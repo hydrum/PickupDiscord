@@ -14,6 +14,8 @@ public class PickupLogic {
 	
 	private List<Server> serverList;
 	private List<GameMap> mapList;
+
+	private List<String> adminRoles;
 	
 	private List<Match> ongoingMatches; // ongoing matches (live)
 	
@@ -25,10 +27,14 @@ public class PickupLogic {
 		this.bot = bot;
 		
 		// handle db stuff
-		ongoingMatches = new ArrayList<Match>();// db.loadCurMatches
+		ongoingMatches = new ArrayList<Match>();// db.loadOngoingMatches
 		mapList = new ArrayList<GameMap>();// db.loadMapList
 		serverList = new ArrayList<Server>();// db.loadServerList
-		curMatch = new HashMap<Gametype, Match>(); // db.loadcurrentmatch
+		curMatch = new HashMap<Gametype, Match>(); // db.loadcurmatch
+		adminRoles = new ArrayList<String>(); // db.loadadmins
+		
+		adminRoles.add("401822611694419968"); // pickupadmin
+		adminRoles.add("401834352872521739"); // owner
 	}
 	
 	public void gameAddPlayer(Player player, String mode) {
@@ -168,6 +174,10 @@ public class PickupLogic {
 	
 	public boolean isLocked() {
 		return locked;
+	}
+
+	public List<String> getAdminList() {
+		return adminRoles;
 	}
 
 }

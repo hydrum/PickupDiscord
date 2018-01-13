@@ -9,6 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,7 +32,7 @@ public class DiscordAPI {
 		return false;
 	}
 	
-	public static String sendPostRequest(String request, JSONObject content) {
+	private static String sendPostRequest(String request, JSONObject content) {
 		try {
 			byte[] postData       = content.toString().getBytes( StandardCharsets.UTF_8 );
 			int    postDataLength = postData.length;
@@ -79,7 +80,7 @@ public class DiscordAPI {
 		return null;
 	}
 	
-	public static String sendGetRequest(String request) {
+	private static String sendGetRequest(String request) {
 		try {
 			URL url = new URL(api_url + api_version + request);
 			HttpURLConnection c = (HttpURLConnection) url.openConnection();
@@ -133,6 +134,18 @@ public class DiscordAPI {
 		if (!reply.isEmpty()) {
 			try {
 				return new JSONObject(reply);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	public static JSONArray requestUserGuildRoles(String guild, String userID) {
+		String reply = sendGetRequest("/guilds/" + guild + "/members/" + userID);
+		if (!reply.isEmpty()) {
+			try {
+				return new JSONObject(reply).getJSONArray("roles");
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}

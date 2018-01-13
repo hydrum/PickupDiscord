@@ -1,5 +1,7 @@
 package de.gost0r.pickupbot.pickup;
 
+import java.util.List;
+
 import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordChannelType;
@@ -303,11 +305,34 @@ public class PickupBot extends DiscordBot {
 				}
 			}
 		}
+		if (data[0].equals("!showroles")) {
+			DiscordUser u = user;
+			if (data.length == 2) {
+				DiscordUser testUser = super.parseMention(data[1]);
+				if (testUser != null) {
+					u = testUser;
+				}
+			}
+			List<String> list = u.getRoles(DiscordBot.getGuildID());
+			String message = "";
+			for (String s : list) {
+				message += "<@&" + s + "> ";
+			}
+			sendNotice(u, message);
+		}
 	}
 		
 	private boolean hasAdminRights(DiscordUser user) {
-		// TODO 
-		return true;
+		List<String> roleList = user.getRoles(DiscordBot.getGuildID());
+		List<String> adminList = logic.getAdminList();
+		for (String s : roleList) {
+			for (String r : adminList) {
+				if (s.equals(r)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 
