@@ -169,6 +169,11 @@ public class PickupLogic {
 				return m;
 			}
 		}
+		for (Match m : ongoingMatches) {
+			if (m.isInMatch(player)) {
+				return m;
+			}
+		}
 		return null;
 	}
 	
