@@ -1,7 +1,9 @@
 package de.gost0r.pickupbot.pickup;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.pickup.server.Server;
@@ -13,9 +15,9 @@ public class PickupLogic {
 	private List<Server> serverList;
 	private List<GameMap> mapList;
 	
-	private List<Match> curMatches; // ongoing matches (live)
+	private List<Match> ongoingMatches; // ongoing matches (live)
 	
-	private Match curMatch;
+	private Map<Gametype, Match> curMatch;
 	
 	public boolean locked;
 	
@@ -23,17 +25,21 @@ public class PickupLogic {
 		this.bot = bot;
 		
 		// handle db stuff
-		curMatches = new ArrayList<Match>();// db.loadCurMatches
+		ongoingMatches = new ArrayList<Match>();// db.loadCurMatches
 		mapList = new ArrayList<GameMap>();// db.loadMapList
 		serverList = new ArrayList<Server>();// db.loadServerList
+		curMatch = new HashMap<Gametype, Match>(); // db.loadcurrentmatch
 	}
 	
-	public void cmdAddPlayer(Player player) {
-		curMatch.addPlayer(player);
+	public void gameAddPlayer(Player player, String mode) {
+		Gametype gt = getGametypeByString(mode);
+		if (gt != null && curMatch.keySet().contains(gt)) {
+//			curMatch.addPlayer(player);
+		}
 	}
 	
-	public void removePlayer(Player player) {
-		curMatch.removePlayer(player);
+	public void gameRemovePlayer(Player player) {
+//		curMatch.removePlayer(player);
 	}
 	
 	public void cmdLock() {
@@ -61,37 +67,33 @@ public class PickupLogic {
 		}
 	}
 
-	public void gameGetElo(String urtauth) {
-		Player player = Player.get(urtauth);		
-		if (player != null) {
-			String msg = Config.pkup_getelo;
-			msg = msg.replace(".urtauth.", urtauth);
-			msg = msg.replace(".elo.", String.valueOf(player.getElo()));
-			String elochange = String.valueOf(player.getEloChange());
-			if (player.getEloChange() >= 0) {
-				elochange = "+" + elochange;
-			} else {
-				elochange = "-" + elochange;
-			}
-			msg.replace(".elochange.", elochange);
-			bot.sendMsg(bot.getPubchan(), msg);
-			
+	public void gameGetElo(Player p) {
+		String msg = Config.pkup_getelo;
+		msg = msg.replace(".urtauth.", p.getUrtauth());
+		msg = msg.replace(".elo.", String.valueOf(p.getElo()));
+		String elochange = String.valueOf(p.getEloChange());
+		if (p.getEloChange() >= 0) {
+			elochange = "+" + elochange;
 		} else {
-			bot.sendMsg(bot.getPubchan(), Config.player_not_found);
+			elochange = "-" + elochange;
 		}
+		msg.replace(".elochange.", elochange);
+		bot.sendMsg(bot.getPubchan(), msg);
 	}
 	
 	public void gameGetMaps() {
-		bot.sendMsg(bot.getPubchan(), curMatch.getMapVotes());
+		for (Gametype gametype : curMatch.keySet()) {
+			bot.sendMsg(bot.getPubchan(), "*" + gametype + "*:" + curMatch.get(gametype).getMapVotes());
+		}
 	}
 
 
 	public void gameMapVote(Player player, String mapname) {
-		if (curMatch.getMatchState() == MatchState.Signup
-				&& curMatch.isInMatch(player)) {
+		Match m = playerInMatch(player);
+		if (m != null && m.getMatchState() == MatchState.Signup) {
 			int counter = 0;
 			GameMap map = null;
-			for (GameMap xmap : curMatch.getMapList()) {
+			for (GameMap xmap : m.getMapList()) {
 				if (xmap.name.contains(mapname)) {
 					counter++;
 					map = xmap;
@@ -103,24 +105,37 @@ public class PickupLogic {
 				bot.sendNotice(player.getDiscordUser(), Config.map_not_found);
 			} else {
 				// handles sending a msg itself
-				curMatch.voteMap(player, map);
+				m.voteMap(player, map);
 			}
 		}
 	}
-
+	
 	public void gameReset(String cmd) {
+		gameReset(cmd, null);
+	}
+
+	public void gameReset(String cmd, String mode) {
+		Gametype gt = getGametypeByString(mode);
 		if (cmd.equals("all")) {
-			for (Match match : curMatches) {
+			for (Match match : ongoingMatches) {
 				match.reset();
 			}
-			curMatch.reset();
+			for (Match m : curMatch.values()) {
+				m.reset();
+			}
 			
 		} else if (cmd.equals("cur")) {
-			curMatch.reset();
+			if (gt != null && curMatch.keySet().contains(gt)) {
+				curMatch.get(mode).reset();
+			} else {
+				for (Match m : curMatch.values()) {
+					m.reset();
+				}
+			}
 		} else {
 			try {
 				int idx = Integer.valueOf(cmd);
-				for (Match match : curMatches) {
+				for (Match match : ongoingMatches) {
 					if (match.getID() == idx) {
 						match.reset();
 						break;
@@ -131,6 +146,24 @@ public class PickupLogic {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public Gametype getGametypeByString(String mode) {
+		for (Gametype gt : curMatch.keySet()) {
+			if (gt.getName().equals(mode)) {
+				return gt;
+			}
+		}
+		return null;
+	}
+	
+	public Match playerInMatch(Player player) {
+		for (Match m : curMatch.values()) {
+			if (m.isInMatch(player)) {
+				return m;
+			}
+		}
+		return null;
 	}
 	
 	public boolean isLocked() {

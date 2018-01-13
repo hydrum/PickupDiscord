@@ -58,6 +58,7 @@ public class DiscordBot  {
 	
 	public void sendMsg(DiscordUser user, String msg) {
 		//DiscordAPI.sendMessage(channel, msg);
+		// SEND DM
 	}
 
 	public static String getToken() {

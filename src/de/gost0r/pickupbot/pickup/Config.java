@@ -54,15 +54,13 @@ public class Config {
 	
 	public static final String USE_CMD_QUIT				= "!quit" ;
 
-	public static final String USE_CMD_ADD				= "!add";
+	public static final String USE_CMD_ADD				= "!add <gametype>";
 	public static final String USE_CMD_REMOVE			= "!remove";
 	public static final String USE_CMD_MAPS				= "!maps";
 	public static final String USE_CMD_MAP				= "!map <mapname>";
 	public static final String USE_CMD_PW				= "!lostpass";
-	//public static final String USE_CMD_GAMEOVER		= "!gameover";
 	public static final String USE_CMD_STATUS			= "!status";
 	public static final String USE_CMD_HELP				= "!help <command>";
-	//public static final String USE_CMD_RING			= "!ring";
 	
 	public static final String USE_CMD_LOCK				= "!lock";
 	public static final String USE_CMD_UNLOCK			= "!unlock";
@@ -82,8 +80,8 @@ public class Config {
 	//public static final String USE_CMD_EXCUSE			= "!excuse <excuse>";
 	//public static final String USE_CMD_REPORTLIST		= "!reportlist";
 	
-	//public static final String USE_CMD_ADDBAN			= "!addban <qauth>";
-	//public static final String USE_CMD_REMOVEBAN		= "!removeban <qauth>";
+	//public static final String USE_CMD_ADDBAN			= "!addban <urtauth>";
+	//public static final String USE_CMD_REMOVEBAN		= "!removeban <urtauth>";
 
 	public static final String USE_CMD_SHOWSERVERS		= "!showservers";
 	public static final String USE_CMD_ADDSERVER		= "!addserver <ip:port> <rcon>";
@@ -97,7 +95,6 @@ public class Config {
 	public static final String pkup_map					= "Map was successfully voted.";
 	public static final String pkup_signup				= "You can sign up again!";
 	public static final String pkup_pw					= "[ /connect .server. ; password .password. ]";
-	//public static final String pkup_gameover			= "Thanks for submitting, .nick.! Need .gameoverleft. more player(s) to confirm that the match is over!";
 	public static final String pkup_status0				= "Nobody has signed up. Type !add to play.";
 	public static final String pkup_status1				= "Sign up: [.playernumber./10] Type !status to see who's signed up.";
 	public static final String pkup_status2				= "Players [.playernumber./10]: .playerlist.";
@@ -111,8 +108,6 @@ public class Config {
 	public static final String pkup_go_pub_calm			= "Be patient when receiving the server address and password. It may take several seconds.";
 	public static final String pkup_go_pub_lostpw		= "The messages have been sent. You didn't receive it? Type !lostpass";
 	public static final String pkup_sign				= "You can sign up again.";
-	//public static final String pkup_ringer1			= "!ringer .playerleft. Need .playerleft. more player.player_s. to start. Join .channel. and " + CMD_ADD;
-	//public static final String pkup_ringer2			= "!ringer 1 A game has already started, but some players are missing. Join .channel. and help out";
 	public static final String pkup_ring_added			= "You have been added to the ringerlist.";
 	public static final String pkup_ring_removed		= "You have been removed from the ringerlist.";
 	
@@ -122,7 +117,6 @@ public class Config {
 	public static final String pkup_top5				= "#.rank. - .urtauth.: ELO: .elo. (.elochange.)";
 			 
 	public static final String is_banned				= "You are banned from using this function.";
-	//public static final String already_gameover			= "You can't submit gameover twice.";
 	public static final String map_not_found			= "Map not found.";
 	public static final String map_not_unique			= "Mapstring not unique.";
 	public static final String map_already_voted		= "You have already voted.";
@@ -131,6 +125,7 @@ public class Config {
 
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_authed			= "You're not authed with QuakeNet.";
+	public static final String user_not_registered		= "You're not registered. Please use " + USE_CMD_REGISTER;
 
 	public static final String auth_taken				= "Your auth has been already registered with another account.";
 	public static final String auth_invalid				= "Your urtauth seems to be invalid.";

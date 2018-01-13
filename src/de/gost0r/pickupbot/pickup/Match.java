@@ -6,6 +6,7 @@ import java.util.Set;
 
 public class Match {
 	
+	private Gametype gametype;
 	private MatchState state;
 	private int id;
 	
@@ -82,6 +83,10 @@ public class Match {
 	
 	public MatchState getMatchState() {
 		return state;
+	}
+	
+	public Gametype getGametype() {
+		return gametype;
 	}
 	
 	public boolean isInMatch(Player player) {
