@@ -7,6 +7,8 @@ import de.gost0r.pickupbot.discord.DiscordUser;
 
 public class Player {
 	
+	public static Database db;
+	
 	private DiscordUser user;
 	private String urtauth;
 	
@@ -63,24 +65,28 @@ public class Player {
 	public void setUrtauth(String urtauth) {
 		this.urtauth = urtauth;
 	}
+
+	public boolean isBanned() {
+		return banned;
+	}
 	
 
 	private static List<Player> playerList = new ArrayList<Player>();
 	public static Player get(String urtauth) {
-		// TODO: check db
 		for (Player player : playerList) {
 			if (player.getUrtauth().equals(urtauth))
 				return player;
 		}
-		return null;
+		Player p = db.loadPlayer(urtauth); // can be valid or null
+		return p;
 	}
 
 	public static Player get(DiscordUser user) {
-		// TODO: check db
 		for (Player player : playerList) {
 			if (player.getDiscordUser().equals(user))
 				return player;
 		}
-		return null;
+		Player p = db.loadPlayer(user); // can be valid or null
+		return p; 
 	}
 }

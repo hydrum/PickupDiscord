@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.pickup.server.Server;
 
 public class Database {
@@ -148,6 +149,11 @@ public class Database {
 			pstmt.setString(5, String.valueOf(server.active));
 			pstmt.executeUpdate();
 			pstmt.close();
+			Statement stmt = c.createStatement();
+			sql = "SELECT ID FROM server ORDER BY ID DESC";
+			ResultSet rs = stmt.executeQuery(sql);
+			rs.next();
+			server.id = rs.getInt("ID");			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -421,12 +427,48 @@ public class Database {
 		return match;
 	}
 	
+	public Player loadPlayer(DiscordUser user) {
+		Player player = null;
+		try {
+			String sql = "SELECT urtauth, elo, elochange FROM player WHERE userid=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, user.id);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				player = new Player(user, rs.getString("urtauth"));
+				player.setElo(rs.getInt("elo"));
+				player.setEloChange(rs.getInt("elochange"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return player;
+	}
+
+	public Player loadPlayer(String urtauth) {
+		Player player = null;
+		try {
+			String sql = "SELECT userid, elo, elochange FROM player WHERE urtauth=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, urtauth);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				DiscordUser user = DiscordUser.getUser(rs.getString("userid"));
+				player = new Player(user, urtauth);
+				player.setElo(rs.getInt("elo"));
+				player.setEloChange(rs.getInt("elochange"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return player;
+	}
 	
 	
 	// UPDATE SERVER
 	public void updateServer(Server server) {
 		try {
-			String sql = "UPDATE server SET ip=?, port=?, rcon=?, password=?, active=? WHERE id=?"; // TODO: exclude active="false" servers
+			String sql = "UPDATE server SET ip=?, port=?, rcon=?, password=?, active=? WHERE id=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, server.IP);
 			pstmt.setInt(2, server.port);
@@ -438,6 +480,21 @@ public class Database {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+
+
+	public void updateMap(GameMap map) {
+		try {
+			String sql = "UPDATE map SET active=? WHERE name=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, String.valueOf(map.active));
+			pstmt.setString(2, map.name);
+			pstmt.executeUpdate();
+			pstmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}		
 	}
 	
 	

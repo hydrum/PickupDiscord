@@ -10,6 +10,9 @@ public class Server {
 	public String password;
 	public boolean active;
 	
+	
+	private boolean taken;
+	
 
 	public Server(int id, String ip, int port, String rconpassword, String password, boolean active) {
 		this.id = id;
@@ -18,6 +21,16 @@ public class Server {
 		this.rconpassword = rconpassword;
 		this.password = password;
 		this.active = active;
+	}
+
+
+	public void sendRcon(String rconString) {
+		// TODO 
+		
+	}
+
+	public boolean isTaken() {
+		return taken;
 	}
 
 }
