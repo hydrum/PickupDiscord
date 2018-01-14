@@ -15,8 +15,8 @@ public class Match {
 	private int id;
 
 	private Map<String, List<Player>> teamList;
-	private List<Player> playerList;
 	private Map<GameMap, Integer> mapVotes;
+	private Map<Player, MatchStats> playerStats = new HashMap<Player, MatchStats>();
 	
 	private Server server;
 	private GameMap map;
@@ -36,8 +36,24 @@ public class Match {
 		teamList = new HashMap<String, List<Player>>();
 		teamList.put("red", new ArrayList<Player>());
 		teamList.put("blue", new ArrayList<Player>());
-		playerList = new ArrayList<Player>();
 		mapVotes = new HashMap<GameMap, Integer>();
+	}
+
+	public Match(int id, long startTime, GameMap map, int scoreRed, int scoreBlue, int eloRed, int eloBlue,
+			Map<String, List<Player>> teamList, MatchState state, Gametype gametype, Server server,
+			Map<Player, MatchStats> playerStats) {
+		this.id = id;
+		this.startTime = startTime;
+		this.map = map;
+		this.scoreRed = scoreRed;
+		this.scoreBlue = scoreBlue;
+		this.eloRed = eloRed;
+		this.eloBlue = eloBlue;
+		this.teamList = teamList;
+		this.state = state;
+		this.gametype = gametype;
+		this.server = server;
+		this.playerStats = playerStats;
 	}
 
 	public void reset() {
@@ -52,14 +68,14 @@ public class Match {
 	
 	private void resetSignup() {
 		// reset mapvote
-		for(Player p : playerList) {
+		for(Player p : playerStats.keySet()) {
 			p.resetMap();
 		}
 		for (GameMap m : mapVotes.keySet()) {
 			mapVotes.put(m, 0);
 		}
 		
-		playerList.clear();
+		playerStats.clear();
 	}
 	
 	private void resetLive() {
@@ -69,7 +85,7 @@ public class Match {
 	public void addPlayer(Player player) {
 		// TODO send msg
 		if (state == MatchState.Signup && !isInMatch(player)) {
-			playerList.add(player);
+			playerStats.put(player, new MatchStats());
 		}
 	}
 
@@ -80,7 +96,7 @@ public class Match {
 			if (map != null) {
 				mapVotes.put(map, mapVotes.get(map).intValue() - 1);
 			}
-			playerList.remove(player);
+			playerStats.remove(player);
 		}
 	}
 
@@ -115,7 +131,7 @@ public class Match {
 	}
 	
 	public boolean isInMatch(Player player) {
-		return playerList.contains(player);
+		return playerStats.containsKey(player);
 	}
 
 	public Set<GameMap> getMapList() {
@@ -158,8 +174,8 @@ public class Match {
 		return teamBlue;
 	}
 
-	public List<Player> getPlayerList() {
-		return playerList;
+	public Player[] getPlayerList() {
+		return (Player[]) playerStats.keySet().toArray();
 	}
 
 	public String getTeam(Player player) {
@@ -169,5 +185,17 @@ public class Match {
 			}
 		}
 		return "null";
+	}
+
+	public int getScoreRed() {
+		return scoreRed;
+	}
+	
+	public int getScoreBlue() {
+		return scoreBlue;
+	}
+
+	public MatchStats getStats(Player player) {
+		return playerStats.get(player);
 	}
 }

@@ -11,6 +11,7 @@ import de.gost0r.pickupbot.pickup.server.Server;
 public class PickupLogic {
 	
 	public PickupBot bot;
+	public Database db;
 	
 	private List<Server> serverList;
 	private List<GameMap> mapList;
@@ -26,12 +27,15 @@ public class PickupLogic {
 	public PickupLogic(PickupBot bot) {
 		this.bot = bot;
 		
+		db = new Database(this);
+		
 		// handle db stuff
-		ongoingMatches = new ArrayList<Match>();// db.loadOngoingMatches
-		mapList = new ArrayList<GameMap>();// db.loadMapList
-		serverList = new ArrayList<Server>();// db.loadServerList
-		curMatch = new HashMap<Gametype, Match>(); // db.loadcurmatch
-		adminRoles = new ArrayList<String>(); // db.loadadmins
+		ongoingMatches = db.loadOngoingMatches();
+		mapList = db.loadMaps();
+		serverList = db.loadServers();
+		adminRoles = db.loadAdminRoles();
+		
+		curMatch = new HashMap<Gametype, Match>();
 		
 		adminRoles.add("401822611694419968"); // pickupadmin
 		adminRoles.add("401834352872521739"); // owner
@@ -183,6 +187,24 @@ public class PickupLogic {
 
 	public List<String> getAdminList() {
 		return adminRoles;
+	}
+
+	public Server getServerByID(int id) {
+		for (Server s : serverList) {
+			if (s.id == id) {
+				return s;
+			}
+		}
+		return null;
+	}
+
+	public GameMap getMapByName(String name) {
+		for (GameMap m : mapList) {
+			if (m.name.equals(name)) {
+				return m;
+			}
+		}
+		return null;
 	}
 
 }
