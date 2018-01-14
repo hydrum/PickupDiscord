@@ -32,7 +32,6 @@ public class PickupLogic {
 		
 		// handle db stuff
 		ongoingMatches = db.loadOngoingMatches();
-		mapList = db.loadMaps();
 		serverList = db.loadServers();
 		adminRoles = db.loadAdminRoles();
 		
@@ -42,6 +41,7 @@ public class PickupLogic {
 				curMatch.put(gt, null);
 			}
 		}
+		mapList = db.loadMaps(); // needs current gamemode list
 
 		createCurrentMatches();
 		
@@ -256,6 +256,35 @@ public class PickupLogic {
 			}
 		}
 		return false;
+	}
+	
+	public boolean cmdEnableGametype(String gametype, String config) {
+		
+		Gametype gt = getGametypeByString(gametype);
+		if (gt == null) {
+			gt = new Gametype(gametype.toUpperCase(), true);
+		}
+		gt.setActive(true);
+		gt.setConfig(config);
+		db.updateGametype(gt);
+		// checking whether this was active before
+		Gametype tmp = getGametypeByString(gametype);
+		if (tmp != null) {
+			curMatch.get(tmp).reset();
+		}
+		createMatch(gt);
+		return true;
+	}
+	
+	public boolean cmdDisableGametype(String gametype) {
+		Gametype gt = getGametypeByString(gametype);
+		if (gt == null) return false;
+				
+		gt.setActive(false);
+		db.updateGametype(gt);
+		curMatch.get(gt).reset();
+		curMatch.remove(gt);
+		return true;
 	}
 	
 	public boolean cmdAddServer(String serveraddr, String rcon) {

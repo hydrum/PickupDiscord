@@ -95,7 +95,7 @@ public class DiscordGateway implements MessageHandler{
 			JSONObject presence = new JSONObject();
 			presence.put("since", "__null__");
 			presence.put("game", "__null__");
-			presence.put("status", "invisible");
+			presence.put("status", "online");
 			presence.put("afk", false);
 			msg.put("presence", presence);
 			

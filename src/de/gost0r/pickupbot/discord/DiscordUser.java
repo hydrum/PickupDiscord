@@ -19,6 +19,8 @@ public class DiscordUser {
 	public String discriminator;
 	public String avatar;
 	
+	public DiscordChannel channel = null;
+	
 	private Map<String, List<String>> roles = new HashMap<String, List<String>>();
 	
 	public DiscordUser(String id, String username, String discriminator, String avatar) {
@@ -57,6 +59,22 @@ public class DiscordUser {
 			roles.put(guild, list);
 			return list;
 		}
+	}
+	
+	public DiscordChannel getDMChannel() {
+		try {
+			if (channel == null) {
+				String channelID = DiscordAPI.createDM(id).getString("id");
+				DiscordChannel channel = DiscordChannel.findChannel(channelID);
+				this.channel = channel;
+			}
+			return channel;
+		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public static Map<String, DiscordUser> userList = new HashMap<String, DiscordUser>();

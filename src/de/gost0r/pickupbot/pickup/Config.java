@@ -18,6 +18,9 @@ public class Config {
 	public static final String CMD_ENABLEMAP			= "!enablemap";
 	public static final String CMD_DISABLEMAP			= "!disablemap";
 	public static final String CMD_RCON					= "!rcon";
+
+	public static final String CMD_ENABLEGAMETYPE		= "!enablegametype";
+	public static final String CMD_DISABLEGAMETYPE		= "!disablegametype";
 	
 	public static final String CMD_REGISTER				= "!register";
 	public static final String CMD_GETELO				= "!elo";
@@ -40,7 +43,7 @@ public class Config {
 	+ CMD_MAP + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP5;
 	
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " "
-	+ CMD_ENABLEMAP + " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS
+	+ CMD_ENABLEMAP + " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE
 	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER;
 		
 //------------------------------------------------------------------------------------//
@@ -61,6 +64,9 @@ public class Config {
 	public static final String USE_CMD_ENABLEMAP		= "!enablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_DISABLEMAP		= "!disablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_RCON				= "!rcon <rconstring>";
+
+	public static final String USE_CMD_ENABLEGAMETYPE	= "!enablegametype <name> <config>";
+	public static final String USE_CMD_DISABLEGAMETYPE	= "!disablegametype <name>";
 	
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
 	public static final String USE_CMD_GETELO			= "!elo </urtauth/>";
@@ -81,7 +87,6 @@ public class Config {
 	public static final String USE_CMD_DISABLESERVER	= "!disableserver <id>";
 	public static final String USE_CMD_UPDATESERVER		= "!updateserver <id> <rcon>";
 
-	public static final String pkup_help				= "CMDs are !add !remove !status !map !maps !lostpass !gameover !ring";
 	public static final String pkup_lock				= "This game is currently locked";
 	public static final String pkup_map					= "Map was successfully voted.";
 	public static final String pkup_signup				= "You can sign up again!";
@@ -142,5 +147,5 @@ public class Config {
 	public static final String pkup_match_invalid_gt	= "No match for that gametype is not available right now.";
 	
 	public static final String admin_cmd_successful		= "Successful: ";
-	public static final String admin_cmd_unsuccessful	= "Unuccessful: ";
+	public static final String admin_cmd_unsuccessful	= "Unsuccessful: ";
 }

@@ -207,8 +207,27 @@ public class PickupBot extends DiscordBot {
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
 						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_DISABLEMAP);
-					
+					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_DISABLEMAP);					
+				}
+				else if (data[0].equals(Config.CMD_ENABLEGAMETYPE))
+				{
+					if (data.length == 3)
+					{
+						if (logic.cmdEnableGametype(data[1], data[2])) {
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+					}
+					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLEGAMETYPE);					
+				}
+				else if (data[0].equals(Config.CMD_DISABLEGAMETYPE))
+				{
+					if (data.length == 2)
+					{
+						if (logic.cmdDisableGametype(data[1])) {
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+					}
+					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLEGAMETYPE);					
 				}
 				else if (data[0].equals(Config.CMD_ADDSERVER))
 				{
@@ -298,6 +317,8 @@ public class PickupBot extends DiscordBot {
 						case Config.CMD_ENABLESERVER: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ENABLESERVER); break;
 						case Config.CMD_DISABLESERVER: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_DISABLESERVER); break;
 						case Config.CMD_UPDATESERVER: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_UPDATESERVER); break;
+						case Config.CMD_ENABLEGAMETYPE: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ENABLEGAMETYPE); break;
+						case Config.CMD_DISABLEGAMETYPE: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_DISABLEGAMETYPE); break;
 					}
 				}
 				else

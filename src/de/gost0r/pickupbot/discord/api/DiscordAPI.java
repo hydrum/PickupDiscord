@@ -116,6 +116,30 @@ public class DiscordAPI {
 		}
 		return null;
 	}
+	
+	
+	public static JSONObject createDM(String userid) {
+		try {
+			String reply = sendPostRequest("/users/@me/channels", new JSONObject().put("recipient_id", userid));
+			JSONObject obj = new JSONObject(reply);
+			return obj;
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static JSONArray requestDM() {
+		String reply = sendGetRequest("/users/@me/channels");
+		if (!reply.isEmpty()) {
+			try {
+				return new JSONArray(reply);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
 
 	public static JSONObject requestUser(String userID) {
 		String reply = sendGetRequest("/users/" + userID);

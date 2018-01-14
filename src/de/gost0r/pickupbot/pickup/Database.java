@@ -51,6 +51,7 @@ public class Database {
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS gametype ( gametype TEXT PRIMARY KEY,"
+													+ "config TEXT,"
 													+ "active TEXT )";
 			stmt.executeUpdate(sql);
 			
@@ -603,6 +604,32 @@ public class Database {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	
+	// need to check whether this is newly created or not
+	public void updateGametype(Gametype gt) {
+		try {
+			String sql = "SELECT gametype FROM gametype WHERE gametype=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, gt.getName());
+			ResultSet rs = pstmt.executeQuery();
+			if (!rs.next()) {
+				sql = "INSERT INTO gametype (gametype) VALUES (?)";
+				pstmt = c.prepareStatement(sql);
+				pstmt.setString(1, gt.getName());
+				pstmt.executeUpdate();
+			}
+			sql = "UPDATE gametype SET config=?, active=? WHERE gametype=?";
+			pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, gt.getConfig());
+			pstmt.setString(2, String.valueOf(gt.getActive()));
+			pstmt.setString(3, gt.getName());
+			pstmt.executeUpdate();
+			pstmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	
 	}
 
 }
