@@ -410,7 +410,8 @@ public class Database {
 				Score[] scores = new Score[2];
 				
 				// getting score
-				int scoreid;
+				@SuppressWarnings("unused")
+				int scoreid = 0;
 				for(int i = 0; i < 2; ++i) {
 					if (i == 0) {
 						scoreid = score1id;
@@ -446,10 +447,8 @@ public class Database {
 			
 			match = new Match(id, rs.getLong("starttime"),
 									map,
-									rs.getInt("score_red"),
-									rs.getInt("score_blue"),
-									rs.getInt("elo_red"),
-									rs.getInt("elo_blue"),
+									new int[] { rs.getInt("score_red"), rs.getInt("score_blue")},
+									new int[] {rs.getInt("elo_red"), rs.getInt("elo_blue") },
 									teamList,
 									state,
 									gametype,

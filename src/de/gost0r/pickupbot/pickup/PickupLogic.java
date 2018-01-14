@@ -57,7 +57,7 @@ public class PickupLogic {
 					if (!player.isBanned()) {
 						if (playerInMatch(player) == null) {
 							curMatch.get(gt).addPlayer(player);
-						}
+						} else bot.sendNotice(player.getDiscordUser(), Config.player_already_added);
 					} else bot.sendNotice(player.getDiscordUser(), Config.is_banned);
 				} else bot.sendNotice(player.getDiscordUser(), Config.pkup_match_unavi);
 			} else bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
@@ -67,9 +67,11 @@ public class PickupLogic {
 	public void cmdRemovePlayer(Player player) {
 		if (!locked) {
 			Match m = playerInMatch(player);
-			if (m != null && m.getMatchState() == MatchState.Signup) {
-				m.removePlayer(player);
-			}
+			if (m != null) {
+				if (m.getMatchState() == MatchState.Signup) {
+					m.removePlayer(player);
+				} else bot.sendNotice(player.getDiscordUser(), Config.player_cannot_remove);
+			} else bot.sendNotice(player.getDiscordUser(), Config.player_already_removed);
 		} else bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
 	}
 	
@@ -116,7 +118,10 @@ public class PickupLogic {
 	
 	public void cmdGetMaps() {
 		for (Gametype gametype : curMatch.keySet()) {
-			bot.sendMsg(bot.getPubchan(), "**" + gametype.getName() + "**: " + curMatch.get(gametype).getMapVotes());
+			String msg = Config.pkup_map_list;
+			msg = msg.replace(".gametype.", gametype.getName());
+			msg = msg.replace(".maplist.", curMatch.get(gametype).getMapVotes());
+			bot.sendMsg(bot.getPubchan(), msg);
 		}
 	}
 
@@ -157,14 +162,17 @@ public class PickupLogic {
 		int playerCount = match.getPlayerCount();
 		if (playerCount == 0) {
 			msg = Config.pkup_status_noone;
+			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 		} else if (match.getMatchState() == MatchState.Signup){
 			msg = Config.pkup_status_signup;
+			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 			msg = msg.replace(".playernumber.", String.valueOf(playerCount));
 			
 		} else if (match.getMatchState() == MatchState.AwaitingServer){
-			msg = Config.pkup_status_server;			
+			msg = Config.pkup_status_server;
+			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 		}
-		bot.sendMsg(bot.getPubchan(), "**" + match.getGametype().getName() + "**: " + msg);
+		bot.sendMsg(bot.getPubchan(), msg);
 	}
 
 	public boolean cmdReset(String cmd) {
@@ -201,14 +209,6 @@ public class PickupLogic {
 				for (Match match : ongoingMatches) {
 					if (match.getID() == idx) {
 						match.reset();
-						bot.sendMsg(bot.getPubchan(), Config.pkup_reset_id.replace(".id.", cmd));
-						return true;
-					}
-				}
-				for (Match match : curMatch.values()) {
-					if (match.getID() == idx) {
-						match.reset();
-						createMatch(match.getGametype());
 						bot.sendMsg(bot.getPubchan(), Config.pkup_reset_id.replace(".id.", cmd));
 						return true;
 					}
@@ -356,8 +356,22 @@ public class PickupLogic {
 			e.printStackTrace();
 		}
 		return false;
-	}	
+	}
 	
+	public boolean cmdServerList(DiscordUser user) {
+		String msg = "None";
+		for (Server server : serverList) {
+			if (msg.equals("None")) {
+				msg = server.toString();
+			} else {
+				msg += "\n" + server.toString();
+			}
+		}
+		bot.sendMsg(user, msg);
+		return true;
+	}
+	
+	// Matchcreation
 	
 	private void createCurrentMatches() {
 		for (Gametype gametype : curMatch.keySet()) {

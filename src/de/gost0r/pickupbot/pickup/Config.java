@@ -89,17 +89,20 @@ public class Config {
 
 	public static final String pkup_lock				= "This game is currently locked";
 	public static final String pkup_map					= "Map was successfully voted.";
-	public static final String pkup_signup				= "You can sign up again!";
+	public static final String pkup_map_list			= "**.gametype.**: .maplist.";
+//	public static final String pkup_signup				= "You can sign up again!";
 	public static final String pkup_pw					= "[ /connect .server. ; password .password. ]";
-	public static final String pkup_status_noone		= "Nobody has signed up. Type !add to play.";
-	public static final String pkup_status_signup		= "Sign up: [.playernumber./10]";
-	public static final String pkup_status_server		= "Awaiting available server.";
-	public static final String pkup_status_signup_priv	= "Players [.playernumber./10]: .playerlist.";
-	public static final String pkup_started				= "Game has already started. .status. - .time. minutes in.";
+	public static final String pkup_status_noone		= "**.gametype.**: Nobody has signed up. Type " + USE_CMD_ADD + " to play.";
+	public static final String pkup_status_signup		= "**.gametype.**: Sign up: [.playernumber./10]";
+	public static final String pkup_status_server		= "**.gametype.**: Awaiting available server.";
+	public static final String pkup_status_players		= "**.gametype.**: Players [.playernumber./10]: .playerlist.";
+//	public static final String pkup_started				= "**.gametype.**: Game has already started. .status. - .time. minutes in.";
 
 	public static final String pkup_reset_all 			= "*All matches have been reset.*";
 	public static final String pkup_reset_cur 			= "*The current match have been reset.*";
 	public static final String pkup_reset_id 			= "*The match .id. has been reset.*";
+	
+	public static final String pkup_ongoing				= "[ Pickup Game #.gamenumber. ][ Gametype: .gametype. ][ Map: .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
 	
 	public static final String pkup_go_admin			= "[ Pickup Game #.gamenumber. ][ Password: .password. ][ Map: .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
 	public static final String pkup_go_player			= "Pickup-pro starts now! Connect to the server and join Team .team. in order to play. Make up positions and ready up! [ /connect .server. ; password .password. ]";
@@ -108,8 +111,6 @@ public class Config {
 	public static final String pkup_go_pub_blue			= "Blue team: .playerlist.";
 	public static final String pkup_go_pub_map			= "Map: .map.";
 	public static final String pkup_go_pub_calm			= "You will receive the connection info via DM.";
-	
-	public static final String pkup_sign				= "You can sign up again.";
 	
 	public static final String pkup_aftermath			= ".team. team .result. (.score.) - .player1. (.elochange1.), .player2. (.elochange2.), .player3. (.elochange3.), .player4. (.elochange4.), .player5. (.elochange5.),";
 	
@@ -128,6 +129,10 @@ public class Config {
 	public static final String auth_invalid				= "Your urtauth seems to be invalid.";
 	public static final String auth_success				= "Your auth has been successfully registered with your account.";
 
+	public static final String player_already_added		= "You are already added to a pickup game.";
+	public static final String player_already_removed	= "You are currently not added.";
+	public static final String player_cannot_remove		= "You cannot remove.";
+
 //	public static final String report_wrong_arg			= "Your report reason is invalid, check !reportlist to check the list.";
 //	public static final String report_invalid_urtauth	= "No player could be found to the specific urtauth.";
 //	public static final String report_not_played		= "The reported player hasn't played the past match.";
@@ -140,11 +145,11 @@ public class Config {
 	public static final String help_prefix				= "How to use the command: ";
 	public static final String help_cmd_avi				= "These commands are available (use !help <!command> for more info): ";
 
-	public static final String lock_enable				= "Game is now locked";
-	public static final String lock_disable				= "Game is now unlocked";
+	public static final String lock_enable				= "*Game is now locked.*";
+	public static final String lock_disable				= "*Game is now unlocked.*";
 
 	public static final String pkup_match_unavi 		= "Match is not available right now.";
-	public static final String pkup_match_invalid_gt	= "No match for that gametype is not available right now.";
+	public static final String pkup_match_invalid_gt	= "No match for that gametype is available right now.";
 	
 	public static final String admin_cmd_successful		= "Successful: ";
 	public static final String admin_cmd_unsuccessful	= "Unsuccessful: ";

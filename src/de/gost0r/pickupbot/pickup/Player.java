@@ -3,7 +3,6 @@ package de.gost0r.pickupbot.pickup;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordUser;
 
 public class Player {
@@ -98,5 +97,10 @@ public class Player {
 			return player.getDiscordUser().equals(this.getDiscordUser()) && player.urtauth == this.urtauth;
 		}
 		return false;
+	}
+
+	public void addElo(int elochange) {
+		this.elo += elochange;
+		this.eloChange = elochange;
 	}
 }

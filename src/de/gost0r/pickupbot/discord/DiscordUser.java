@@ -10,7 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
-import de.gost0r.pickupbot.pickup.Gametype;
 
 public class DiscordUser {
 	
@@ -39,6 +38,10 @@ public class DiscordUser {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public String getMentionString() {
+		return "<@" + id + ">";
 	}
 	
 	public List<String> getRoles(String guild) {

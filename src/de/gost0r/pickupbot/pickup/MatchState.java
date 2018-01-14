@@ -4,5 +4,6 @@ public enum MatchState {
 	Signup,
 	AwaitingServer,
 	Live,
-	Done
+	Done,
+	Abort
 }

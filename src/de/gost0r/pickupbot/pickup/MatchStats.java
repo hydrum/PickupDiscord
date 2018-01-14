@@ -4,11 +4,8 @@ public class MatchStats {
 	
 	public enum STATUS {
 		PLAYING,
-		TIMEOUT,
 		LEFT,
-		NOSHOW,
-		RINGER,
-		RINGER_RAGEQUIT
+		NOSHOW
 	}
 	
 	private String ip;	

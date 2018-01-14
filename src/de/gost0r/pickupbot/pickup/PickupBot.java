@@ -179,16 +179,6 @@ public class PickupBot extends DiscordBot {
 //					}
 //					else super.sendMsg(channel, Config.wrong_argument_amount + Config.USE_CMD_GETDATA);
 //				}
-				
-				// TODO				
-//				else if (data[0].equals(Config.CMD_SHOWSERVERS))
-//				{
-//					if (data.length == 1)
-//					{
-//						logic.cmdListServers();
-//					}
-//					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_SHOWSERVERS);
-//				}
 				else if (data[0].equals(Config.CMD_ENABLEMAP))
 				{
 					if (data.length == 3)
@@ -272,6 +262,14 @@ public class PickupBot extends DiscordBot {
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_DISABLESERVER);
 					
+				}				
+				else if (data[0].equals(Config.CMD_SHOWSERVERS))
+				{
+					if (data.length == 1)
+					{
+						logic.cmdServerList(user);
+					}
+					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_SHOWSERVERS);
 				}
 				else if (data[0].equals(Config.CMD_RCON))
 				{
@@ -375,7 +373,7 @@ public class PickupBot extends DiscordBot {
 
 
 	public void sendNotice(DiscordUser user, String msg) {
-		sendMsg(getPubchan(), "<@" + user.id + "> " + msg);
+		sendMsg(getPubchan(), user.getMentionString() + " " + msg);
 	}
 	
 	public DiscordChannel getPubchan() {
