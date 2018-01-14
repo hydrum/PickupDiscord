@@ -50,8 +50,14 @@ public class Database {
 													+ "elochange INTEGER DEFAULT 0 )";
 			stmt.executeUpdate(sql);
 			
-			sql = "CREATE TABLE IF NOT EXISTS map ( map TEXT PRIMARY KEY,"
-												+ " active TEXT )";
+			sql = "CREATE TABLE IF NOT EXISTS gametype ( gametype TEXT PRIMARY KEY,"
+													+ "active TEXT )";
+			stmt.executeUpdate(sql);
+			
+			sql = "CREATE TABLE IF NOT EXISTS map ( map TEXT,"
+													+ "gametype REFERENCES gametype,"
+													+ "active TEXT,"
+													+ "PRIMARY KEY (map, gametype) )";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS banlist ( ID INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -159,12 +165,13 @@ public class Database {
 		}
 	}
 
-	public void createMap(GameMap map) {
+	public void createMap(GameMap map, Gametype gametype) {
 		try {
-			String sql = "INSERT INTO map (map, active) VALUES (?, ?)";
+			String sql = "INSERT INTO map (map, gametype, active) VALUES (?, ?, ?)";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, map.name);
-			pstmt.setString(2, String.valueOf(map.active));
+			pstmt.setString(2, gametype.getName());
+			pstmt.setString(3, String.valueOf(map.active));
 			pstmt.executeUpdate();
 			pstmt.close();
 		} catch (SQLException e) {
@@ -302,14 +309,40 @@ public class Database {
 	
 
 
+	public List<Gametype> loadGametypes() {
+		List<Gametype> gametypeList = new ArrayList<Gametype>();
+		try {
+			Statement stmt = c.createStatement();
+			String sql = "SELECT gametype, active FROM gametype";
+			ResultSet rs = stmt.executeQuery(sql);
+			while (rs.next()) {
+				gametypeList.add(new Gametype(rs.getString("gametype"), Boolean.valueOf(rs.getString("active"))));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return gametypeList;
+	}
+
 	public List<GameMap> loadMaps() {
 		List<GameMap> maplist = new ArrayList<GameMap>();
 		try {
 			Statement stmt = c.createStatement();
-			String sql = "SELECT map, active FROM map";
+			String sql = "SELECT map, gametype, active FROM map";
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				maplist.add(new GameMap(rs.getString("map"), Boolean.valueOf(rs.getString("active"))));
+				GameMap map = null;
+				for (GameMap xmap : maplist) {
+					if (xmap.name.equals(rs.getString("map"))) {
+						map = xmap;
+						break;
+					}
+				}
+				if (map == null) {
+					map = new GameMap(rs.getString("map"));
+					maplist.add(map);
+				}
+				map.setGametype(logic.getGametypeByString(rs.getString("gametype")), Boolean.valueOf(rs.getString("active")));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -484,12 +517,13 @@ public class Database {
 	
 
 
-	public void updateMap(GameMap map) {
+	public void updateMap(GameMap map, Gametype gametype) {
 		try {
-			String sql = "UPDATE map SET active=? WHERE name=?";
+			String sql = "UPDATE map SET active=? WHERE map=? AND gametype=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
-			pstmt.setString(1, String.valueOf(map.active));
+			pstmt.setString(1, String.valueOf(map.isActiveForGametype(gametype)));
 			pstmt.setString(2, map.name);
+			pstmt.setString(3, gametype.getName());
 			pstmt.executeUpdate();
 			pstmt.close();
 		} catch (SQLException e) {

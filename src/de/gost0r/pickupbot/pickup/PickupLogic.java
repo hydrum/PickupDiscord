@@ -1,5 +1,6 @@
 package de.gost0r.pickupbot.pickup;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +37,16 @@ public class PickupLogic {
 		adminRoles = db.loadAdminRoles();
 		
 		curMatch = new HashMap<Gametype, Match>();
+		for (Gametype gt : db.loadGametypes()) {
+			if (gt.getActive()) {
+				curMatch.put(gt, null);
+			}
+		}
+
+		createCurrentMatches();
 		
-		adminRoles.add("401822611694419968"); // pickupadmin
-		adminRoles.add("401834352872521739"); // owner
+		adminRoles.add("401821506205646858"); // pickupadmin
+		adminRoles.add("309752235611389953"); // owner
 	}
 	
 	public void cmdAddPlayer(Player player, String mode) {
@@ -46,14 +54,14 @@ public class PickupLogic {
 		if (gt != null && curMatch.keySet().contains(gt)) {
 			if (!locked) {
 				if (curMatch.get(gt).getMatchState() == MatchState.Signup) {
-					if (player.isBanned()) {
+					if (!player.isBanned()) {
 						if (playerInMatch(player) == null) {
 							curMatch.get(gt).addPlayer(player);
 						}
 					} else bot.sendNotice(player.getDiscordUser(), Config.is_banned);
-				} else bot.sendNotice(player.getDiscordUser(), Config.pkup_no_match_avi);
+				} else bot.sendNotice(player.getDiscordUser(), Config.pkup_match_unavi);
 			} else bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
-		} else bot.sendNotice(player.getDiscordUser(), Config.pkup_no_match_avi);
+		} else bot.sendNotice(player.getDiscordUser(), Config.pkup_match_invalid_gt);
 	}
 	
 	public void cmdRemovePlayer(Player player) {
@@ -61,7 +69,7 @@ public class PickupLogic {
 			Match m = playerInMatch(player);
 			if (m != null && m.getMatchState() == MatchState.Signup) {
 				m.removePlayer(player);
-			} else bot.sendNotice(player.getDiscordUser(), Config.pkup_no_match_avi);
+			}
 		} else bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
 	}
 	
@@ -96,19 +104,19 @@ public class PickupLogic {
 		String msg = Config.pkup_getelo;
 		msg = msg.replace(".urtauth.", p.getUrtauth());
 		msg = msg.replace(".elo.", String.valueOf(p.getElo()));
-		String elochange = String.valueOf(p.getEloChange());
+		String elochange;
 		if (p.getEloChange() >= 0) {
-			elochange = "+" + elochange;
+			elochange = "+" + String.valueOf(p.getEloChange());
 		} else {
-			elochange = "-" + elochange;
+			elochange = "-" + String.valueOf(p.getEloChange());
 		}
-		msg.replace(".elochange.", elochange);
+		msg = msg.replace(".elochange.", elochange);
 		bot.sendMsg(bot.getPubchan(), msg);
 	}
 	
 	public void cmdGetMaps() {
 		for (Gametype gametype : curMatch.keySet()) {
-			bot.sendMsg(bot.getPubchan(), "*" + gametype + "*:" + curMatch.get(gametype).getMapVotes());
+			bot.sendMsg(bot.getPubchan(), "**" + gametype.getName() + "**: " + curMatch.get(gametype).getMapVotes());
 		}
 	}
 
@@ -135,9 +143,30 @@ public class PickupLogic {
 	}
 	
 	public void cmdStatus() {
-		// TODO
+		if (curMatch.isEmpty()) {
+			bot.sendMsg(bot.getPubchan(), Config.pkup_match_unavi);
+			return;
+		}
+		for (Match m : curMatch.values()) {
+			cmdStatus(m);
+		}
 	}
 	
+	public void cmdStatus(Match match) {
+		String msg = "";
+		int playerCount = match.getPlayerCount();
+		if (playerCount == 0) {
+			msg = Config.pkup_status_noone;
+		} else if (match.getMatchState() == MatchState.Signup){
+			msg = Config.pkup_status_signup;
+			msg = msg.replace(".playernumber.", String.valueOf(playerCount));
+			
+		} else if (match.getMatchState() == MatchState.AwaitingServer){
+			msg = Config.pkup_status_server;			
+		}
+		bot.sendMsg(bot.getPubchan(), "**" + match.getGametype().getName() + "**: " + msg);
+	}
+
 	public boolean cmdReset(String cmd) {
 		return cmdReset(cmd, null);
 	}
@@ -150,16 +179,19 @@ public class PickupLogic {
 			}
 			for (Match m : curMatch.values()) {
 				m.reset();
+				createCurrentMatches();
 			}
 			bot.sendMsg(bot.getPubchan(), Config.pkup_reset_all);
 			return true;
 		} else if (cmd.equals("cur")) {
 			if (gt != null && curMatch.keySet().contains(gt)) {
-				curMatch.get(mode).reset();
+				curMatch.get(gt).reset();
+				createMatch(gt);
 			} else {
 				for (Match m : curMatch.values()) {
 					m.reset();
 				}
+				createCurrentMatches();
 			}
 			bot.sendMsg(bot.getPubchan(), Config.pkup_reset_cur);
 			return true;
@@ -173,6 +205,14 @@ public class PickupLogic {
 						return true;
 					}
 				}
+				for (Match match : curMatch.values()) {
+					if (match.getID() == idx) {
+						match.reset();
+						createMatch(match.getGametype());
+						bot.sendMsg(bot.getPubchan(), Config.pkup_reset_id.replace(".id.", cmd));
+						return true;
+					}
+				}
 				
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
@@ -181,30 +221,37 @@ public class PickupLogic {
 		return false;
 	}
 	
-	public boolean cmdEnableMap(String mapname) {
+	public boolean cmdEnableMap(String mapname, String gametype) {
+		Gametype gt = getGametypeByString(gametype);
+		if (gt == null) return false;
+		
 		GameMap map = null;
 		for (GameMap xmap : mapList) {
-			if (xmap.toString().equals(mapname)) {
+			if (xmap.name.equals(mapname)) {
 				map = xmap;
 				break;
 			}
 		}
 		if (map == null) {
-			map = new GameMap(mapname, true);
-			db.createMap(map);
+			map = new GameMap(mapname);
+			map.setGametype(gt, true);
+			db.createMap(map, gt);
 			mapList.add(map);
 		} else {
-			map.active = true;
-			db.updateMap(map);
+			map.setGametype(gt, true);
+			db.updateMap(map, gt);
 		}
 		return true;
 	}
 	
-	public boolean cmdDisableMap(String mapname) {
+	public boolean cmdDisableMap(String mapname, String gametype) {
+		Gametype gt = getGametypeByString(gametype);
+		if (gt == null) return false;
+		
 		for (GameMap map : mapList) {
-			if (map.toString().equals(mapname)) {
-				map.active = false;
-				db.updateMap(map);
+			if (map.name.equals(mapname)) {
+				map.setGametype(gt, true);
+				db.updateMap(map, gt);
 				return true;
 			}
 		}
@@ -283,11 +330,30 @@ public class PickupLogic {
 	}	
 	
 	
+	private void createCurrentMatches() {
+		for (Gametype gametype : curMatch.keySet()) {
+			createMatch(gametype);
+		}
+	}
+	
+	private void createMatch(Gametype gametype) {
+		List<GameMap> gametypeMapList = new ArrayList<GameMap>();
+		for (GameMap map : mapList) {
+			if (map.isActiveForGametype(gametype)) {
+				gametypeMapList.add(map);
+			}
+		}
+		Match match = new Match(this, gametype, mapList);
+		
+		curMatch.put(gametype, match);
+	}
+	
+	
 	// HELPER
 	
 	public Gametype getGametypeByString(String mode) {
 		for (Gametype gt : curMatch.keySet()) {
-			if (gt.getName().equals(mode)) {
+			if (gt.getName().equalsIgnoreCase(mode)) {
 				return gt;
 			}
 		}

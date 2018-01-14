@@ -40,4 +40,14 @@ public class DiscordChannel {
 		}
 		return null;
 	}
+	
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof DiscordChannel) {
+			DiscordChannel chan = (DiscordChannel) o;
+			return chan.id == this.id;
+		}
+		return false;
+	}
 }

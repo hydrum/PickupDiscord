@@ -22,8 +22,6 @@ public class Match {
 	private GameMap map;
 	private int eloRed;
 	private int eloBlue;
-	private Player[] teamRed;
-	private Player[] teamBlue;
 	
 	private int scoreRed;
 	private int scoreBlue;
@@ -32,11 +30,22 @@ public class Match {
 	
 	private PickupLogic logic;
 	
-	public Match() {
+	private Match() {
 		teamList = new HashMap<String, List<Player>>();
 		teamList.put("red", new ArrayList<Player>());
 		teamList.put("blue", new ArrayList<Player>());
 		mapVotes = new HashMap<GameMap, Integer>();
+	}
+	
+	public Match(PickupLogic logic, Gametype gametype, List<GameMap> maplist) {
+		this();
+		this.logic = logic;
+		this.gametype = gametype;
+
+		for (GameMap m : maplist) {
+			mapVotes.put(m, 0);
+		}
+		state = MatchState.Signup;
 	}
 
 	public Match(int id, long startTime, GameMap map, int scoreRed, int scoreBlue, int eloRed, int eloBlue,
@@ -83,20 +92,21 @@ public class Match {
 	}
 
 	public void addPlayer(Player player) {
-		// TODO send msg
 		if (state == MatchState.Signup && !isInMatch(player)) {
 			playerStats.put(player, new MatchStats());
+			logic.cmdStatus(this);
 		}
 	}
 
 	public void removePlayer(Player player) {
-		// TODO send msg
 		if (state == MatchState.Signup && isInMatch(player)) {
 			GameMap map = player.getVotedMap();
 			if (map != null) {
 				mapVotes.put(map, mapVotes.get(map).intValue() - 1);
+				player.resetMap();
 			}
 			playerStats.remove(player);
+			logic.cmdStatus(this);
 		}
 	}
 
@@ -104,6 +114,8 @@ public class Match {
 		if (state == MatchState.Signup && isInMatch(player) && player.getVotedMap() == null) {
 			mapVotes.put(map, mapVotes.get(map).intValue() + 1);
 			player.vote(map);
+			System.out.println(logic == null);
+			System.out.println(logic.bot == null);
 			logic.bot.sendNotice(player.getDiscordUser(), Config.pkup_map);
 		} else {
 			logic.bot.sendNotice(player.getDiscordUser(), Config.map_already_voted);
@@ -112,10 +124,10 @@ public class Match {
 	
 	public String getMapVotes() {
 
-		String msg = "";
+		String msg = "None";
 		for (GameMap map : mapVotes.keySet()) {
-			if (msg.equals(""))
-				msg += map.name + ": " + String.valueOf(mapVotes.get(map));
+			if (msg.equals("None"))
+				msg = map.name + ": " + String.valueOf(mapVotes.get(map));
 			else
 				msg += " || " + map.name + ": " + String.valueOf(mapVotes.get(map));
 		}
@@ -145,6 +157,10 @@ public class Match {
 	public void setID(int id) {
 		this.id = id;
 	}
+	
+	public void setLogic(PickupLogic logic) {
+		this.logic = logic;
+	}
 
 	public Server getServer() {
 		return server;
@@ -166,16 +182,20 @@ public class Match {
 		return eloBlue;
 	}
 
-	public Player[] getTeamRed() {
-		return teamRed;
+	public List<Player> getTeamRed() {
+		return teamList.get("red");
 	}
 
-	public Player[] getTeamBlue() {
-		return teamBlue;
+	public List<Player> getTeamBlue() {
+		return teamList.get("blue");
 	}
 
-	public Player[] getPlayerList() {
-		return (Player[]) playerStats.keySet().toArray();
+	public List<Player> getPlayerList() {
+		List<Player> list = new ArrayList<Player>();
+		for (Player p : playerStats.keySet()) {
+			list.add(p);
+		}
+		return list;
 	}
 
 	public String getTeam(Player player) {
@@ -197,5 +217,9 @@ public class Match {
 
 	public MatchStats getStats(Player player) {
 		return playerStats.get(player);
+	}
+
+	public int getPlayerCount() {
+		return playerStats.keySet().size();
 	}
 }

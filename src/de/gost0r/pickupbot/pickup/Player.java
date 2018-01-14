@@ -3,6 +3,7 @@ package de.gost0r.pickupbot.pickup;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordUser;
 
 public class Player {
@@ -12,9 +13,9 @@ public class Player {
 	private DiscordUser user;
 	private String urtauth;
 	
-	private GameMap votedMap;
-	private int elo;
-	private int eloChange;
+	private GameMap votedMap = null;
+	private int elo = 1000;
+	private int eloChange = 0;
 	
 	private boolean banned;
 	
@@ -88,5 +89,14 @@ public class Player {
 		}
 		Player p = db.loadPlayer(user); // can be valid or null
 		return p; 
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Player) {
+			Player player = (Player) o;
+			return player.getDiscordUser().equals(this.getDiscordUser()) && player.urtauth == this.urtauth;
+		}
+		return false;
 	}
 }

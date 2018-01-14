@@ -40,7 +40,7 @@ public class DiscordGateway implements MessageHandler{
 	public void handleMessage(String message) {
 		try {
 			JSONObject jsonObj = new JSONObject(message);
-			System.out.println("jsonObject: " + jsonObj);
+			System.out.println("INC " + jsonObj);
 			
 			// Parse to packet
 			int op = jsonObj.getInt("op");

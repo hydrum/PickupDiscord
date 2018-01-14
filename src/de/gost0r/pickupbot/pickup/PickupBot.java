@@ -37,7 +37,7 @@ public class PickupBot extends DiscordBot {
 				{
 					Player p = Player.get(user);
 					if (p != null)
-					{
+					{					
 						logic.cmdAddPlayer(p, data[1]);
 					}
 					else sendNotice(user, Config.user_not_registered);
@@ -75,19 +75,15 @@ public class PickupBot extends DiscordBot {
 				else sendNotice(user, Config.user_not_registered);
 			}
 			
-			// TODO
-//			else if (data[0].equals(Config.CMD_STATUS))
-//			{
-//				if (isQauthed(nick))
-//				{
-//					if (data.length == 1)
-//					{
-//						logic.gameStatus(nick);
-//					}
-//					else super.sendMsg(channel, Config.wrong_argument_amount + Config.USE_CMD_STATUS);
-//				}
-//					
-//			}
+			else if (data[0].equals(Config.CMD_STATUS))
+			{
+				if (data.length == 1)
+				{
+					logic.cmdStatus();
+				}
+				else super.sendMsg(channel, Config.wrong_argument_amount + Config.USE_CMD_STATUS);
+					
+			}
 			//TODO: move to DM?
 			else if (data[0].equals(Config.CMD_RESET))
 			{
@@ -156,7 +152,9 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 1)
 					{
-						logic.cmdLock();
+						if (logic.cmdLock()) {
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_LOCK);
 					
@@ -165,7 +163,9 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 1)
 					{
-						logic.cmdUnlock();
+						if (logic.cmdUnlock()) {
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_UNLOCK);
 					
@@ -191,17 +191,21 @@ public class PickupBot extends DiscordBot {
 //				}
 				else if (data[0].equals(Config.CMD_ENABLEMAP))
 				{
-					if (data.length == 2)
+					if (data.length == 3)
 					{
-						logic.cmdEnableMap(data[1]);
+						if (logic.cmdEnableMap(data[1], data[2])) {
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLEMAP);
 				}
 				else if (data[0].equals(Config.CMD_DISABLEMAP))
 				{
-					if (data.length == 2)
+					if (data.length == 3)
 					{
-						logic.cmdDisableMap(data[1]);
+						if (logic.cmdDisableMap(data[1], data[2])) {
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_DISABLEMAP);
 					
@@ -210,7 +214,9 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 3)
 					{
-//						logic.cmdAddServer(data[1], data[2]);
+						if (logic.cmdAddServer(data[1], data[2])) {
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ADDSERVER);
 						
@@ -219,7 +225,9 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 2)
 					{
-						logic.cmdServerActivation(data[1], true);
+						if (logic.cmdServerActivation(data[1], true)) {
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLESERVER);
 					
@@ -228,7 +236,9 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 2)
 					{
-						logic.cmdServerActivation(data[1], false);
+						if (logic.cmdServerActivation(data[1], false)) {
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_DISABLESERVER);
 					
@@ -237,7 +247,9 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 2)
 					{
-						logic.cmdServerChangeRcon(data[1], data[1]);
+						if (logic.cmdServerChangeRcon(data[1], data[1])) {
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_DISABLESERVER);
 					
@@ -245,7 +257,9 @@ public class PickupBot extends DiscordBot {
 				else if (data[0].equals(Config.CMD_RCON))
 				{
 					if (data.length > 2) {
-					logic.cmdServerSendRcon(data[1], msg.substring(Config.CMD_RCON.length() + data[1].length() + 2));
+						if (logic.cmdServerSendRcon(data[1], msg.substring(Config.CMD_RCON.length() + data[1].length() + 2))) {
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 				}
 			}
@@ -315,6 +329,13 @@ public class PickupBot extends DiscordBot {
 				message += "<@&" + s + "> ";
 			}
 			sendNotice(u, message);
+		}
+		if (data[0].equals("!showadminroles")) {			
+			String message = " Admin roles: ";
+			for (String s : logic.getAdminList()) {
+				message += "<@&" + s + "> ";
+			}
+			sendNotice(user, message);
 		}
 	}
 		

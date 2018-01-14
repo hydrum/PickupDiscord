@@ -58,8 +58,8 @@ public class Config {
 	public static final String USE_CMD_UNLOCK			= "!unlock";
 	public static final String USE_CMD_RESET			= "!reset <all/cur/id>";
 	public static final String USE_CMD_GETDATA			= "!getdata <id>";
-	public static final String USE_CMD_ENABLEMAP		= "!enablemap <ut4_map>";
-	public static final String USE_CMD_DISABLEMAP		= "!disablemap <ut4_map>";
+	public static final String USE_CMD_ENABLEMAP		= "!enablemap <ut4_map> <gametype>";
+	public static final String USE_CMD_DISABLEMAP		= "!disablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_RCON				= "!rcon <rconstring>";
 	
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
@@ -80,9 +80,6 @@ public class Config {
 	public static final String USE_CMD_ENABLESERVER		= "!enableserver <id>";
 	public static final String USE_CMD_DISABLESERVER	= "!disableserver <id>";
 	public static final String USE_CMD_UPDATESERVER		= "!updateserver <id> <rcon>";
-	
-	public static final String USE_CMD_ENABLEDEBUG		= "!enabledebug";
-	public static final String USE_CMD_DISABLEDEBUG		= "!disabledebug";
 
 	public static final String pkup_help				= "CMDs are !add !remove !status !map !maps !lostpass !gameover !ring";
 	public static final String pkup_lock				= "This game is currently locked";
@@ -90,7 +87,8 @@ public class Config {
 	public static final String pkup_signup				= "You can sign up again!";
 	public static final String pkup_pw					= "[ /connect .server. ; password .password. ]";
 	public static final String pkup_status_noone		= "Nobody has signed up. Type !add to play.";
-	public static final String pkup_status_signup_pub	= "Sign up: [.playernumber./10] Type !status to see who's signed up.";
+	public static final String pkup_status_signup		= "Sign up: [.playernumber./10]";
+	public static final String pkup_status_server		= "Awaiting available server.";
 	public static final String pkup_status_signup_priv	= "Players [.playernumber./10]: .playerlist.";
 	public static final String pkup_started				= "Game has already started. .status. - .time. minutes in.";
 
@@ -140,5 +138,9 @@ public class Config {
 	public static final String lock_enable				= "Game is now locked";
 	public static final String lock_disable				= "Game is now unlocked";
 
-	public static final String pkup_no_match_avi 		= "Match is available right now.";
+	public static final String pkup_match_unavi 		= "Match is not available right now.";
+	public static final String pkup_match_invalid_gt	= "No match for that gametype is not available right now.";
+	
+	public static final String admin_cmd_successful		= "Successful: ";
+	public static final String admin_cmd_unsuccessful	= "Unuccessful: ";
 }

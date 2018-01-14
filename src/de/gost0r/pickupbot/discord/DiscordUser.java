@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
+import de.gost0r.pickupbot.pickup.Gametype;
 
 public class DiscordUser {
 	
@@ -87,5 +88,14 @@ public class DiscordUser {
 			return userList.get(id);
 		}
 		return null;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof DiscordUser) {
+			DiscordUser user = (DiscordUser) o;
+			return user.id == this.id;
+		}
+		return false;
 	}
 }
