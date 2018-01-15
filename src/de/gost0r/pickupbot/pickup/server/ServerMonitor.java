@@ -140,7 +140,7 @@ public class ServerMonitor implements Runnable {
 				Player player = Player.get(sp.auth);				
 				if (player != null) {
 					sp.player = player;
-					match.getStats(player).updateStatus(MatchStats.STATUS.PLAYING);
+					match.getStats(player).updateStatus(MatchStats.Status.PLAYING);
 					match.getStats(player).updateIP(sp.ip);
 				} else { // if player not authed or player unknown -> kick
 					System.out.println("Didn't find " + sp.auth + " in the registered player list. -> kick");
@@ -169,9 +169,9 @@ public class ServerMonitor implements Runnable {
 				}
 			
 			} else { // not active
-				if (sp.player != null && match.getStats(sp.player).getStatus() != MatchStats.STATUS.LEFT) { 
+				if (sp.player != null && match.getStats(sp.player).getStatus() != MatchStats.Status.LEFT) { 
 					match.getStats(sp.player).updateIP(sp.ip);
-					match.getStats(sp.player).updateStatus(MatchStats.STATUS.LEFT);
+					match.getStats(sp.player).updateStatus(MatchStats.Status.LEFT);
 				}
 			}
 		}

@@ -44,10 +44,12 @@ public class Database {
 	private void initTable() {
 		try {
 			Statement stmt = c.createStatement();
-			String sql = "CREATE TABLE IF NOT EXISTS player ( userid TEXT NOT NULL,"
-													+ "urtauth TEXT PRIMARY KEY,"
+			String sql = "CREATE TABLE IF NOT EXISTS player ( userid TEXT,"
+													+ "urtauth TEXT,"
 													+ "elo INTEGER DEFAULT 1000,"
-													+ "elochange INTEGER DEFAULT 0 )";
+													+ "elochange INTEGER DEFAULT 0,"
+													+ "active TEXT,"
+													+ "PRIMARY KEY (userid, urtauth)";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS gametype ( gametype TEXT PRIMARY KEY,"
@@ -56,41 +58,55 @@ public class Database {
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS map ( map TEXT,"
-													+ "gametype REFERENCES gametype,"
+													+ "gametype TEXT,"
 													+ "active TEXT,"
+													+ "FOREIGN KEY (gametype) REFERENCES gametype(gametype),"
 													+ "PRIMARY KEY (map, gametype) )";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS banlist ( ID INTEGER PRIMARY KEY AUTOINCREMENT,"
-													+ "player REFERENCES player,"
+													+ "player_userid TEXT,"
+													+ "player_urtauth TEXT,"
 													+ "reason TEXT,"
 													+ "start INTEGER,"
-													+ "end INTEGER)";
+													+ "end INTEGER,"
+													+ "FOREIGN KEY (player_userid, player_urtauth) REFERENCES player(userid, urtauth) )";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS report ( ID INTEGER PRIMARY KEY AUTOINCREMENT,"
-													+ "player REFERENCES player,"
-													+ "reporter REFERENCES player,"
+													+ "player_userid TEXT,"
+													+ "player_urtauth TEXT,"
+													+ "reporter_userid TEXT,"
+													+ "reporter_urtauth TEXT,"
 													+ "reason TEXT,"
-													+ "match REFERENCES match )";
+													+ "match INTEGER,"
+													+ "FOREIGN KEY (player_userid, player_urtauth) REFERENCES player(userid, urtauth),"
+													+ "FOREIGN KEY (reporter_userid, reporter_urtauth) REFERENCES player(userid, urtauth),"
+													+ "FOREIGN KEY (match) REFERENCES match(ID) )";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS match ( ID INTEGER PRIMARY KEY AUTOINCREMENT,"
-													+ "server REFERENCES server,"
+													+ "server INTEGER,"
 													+ "gametype TEXT,"
 													+ "state TEXT,"
 													+ "starttime INTEGER,"
-													+ "map REFERENCES map,"
+													+ "map TEXT,"
 													+ "elo_red INTEGER,"
 													+ "elo_blue INTEGER,"
 													+ "score_red INTEGER DEFAULT 0,"
-													+ "score_blue INTEGER DEFAULT 0 )";
+													+ "score_blue INTEGER DEFAULT 0,"
+													+ "FOREIGN KEY (server) REFERENCES server(id),"
+													+ "FOREIGN KEY (map, gametype) REFERENCES map(map, gametype),"
+													+ "FOREIGN KEY (gametype) REFERENCES gametype(gametype) )";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS player_in_match ( ID INTEGER PRIMARY KEY AUTOINCREMENT,"
-													+ "matchid REFERENCES match,"
-													+ "player REFRENCES player,"
-													+ "team TEXT)";
+													+ "matchid INTEGER,"
+													+ "player_userid TEXT,"
+													+ "player_urtauth TEXT,"
+													+ "team TEXT,"
+													+ "FOREIGN KEY (matchid) REFERENCES match(ID), "
+													+ "FOREIGN KEY (player_userid, player_urtauth) REFERENCES player(userid, urtauth) )";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS score ( ID INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -101,15 +117,17 @@ public class Database {
 													+ "returns INTEGER DEFAULT 0,"
 													+ "fckills INTEGER DEFAULT 0,"
 													+ "stopcaps INTEGER DEFAULT 0,"
-													+ "protflag INTEGER DEFAULT 0)";
+													+ "protflag INTEGER DEFAULT 0 )";
 			stmt.executeUpdate(sql);
 			
-			sql = "CREATE TABLE IF NOT EXISTS stats ( ID INTEGER PRIMARY KEY AUTOINCREMENT,"
-													+ "pim REFERENCES player_in_match,"
+			sql = "CREATE TABLE IF NOT EXISTS stats ( pim INTEGER PRIMARY KEY,"
 													+ "ip TEXT,"
-													+ "score_1 REFERENCES score,"
-													+ "score_2 REFERENCES score,"
-													+ "status INTEGER)";
+													+ "status TEXT,"
+													+ "score_1 INTEGER,"
+													+ "score_2 INTEGER,"
+													+ "FOREIGN KEY(pim) REFERENCES player_in_match(ID),"
+													+ "FOREIGN KEY (score_1) REFERENCES score(ID),"
+													+ "FOREIGN KEY (score_2) REFERENCES score(ID) )";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS server ( ID INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -132,12 +150,13 @@ public class Database {
 
 	public void createPlayer(Player player) {
 		try {
-			String sql = "INSERT INTO player (userid, urtauth, elo, elochange) VALUES (?, ?, ?, ?)";
+			String sql = "INSERT INTO player (userid, urtauth, elo, elochange, active) VALUES (?, ?, ?, ?, ?)";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, player.getDiscordUser().id);
 			pstmt.setString(2, player.getUrtauth());
 			pstmt.setInt(3,  player.getElo());
 			pstmt.setInt(4,  player.getEloChange());
+			pstmt.setString(5, String.valueOf(true));
 			pstmt.executeUpdate();
 			pstmt.close();
 		} catch (SQLException e) {
@@ -160,7 +179,7 @@ public class Database {
 			sql = "SELECT ID FROM server ORDER BY ID DESC";
 			ResultSet rs = stmt.executeQuery(sql);
 			rs.next();
-			server.id = rs.getInt("ID");			
+			server.id = rs.getInt("ID");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -182,7 +201,7 @@ public class Database {
 	
 	public int createMatch(Match match) {
 		try {
-			String sql = "INSERT INTO match (state, gametype, server, starttime, map, red_elo, blue_elo) VALUES (?, ?, ?, ?, ?, ?, ?)";
+			String sql = "INSERT INTO match (state, gametype, server, starttime, map, elo_red, elo_blue) VALUES (?, ?, ?, ?, ?, ?, ?)";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, match.getMatchState().name());
 			pstmt.setString(2, match.getGametype().getName());
@@ -199,23 +218,21 @@ public class Database {
 			rs.next();
 			int mid = rs.getInt("id");
 			for (Player player : match.getPlayerList()) {
-				sql = "INSERT INTO score (kills, deaths) VALUES (0, 0)";
-				stmt.executeUpdate(sql);
-				sql = "SELECT ID FROM score ORDER BY ID DESC";
-				rs = stmt.executeQuery(sql);
-				rs.next();
-				int scoreid1 = rs.getInt("ID");
-				sql = "INSERT INTO score (kills, deaths) VALUES (0, 0)";
-				stmt.executeUpdate(sql);
-				sql = "SELECT ID FROM score ORDER BY ID DESC";
-				rs = stmt.executeQuery(sql);
-				rs.next();
-				int scoreid2 = rs.getInt("ID");
-				sql = "INSERT INTO player_in_match (matchid, player, team) VALUES (?, ?, ?)";
+				int[] score = new int[2];
+				for (int i = 0; i < score.length; ++i) {
+					sql = "INSERT INTO score (kills, deaths) VALUES (0, 0)";
+					stmt.executeUpdate(sql);
+					sql = "SELECT ID FROM score ORDER BY ID DESC";
+					rs = stmt.executeQuery(sql);
+					rs.next();
+					score[i] = rs.getInt("ID");
+				}
+				sql = "INSERT INTO player_in_match (matchid, player_userid, player_urtauth, team) VALUES (?, ?, ?, ?)";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setInt(1, mid);
-				pstmt.setString(2, player.getUrtauth());
-				pstmt.setString(3, match.getTeam(player));
+				pstmt.setString(2, player.getDiscordUser().id);
+				pstmt.setString(3, player.getUrtauth());
+				pstmt.setString(4, match.getTeam(player));
 				pstmt.executeUpdate();
 				sql = "SELECT ID FROM player_in_match ORDER BY ID DESC";
 				rs = stmt.executeQuery(sql);
@@ -224,9 +241,9 @@ public class Database {
 				sql = "INSERT INTO stats (pim, ip, score_1, score_2, status) VALUES (?, null, ?, ?, ?)";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setInt(1, pidmid);
-				pstmt.setInt(2, scoreid1);
-				pstmt.setInt(3, scoreid2);
-				pstmt.setString(4, "PLAYING");
+				pstmt.setInt(2, score[0]);
+				pstmt.setInt(3, score[1]);
+				pstmt.setString(4, match.getStats(player).getStatus().name());
 				pstmt.executeUpdate();
 			}
 			pstmt.close();
@@ -272,7 +289,7 @@ public class Database {
 	
 	public void deleteAdminRole(String role) {
 		try {
-			String sql = "DELETE FROM admin_role WHERE role =?";
+			String sql = "DELETE FROM admin_role WHERE role=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, role);
 			pstmt.executeUpdate();
@@ -289,7 +306,7 @@ public class Database {
 		List<Server> serverList = new ArrayList<Server>();		
 		try {
 			Statement stmt = c.createStatement();
-			String sql = "SELECT id, ip, port, rcon, password, active FROM server"; // TODO: exclude active="false" servers
+			String sql = "SELECT id, ip, port, rcon, password, active FROM server";
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				int id = rs.getInt("id");
@@ -314,10 +331,12 @@ public class Database {
 		List<Gametype> gametypeList = new ArrayList<Gametype>();
 		try {
 			Statement stmt = c.createStatement();
-			String sql = "SELECT gametype, active FROM gametype";
+			String sql = "SELECT gametype, config, active FROM gametype";
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				gametypeList.add(new Gametype(rs.getString("gametype"), Boolean.valueOf(rs.getString("active"))));
+				Gametype gametype = new Gametype(rs.getString("gametype"), Boolean.valueOf(rs.getString("active")));
+				gametype.setConfig(rs.getString("config"));
+				gametypeList.add(gametype);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -373,8 +392,8 @@ public class Database {
 		Match match = null;
 		try {
 			Statement stmt = c.createStatement();
-			ResultSet rs, rs1, rs2;
-			String sql = "SELECT ID, starttime, map, gametype, score_red, score_blue, elo_red, elo_blue, state, server FROM match WHERE id=?";
+			ResultSet rs, rs1, rs2, rs3;
+			String sql = "SELECT starttime, map, gametype, score_red, score_blue, elo_red, elo_blue, state, server FROM match WHERE ID=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setInt(1, id);
 			rs = pstmt.executeQuery();
@@ -386,52 +405,46 @@ public class Database {
 			teamList.put("blue", new ArrayList<Player>());
 				
 			// getting players in match
-			sql = "SELECT ID, player, team FROM player_in_match WHERE matchid=? ORDER BY ID DESC";
+			sql = "SELECT ID, player_userid, player_urtauth, team FROM player_in_match WHERE matchid=?";
 			pstmt = c.prepareStatement(sql);
-			pstmt.setInt(1, rs.getInt("ID"));
+			pstmt.setInt(1, id);
 			rs1 = pstmt.executeQuery();
 			while (rs1.next()) {
 				int pidmid = rs1.getInt("ID");
-				String urtauth = rs1.getString("player");
+				String userid = rs1.getString("player_userid");
+				String urtauth = rs1.getString("player_urtauth");
 				String team = rs1.getString("team");
 				
-				// getting score
-				sql = "SELECT ip, score_1, score_2, status FROM stats WHERE pim=? ORDER BY ID DESC";
+				// getting stats
+				sql = "SELECT ip, score_1, score_2, status FROM stats WHERE pim=?";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setInt(1, pidmid);
 				rs2 = stmt.executeQuery(sql);
 				rs2.next();
 				
-				int score1id = rs1.getInt("score_1");
-				int score2id = rs1.getInt("score_2");
-				String ip = rs1.getString("ip");
-				String status = rs1.getString("status");
+				int[] scoreid = new int[] {rs2.getInt("score_1"), rs2.getInt("score_2") };
+				String ip = rs2.getString("ip");
+				MatchStats.Status status = MatchStats.Status.valueOf(rs2.getString("status"));
 				
 				Score[] scores = new Score[2];
 				
 				// getting score
-				@SuppressWarnings("unused")
-				int scoreid = 0;
 				for(int i = 0; i < 2; ++i) {
-					if (i == 0) {
-						scoreid = score1id;
-					} else {
-						scoreid = score2id;
-					}
-					sql = "SELECT kills, deaths, caps, returns, fckills, stopcaps, protflag FROM score WHERE ID=? ORDER BY ID DESC";
+					sql = "SELECT kills, deaths, assists, caps, returns, fckills, stopcaps, protflag FROM score WHERE ID=? ORDER BY ID DESC";
 					pstmt = c.prepareStatement(sql);
-					pstmt.setInt(1, pidmid);
-					rs2 = pstmt.executeQuery();
-					rs2.next();
+					pstmt.setInt(1, scoreid[i]);
+					rs3 = pstmt.executeQuery();
+					rs3.next();
 					
 					scores[i] = new Score();
-					scores[i].score = rs2.getInt("kills");
-					scores[i].score = rs2.getInt("deaths");
-					scores[i].caps = rs2.getInt("caps");
-					scores[i].returns = rs2.getInt("returns");
-					scores[i].fc_kills = rs2.getInt("fckills");
-					scores[i].stop_caps = rs2.getInt("stopcaps");
-					scores[i].protect_flag = rs2.getInt("protflag");
+					scores[i].score = rs3.getInt("kills");
+					scores[i].deaths = rs3.getInt("deaths");
+					scores[i].assists = rs3.getInt("assists");
+					scores[i].caps = rs3.getInt("caps");
+					scores[i].returns = rs3.getInt("returns");
+					scores[i].fc_kills = rs3.getInt("fckills");
+					scores[i].stop_caps = rs3.getInt("stopcaps");
+					scores[i].protect_flag = rs3.getInt("protflag");
 				}
 					
 				// assemble stats
@@ -447,8 +460,8 @@ public class Database {
 			
 			match = new Match(id, rs.getLong("starttime"),
 									map,
-									new int[] { rs.getInt("score_red"), rs.getInt("score_blue")},
-									new int[] {rs.getInt("elo_red"), rs.getInt("elo_blue") },
+									new int[] { rs.getInt("score_red"), rs.getInt("score_blue") },
+									new int[] { rs.getInt("elo_red"), rs.getInt("elo_blue") },
 									teamList,
 									state,
 									gametype,
@@ -463,9 +476,10 @@ public class Database {
 	public Player loadPlayer(DiscordUser user) {
 		Player player = null;
 		try {
-			String sql = "SELECT urtauth, elo, elochange FROM player WHERE userid=?";
+			String sql = "SELECT urtauth, elo, elochange FROM player WHERE userid=? AND active=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, user.id);
+			pstmt.setString(2, String.valueOf(true));
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
 				player = new Player(user, rs.getString("urtauth"));
@@ -481,9 +495,10 @@ public class Database {
 	public Player loadPlayer(String urtauth) {
 		Player player = null;
 		try {
-			String sql = "SELECT userid, elo, elochange FROM player WHERE urtauth=?";
+			String sql = "SELECT userid, elo, elochange FROM player WHERE urtauth=? AND active=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, urtauth);
+			pstmt.setString(2, String.valueOf(true));
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
 				DiscordUser user = DiscordUser.getUser(rs.getString("userid"));
@@ -508,6 +523,7 @@ public class Database {
 			pstmt.setString(3, server.rconpassword);
 			pstmt.setString(4, server.password);
 			pstmt.setString(5, String.valueOf(server.active));
+			pstmt.setInt(6, server.id);
 			pstmt.executeUpdate();
 			pstmt.close();
 		} catch (SQLException e) {
@@ -548,32 +564,32 @@ public class Database {
 			
 			for (Player player : match.getPlayerList()) {
 				// get ids
-				sql = "SELECT ID FROM player_in_match WHERE matchid=? AND player=?";
+				sql = "SELECT ID FROM player_in_match WHERE matchid=? AND player_userid=? AND player_urtauth=?";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setInt(1, match.getID());
-				pstmt.setString(2, player.getUrtauth());
+				pstmt.setString(2, player.getDiscordUser().id);
+				pstmt.setString(3, player.getUrtauth());
 				rs = pstmt.executeQuery(sql);
 				rs.next();
-				int pidmid = rs.getInt("ID");
+				int pim = rs.getInt("ID");
 				
 				sql = "SELECT score_1, score_2 FROM stats WHERE pim=?";
 				pstmt = c.prepareStatement(sql);
-				pstmt.setInt(1, pidmid);
+				pstmt.setInt(1, pim);
 				rs = pstmt.executeQuery(sql);
 				rs.next();
-				int scoreid1 = rs.getInt("score_1");
-				int scoreid2 = rs.getInt("score_2");
+				int[] scoreid = new int[] { rs.getInt("score_1"), rs.getInt("score_2") };
 				
 				// update ip & status (leaver etc)
-				sql = "UPDATE stats SET ip=?, status=? WHERE id=?";
+				sql = "UPDATE stats SET ip=?, status=? WHERE pim=?";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setString(1, match.getStats(player).getIP());
 				pstmt.setString(2, match.getStats(player).getStatus().name());
-				pstmt.setInt(3, pidmid);
+				pstmt.setInt(3, pim);
 				pstmt.executeUpdate(sql);
 				
 				// update playerscore
-				sql = "UPDATE stats SET kills=?, deaths=?, assists=?, caps=?, returns=?, fckills=?, stopcaps=?, protflag=? WHERE id=?";
+				sql = "UPDATE score SET kills=?, deaths=?, assists=?, caps=?, returns=?, fckills=?, stopcaps=?, protflag=? WHERE ID=?";
 				pstmt = c.prepareStatement(sql);
 				for (int i=0; i < 2; ++i) {
 					pstmt.setInt(1, match.getStats(player).score[i].score);
@@ -584,19 +600,16 @@ public class Database {
 					pstmt.setInt(6, match.getStats(player).score[i].fc_kills);
 					pstmt.setInt(7, match.getStats(player).score[i].stop_caps);
 					pstmt.setInt(8, match.getStats(player).score[i].protect_flag);
-					if (i == 0) {
-						pstmt.setInt(9, scoreid1);
-					} else {
-						pstmt.setInt(9, scoreid2);
-					}
+					pstmt.setInt(9, scoreid[i]);
 					pstmt.executeUpdate(sql);
 				}
 				
 				// update elo change
-				sql = "UPDATE player SET elo=?, elochange=? WHERE player=?";
+				sql = "UPDATE player SET elo=?, elochange=? WHERE player_userid=? AND player_urtauth=?";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setInt(1, player.getElo());
 				pstmt.setInt(2, player.getEloChange());
+				pstmt.setString(3, player.getDiscordUser().id);
 				pstmt.setString(3, player.getUrtauth());
 				pstmt.executeUpdate();			
 			}
@@ -646,6 +659,24 @@ public class Database {
 			e.printStackTrace();
 		}
 		return list;
+	}
+	
+	public int getRankForPlayer(Player player) {
+		int rank = -1;
+		try {
+			String sql = "SELECT (SELECT COUNT(*) FROM player b WHERE a.elo < b.elo AND active=?) AS rank FROM player a WHERE userid=? AND urtauth=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, String.valueOf(true));
+			pstmt.setString(2, player.getDiscordUser().id);
+			pstmt.setString(3, player.getUrtauth());
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				rank = rs.getInt("rank") + 1;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return rank;
 	}
 
 }

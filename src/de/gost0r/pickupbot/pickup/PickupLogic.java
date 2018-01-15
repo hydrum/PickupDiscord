@@ -34,7 +34,6 @@ public class PickupLogic {
 		db = new Database(this);
 		Player.db = db;		
 		// handle db stuff
-		ongoingMatches = db.loadOngoingMatches();
 		serverList = db.loadServers();
 		adminRoles = db.loadAdminRoles();
 		
@@ -45,6 +44,7 @@ public class PickupLogic {
 			}
 		}
 		mapList = db.loadMaps(); // needs current gamemode list
+		ongoingMatches = db.loadOngoingMatches(); // need maps, servers and gamemodes
 
 		createCurrentMatches();
 		
@@ -478,7 +478,7 @@ public class PickupLogic {
 
 	private void checkServer() {
 		for (Server server : serverList) {
-			if (!server.isTaken() && !awaitingServer.isEmpty()) {
+			if (server.active && !server.isTaken() && !awaitingServer.isEmpty()) {
 				Match m = awaitingServer.poll();
 				if (m != null) {
 					m.start(server);

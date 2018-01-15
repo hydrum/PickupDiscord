@@ -2,33 +2,33 @@ package de.gost0r.pickupbot.pickup;
 
 public class MatchStats {
 	
-	public enum STATUS {
+	public enum Status {
 		PLAYING,
 		LEFT,
 		NOSHOW
 	}
 	
 	private String ip;	
-	private STATUS status = STATUS.NOSHOW;
+	private Status status = Status.NOSHOW;
 	
 	public Score[] score = new Score[2];
 	
 	public MatchStats() {
 	}
 	
-	public MatchStats(Score score1, Score score2, String ip, String status) {
+	public MatchStats(Score score1, Score score2, String ip, Status status) {
 		this();
 		score[0] = score1;
 		score[1] = score2;
 		this.ip = ip;
-		this.status = STATUS.valueOf(status);
-	}
-	
-	public void updateStatus(STATUS status) {
 		this.status = status;
 	}
 	
-	public STATUS getStatus() {
+	public void updateStatus(Status status) {
+		this.status = status;
+	}
+	
+	public Status getStatus() {
 		return status;
 	}
 	
