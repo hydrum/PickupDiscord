@@ -34,6 +34,14 @@ public class Player {
 		votedMap = null;
 	}
 	
+
+	public void addElo(int elochange) {
+		this.elo += elochange;
+		this.eloChange = elochange;
+		
+		// update done by servermonitor
+	}
+	
 	public GameMap getVotedMap() {
 		return votedMap;
 	}
@@ -98,9 +106,9 @@ public class Player {
 		}
 		return false;
 	}
-
-	public void addElo(int elochange) {
-		this.elo += elochange;
-		this.eloChange = elochange;
+	
+	@Override
+	public String toString() {
+		return this.urtauth;
 	}
 }

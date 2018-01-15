@@ -260,7 +260,7 @@ public class PickupBot extends DiscordBot {
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
 						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_DISABLESERVER);
+					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_UPDATESERVER);
 					
 				}				
 				else if (data[0].equals(Config.CMD_SHOWSERVERS))

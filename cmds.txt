@@ -1,0 +1,33 @@
+
+CMD					PARMS					LEVEL		EXPLANATION
+!add				<gametype>				authed		-
+!remove				-						authed
+!maps				-						authed
+!map				<map>					added
+!status				-						-
+!help				<!command>				-
+
+!lock										admin
+!unlock										admin
+!reset				<all/cur/id>			admin		avi in channel
+!getdata			<id>					admin	
+!enablemap			<ut4_map> <gametype>	admin
+!disablemap			<ut4_map> <gametype>	admin
+!rcon				<id> <rconstring>		admin
+
+!enablegametype		<name> <config>			admin
+!disablegametype	<name>					admin
+
+!register									-
+!elo				<urtauth>				authed
+!top5										authed
+
+!showservers								admin
+!addserver			<ip:port> <rcon>		admin
+!enableserver		<id>					admin
+!disableserver		<id>					admin
+!updateserver		<id> <rcon>				admin
+
+
+!showroles 			<user>
+!showadminroles

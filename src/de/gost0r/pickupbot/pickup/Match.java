@@ -1,9 +1,11 @@
 package de.gost0r.pickupbot.pickup;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import de.gost0r.pickupbot.pickup.server.Server;
@@ -63,6 +65,8 @@ public class Match {
 	public void reset() {
 		if (state == MatchState.Signup) {
 			resetSignup();
+		} else if (state == MatchState.AwaitingServer) {
+			// TODO
 		} else if (state == MatchState.Live) {
 			resetLive();
 		} else if (state == MatchState.Done || state == MatchState.Abort){
@@ -83,15 +87,13 @@ public class Match {
 	}
 	
 	private void resetLive() {
-		// TODO
-		// simply abort() ?
+		abort();
 	}
 
 	public void addPlayer(Player player) {
 		if (state == MatchState.Signup && !isInMatch(player)) {
-			// TODO: check for starting condition
 			playerStats.put(player, new MatchStats());
-			logic.cmdStatus(this);
+			checkReadyState();
 		}
 	}
 
@@ -118,6 +120,16 @@ public class Match {
 			logic.bot.sendNotice(player.getDiscordUser(), Config.map_already_voted);
 		}
 	}
+	
+	public void checkReadyState() {
+		if (playerStats.keySet().size() == 10) {
+			state = MatchState.AwaitingServer;
+			logic.cmdStatus(this);
+			logic.requestServer(this);
+		} else {
+			logic.cmdStatus(this);
+		}
+	}
 
 	public void abort() {
 		state = MatchState.Abort;
@@ -131,10 +143,13 @@ public class Match {
 	}
 	
 	private void cleanUp() {
+		for(Player p : playerStats.keySet()) {
+			p.resetMap();
+		}
 		logic.db.saveMatch(this);
 		server.free();
 
-		// TODO: tell server to remove this match from ongoing
+		logic.matchEnded(this);
 	}
 	
 	private void sendAftermath() {
@@ -163,132 +178,158 @@ public class Match {
 	}
 	
 
-//	public void start() {
-//		if (!done) {
-//			logic.bot.sendMode(logic.bot.pubchan, "", "+m");
-//			
-//			server.take();
-//			
-//			starttime = System.currentTimeMillis();
-//			
-//			Random rand = new Random();
-//			int password = rand.nextInt((999999-100000) + 1) + 100000;
-//			Debug.Log(TAG.MATCH, "Password: " + String.valueOf(password));
-//			server.setPassword(String.valueOf(password));
-//	
-//			// TODO: Randomize map if no votes.
-//			for (Map map : maplist) {
-//				if (this.map == null) this.map = map;
-//				else if (map.getVotes() > this.map.getVotes()) {
-//					this.map = map;
-//				}
-//			}		
-//			Debug.Log(TAG.MATCH, "Map: " + this.map.getName());
-//	
-//			ArrayList<Player> sortplayers = new ArrayList<Player>();
-//			sortplayers.add(playerlist.get(0));
-//			for (Player player : playerlist) {
-//				for (Player sortplayer : sortplayers) {
-//					if (player.equals(sortplayer)) continue;
-//					else if (player.getElo() <= sortplayer.getElo()) {
-//						sortplayers.add(sortplayers.indexOf(sortplayer), player); 
-//						break;
-//					}				
-//				}
-//			}
-//			teamred = new Player[5];
-//			teamred[0] = sortplayers.get(0);
-//			teamred[1] = sortplayers.get(2);
-//			teamred[3] = sortplayers.get(7);
-//			teamred[4] = sortplayers.get(9);
-//			elored = teamred[0].getElo() + teamred[1].getElo() + teamred[3].getElo() + teamred[4].getElo();		
-//	
-//			teamblue = new Player[5];
-//			teamblue[0] = sortplayers.get(1);
-//			teamblue[1] = sortplayers.get(3);
-//			teamblue[3] = sortplayers.get(6);
-//			teamblue[4] = sortplayers.get(8);		
-//			eloblue = teamblue[0].getElo() + teamblue[1].getElo() + teamblue[3].getElo() + teamblue[4].getElo();
-//			
-//			if (eloblue <= elored) {
-//				teamblue[2] = sortplayers.get(4);
-//				teamred[2] = sortplayers.get(5);
-//			} else {
-//				teamred[2] = sortplayers.get(4);
-//				teamblue[2] = sortplayers.get(5);
-//			}
-//			eloblue += teamblue[2].getElo();
-//			elored += teamred[2].getElo();
-//			
-//			eloblue /= 5;
-//			elored /= 5;
-//			
-//			addMatchHistory();
-//	
-//			Debug.Log(TAG.MATCH, "Team red:" + elored + " " + teamred.toString());
-//			Debug.Log(TAG.MATCH, "Team blue:" + eloblue + " " + teamblue.toString());
-//			
-//			id = logic.db.createMatch(this);
-//			
-//			server.startObservation(this);
-//			
-//			server.sendRcon("map " + this.map.getName());
-//			server.sendRcon("g_password " + server.getPassword());
-//
-//			String defmapstring = "No votes for any map - RANDOM MAP!";
-//			String mapstring = defmapstring;
-//			for (Map map : maplist) {
-//				if (map.getVotes() > 0) {
-//					String chosenMap = this.map.getName().equals(map.getName()) ? "" : "";
-//					if (mapstring.equals(defmapstring)) {
-//						mapstring = chosenMap + map.getName() + ": " + String.valueOf(map.getVotes()) + chosenMap;
-//					} else {
-//						mapstring += " || " + chosenMap + map.getName() + ": " + String.valueOf(map.getVotes()) + chosenMap;
-//					}
-//				}
-//			}
-//			
-//			String msg = Config.pkup_go_admin.replace(".elored.", String.valueOf(elored));
-//			msg = msg.replace(".eloblue.", String.valueOf(eloblue));
+	public void start(Server server) {
+		if (!(state == MatchState.Abort || state == MatchState.Done)) {
+			
+			this.server = server;
+			server.take();
+			
+			state = MatchState.Live;
+			
+			startTime = System.currentTimeMillis();
+			
+			Random rand = new Random();
+			int password = rand.nextInt((999999-100000) + 1) + 100000;
+			server.password = String.valueOf(password);
+			System.out.println("Password: " + server.password);
+
+			// Get most voted map
+			List<GameMap> tmp = new ArrayList<GameMap>();
+			int currentVotes = -1;
+			for (GameMap map : mapVotes.keySet()) {
+				if (currentVotes == -1) {
+					tmp.add(map);
+					currentVotes = mapVotes.get(map);
+					continue;
+				}
+
+				if (mapVotes.get(map) > currentVotes) {
+					tmp.clear();
+					tmp.add(map);
+					currentVotes = mapVotes.get(map);
+				} else if (mapVotes.get(map) == currentVotes) {
+					tmp.add(map);
+				}
+			}
+			this.map = tmp.get(rand.nextInt(tmp.size()-1));
+			System.out.println("Map: " + this.map.name);
+
+			// Sort players by elo
+			Player[] playerList = (Player[]) playerStats.keySet().toArray();
+			List<Player> sortPlayers = new ArrayList<Player>();
+			sortPlayers.add(playerList[0]);
+			for (Player player : playerList) {
+				for (Player sortplayer : sortPlayers) {
+					if (player.equals(sortplayer)) continue;
+					else if (player.getElo() <= sortplayer.getElo()) {
+						sortPlayers.add(sortPlayers.indexOf(sortplayer), player); 
+						break;
+					}				
+				}
+			}
+			
+			teamList.get("red").add(sortPlayers.get(0));
+			teamList.get("red").add(sortPlayers.get(2));
+			teamList.get("red").add(sortPlayers.get(7));
+			teamList.get("red").add(sortPlayers.get(9));
+			for (Player p : teamList.get("red")) elo[0] += p.getElo();
+
+			teamList.get("blue").add(sortPlayers.get(1));
+			teamList.get("blue").add(sortPlayers.get(3));
+			teamList.get("blue").add(sortPlayers.get(6));
+			teamList.get("blue").add(sortPlayers.get(8));
+			for (Player p : teamList.get("blue")) elo[1] += p.getElo();
+			
+			if (elo[0] > elo[1]) {
+				teamList.get("red").add(sortPlayers.get(5));
+				teamList.get("blue").add(sortPlayers.get(4));
+				elo[0] += sortPlayers.get(5).getElo();
+				elo[1] += sortPlayers.get(4).getElo();
+			} else {
+				teamList.get("red").add(sortPlayers.get(4));
+				teamList.get("blue").add(sortPlayers.get(5));
+				elo[0] += sortPlayers.get(4).getElo();
+				elo[1] += sortPlayers.get(5).getElo();
+			}
+			
+			// avg elo
+			elo[0] /= 5;
+			elo[1] /= 5;
+	
+			System.out.println("Team Red: " + elo[0] + " " + Arrays.toString(teamList.get("red").toArray()));
+			System.out.println("Team Blue: " + elo[1] + " " + Arrays.toString(teamList.get("blue").toArray()));
+			
+			id = logic.db.createMatch(this);
+			
+			server.startObservation(this);
+			
+			server.sendRcon("exec " + this.gametype.getConfig());
+			server.sendRcon("map " + this.map.name);
+			server.sendRcon("g_password " + server.password);
+			
+			// MESSAGE HYPE
+			
+			
+//			String msg = Config.pkup_go_admin.replace(".elored.", String.valueOf(elo[0]));
+//			msg = msg.replace(".eloblue.", String.valueOf(elo[1]));
 //			msg = msg.replace(".gamenumber.", String.valueOf(id));
-//			msg = msg.replace(".password.", server.getPassword());
-//			msg = msg.replace(".map.", this.map.getName());
+//			msg = msg.replace(".password.", server.password);
+//			msg = msg.replace(".map.", this.map.name);
 //			logic.bot.sendMsg(logic.bot.adminchan, msg);
-//			
-//			msg = Config.pkup_go_pub_head.replace(".elo.", String.valueOf((elored + eloblue)/2));
-//			msg = msg.replace(".gamenumber.", String.valueOf(id));
-//			logic.bot.sendMsg(logic.bot.pubchan, msg);
-//			
-//			logic.bot.sendMsg(logic.bot.pubchan, mapstring);
-//			
-//			msg = Config.pkup_go_pub_red.replace(".playerlist.", User.get(teamred[0].getQauth()).getNick() + " " + User.get(teamred[1].getQauth()).getNick()  + " " + User.get(teamred[2].getQauth()).getNick()  + " " + User.get(teamred[3].getQauth()).getNick()  + " " + User.get(teamred[4].getQauth()).getNick());
-//			logic.bot.sendMsg(logic.bot.pubchan, msg);
-//			msg = Config.pkup_go_pub_blue.replace(".playerlist.", User.get(teamblue[0].getQauth()).getNick() + " " + User.get(teamblue[1].getQauth()).getNick()  + " " + User.get(teamblue[2].getQauth()).getNick()  + " " + User.get(teamblue[3].getQauth()).getNick()  + " " + User.get(teamblue[4].getQauth()).getNick());
-//			logic.bot.sendMsg(logic.bot.pubchan, msg);
-//			
-//			msg = Config.pkup_go_pub_map.replace(".map.", this.map.getName());
-//			logic.bot.sendMsg(logic.bot.pubchan, msg);
-//			
-//			logic.bot.sendMsg(logic.bot.pubchan, Config.pkup_go_pub_calm);
-//			
-//			String msg_b = Config.pkup_go_player.replace(".team.", "blue");
-//			msg_b = msg_b.replace(".server.", server.getAddress());
-//			msg_b = msg_b.replace(".password.", server.getPassword());
-//	
-//			String msg_r = Config.pkup_go_player.replace(".team.", "red");
-//			msg_r = msg_r.replace(".server.", server.getAddress());
-//			msg_r = msg_r.replace(".password.", server.getPassword());
-//
-//			for (int i = 0; i < 5; i++) {
-//				logic.bot.sendMsg(User.get(teamred[i].getQauth()).getNick(), msg_r);
-//			}
-//			for (int i = 0; i < 5; i++) {
-//				logic.bot.sendMsg(User.get(teamblue[i].getQauth()).getNick(), msg_b);
-//			}
-//			
-//			logic.bot.sendMsg(logic.bot.pubchan, Config.pkup_go_pub_lostpw);
-//		}
-//	}
+			
+			String msg = Config.pkup_go_pub_head;
+			msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
+			msg = msg.replace(".gamenumber.", String.valueOf(id));
+			msg = msg.replace(".gametype.", gametype.getName());
+			logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+			
+			msg = Config.pkup_map_list;
+			msg = msg.replace(".gametype.", gametype.getName());
+			msg = msg.replace(".maplist.", getMapVotes());
+			logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+			
+			String[] teamname = {"Red", "Blue"};
+			for (String team : teamname) {
+				String playernames = "";
+				for (Player p : teamList.get(team.toLowerCase())) {
+					if (!playernames.equals("")) {
+						playernames += " ";
+					}
+					playernames += p.getDiscordUser().getMentionString();
+				}
+				msg = Config.pkup_go_pub_team;
+				msg = msg.replace(".team.", team);
+				msg = msg.replace(".gametype.", gametype.getName());
+				msg = msg.replace(".playerlist.", playernames);
+				logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+			}
+			
+			msg = Config.pkup_go_pub_map;
+			msg = msg.replace(".map.", this.map.name);
+			msg = msg.replace(".gametype.", gametype.getName());
+			logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+
+			msg = Config.pkup_go_pub_calm;
+			msg = msg.replace(".gametype.", gametype.getName());
+			logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+
+			msg = Config.pkup_go_player;
+			msg = msg.replace(".server.", server.getAddress());
+			msg = msg.replace(".password.", server.password);
+			for (String team : teamList.keySet()) {
+				for (Player player : teamList.get(team)) {
+					String msg_t = msg.replace(".team.", team);
+					logic.bot.sendMsg(player.getDiscordUser(), msg_t);
+				}
+			}
+			
+			msg = Config.pkup_go_pub_sent;
+			msg = msg.replace(".gametype.", gametype.getName());
+			logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+			
+			logic.matchStarted(this);
+		}
+	}
 	
 	public String getMapVotes() {
 
@@ -397,5 +438,34 @@ public class Match {
 
 	public int getPlayerCount() {
 		return playerStats.keySet().size();
+	}
+	
+	@Override
+	public String toString() {
+		String msg = "";
+		switch(state) {
+		case Signup: msg = Config.pkup_match_print_signup; break;
+		case AwaitingServer: msg = Config.pkup_match_print_server; break;
+		case Live: msg = Config.pkup_match_print_live; break;
+		case Done: msg = Config.pkup_match_print_done; break;
+		case Abort: msg = Config.pkup_match_print_abort; break;
+		}
+		
+		String playernames = "None";
+		for (Player p : playerStats.keySet()) {
+			if (!playernames.equals("None")) {
+				playernames += " ";
+			}
+			playernames += p.getDiscordUser().getMentionString();
+		}
+		
+		msg = msg.replace(".gamenumber.", String.valueOf(id));
+		msg = msg.replace(".gametype.", gametype.getName());
+		msg = msg.replace(".map.", map != null ? map.name : "null");
+		msg = msg.replace(".elored.", String.valueOf(elo[0]));
+		msg = msg.replace(".eloblue.", String.valueOf(elo[1]));
+		msg = msg.replace(".playernumber.", String.valueOf(getPlayerCount()));
+		msg = msg.replace(".playerlist.", playernames);
+		return msg;
 	}
 }

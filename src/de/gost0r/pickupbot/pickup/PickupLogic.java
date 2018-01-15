@@ -2,8 +2,10 @@ package de.gost0r.pickupbot.pickup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.pickup.server.Server;
@@ -20,6 +22,8 @@ public class PickupLogic {
 	
 	private List<Match> ongoingMatches; // ongoing matches (live)
 	
+	private Queue<Match> awaitingServer;
+	
 	private Map<Gametype, Match> curMatch;
 	
 	private boolean locked;
@@ -28,8 +32,7 @@ public class PickupLogic {
 		this.bot = bot;
 		
 		db = new Database(this);
-		Player.db = db;
-		
+		Player.db = db;		
 		// handle db stuff
 		ongoingMatches = db.loadOngoingMatches();
 		serverList = db.loadServers();
@@ -44,6 +47,8 @@ public class PickupLogic {
 		mapList = db.loadMaps(); // needs current gamemode list
 
 		createCurrentMatches();
+		
+		awaitingServer = new LinkedList<Match>();
 		
 		adminRoles.add("401821506205646858"); // pickupadmin
 		adminRoles.add("309752235611389953"); // owner
@@ -304,6 +309,7 @@ public class PickupLogic {
 			Server server = new Server(-1, ip, port, rcon, "???", true);
 			db.createServer(server);
 			serverList.add(server);
+			checkServer();
 			return true;
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
@@ -318,6 +324,7 @@ public class PickupLogic {
 				if (server.id == idx && !server.isTaken() && server.active != active) {
 					server.active = active;
 					db.updateServer(server);
+					checkServer();
 					return true;
 				}
 			}
@@ -390,10 +397,37 @@ public class PickupLogic {
 		
 		curMatch.put(gametype, match);
 	}
-	
+
+	public void requestServer(Match match) {
+		awaitingServer.add(match);
+		checkServer();
+	}
+
+	public void matchStarted(Match match) {
+		createMatch(match.getGametype());
+		ongoingMatches.add(match);
+	}
+
+	public void matchEnded(Match match) {
+		if (ongoingMatches.contains(match)) {
+			ongoingMatches.remove(match);
+		}
+		checkServer();
+	}
+
+	private void checkServer() {
+		for (Server server : serverList) {
+			if (!server.isTaken() && !awaitingServer.isEmpty()) {
+				Match m = awaitingServer.poll();
+				if (m != null) {
+					m.start(server);
+				}
+			}
+		}
+	}
 	
 	// HELPER
-	
+
 	public Gametype getGametypeByString(String mode) {
 		for (Gametype gt : curMatch.keySet()) {
 			if (gt.getName().equalsIgnoreCase(mode)) {

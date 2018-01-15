@@ -1,0 +1,41 @@
+TODO:
+( ) update admin roles: instead of hardcoding, claim right by !iamgod <role>, then be able to add or remove roles 
+( ) ability to remove a urtauth from a user (admin cmd)
+( ) !top5 function
+(x) handle matchstart: if playercount == 10 => request a server, if one is avi -> startGame() -> move match to ongoing and be ready for a new signup
+( ) be able to vote/remove during AwaitingServer state
+( ) cmd to get matchinfo for ongoing matches
+( ) whitelist certain players on the server (admins)
+( ) !reset for live matches
+( ) !getdata
+( ) somehow gametype related maps isnt working -> to check
+( ) ignore messages from self
+
+( ) admin cmds to lookup user/auths/ips etc
+( ) playerprofiles (stats stats stats (matches played etc...))
+( ) match history
+
+// Discord:
+( ) reconnect (resume) function
+( ) get gateway if fails to connect
+( ) ability to reply to heartbeat event
+
+
+IDEA:
+- display newly connected/disconnected people in the chat
+- ringer system? how would that look like
+- report/auto-ban system
+- multiple guilds
+
+ABORT: currently if 5min are over, match will be aborted - good?
+
+REPORT SYSTEM:
+!report auth leave/noshow/insult/troll
+to defend yourself: !excuse <reason>
+if 3 games a report
+msg to admins to review case !review <number>
+!accept !decline
+suspended for 1d, 3d, 1w, 2w, 1m, 3m, perm
+show bans and time !banlist
+ability to ban ppl as admin !permban <auth> ? if temp bans wished: !ban <auth> <1d> ex.?
+end bans: !pardon <auth>

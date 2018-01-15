@@ -123,4 +123,8 @@ public class Server {
 		return "#" + id + " " + IP + ":" + port + " - active: " + active;
 	}
 
+	public String getAddress() {
+		return IP + ":" + port;
+	}
+
 }
