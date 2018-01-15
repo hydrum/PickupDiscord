@@ -67,6 +67,7 @@ public class Match {
 			resetSignup();
 		} else if (state == MatchState.AwaitingServer) {
 			// TODO
+			resetAwaitingServer();
 		} else if (state == MatchState.Live) {
 			resetLive();
 		} else if (state == MatchState.Done || state == MatchState.Abort){
@@ -86,6 +87,12 @@ public class Match {
 		playerStats.clear();
 	}
 	
+	private void resetAwaitingServer() {
+		logic.cancelRequestServer(this);
+		resetSignup();
+		state = MatchState.Signup;
+	}
+	
 	private void resetLive() {
 		abort();
 	}
@@ -98,23 +105,22 @@ public class Match {
 	}
 
 	public void removePlayer(Player player) {
-		if (state == MatchState.Signup && isInMatch(player)) {
+		if ((state == MatchState.Signup || state == MatchState.AwaitingServer) && isInMatch(player)) {
 			GameMap map = player.getVotedMap();
 			if (map != null) {
 				mapVotes.put(map, mapVotes.get(map).intValue() - 1);
 				player.resetMap();
 			}
 			playerStats.remove(player);
+			checkServerState();
 			logic.cmdStatus(this);
 		}
 	}
 
 	public void voteMap(Player player, GameMap map) {
-		if (state == MatchState.Signup && isInMatch(player) && player.getVotedMap() == null) {
+		if ((state == MatchState.Signup || state == MatchState.AwaitingServer) && isInMatch(player) && player.getVotedMap() == null) {
 			mapVotes.put(map, mapVotes.get(map).intValue() + 1);
 			player.vote(map);
-			System.out.println(logic == null);
-			System.out.println(logic.bot == null);
 			logic.bot.sendNotice(player.getDiscordUser(), Config.pkup_map);
 		} else {
 			logic.bot.sendNotice(player.getDiscordUser(), Config.map_already_voted);
@@ -128,6 +134,12 @@ public class Match {
 			logic.requestServer(this);
 		} else {
 			logic.cmdStatus(this);
+		}
+	}
+	
+	public void checkServerState() {
+		if (state == MatchState.AwaitingServer && playerStats.keySet().size() != 10) {
+			state = MatchState.Signup;
 		}
 	}
 

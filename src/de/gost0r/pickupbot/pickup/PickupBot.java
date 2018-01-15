@@ -25,7 +25,10 @@ public class PickupBot extends DiscordBot {
 	protected void recvMessage(DiscordUser user, DiscordChannel channel, String msg) {
 		System.out.println("RECV #" + ((channel == null || channel.name == null) ?  "null" : channel.name) + " " + user.username + ": " + msg);
 		
-		// TODO: ignore self-msgs
+		if (user.equals(self)) {
+			System.out.println("Msg from self, ignore.");
+			return;
+		}
 		
 		String[] data = msg.split(" ");
 
@@ -122,17 +125,18 @@ public class PickupBot extends DiscordBot {
 				}
 				else sendNotice(user, Config.user_not_registered);			
 			}
-//			else if (data[0].equals(Config.CMD_TOP5))
-//			{
-//				if (isQauthed(nick))
-//				{
-//					if (data.length == 1)
-//					{
-//						logic.gameTop5();
-//					}
-//					else super.sendMsg(channel, Config.wrong_argument_amount + Config.USE_CMD_TOP5);
-//				}					
-//			}
+			else if (data[0].equals(Config.CMD_TOP5))
+			{
+				Player p = Player.get(user);
+				if (p != null)
+				{
+					if (data.length == 1)
+					{
+						logic.cmdTopElo(5);
+					}
+					else super.sendMsg(channel, Config.wrong_argument_amount + Config.USE_CMD_TOP5);
+				}					
+			}
 			else if (data[0].equals(Config.CMD_REGISTER))
 			{
 				if (data.length == 2)
@@ -170,15 +174,14 @@ public class PickupBot extends DiscordBot {
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_UNLOCK);
 					
 				}
-				// TODO
-//				else if (data[0].equals(Config.CMD_GETDATA))
-//				{
-//					if (data.length == 2)
-//					{
-//						logic.cmdGetData(data[1]);
-//					}
-//					else super.sendMsg(channel, Config.wrong_argument_amount + Config.USE_CMD_GETDATA);
-//				}
+				else if (data[0].equals(Config.CMD_GETDATA))
+				{
+					if (data.length == 2)
+					{
+						logic.cmdGetData(user, data[1]);
+					}
+					else super.sendMsg(channel, Config.wrong_argument_amount + Config.USE_CMD_GETDATA);
+				}
 				else if (data[0].equals(Config.CMD_ENABLEMAP))
 				{
 					if (data.length == 3)
@@ -278,6 +281,14 @@ public class PickupBot extends DiscordBot {
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
 						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
+				}				
+				else if (data[0].equals(Config.CMD_SHOWMATCHES))
+				{
+					if (data.length == 1)
+					{
+						logic.cmdMatchList(user);
+					}
+					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_SHOWMATCHES);
 				}
 			}
 		}
@@ -317,6 +328,7 @@ public class PickupBot extends DiscordBot {
 						case Config.CMD_UPDATESERVER: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_UPDATESERVER); break;
 						case Config.CMD_ENABLEGAMETYPE: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ENABLEGAMETYPE); break;
 						case Config.CMD_DISABLEGAMETYPE: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_DISABLEGAMETYPE); break;
+						case Config.CMD_SHOWMATCHES: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_SHOWMATCHES); break;
 					}
 				}
 				else

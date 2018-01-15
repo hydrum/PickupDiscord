@@ -630,5 +630,22 @@ public class Database {
 			e.printStackTrace();
 		}	
 	}
+	
+	public List<Player> getTopPlayers(int number) {
+		List<Player> list = new ArrayList<Player>();
+		try {
+			String sql = "SELECT urtauth FROM player ORDER BY elo DESC LIMIT ?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setInt(1, number);
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				Player p = Player.get(rs.getString("urtauth"));
+				list.add(p);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
 
 }

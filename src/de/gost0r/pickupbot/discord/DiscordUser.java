@@ -100,7 +100,7 @@ public class DiscordUser {
 			return userList.get(id);
 		}
 		DiscordUser newUser = new DiscordUser(DiscordAPI.requestUser(id));
-		userList.put(id, newUser);
+		userList.put(newUser.id, newUser);
 		return newUser;
 	}
 	

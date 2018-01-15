@@ -1,15 +1,15 @@
 TODO:
 ( ) update admin roles: instead of hardcoding, claim right by !iamgod <role>, then be able to add or remove roles 
 ( ) ability to remove a urtauth from a user (admin cmd)
-( ) !top5 function
+(x) !top5 function
 (x) handle matchstart: if playercount == 10 => request a server, if one is avi -> startGame() -> move match to ongoing and be ready for a new signup
-( ) be able to vote/remove during AwaitingServer state
-( ) cmd to get matchinfo for ongoing matches
+(x) be able to vote/remove during AwaitingServer state
+(x) cmd to get matchinfo for ongoing matches
 ( ) whitelist certain players on the server (admins)
-( ) !reset for live matches
-( ) !getdata
-( ) somehow gametype related maps isnt working -> to check
-( ) ignore messages from self
+(x) !reset for live matches
+(x) !getdata
+(x) somehow gametype related maps isnt working -> to check
+(x) ignore messages from self
 
 ( ) admin cmds to lookup user/auths/ips etc
 ( ) playerprofiles (stats stats stats (matches played etc...))
@@ -20,6 +20,7 @@ TODO:
 ( ) get gateway if fails to connect
 ( ) ability to reply to heartbeat event
 
+DISCUSS: !unregister <urtauth> => what happens if someone played a match with that one?
 
 IDEA:
 - display newly connected/disconnected people in the chat

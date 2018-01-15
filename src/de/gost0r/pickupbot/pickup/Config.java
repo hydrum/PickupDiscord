@@ -35,13 +35,15 @@ public class Config {
 	public static final String CMD_ENABLESERVER			= "!enableserver";
 	public static final String CMD_DISABLESERVER		= "!disableserver";
 	public static final String CMD_UPDATESERVER			= "!updateserver";
+	
+	public static final String CMD_SHOWMATCHES			= "!showmatches";
 
 	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " "
 	+ CMD_MAP + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP5;
 	
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " "
 	+ CMD_ENABLEMAP + " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE
-	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER;
+	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_SHOWMATCHES;
 		
 //------------------------------------------------------------------------------------//
 	
@@ -82,6 +84,12 @@ public class Config {
 	public static final String USE_CMD_ENABLESERVER		= "!enableserver <id>";
 	public static final String USE_CMD_DISABLESERVER	= "!disableserver <id>";
 	public static final String USE_CMD_UPDATESERVER		= "!updateserver <id> <rcon>";
+		
+	public static final String USE_CMD_SHOWMATCHES		= "!showmatches";
+	
+	
+	
+	
 
 	public static final String pkup_lock				= "This game is currently locked";
 	public static final String pkup_map					= "Map was successfully voted.";
@@ -114,8 +122,8 @@ public class Config {
 	
 	public static final String pkup_aftermath			= ".team. team .result. (.score.) - .player1. (.elochange1.), .player2. (.elochange2.), .player3. (.elochange3.), .player4. (.elochange4.), .player5. (.elochange5.),";
 	
-	public static final String pkup_getelo				= "ELO .urtauth.: .elo. (.elochange.)";
-	public static final String pkup_top5				= "#.rank. - .urtauth.: ELO: .elo. (.elochange.)";
+	public static final String pkup_getelo				= ".user. (.urtauth.): .elo. (.elochange.)";
+	public static final String pkup_top5_header			= "**Top5:**";
 			 
 	public static final String is_banned				= "You are banned and therefore you cannot participate.";
 	public static final String map_not_found			= "Map not found.";

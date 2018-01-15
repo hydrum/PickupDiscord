@@ -107,6 +107,20 @@ public class PickupLogic {
 		}
 	}
 
+	public void cmdTopElo(int number) {
+		String msg = Config.pkup_top5_header;
+		
+		List<Player> players = db.getTopPlayers(number);
+		if (players.isEmpty()) {
+			bot.sendMsg(bot.getPubchan(), msg + "  None");
+		} else {
+			bot.sendMsg(bot.getPubchan(), msg);
+			for (Player p : players) {
+				cmdGetElo(p);
+			}
+		}
+	}
+
 	public void cmdGetElo(Player p) {
 		String msg = Config.pkup_getelo;
 		msg = msg.replace(".urtauth.", p.getUrtauth());
@@ -118,6 +132,7 @@ public class PickupLogic {
 			elochange = "-" + String.valueOf(p.getEloChange());
 		}
 		msg = msg.replace(".elochange.", elochange);
+		msg = msg.replace(".user.", p.getDiscordUser().getMentionString());
 		bot.sendMsg(bot.getPubchan(), msg);
 	}
 	
@@ -223,6 +238,26 @@ public class PickupLogic {
 				e.printStackTrace();
 			}
 		}
+		return false;
+	}
+	
+	public boolean cmdGetData(DiscordUser user, String id) {
+		String msg = "Match not found.";
+		try {
+			int i_id = Integer.valueOf(id);
+			for (Match match : ongoingMatches) {
+				if (match.getID() == i_id) {
+					msg = Config.pkup_pw;
+					msg = msg.replace(".server.", match.getServer().getAddress());
+					msg = msg.replace(".password.", match.getServer().password);
+					bot.sendMsg(user, msg);
+					return true;
+				}
+			}
+		} catch (NumberFormatException e) {
+			
+		}
+		bot.sendMsg(user, msg);
 		return false;
 	}
 	
@@ -378,6 +413,26 @@ public class PickupLogic {
 		return true;
 	}
 	
+	public boolean cmdMatchList(DiscordUser user) {
+		String msg = "None";
+		for (Match match : curMatch.values()) {
+			if (msg.equals("None")) {
+				msg = match.toString();
+			} else {
+				msg += "\n" + match.toString();
+			}
+		}
+		for (Match match : ongoingMatches) {
+			if (msg.equals("None")) {
+				msg = match.toString();
+			} else {
+				msg += "\n" + match.toString();
+			}
+		}
+		bot.sendMsg(user, msg);
+		return true;
+	}
+	
 	// Matchcreation
 	
 	private void createCurrentMatches() {
@@ -393,7 +448,7 @@ public class PickupLogic {
 				gametypeMapList.add(map);
 			}
 		}
-		Match match = new Match(this, gametype, mapList);
+		Match match = new Match(this, gametype, gametypeMapList);
 		
 		curMatch.put(gametype, match);
 	}
@@ -401,6 +456,12 @@ public class PickupLogic {
 	public void requestServer(Match match) {
 		awaitingServer.add(match);
 		checkServer();
+	}
+	
+	public void cancelRequestServer(Match match) {
+		if (awaitingServer.contains(match)) {
+			awaitingServer.remove(match);
+		}
 	}
 
 	public void matchStarted(Match match) {

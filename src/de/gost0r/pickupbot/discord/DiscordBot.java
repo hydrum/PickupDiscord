@@ -15,6 +15,8 @@ public class DiscordBot  {
 	
 	private static String token = "";
 	private static String guildID = "117622053061787657";
+	
+	protected DiscordUser self = null;
 		
 	private DiscordGateway gateway;
 	private WsClientEndPoint endpoint;
@@ -29,6 +31,8 @@ public class DiscordBot  {
 			gateway = new DiscordGateway(this, endpoint);
 			
 			endpoint.addMessageHandler(gateway);
+			
+			self = DiscordUser.getUser("@me");
 			
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
