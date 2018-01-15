@@ -35,19 +35,21 @@ public class Config {
 	public static final String CMD_ENABLESERVER			= "!enableserver";
 	public static final String CMD_DISABLESERVER		= "!disableserver";
 	public static final String CMD_UPDATESERVER			= "!updateserver";
-	
+
 	public static final String CMD_SHOWMATCHES			= "!showmatches";
+	
+	public static final String CMD_UNREGISTER			= "!unregister";
 
 	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " "
 	+ CMD_MAP + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP5;
 	
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " "
 	+ CMD_ENABLEMAP + " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE
-	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_SHOWMATCHES;
+	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_SHOWMATCHES
+	+ " " + CMD_UNREGISTER;
 		
 //------------------------------------------------------------------------------------//
 	
-	public static final String USE_CMD_QUIT				= "!quit" ;
 
 	public static final String USE_CMD_ADD				= "!add <gametype>";
 	public static final String USE_CMD_REMOVE			= "!remove";
@@ -86,6 +88,8 @@ public class Config {
 	public static final String USE_CMD_UPDATESERVER		= "!updateserver <id> <rcon>";
 		
 	public static final String USE_CMD_SHOWMATCHES		= "!showmatches";
+	
+	public static final String USE_CMD_UNREGISTER		= "!unregister <urtauth>";
 	
 	
 	

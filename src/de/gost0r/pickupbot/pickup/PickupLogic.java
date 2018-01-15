@@ -73,7 +73,7 @@ public class PickupLogic {
 		if (!locked) {
 			Match m = playerInMatch(player);
 			if (m != null) {
-				if (m.getMatchState() == MatchState.Signup) {
+				if (m.getMatchState() == MatchState.Signup || m.getMatchState() == MatchState.AwaitingServer) {
 					m.removePlayer(player);
 				} else bot.sendNotice(player.getDiscordUser(), Config.player_cannot_remove);
 			} else bot.sendNotice(player.getDiscordUser(), Config.player_already_removed);
@@ -105,6 +105,18 @@ public class PickupLogic {
 		} else {
 			bot.sendNotice(user, Config.auth_taken);
 		}
+	}
+	
+	public boolean cmdUnregisterPlayer(Player player) {
+		Match m = playerInMatch(player);
+		if (m != null) {
+			if (m.getMatchState() == MatchState.Signup) {
+				m.removePlayer(player);
+			}
+		}
+		db.removePlayer(player);
+		Player.remove(player);
+		return true;
 	}
 
 	public void cmdTopElo(int number) {

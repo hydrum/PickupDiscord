@@ -156,9 +156,11 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 1)
 					{
-						if (logic.cmdLock()) {
+						if (logic.cmdLock())
+						{
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
-						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_LOCK);
 					
@@ -167,9 +169,11 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 1)
 					{
-						if (logic.cmdUnlock()) {
+						if (logic.cmdUnlock())
+						{
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
-						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_UNLOCK);
 					
@@ -186,9 +190,11 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 3)
 					{
-						if (logic.cmdEnableMap(data[1], data[2])) {
+						if (logic.cmdEnableMap(data[1], data[2]))
+						{
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
-						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLEMAP);
 				}
@@ -196,9 +202,11 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 3)
 					{
-						if (logic.cmdDisableMap(data[1], data[2])) {
+						if (logic.cmdDisableMap(data[1], data[2]))
+						{
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
-						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_DISABLEMAP);					
 				}
@@ -206,9 +214,11 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 3)
 					{
-						if (logic.cmdEnableGametype(data[1], data[2])) {
+						if (logic.cmdEnableGametype(data[1], data[2]))
+						{
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
-						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLEGAMETYPE);					
 				}
@@ -216,9 +226,11 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 2)
 					{
-						if (logic.cmdDisableGametype(data[1])) {
+						if (logic.cmdDisableGametype(data[1]))
+						{
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
-						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLEGAMETYPE);					
 				}
@@ -226,9 +238,11 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 3)
 					{
-						if (logic.cmdAddServer(data[1], data[2])) {
+						if (logic.cmdAddServer(data[1], data[2]))
+						{
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
-						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ADDSERVER);
 						
@@ -237,9 +251,11 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 2)
 					{
-						if (logic.cmdServerActivation(data[1], true)) {
+						if (logic.cmdServerActivation(data[1], true))
+						{
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
-						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLESERVER);
 					
@@ -248,9 +264,11 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 2)
 					{
-						if (logic.cmdServerActivation(data[1], false)) {
+						if (logic.cmdServerActivation(data[1], false))
+						{
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
-						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_DISABLESERVER);
 					
@@ -259,9 +277,11 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 2)
 					{
-						if (logic.cmdServerChangeRcon(data[1], data[1])) {
+						if (logic.cmdServerChangeRcon(data[1], data[1]))
+						{
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
-						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_UPDATESERVER);
 					
@@ -277,11 +297,13 @@ public class PickupBot extends DiscordBot {
 				else if (data[0].equals(Config.CMD_RCON))
 				{
 					if (data.length > 2) {
-						if (logic.cmdServerSendRcon(data[1], msg.substring(Config.CMD_RCON.length() + data[1].length() + 2))) {
+						if (logic.cmdServerSendRcon(data[1], msg.substring(Config.CMD_RCON.length() + data[1].length() + 2)))
+						{
 							super.sendMsg(channel, Config.admin_cmd_successful + msg);
-						} else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-				}				
+				}
 				else if (data[0].equals(Config.CMD_SHOWMATCHES))
 				{
 					if (data.length == 1)
@@ -289,6 +311,23 @@ public class PickupBot extends DiscordBot {
 						logic.cmdMatchList(user);
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_SHOWMATCHES);
+				}
+				else if (data[0].equals(Config.CMD_UNREGISTER))
+				{
+					if (data.length == 2)
+					{
+						Player player = Player.get(data[1]);
+						if (player != null)
+						{
+							if (logic.cmdUnregisterPlayer(player))
+							{
+								super.sendMsg(channel, Config.admin_cmd_successful + msg);
+							}
+							else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+						}
+						else sendNotice(user, Config.player_not_found);
+					}
+					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_UNREGISTER);
 				}
 			}
 		}

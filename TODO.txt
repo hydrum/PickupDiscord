@@ -1,6 +1,6 @@
 TODO:
 ( ) update admin roles: instead of hardcoding, claim right by !iamgod <role>, then be able to add or remove roles 
-( ) ability to remove a urtauth from a user (admin cmd)
+(x) ability to remove a urtauth from a user (admin cmd)
 (x) !top5 function
 (x) handle matchstart: if playercount == 10 => request a server, if one is avi -> startGame() -> move match to ongoing and be ready for a new signup
 (x) be able to vote/remove during AwaitingServer state
@@ -10,6 +10,7 @@ TODO:
 (x) !getdata
 (x) somehow gametype related maps isnt working -> to check
 (x) ignore messages from self
+( ) send !top5 msgs as one msg instead of 5 seperate ones
 
 ( ) admin cmds to lookup user/auths/ips etc
 ( ) playerprofiles (stats stats stats (matches played etc...))

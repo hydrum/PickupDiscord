@@ -49,7 +49,7 @@ public class Database {
 													+ "elo INTEGER DEFAULT 1000,"
 													+ "elochange INTEGER DEFAULT 0,"
 													+ "active TEXT,"
-													+ "PRIMARY KEY (userid, urtauth)";
+													+ "PRIMARY KEY (userid, urtauth) )";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS gametype ( gametype TEXT PRIMARY KEY,"
@@ -148,16 +148,32 @@ public class Database {
 	}
 	
 
+	@SuppressWarnings("resource")
 	public void createPlayer(Player player) {
-		try {
-			String sql = "INSERT INTO player (userid, urtauth, elo, elochange, active) VALUES (?, ?, ?, ?, ?)";
+		try {			
+			// check whether user exists
+			String sql = "SELECT * FROM player WHERE userid=? AND urtauth=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, player.getDiscordUser().id);
 			pstmt.setString(2, player.getUrtauth());
-			pstmt.setInt(3,  player.getElo());
-			pstmt.setInt(4,  player.getEloChange());
-			pstmt.setString(5, String.valueOf(true));
-			pstmt.executeUpdate();
+			ResultSet rs = pstmt.executeQuery();
+			if (!rs.next()) {				
+				sql = "INSERT INTO player (userid, urtauth, elo, elochange, active) VALUES (?, ?, ?, ?, ?)";
+				pstmt = c.prepareStatement(sql);
+				pstmt.setString(1, player.getDiscordUser().id);
+				pstmt.setString(2, player.getUrtauth());
+				pstmt.setInt(3,  player.getElo());
+				pstmt.setInt(4,  player.getEloChange());
+				pstmt.setString(5, String.valueOf(true));
+				pstmt.executeUpdate();
+			} else {
+				sql = "UPDATE player SET active=? WHERE userid=? AND urtauth=?";
+				pstmt = c.prepareStatement(sql);
+				pstmt.setString(1, String.valueOf(true));
+				pstmt.setString(2, player.getDiscordUser().id);
+				pstmt.setString(3, player.getUrtauth());
+				pstmt.executeUpdate();
+			}
 			pstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -411,7 +427,7 @@ public class Database {
 			rs1 = pstmt.executeQuery();
 			while (rs1.next()) {
 				int pidmid = rs1.getInt("ID");
-				String userid = rs1.getString("player_userid");
+//				String userid = rs1.getString("player_userid"); // not needed as we potentially load the player via loadPlayer(urtauth)
 				String urtauth = rs1.getString("player_urtauth");
 				String team = rs1.getString("team");
 				
@@ -643,6 +659,24 @@ public class Database {
 			e.printStackTrace();
 		}	
 	}
+	
+
+
+
+	public void removePlayer(Player player) {
+		try {
+			String sql = "UPDATE player SET active=? WHERE userid=? AND urtauth=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, String.valueOf(false));
+			pstmt.setString(2, player.getDiscordUser().id);
+			pstmt.setString(3, player.getUrtauth());
+			pstmt.executeUpdate();
+			pstmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	
 	public List<Player> getTopPlayers(int number) {
 		List<Player> list = new ArrayList<Player>();

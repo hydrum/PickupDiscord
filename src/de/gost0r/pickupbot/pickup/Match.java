@@ -66,7 +66,6 @@ public class Match {
 		if (state == MatchState.Signup) {
 			resetSignup();
 		} else if (state == MatchState.AwaitingServer) {
-			// TODO
 			resetAwaitingServer();
 		} else if (state == MatchState.Live) {
 			resetLive();

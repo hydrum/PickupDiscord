@@ -111,4 +111,10 @@ public class Player {
 	public String toString() {
 		return this.urtauth;
 	}
+
+	public static void remove(Player player) {
+		if (playerList.contains(player)) {
+			playerList.remove(player);
+		}
+	}
 }
