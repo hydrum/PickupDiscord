@@ -23,4 +23,9 @@ public class GameMap {
 		}
 		return false;
 	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
 }

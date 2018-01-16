@@ -99,9 +99,13 @@ public class DiscordUser {
 		if (userList.containsKey(id)) {
 			return userList.get(id);
 		}
-		DiscordUser newUser = new DiscordUser(DiscordAPI.requestUser(id));
-		userList.put(newUser.id, newUser);
-		return newUser;
+		JSONObject user = DiscordAPI.requestUser(id);
+		if (user != null) {
+			DiscordUser newUser = new DiscordUser(user);
+			userList.put(newUser.id, newUser);
+			return newUser;
+		}
+		return null;
 	}
 	
 	public static DiscordUser findUser(String id) {

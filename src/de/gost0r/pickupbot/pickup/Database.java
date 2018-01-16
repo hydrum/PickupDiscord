@@ -396,7 +396,9 @@ public class Database {
 			rs = pstmt.executeQuery();
 			while(rs.next()) {
 				Match m = loadMatch(rs.getInt("ID"));
-				matchList.add(m);
+				if (m != null) {
+					matchList.add(m);
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -407,7 +409,6 @@ public class Database {
 	public Match loadMatch(int id) {
 		Match match = null;
 		try {
-			Statement stmt = c.createStatement();
 			ResultSet rs, rs1, rs2, rs3;
 			String sql = "SELECT starttime, map, gametype, score_red, score_blue, elo_red, elo_blue, state, server FROM match WHERE ID=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
@@ -435,10 +436,10 @@ public class Database {
 				sql = "SELECT ip, score_1, score_2, status FROM stats WHERE pim=?";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setInt(1, pidmid);
-				rs2 = stmt.executeQuery(sql);
+				rs2 = pstmt.executeQuery();
 				rs2.next();
 				
-				int[] scoreid = new int[] {rs2.getInt("score_1"), rs2.getInt("score_2") };
+				int[] scoreid = new int[] { rs2.getInt("score_1"), rs2.getInt("score_2") };
 				String ip = rs2.getString("ip");
 				MatchStats.Status status = MatchStats.Status.valueOf(rs2.getString("status"));
 				
@@ -483,6 +484,7 @@ public class Database {
 									gametype,
 									server,
 									stats); 
+			match.setLogic(logic);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -585,14 +587,14 @@ public class Database {
 				pstmt.setInt(1, match.getID());
 				pstmt.setString(2, player.getDiscordUser().id);
 				pstmt.setString(3, player.getUrtauth());
-				rs = pstmt.executeQuery(sql);
+				rs = pstmt.executeQuery();
 				rs.next();
 				int pim = rs.getInt("ID");
 				
 				sql = "SELECT score_1, score_2 FROM stats WHERE pim=?";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setInt(1, pim);
-				rs = pstmt.executeQuery(sql);
+				rs = pstmt.executeQuery();
 				rs.next();
 				int[] scoreid = new int[] { rs.getInt("score_1"), rs.getInt("score_2") };
 				
@@ -602,7 +604,7 @@ public class Database {
 				pstmt.setString(1, match.getStats(player).getIP());
 				pstmt.setString(2, match.getStats(player).getStatus().name());
 				pstmt.setInt(3, pim);
-				pstmt.executeUpdate(sql);
+				pstmt.executeUpdate();
 				
 				// update playerscore
 				sql = "UPDATE score SET kills=?, deaths=?, assists=?, caps=?, returns=?, fckills=?, stopcaps=?, protflag=? WHERE ID=?";
@@ -617,11 +619,11 @@ public class Database {
 					pstmt.setInt(7, match.getStats(player).score[i].stop_caps);
 					pstmt.setInt(8, match.getStats(player).score[i].protect_flag);
 					pstmt.setInt(9, scoreid[i]);
-					pstmt.executeUpdate(sql);
+					pstmt.executeUpdate();
 				}
 				
 				// update elo change
-				sql = "UPDATE player SET elo=?, elochange=? WHERE player_userid=? AND player_urtauth=?";
+				sql = "UPDATE player SET elo=?, elochange=? WHERE userid=? AND urtauth=?";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setInt(1, player.getElo());
 				pstmt.setInt(2, player.getEloChange());
@@ -681,9 +683,10 @@ public class Database {
 	public List<Player> getTopPlayers(int number) {
 		List<Player> list = new ArrayList<Player>();
 		try {
-			String sql = "SELECT urtauth FROM player ORDER BY elo DESC LIMIT ?";
+			String sql = "SELECT urtauth FROM player WHERE active=? ORDER BY elo DESC LIMIT ?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
-			pstmt.setInt(1, number);
+			pstmt.setString(1, String.valueOf(true));
+			pstmt.setInt(2, number);
 			ResultSet rs = pstmt.executeQuery();
 			while (rs.next()) {
 				Player p = Player.get(rs.getString("urtauth"));

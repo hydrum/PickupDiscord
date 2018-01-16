@@ -65,7 +65,7 @@ public class ServerMonitor implements Runnable {
 		updatePlayers(rpp);		
 		evaluateState(rpp);
 		
-		forceplayers();
+//		forceplayers();
 		
 		if (state == ServerState.WELCOME)
 		{

@@ -99,7 +99,7 @@ public class Match {
 	public void addPlayer(Player player) {
 		if (state == MatchState.Signup && !isInMatch(player)) {
 			playerStats.put(player, new MatchStats());
-			checkReadyState();
+			checkReadyState(player);
 		}
 	}
 
@@ -112,7 +112,7 @@ public class Match {
 			}
 			playerStats.remove(player);
 			checkServerState();
-			logic.cmdStatus(this);
+			logic.cmdStatus(this, player);
 		}
 	}
 
@@ -126,13 +126,13 @@ public class Match {
 		}
 	}
 	
-	public void checkReadyState() {
+	public void checkReadyState(Player player) {
 		if (playerStats.keySet().size() == 10) {
 			state = MatchState.AwaitingServer;
-			logic.cmdStatus(this);
+			logic.cmdStatus(this, null);
 			logic.requestServer(this);
 		} else {
-			logic.cmdStatus(this);
+			logic.cmdStatus(this, player);
 		}
 	}
 	
@@ -157,6 +157,7 @@ public class Match {
 		for(Player p : playerStats.keySet()) {
 			p.resetMap();
 		}
+		System.out.println(logic == null);
 		logic.db.saveMatch(this);
 		server.free();
 
@@ -222,13 +223,18 @@ public class Match {
 					tmp.add(map);
 				}
 			}
-			this.map = tmp.get(rand.nextInt(tmp.size()-1));
+			System.out.println(tmp.size());
+			System.out.println(Arrays.toString(tmp.toArray()));
+			this.map = tmp.size() == 1 ? tmp.get(0) : tmp.get(rand.nextInt(tmp.size()-1));
 			System.out.println("Map: " + this.map.name);
 
 			// Sort players by elo
-			Player[] playerList = (Player[]) playerStats.keySet().toArray();
+			List<Player> playerList = new ArrayList<Player>();
+			for (Player p : playerStats.keySet()) {
+				playerList.add(p);
+			}
 			List<Player> sortPlayers = new ArrayList<Player>();
-			sortPlayers.add(playerList[0]);
+			sortPlayers.add(playerList.get(0));
 			for (Player player : playerList) {
 				for (Player sortplayer : sortPlayers) {
 					if (player.equals(sortplayer)) continue;
@@ -464,10 +470,11 @@ public class Match {
 		
 		String playernames = "None";
 		for (Player p : playerStats.keySet()) {
-			if (!playernames.equals("None")) {
-				playernames += " ";
+			if (playernames.equals("None")) {
+				playernames = p.getDiscordUser().getMentionString();
+			} else {
+				playernames += " " + p.getDiscordUser().getMentionString();
 			}
-			playernames += p.getDiscordUser().getMentionString();
 		}
 		
 		msg = msg.replace(".gamenumber.", String.valueOf(id));

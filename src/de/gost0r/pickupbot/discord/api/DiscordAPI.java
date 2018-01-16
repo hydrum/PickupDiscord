@@ -52,8 +52,16 @@ public class DiscordAPI {
 			}
 			
 			if (c.getResponseCode() != 200) {
-				System.out.println("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage());
-				return "";
+				System.out.println("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + request);
+				if (c.getResponseCode() == 429) {
+					try {
+						Thread.sleep(1000);
+						return sendPostRequest(request, content);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				return null;
 			}
 			
 			BufferedReader br = new BufferedReader(new InputStreamReader((c.getInputStream())));
@@ -89,8 +97,16 @@ public class DiscordAPI {
 			c.setRequestProperty("Authorization", "Bot " + DiscordBot.getToken());
 			
 			if (c.getResponseCode() != 200) {
-				System.out.println("API call failed: " + c.getResponseCode() + " " + c.getResponseMessage());
-				return "";
+				System.out.println("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + request);
+				if (c.getResponseCode() == 429) {
+					try {
+						Thread.sleep(1000);
+						return sendGetRequest(request);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					return null;
+				}
 			}
 			
 			BufferedReader br = new BufferedReader(new InputStreamReader((c.getInputStream())));

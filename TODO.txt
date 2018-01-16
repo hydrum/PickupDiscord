@@ -10,8 +10,34 @@ TODO:
 (x) !getdata
 (x) somehow gametype related maps isnt working -> to check
 (x) ignore messages from self
-( ) send !top5 msgs as one msg instead of 5 seperate ones
+(x) send !top5 msgs as one msg instead of 5 seperate ones
+( ) !gameconfig <gametype> <timelimit 10...> => would replace gametype.config
+(x) !register => to lowercase
+(x) use !elo <@userid> for retrieving elo
+(x) move !lock to pubchan
+( ) !reset <gametype>
+( ) don't hardcode pubchan
+( ) make playercount dynamically
+(x) !map vote no msg
+(x) [ Pickup Game #cur ][ Signup ][ Gametype: CTF ][ 5/10 ][ Players: None@Slide @RaideR @v3nd3tta | Jonathan @Biddle @Gost0r ]
+(x) !status give only urtauth
+(x) API call failed: (429) TOO MANY REQUESTS
+( ) send msgs once (gamestart)
+( ) todo server.connect adjust
+(x) rs2 closed => failed pstmt
+(x) !add should highlight the added player
+( ) !reset saveMatch not working when aborting (see stacktrace)
+( ) !help !cmd without !
+(x) !top5 crash on 5th entry: nullpointer for player
+( ) !showmatch starttime
 
+
+
+server monitor: forceplayers rework
+
+
+
+( ) !expire 15m timer until autoremove
 ( ) admin cmds to lookup user/auths/ips etc
 ( ) playerprofiles (stats stats stats (matches played etc...))
 ( ) match history
@@ -20,8 +46,6 @@ TODO:
 ( ) reconnect (resume) function
 ( ) get gateway if fails to connect
 ( ) ability to reply to heartbeat event
-
-DISCUSS: !unregister <urtauth> => what happens if someone played a match with that one?
 
 IDEA:
 - display newly connected/disconnected people in the chat

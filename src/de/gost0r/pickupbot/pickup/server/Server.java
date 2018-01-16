@@ -34,6 +34,8 @@ public class Server {
 		this.rconpassword = rconpassword;
 		this.password = password;
 		this.active = active;
+		
+		connect();
 	}
 
 	public void connect() {

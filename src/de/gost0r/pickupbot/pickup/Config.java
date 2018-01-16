@@ -101,7 +101,7 @@ public class Config {
 //	public static final String pkup_signup				= "You can sign up again!";
 	public static final String pkup_pw					= "[ /connect .server. ; password .password. ]";
 	public static final String pkup_status_noone		= "**.gametype.**: Nobody has signed up. Type " + USE_CMD_ADD + " to play.";
-	public static final String pkup_status_signup		= "**.gametype.**: Sign up: [.playernumber./10]";
+	public static final String pkup_status_signup		= "**.gametype.**: Sign up: [.playernumber./10] .playerlist.";
 	public static final String pkup_status_server		= "**.gametype.**: Awaiting available server.";
 	public static final String pkup_status_players		= "**.gametype.**: Players [.playernumber./10]: .playerlist.";
 //	public static final String pkup_started				= "**.gametype.**: Game has already started. .status. - .time. minutes in.";
@@ -126,7 +126,7 @@ public class Config {
 	
 	public static final String pkup_aftermath			= ".team. team .result. (.score.) - .player1. (.elochange1.), .player2. (.elochange2.), .player3. (.elochange3.), .player4. (.elochange4.), .player5. (.elochange5.),";
 	
-	public static final String pkup_getelo				= ".user. (.urtauth.): .elo. (.elochange.)";
+	public static final String pkup_getelo				= "#.rank.\t **.urtauth.**\t .elo. (.elochange.)";
 	public static final String pkup_top5_header			= "**Top5:**";
 			 
 	public static final String is_banned				= "You are banned and therefore you cannot participate.";

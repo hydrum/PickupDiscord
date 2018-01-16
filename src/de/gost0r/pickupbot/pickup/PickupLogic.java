@@ -126,14 +126,18 @@ public class PickupLogic {
 		if (players.isEmpty()) {
 			bot.sendMsg(bot.getPubchan(), msg + "  None");
 		} else {
-			bot.sendMsg(bot.getPubchan(), msg);
 			for (Player p : players) {
-				cmdGetElo(p);
+				msg += "\n" + cmdGetElo(p, false);
 			}
+			bot.sendMsg(bot.getPubchan(), msg);
 		}
 	}
 
-	public void cmdGetElo(Player p) {
+	public String cmdGetElo(Player p) {
+		return cmdGetElo(p, true);
+	}
+
+	public String cmdGetElo(Player p, boolean sendMsg) {
 		String msg = Config.pkup_getelo;
 		msg = msg.replace(".urtauth.", p.getUrtauth());
 		msg = msg.replace(".elo.", String.valueOf(p.getElo()));
@@ -144,8 +148,11 @@ public class PickupLogic {
 			elochange = "-" + String.valueOf(p.getEloChange());
 		}
 		msg = msg.replace(".elochange.", elochange);
-		msg = msg.replace(".user.", p.getDiscordUser().getMentionString());
-		bot.sendMsg(bot.getPubchan(), msg);
+		msg = msg.replace(".rank.", String.valueOf(db.getRankForPlayer(p)));
+		if (sendMsg) {
+			bot.sendMsg(bot.getPubchan(), msg);
+		}
+		return msg;
 	}
 	
 	public void cmdGetMaps() {
@@ -177,6 +184,7 @@ public class PickupLogic {
 				m.voteMap(player, map); // handles sending a msg itself
 			}
 		}
+		bot.sendNotice(player.getDiscordUser(), Config.player_already_removed);
 	}
 	
 	public void cmdStatus() {
@@ -185,11 +193,11 @@ public class PickupLogic {
 			return;
 		}
 		for (Match m : curMatch.values()) {
-			cmdStatus(m);
+			cmdStatus(m, null);
 		}
 	}
 	
-	public void cmdStatus(Match match) {
+	public void cmdStatus(Match match, Player player) {
 		String msg = "";
 		int playerCount = match.getPlayerCount();
 		if (playerCount == 0) {
@@ -199,6 +207,21 @@ public class PickupLogic {
 			msg = Config.pkup_status_signup;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 			msg = msg.replace(".playernumber.", String.valueOf(playerCount));
+
+			String playernames = "None";
+			if (player == null) {
+				for (Player p : match.getPlayerList()) {
+					if (playernames.equals("None")) {
+						playernames = p.getUrtauth();
+					} else {
+						playernames += " " + p.getUrtauth();
+					}
+				}
+			} else {
+				playernames = player.getDiscordUser().getMentionString();
+			}
+			
+			msg = msg.replace(".playerlist.", playernames);
 			
 		} else if (match.getMatchState() == MatchState.AwaitingServer){
 			msg = Config.pkup_status_server;
@@ -367,6 +390,7 @@ public class PickupLogic {
 	public boolean cmdServerActivation(String id, boolean active) {
 		try {
 			int idx = Integer.valueOf(id);
+			System.out.println(idx);
 			for (Server server : serverList) {
 				if (server.id == idx && !server.isTaken() && server.active != active) {
 					server.active = active;
