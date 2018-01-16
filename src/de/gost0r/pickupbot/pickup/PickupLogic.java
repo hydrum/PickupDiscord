@@ -207,6 +207,7 @@ public class PickupLogic {
 			msg = Config.pkup_status_signup;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 			msg = msg.replace(".playernumber.", String.valueOf(playerCount));
+			msg = msg.replace(".maxplayer.", String.valueOf(match.getGametype().getTeamSize() * 2));
 
 			String playernames = "None";
 			if (player == null) {
@@ -333,22 +334,26 @@ public class PickupLogic {
 		return false;
 	}
 	
-	public boolean cmdEnableGametype(String gametype, String config) {
-		
-		Gametype gt = getGametypeByString(gametype);
-		if (gt == null) {
-			gt = new Gametype(gametype.toUpperCase(), true);
+	public boolean cmdEnableGametype(String gametype, String teamSize) {
+		try {
+			int i_teamSize = Integer.valueOf(teamSize);
+			Gametype gt = getGametypeByString(gametype);
+			if (gt == null) {
+				gt = new Gametype(gametype.toUpperCase(), i_teamSize, true);
+			}
+			gt.setActive(true);
+			db.updateGametype(gt);
+			// checking whether this was active before
+			Gametype tmp = getGametypeByString(gametype);
+			if (tmp != null) {
+				curMatch.get(tmp).reset();
+			}
+			createMatch(gt);
+			return true;
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+			return false;
 		}
-		gt.setActive(true);
-		gt.setConfig(config);
-		db.updateGametype(gt);
-		// checking whether this was active before
-		Gametype tmp = getGametypeByString(gametype);
-		if (tmp != null) {
-			curMatch.get(tmp).reset();
-		}
-		createMatch(gt);
-		return true;
 	}
 	
 	public boolean cmdDisableGametype(String gametype) {
@@ -359,6 +364,45 @@ public class PickupLogic {
 		db.updateGametype(gt);
 		curMatch.get(gt).reset();
 		curMatch.remove(gt);
+		return true;
+	}
+	
+	public boolean cmdAddGameConfig(String gametype, String command) {
+		Gametype gt = getGametypeByString(gametype);
+		if (gt == null) return false;
+		
+		gt.addConfig(command);
+		
+		db.updateGametype(gt);
+		return true;
+	}
+	
+	public boolean cmdRemoveGameConfig(String gametype, String command) {
+		Gametype gt = getGametypeByString(gametype);
+		if (gt == null) return false;
+		
+		gt.removeConfig(command);
+		
+		db.updateGametype(gt);
+		return true;
+	}
+	
+	public boolean cmdListGameConfig(String gametype) {
+		Gametype gt = getGametypeByString(gametype);
+		if (gt == null) return false;
+		
+		String configlist = "";
+		for (String config : gt.getConfig()) {
+			if (!configlist.isEmpty()) {
+				configlist += "\n";
+			}
+			configlist += config;
+		}
+		
+		String msg = Config.pkup_config_list;
+		msg = msg.replace(".gametype.", gt.getName());
+		msg = msg.replace(".configlist.", configlist);
+		
 		return true;
 	}
 	

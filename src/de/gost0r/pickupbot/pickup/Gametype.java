@@ -1,20 +1,25 @@
 package de.gost0r.pickupbot.pickup;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Gametype {
 	
 	private String name;
 	private boolean active;
 	
-	private String config;
-	private int half;
+	private int teamSize;
+
+	private List<String> config;
 	
-	public Gametype(String name, boolean active) {
+	public Gametype(String name, int teamSize, boolean active) {
 		
 		this.setName(name);
 		this.setActive(active);
+
+		this.setTeamSize(teamSize);
 		
-		config = "";
-		half = 1;
+		config = new ArrayList<String>();
 	}
 
 	public String getName() {
@@ -29,24 +34,30 @@ public class Gametype {
 		return active;
 	}
 
+	public void setTeamSize(int teamSize) {
+		this.teamSize = teamSize;
+	}
+
+	public int getTeamSize() {
+		return teamSize;
+	}
+
 	public void setActive(boolean active) {
 		this.active = active;
 	}
 
-	public String getConfig() {
+	public List<String> getConfig() {
 		return config;
 	}
 
-	public void setConfig(String config) {
-		this.config = config;
+	public void addConfig(String configString) {
+		if (!config.contains(configString))	{
+			this.config.add(configString);
+		}
 	}
 
-	public int getHalf() {
-		return half;
-	}
-
-	public void setHalf(int half) {
-		this.half = half;
+	public void removeConfig(String configString) {
+		config.remove(configString);
 	}
 	
 	@Override

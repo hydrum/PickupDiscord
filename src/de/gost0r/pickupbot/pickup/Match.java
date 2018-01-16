@@ -127,7 +127,7 @@ public class Match {
 	}
 	
 	public void checkReadyState(Player player) {
-		if (playerStats.keySet().size() == 10) {
+		if (playerStats.keySet().size() == gametype.getTeamSize() * 2) {
 			state = MatchState.AwaitingServer;
 			logic.cmdStatus(this, null);
 			logic.requestServer(this);
@@ -137,7 +137,7 @@ public class Match {
 	}
 	
 	public void checkServerState() {
-		if (state == MatchState.AwaitingServer && playerStats.keySet().size() != 10) {
+		if (state == MatchState.AwaitingServer && playerStats.keySet().size() != gametype.getTeamSize() * 2) {
 			state = MatchState.Signup;
 		}
 	}
@@ -164,12 +164,15 @@ public class Match {
 		logic.matchEnded(this);
 	}
 	
-	private void sendAftermath() {
+	private void sendAftermath() {		
+		String fullmsg = Config.pkup_aftermath_head;
+		fullmsg = fullmsg.replace(".gametype.", gametype.getName());
+		fullmsg = fullmsg.replace(".gamenumber.", String.valueOf(id));
 		for (int i = 0; i < 2; ++i) {
     		int team = i;
     		int opp = (team + 1) % 2;
     		String teamname = (team == 0) ? "Red" : "Blue";
-			String msg = Config.pkup_aftermath;
+			String msg = Config.pkup_aftermath_result;
 			msg = msg.replace(".team.", teamname);
 			if (score[team] > score[opp]) {
 				msg = msg.replace(".result.", "won");
@@ -179,14 +182,16 @@ public class Match {
 				msg = msg.replace(".result.", "draw");
 			} 
 			msg = msg.replace(".score.", score[team] + "-" + score[opp]);
-	
-			for (int j = 0; j < teamList.get(teamname).size(); ++j) {
-				Player p = teamList.get(teamname).get(j);
-				msg = msg.replace(".player"    + (j + 1) + ".", p.getDiscordUser().getMentionString());
-				msg = msg.replace(".elochange" + (j + 1) + ".", String.valueOf(p.getEloChange()));
-				logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+			
+			for (Player p : teamList.get(teamname)) {
+				String msgelo = Config.pkup_aftermath_player;
+				msgelo = msgelo.replace(".player.", p.getDiscordUser().getMentionString());
+				msgelo = msgelo.replace(".elochange.", String.valueOf(p.getEloChange()));
+				msg += " " + msgelo;
 			}
+			fullmsg += "\n" + msg;
 		}
+		logic.bot.sendMsg(logic.bot.getPubchan(), fullmsg);
 	}
 	
 
@@ -244,34 +249,38 @@ public class Match {
 					}				
 				}
 			}
-			
-			teamList.get("red").add(sortPlayers.get(0));
-			teamList.get("red").add(sortPlayers.get(2));
-			teamList.get("red").add(sortPlayers.get(7));
-			teamList.get("red").add(sortPlayers.get(9));
-			for (Player p : teamList.get("red")) elo[0] += p.getElo();
 
-			teamList.get("blue").add(sortPlayers.get(1));
-			teamList.get("blue").add(sortPlayers.get(3));
-			teamList.get("blue").add(sortPlayers.get(6));
-			teamList.get("blue").add(sortPlayers.get(8));
-			for (Player p : teamList.get("blue")) elo[1] += p.getElo();
+			// 5: i=0,1 => red: (0, 9) (2, 7) -> blue: (1, 8) (3, 6)   if cond: (4, 5)
+			// 4: i=0,1 => red: (0, 7) (2, 5) -> blue: (1, 7) (3, 4)   if cond: none
+			// 3: i=0   => red: (0, 5)        -> blue: (1, 4)          if cond: (2, 3)
+			// 2: i=0   => red: (0, 3)        -> blue: (1, 2)          if cond: none
+			// 1: i=-   => red: none          -> blue: none            if cond: (0, 1)
+			for (int i = 0; i < Math.floor(gametype.getTeamSize() / 2); ++i) {
+				teamList.get("red").add(sortPlayers.get(i*2));
+				teamList.get("red").add(sortPlayers.get(((gametype.getTeamSize()*2)-1)-i*2));
+
+				teamList.get("blue").add(sortPlayers.get(i*2+1));
+				teamList.get("blue").add(sortPlayers.get(((gametype.getTeamSize()*2)-1)-i*2-1));
+			}
 			
-			if (elo[0] > elo[1]) {
-				teamList.get("red").add(sortPlayers.get(5));
-				teamList.get("blue").add(sortPlayers.get(4));
-				elo[0] += sortPlayers.get(5).getElo();
-				elo[1] += sortPlayers.get(4).getElo();
-			} else {
-				teamList.get("red").add(sortPlayers.get(4));
-				teamList.get("blue").add(sortPlayers.get(5));
-				elo[0] += sortPlayers.get(4).getElo();
-				elo[1] += sortPlayers.get(5).getElo();
+			if ((gametype.getTeamSize() % 2) == 1) {
+				int better = gametype.getTeamSize() - 1;
+				int worse = gametype.getTeamSize();
+				
+				if (elo[0] > elo[1]) {
+					teamList.get("red").add(sortPlayers.get(worse));
+					teamList.get("blue").add(sortPlayers.get(better));
+				} else {
+					teamList.get("red").add(sortPlayers.get(better));
+					teamList.get("blue").add(sortPlayers.get(worse));
+				}
 			}
 			
 			// avg elo
-			elo[0] /= 5;
-			elo[1] /= 5;
+			for (Player p : teamList.get("red")) elo[0] += p.getElo();
+			for (Player p : teamList.get("blue")) elo[1] += p.getElo();
+			elo[0] /= gametype.getTeamSize();
+			elo[1] /= gametype.getTeamSize();
 	
 			System.out.println("Team Red: " + elo[0] + " " + Arrays.toString(teamList.get("red").toArray()));
 			System.out.println("Team Blue: " + elo[1] + " " + Arrays.toString(teamList.get("blue").toArray()));
@@ -279,10 +288,6 @@ public class Match {
 			id = logic.db.createMatch(this);
 			
 			server.startObservation(this);
-			
-			server.sendRcon("exec " + this.gametype.getConfig());
-			server.sendRcon("map " + this.map.name);
-			server.sendRcon("g_password " + server.password);
 			
 			// MESSAGE HYPE
 			
@@ -343,6 +348,18 @@ public class Match {
 			msg = Config.pkup_go_pub_sent;
 			msg = msg.replace(".gametype.", gametype.getName());
 			logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+			
+			// set server data
+			for (String s : this.gametype.getConfig()) {
+				server.sendRcon(s);
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			server.sendRcon("map " + this.map.name);
+			server.sendRcon("g_password " + server.password);
 			
 			logic.matchStarted(this);
 		}
@@ -483,6 +500,7 @@ public class Match {
 		msg = msg.replace(".elored.", String.valueOf(elo[0]));
 		msg = msg.replace(".eloblue.", String.valueOf(elo[1]));
 		msg = msg.replace(".playernumber.", String.valueOf(getPlayerCount()));
+		msg = msg.replace(".maxplayer.", String.valueOf(gametype.getTeamSize() * 2));
 		msg = msg.replace(".playerlist.", playernames);
 		return msg;
 	}

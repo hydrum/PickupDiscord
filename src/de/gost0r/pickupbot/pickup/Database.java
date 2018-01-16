@@ -54,7 +54,13 @@ public class Database {
 			
 			sql = "CREATE TABLE IF NOT EXISTS gametype ( gametype TEXT PRIMARY KEY,"
 													+ "config TEXT,"
+													+ "teamsize INTEGER, "
 													+ "active TEXT )";
+			stmt.executeUpdate(sql);
+			
+			sql = "CREATE TABLE IF NOT EXISTS gameconfig ( gametype TEXT,"
+													+ "config TEXT,"
+													+ "PRIMARY KEY (gametype, config) )";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS map ( map TEXT,"
@@ -347,11 +353,17 @@ public class Database {
 		List<Gametype> gametypeList = new ArrayList<Gametype>();
 		try {
 			Statement stmt = c.createStatement();
-			String sql = "SELECT gametype, config, active FROM gametype";
+			String sql = "SELECT gametype, teamsize, active FROM gametype";
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				Gametype gametype = new Gametype(rs.getString("gametype"), Boolean.valueOf(rs.getString("active")));
-				gametype.setConfig(rs.getString("config"));
+				Gametype gametype = new Gametype(rs.getString("gametype"), rs.getInt("teamsize"), Boolean.valueOf(rs.getString("active")));
+				sql = "SELECT config FROM gameconfig WHERE gametype=?";
+				PreparedStatement pstmt = c.prepareStatement(sql);
+				pstmt.setString(1, gametype.getName());
+				ResultSet rs1 = pstmt.executeQuery();
+				while (rs1.next()) {
+					gametype.addConfig(rs1.getString("config"));
+				}
 				gametypeList.add(gametype);
 			}
 		} catch (SQLException e) {
@@ -650,11 +662,22 @@ public class Database {
 				pstmt.setString(1, gt.getName());
 				pstmt.executeUpdate();
 			}
-			sql = "UPDATE gametype SET config=?, active=? WHERE gametype=?";
+			sql = "UPDATE gametype SET teamsize=?, active=? WHERE gametype=?";
 			pstmt = c.prepareStatement(sql);
-			pstmt.setString(1, gt.getConfig());
+			pstmt.setInt(1, gt.getTeamSize());
 			pstmt.setString(2, String.valueOf(gt.getActive()));
 			pstmt.setString(3, gt.getName());
+			sql = "DELETE FROM gameconfig WHERE gametype=?";
+			pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, gt.getName());
+			pstmt.executeQuery();
+			for (String config : gt.getConfig()) {
+				sql = "INSERT INTO gameconfig (gametype, config) VALUES (?, ?)";
+				pstmt = c.prepareStatement(sql);
+				pstmt.setString(1, gt.getName());
+				pstmt.setString(2, config);
+				pstmt.executeUpdate();
+			}
 			pstmt.executeUpdate();
 			pstmt.close();
 		} catch (SQLException e) {

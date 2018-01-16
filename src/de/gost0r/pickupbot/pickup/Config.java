@@ -18,6 +18,10 @@ public class Config {
 
 	public static final String CMD_ENABLEGAMETYPE		= "!enablegametype";
 	public static final String CMD_DISABLEGAMETYPE		= "!disablegametype";
+
+	public static final String CMD_ADDGAMECONFIG		= "!addgameconfig";
+	public static final String CMD_REMOVEGAMECONFIG		= "!delgameconfig";
+	public static final String CMD_LISTGAMECONFIG		= "!listgameconfig";
 	
 	public static final String CMD_REGISTER				= "!register";
 	public static final String CMD_GETELO				= "!elo";
@@ -46,7 +50,7 @@ public class Config {
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " "
 	+ CMD_ENABLEMAP + " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE
 	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_SHOWMATCHES
-	+ " " + CMD_UNREGISTER;
+	+ " " + CMD_UNREGISTER + " " + CMD_ADDGAMECONFIG + " " + CMD_REMOVEGAMECONFIG + " " + CMD_LISTGAMECONFIG;
 		
 //------------------------------------------------------------------------------------//
 	
@@ -66,8 +70,12 @@ public class Config {
 	public static final String USE_CMD_DISABLEMAP		= "!disablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_RCON				= "!rcon <rconstring>";
 
-	public static final String USE_CMD_ENABLEGAMETYPE	= "!enablegametype <name> <config>";
+	public static final String USE_CMD_ENABLEGAMETYPE	= "!enablegametype <name> <teamsize>";
 	public static final String USE_CMD_DISABLEGAMETYPE	= "!disablegametype <name>";
+	
+	public static final String USE_CMD_ADDGAMECONFIG	= "!addgameconfig <gametype> <string>";
+	public static final String USE_CMD_REMOVEGAMECONFIG	= "!delgameconfig <gametype> <string>";
+	public static final String USE_CMD_LISTGAMECONFIG	= "!listgameconfig <gametype>";
 	
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
 	public static final String USE_CMD_GETELO			= "!elo </urtauth/>";
@@ -101,9 +109,9 @@ public class Config {
 //	public static final String pkup_signup				= "You can sign up again!";
 	public static final String pkup_pw					= "[ /connect .server. ; password .password. ]";
 	public static final String pkup_status_noone		= "**.gametype.**: Nobody has signed up. Type " + USE_CMD_ADD + " to play.";
-	public static final String pkup_status_signup		= "**.gametype.**: Sign up: [.playernumber./10] .playerlist.";
+	public static final String pkup_status_signup		= "**.gametype.**: Sign up: [.playernumber./.maxplayer.] .playerlist.";
 	public static final String pkup_status_server		= "**.gametype.**: Awaiting available server.";
-	public static final String pkup_status_players		= "**.gametype.**: Players [.playernumber./10]: .playerlist.";
+//	public static final String pkup_status_players		= "**.gametype.**: Players [.playernumber./10]: .playerlist.";
 //	public static final String pkup_started				= "**.gametype.**: Game has already started. .status. - .time. minutes in.";
 
 	public static final String pkup_reset_all 			= "*All matches have been reset.*";
@@ -111,8 +119,8 @@ public class Config {
 	public static final String pkup_reset_id 			= "*The match .id. has been reset.*";
 	
 	public static final String pkup_match_print_live	= "**[** Pickup Game #.gamenumber. **][** Live **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
-	public static final String pkup_match_print_signup	= "**[** Pickup Game #cur **][** Signup **][** Gametype: .gametype. **][** .playernumber./10 **][** Players: .playerlist. **]**";
-	public static final String pkup_match_print_server	= "**[** Pickup Game #cur **][** AwaitingServer **][** Gametype: .gametype. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_signup	= "**[** Pickup Game #--- **][** Signup **][** Gametype: .gametype. **][** .playernumber./.maxplayer. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_server	= "**[** Pickup Game #--- **][** AwaitingServer **][** Gametype: .gametype. **][** Players: .playerlist. **]**";
 	public static final String pkup_match_print_done	= "**[** Pickup Game #.gamenumber. **][** Done **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 	public static final String pkup_match_print_abort	= "**[** Pickup Game #.gamenumber. **][** Abort **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 	
@@ -123,8 +131,12 @@ public class Config {
 	public static final String pkup_go_pub_map			= "**.gametype.**: Map: .map.";
 	public static final String pkup_go_pub_calm			= "**.gametype.**: You will receive the connection info via DM.";
 	public static final String pkup_go_pub_sent			= "**.gametype.**: All connection info has been sent. Enjoy the match!";
-	
-	public static final String pkup_aftermath			= ".team. team .result. (.score.) - .player1. (.elochange1.), .player2. (.elochange2.), .player3. (.elochange3.), .player4. (.elochange4.), .player5. (.elochange5.),";
+
+	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber.:";
+	public static final String pkup_aftermath_result	= ".team. team .result. (.score.) -";
+	public static final String pkup_aftermath_player	= ".player. (.elochange.)";
+
+	public static final String pkup_config_list 		= "Gameconfig for .gametype.:\n.configlist.";
 	
 	public static final String pkup_getelo				= "#.rank.\t **.urtauth.**\t .elo. (.elochange.)";
 	public static final String pkup_top5_header			= "**Top5:**";

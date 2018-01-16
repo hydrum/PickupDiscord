@@ -240,6 +240,42 @@ public class PickupBot extends DiscordBot {
 					}
 					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLEGAMETYPE);					
 				}
+				else if (data[0].equals(Config.CMD_ADDGAMECONFIG))
+				{
+					if (data.length == 3)
+					{
+						if (logic.cmdAddGameConfig(data[1], msg.substring(Config.CMD_ADDGAMECONFIG.length() + data[1].length() + 2)))
+						{
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+					}
+					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ADDGAMECONFIG);					
+				}
+				else if (data[0].equals(Config.CMD_REMOVEGAMECONFIG))
+				{
+					if (data.length == 3)
+					{
+						if (logic.cmdRemoveGameConfig(data[1], msg.substring(Config.CMD_REMOVEGAMECONFIG.length() + data[1].length() + 2)))
+						{
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+					}
+					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_REMOVEGAMECONFIG);					
+				}
+				else if (data[0].equals(Config.CMD_LISTGAMECONFIG))
+				{
+					if (data.length == 2)
+					{
+						if (logic.cmdListGameConfig(data[1]))
+						{
+							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+						}
+						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
+					}
+					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_LISTGAMECONFIG);					
+				}
 				else if (data[0].equals(Config.CMD_ADDSERVER))
 				{
 					if (data.length == 3)

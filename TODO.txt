@@ -11,13 +11,13 @@ TODO:
 (x) somehow gametype related maps isnt working -> to check
 (x) ignore messages from self
 (x) send !top5 msgs as one msg instead of 5 seperate ones
-( ) !gameconfig <gametype> <timelimit 10...> => would replace gametype.config
+(x) !gameconfig <gametype> <timelimit 10...> => would replace gametype.config
 (x) !register => to lowercase
 (x) use !elo <@userid> for retrieving elo
 (x) move !lock to pubchan
 ( ) !reset <gametype>
 ( ) don't hardcode pubchan
-( ) make playercount dynamically
+(x) make playercount dynamically
 (x) !map vote no msg
 (x) [ Pickup Game #cur ][ Signup ][ Gametype: CTF ][ 5/10 ][ Players: None@Slide @RaideR @v3nd3tta | Jonathan @Biddle @Gost0r ]
 (x) !status give only urtauth
