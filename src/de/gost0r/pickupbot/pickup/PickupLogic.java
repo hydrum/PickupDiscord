@@ -2,6 +2,7 @@ package de.gost0r.pickupbot.pickup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -237,9 +238,14 @@ public class PickupLogic {
 
 	public boolean cmdReset(String cmd, String mode) {
 		if (cmd.equals("all")) {
-			for (Match match : ongoingMatches) {
+			Iterator<Match> iter = ongoingMatches.iterator();
+			List<Match> toRemove = new ArrayList<Match>();
+			while (iter.hasNext()) {
+				Match match = iter.next();
 				match.reset();
+				toRemove.add(match);
 			}
+			ongoingMatches.removeAll(toRemove);
 			for (Match m : curMatch.values()) {
 				m.reset();
 				createCurrentMatches();
@@ -268,9 +274,12 @@ public class PickupLogic {
 			} else {
 				try {
 					int idx = Integer.valueOf(cmd);
-					for (Match match : ongoingMatches) {
+					Iterator<Match> iter = ongoingMatches.iterator();
+					while (iter.hasNext()) {
+						Match match = iter.next();
 						if (match.getID() == idx) {
 							match.reset();
+							ongoingMatches.remove(match);
 							bot.sendMsg(bot.getPubchan(), Config.pkup_reset_id.replace(".id.", cmd));
 							return true;
 						}
@@ -559,10 +568,14 @@ public class PickupLogic {
 	}
 
 	public void matchEnded(Match match) {
+//		matchRemove(match); // dont remove as this can be called while in a loop
+		checkServer();
+	}
+	
+	public void matchRemove(Match match) {
 		if (ongoingMatches.contains(match)) {
 			ongoingMatches.remove(match);
 		}
-		checkServer();
 	}
 
 	private void checkServer() {

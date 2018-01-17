@@ -642,7 +642,7 @@ public class Database {
 				pstmt.setInt(1, player.getElo());
 				pstmt.setInt(2, player.getEloChange());
 				pstmt.setString(3, player.getDiscordUser().id);
-				pstmt.setString(3, player.getUrtauth());
+				pstmt.setString(4, player.getUrtauth());
 				pstmt.executeUpdate();			
 			}
 		} catch (SQLException e) {

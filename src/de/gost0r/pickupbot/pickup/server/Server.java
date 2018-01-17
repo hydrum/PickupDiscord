@@ -79,9 +79,12 @@ public class Server {
 	        }
 	        string = string.replace("ÿÿÿÿprint\n", "");
 	        string = string.replace("" + (char) 0, "");
+	        Thread.sleep(200);
 	        return string;
 		} catch (IOException e1) {
 			e1.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
         return null;
 	}

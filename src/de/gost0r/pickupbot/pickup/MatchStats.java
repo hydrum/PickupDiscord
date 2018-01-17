@@ -14,6 +14,9 @@ public class MatchStats {
 	public Score[] score = new Score[2];
 	
 	public MatchStats() {
+		score = new Score[2];
+		score [0] = new Score();
+		score [1] = new Score();
 	}
 	
 	public MatchStats(Score score1, Score score2, String ip, Status status) {

@@ -37,6 +37,23 @@ public class PickupBotDiscordMain {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		
+//		eloTest();
+	}
+	
+	public static void eloTest() {
+		int eloSelf = 1000;
+		int eloOpp = 1000;
+
+		double w = 1; // 1 win, 0.5 draw, 0 loss
+		
+		double tSelf = Math.pow(10d, eloSelf/400d);
+		double tOpp = Math.pow(10d, eloOpp/400d);
+		double e = tSelf / (tSelf + tOpp);
+		
+		double resultSelf = 32d * (w - e);
+		int elochange = (int) Math.floor(resultSelf);
+		System.out.println(elochange);
 	}
 
 }

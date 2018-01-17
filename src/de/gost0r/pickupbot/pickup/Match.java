@@ -151,6 +151,7 @@ public class Match {
 		state = MatchState.Done;
 		cleanUp();
 		sendAftermath();
+		logic.matchRemove(this);
 	}
 	
 	private void cleanUp() {
@@ -183,7 +184,7 @@ public class Match {
 			} 
 			msg = msg.replace(".score.", score[team] + "-" + score[opp]);
 			
-			for (Player p : teamList.get(teamname)) {
+			for (Player p : teamList.get(teamname.toLowerCase())) {
 				String msgelo = Config.pkup_aftermath_player;
 				msgelo = msgelo.replace(".player.", p.getDiscordUser().getMentionString());
 				msgelo = msgelo.replace(".elochange.", String.valueOf(p.getEloChange()));
@@ -243,10 +244,13 @@ public class Match {
 			for (Player player : playerList) {
 				for (Player sortplayer : sortPlayers) {
 					if (player.equals(sortplayer)) continue;
-					else if (player.getElo() <= sortplayer.getElo()) {
-						sortPlayers.add(sortPlayers.indexOf(sortplayer), player); 
+					else if (player.getElo() >= sortplayer.getElo()) {
+						sortPlayers.add(sortPlayers.indexOf(sortplayer), player);
 						break;
-					}				
+					}
+				}
+				if (!sortPlayers.contains(player)) {
+					sortPlayers.add(player);
 				}
 			}
 
@@ -266,7 +270,7 @@ public class Match {
 			if ((gametype.getTeamSize() % 2) == 1) {
 				int better = gametype.getTeamSize() - 1;
 				int worse = gametype.getTeamSize();
-				
+
 				if (elo[0] > elo[1]) {
 					teamList.get("red").add(sortPlayers.get(worse));
 					teamList.get("blue").add(sortPlayers.get(better));
@@ -352,18 +356,13 @@ public class Match {
 			msg = Config.pkup_go_pub_sent;
 			msg = msg.replace(".gametype.", gametype.getName());
 			logic.bot.sendMsg(logic.bot.getPubchan(), msg);
-			
+
 			// set server data
 			for (String s : this.gametype.getConfig()) {
 				server.sendRcon(s);
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
 			}
-			server.sendRcon("map " + this.map.name);
 			server.sendRcon("g_password " + server.password);
+			server.sendRcon("map " + this.map.name);
 			
 			logic.matchStarted(this);
 		}

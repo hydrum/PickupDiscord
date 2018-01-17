@@ -35,7 +35,11 @@ TODO:
 
 
 server monitor: forceplayers rework
-
+-> auths not displayed
+-> stats not updating?
+-> teams not updating
+-> how does auth-whois look like for non-authed ppl
+-> swaproles not working
 
 
 ( ) !expire 15m timer until autoremove

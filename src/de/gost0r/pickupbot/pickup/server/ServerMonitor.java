@@ -39,6 +39,8 @@ public class ServerMonitor implements Runnable {
 		this.stopped = false;
 		state = ServerState.WELCOME;
 		
+		firstHalf = true;
+		
 		players = new ArrayList<ServerPlayer>();
 	}
 
@@ -86,6 +88,7 @@ public class ServerMonitor implements Runnable {
 		{
 			if (swapRoles && firstHalf) {
 				firstHalf = false;
+				System.out.println("first half ended!");
 			}
 		}		
 	}
@@ -119,14 +122,16 @@ public class ServerMonitor implements Runnable {
 		// save playerscores
 		for (ServerPlayer player : players) {
 			try {
-				match.getStats(player.player).score[half].score = Integer.valueOf(player.ctfstats.score);
-				match.getStats(player.player).score[half].deaths = Integer.valueOf(player.ctfstats.deaths);
-				match.getStats(player.player).score[half].assists = Integer.valueOf(player.ctfstats.assists);
-				match.getStats(player.player).score[half].caps = Integer.valueOf(player.ctfstats.caps);
-				match.getStats(player.player).score[half].returns = Integer.valueOf(player.ctfstats.returns);
-				match.getStats(player.player).score[half].fc_kills = Integer.valueOf(player.ctfstats.fc_kills);
-				match.getStats(player.player).score[half].stop_caps = Integer.valueOf(player.ctfstats.stop_caps);
-				match.getStats(player.player).score[half].protect_flag = Integer.valueOf(player.ctfstats.protect_flag);
+				if (player.player != null && match.isInMatch(player.player)) {
+					match.getStats(player.player).score[half].score = Integer.valueOf(player.ctfstats.score);
+					match.getStats(player.player).score[half].deaths = Integer.valueOf(player.ctfstats.deaths);
+					match.getStats(player.player).score[half].assists = Integer.valueOf(player.ctfstats.assists);
+					match.getStats(player.player).score[half].caps = Integer.valueOf(player.ctfstats.caps);
+					match.getStats(player.player).score[half].returns = Integer.valueOf(player.ctfstats.returns);
+					match.getStats(player.player).score[half].fc_kills = Integer.valueOf(player.ctfstats.fc_kills);
+					match.getStats(player.player).score[half].stop_caps = Integer.valueOf(player.ctfstats.stop_caps);
+					match.getStats(player.player).score[half].protect_flag = Integer.valueOf(player.ctfstats.protect_flag);
+				}
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
 			}
@@ -184,6 +189,9 @@ public class ServerMonitor implements Runnable {
 			if (rpp.matchready[0] && rpp.matchready[1] && rpp.warmupphase) {
 				state = ServerState.WARMUP;
 				System.out.println("SWITCHED WELCOME -> WARMUP");
+			} else if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase) {
+				state = ServerState.LIVE;
+				System.out.println("SWITCHED WELCOME -> LIVE");
 			}
 		} else if (state == ServerState.WARMUP) {
 			if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase) {
@@ -191,7 +199,7 @@ public class ServerMonitor implements Runnable {
 				System.out.println("SWITCHED WARMUP -> LIVE");
 			}
 		} else if (state == ServerState.LIVE && rpp.gametime.equals("00:00:00")) {
-			if (!rpp.matchready[0] && !rpp.matchready[1]) {
+			if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase) {
 				state = ServerState.SCORE;
 				System.out.println("SWITCHED LIVE -> SCORE");
 				saveStats(rpp);
@@ -215,11 +223,14 @@ public class ServerMonitor implements Runnable {
 		List<ServerPlayer> newPlayers = new ArrayList<ServerPlayer>();
 		
 		for (ServerPlayer player : rpp.players) {
+			if (player.auth.equals("---")) {
+				requestAuth(player);
+			}
 			
 			// find player in serverplayerlist
 			ServerPlayer found = null;
 			for (ServerPlayer player_x : players) {
-				if (player_x.auth.equalsIgnoreCase(player.auth)) {
+				if (player_x.auth.equalsIgnoreCase(player.auth) && !player.auth.equals("---")) {
 					found = player_x;
 					break;
 				}
@@ -249,6 +260,17 @@ public class ServerMonitor implements Runnable {
 		}
 	}
 	
+	private void requestAuth(ServerPlayer player) {
+		String replyAuth = server.sendRcon("auth-whois " + player.id);
+		System.out.println(replyAuth);
+		if (replyAuth != null && !replyAuth.isEmpty()) {
+			String[] splitted = replyAuth.split(" ");
+			player.auth = splitted[8];
+		} else {
+			requestAuth(player);
+		}
+	}
+
 	private boolean getSwapRoles() {
 		String swaproles = server.sendRcon("g_swaproles");
 		String[] split = swaproles.split("\"");
@@ -263,13 +285,16 @@ public class ServerMonitor implements Runnable {
 		RconPlayersParsed rpp = new RconPlayersParsed();
 		
 		String playersString = server.sendRcon("players");
-		System.out.println("rcon players: >>>" + playersString + "<<<");
+//		System.out.println("rcon players: >>>" + playersString + "<<<");
 		String[] stripped = playersString.split("\n");
 		
 		boolean awaitsStats = false;		
 		for (String line : stripped)
 		{
-			System.out.println("line: =]]]" + line + "[[[=");
+			System.out.println("line: " + line);
+			if (line.isEmpty()) continue;
+			if (line.equals("==== ShutdownGame ====")) break;
+			
 			if (line.startsWith("Map:"))
 			{
 				rpp.map = line.split(" ")[1];
@@ -306,13 +331,12 @@ public class ServerMonitor implements Runnable {
 			}
 			else
 			{
-				System.out.println("NOW PLAYERS:");
 				String[] splitted = line.split(" ");
-				System.out.println("splitted = " + Arrays.toString(splitted));
+//				System.out.println("splitted = " + Arrays.toString(splitted));
 				
-				if (splitted.equals("[connecting]")) continue;
+				if (splitted[0].equals("[connecting]")) continue;
 				
-				if (splitted.equals("CTF:") && awaitsStats) {
+				if (splitted[0].equals("CTF:") && awaitsStats) {
 					// ctfstats
 					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).caps = splitted[1].split(":")[1];
 					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).returns = splitted[2].split(":")[1];
@@ -321,7 +345,7 @@ public class ServerMonitor implements Runnable {
 					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).protect_flag = splitted[5].split(":")[1];
 					awaitsStats = false;
 				}
-				else if (splitted.equals("BOMB:") && awaitsStats)
+				else if (splitted[0].equals("BOMB:") && awaitsStats)
 				{
 					/*	BOMB: PLT:%i SBM:%i PKB:%i DEF:%i KBD:%i KBC:%i PKBC:%i
 						>BOMB_PLANT
@@ -370,20 +394,20 @@ public class ServerMonitor implements Runnable {
         		int team = match.getTeam(player.player).equalsIgnoreCase("red") ? 0 : 1;
         		int opp = (team + 1) % 2;
         		
-    			int e = (int) (1 / (1 + Math.pow((double) 10, (double)((match.getElo()[opp] - player.player.getElo()) / 400))));
-    			double d = 1;
-    			int w = 1;
-    			if (finalscore[team] > finalscore[opp]) { // victory
-    				w = 1;
-    			} else if (finalscore[team] < finalscore[opp]) { // loss
-    				w = 0;
-    			} else { // draw
-    				w = 1;
-    				d = 0.5;
-    			}
-    			int elochange = (int) (32 * (w-e) * d);
+        		int eloSelf = player.player.getElo();
+        		int eloOpp = match.getElo()[opp];
+        		
+        		// 1 win, 0.5 draw, 0 loss
+        		double w = finalscore[team] > finalscore[opp] ? 1d : (finalscore[team] < finalscore[opp] ? 0d : 0.5d);
+        		
+        		double tSelf = Math.pow(10d, eloSelf/400d);
+        		double tOpp = Math.pow(10d, eloOpp/400d);
+        		double e = tSelf / (tSelf + tOpp);
+        		
+        		double result = 32d * (w - e);
+        		int elochange = (int) Math.floor(result);
     			int newelo = player.player.getElo() + elochange;
-    			System.out.println("ELO player: " + player.auth + " old ELO: " + player.player.getElo() + " new ELO: " + newelo + " (" + (!String.valueOf(elochange).startsWith("-") ? "+" : "" + elochange));
+    			System.out.println("ELO player: " + player.auth + " old ELO: " + player.player.getElo() + " new ELO: " + newelo + " (" + (!String.valueOf(elochange).startsWith("-") ? "+" : "") + elochange + ")");
     			player.player.addElo(elochange);
         	}
         }
