@@ -299,16 +299,18 @@ public class Match {
 //			msg = msg.replace(".map.", this.map.name);
 //			logic.bot.sendMsg(logic.bot.adminchan, msg);
 			
+			String fullmsg = "";
+			
 			String msg = Config.pkup_go_pub_head;
 			msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
 			msg = msg.replace(".gamenumber.", String.valueOf(id));
 			msg = msg.replace(".gametype.", gametype.getName());
-			logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+			fullmsg = msg;
 			
 			msg = Config.pkup_map_list;
 			msg = msg.replace(".gametype.", gametype.getName());
 			msg = msg.replace(".maplist.", getMapVotes());
-			logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+			fullmsg += "\n" + msg;
 			
 			String[] teamname = {"Red", "Blue"};
 			for (String team : teamname) {
@@ -323,17 +325,19 @@ public class Match {
 				msg = msg.replace(".team.", team);
 				msg = msg.replace(".gametype.", gametype.getName());
 				msg = msg.replace(".playerlist.", playernames);
-				logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+				fullmsg += "\n" + msg;
 			}
 			
 			msg = Config.pkup_go_pub_map;
 			msg = msg.replace(".map.", this.map.name);
 			msg = msg.replace(".gametype.", gametype.getName());
-			logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+			fullmsg += "\n" + msg;
 
 			msg = Config.pkup_go_pub_calm;
 			msg = msg.replace(".gametype.", gametype.getName());
-			logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+			fullmsg += "\n" + msg;
+			
+			logic.bot.sendMsg(logic.bot.getPubchan(), fullmsg);
 
 			msg = Config.pkup_go_player;
 			msg = msg.replace(".server.", server.getAddress());
@@ -403,6 +407,10 @@ public class Match {
 	
 	public void setLogic(PickupLogic logic) {
 		this.logic = logic;
+	}
+
+	public PickupLogic getLogic() {
+		return logic;
 	}
 
 	public Server getServer() {

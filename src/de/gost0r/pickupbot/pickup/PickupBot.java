@@ -242,7 +242,7 @@ public class PickupBot extends DiscordBot {
 				}
 				else if (data[0].equals(Config.CMD_ADDGAMECONFIG))
 				{
-					if (data.length == 3)
+					if (data.length >= 3)
 					{
 						if (logic.cmdAddGameConfig(data[1], msg.substring(Config.CMD_ADDGAMECONFIG.length() + data[1].length() + 2)))
 						{
@@ -254,7 +254,7 @@ public class PickupBot extends DiscordBot {
 				}
 				else if (data[0].equals(Config.CMD_REMOVEGAMECONFIG))
 				{
-					if (data.length == 3)
+					if (data.length >= 3)
 					{
 						if (logic.cmdRemoveGameConfig(data[1], msg.substring(Config.CMD_REMOVEGAMECONFIG.length() + data[1].length() + 2)))
 						{
@@ -268,9 +268,9 @@ public class PickupBot extends DiscordBot {
 				{
 					if (data.length == 2)
 					{
-						if (logic.cmdListGameConfig(data[1]))
+						if (logic.cmdListGameConfig(user, data[1]))
 						{
-							super.sendMsg(channel, Config.admin_cmd_successful + msg);
+							// if successful it will print the info
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
@@ -379,7 +379,8 @@ public class PickupBot extends DiscordBot {
 			{
 				if (data.length == 2)
 				{
-					switch (data[1])
+					String cmd = (!data[1].startsWith("!") ? "!" : "") + data[1];
+					switch (cmd)
 					{
 						case Config.CMD_ADD: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ADD); break;
 						case Config.CMD_REMOVE: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_REMOVE); break;
@@ -410,19 +411,21 @@ public class PickupBot extends DiscordBot {
 						case Config.CMD_ENABLEGAMETYPE: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ENABLEGAMETYPE); break;
 						case Config.CMD_DISABLEGAMETYPE: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_DISABLEGAMETYPE); break;
 						case Config.CMD_SHOWMATCHES: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_SHOWMATCHES); break;
+						case Config.CMD_ADDGAMECONFIG: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ADDGAMECONFIG); break;
+						case Config.CMD_REMOVEGAMECONFIG: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_REMOVEGAMECONFIG); break;
+						case Config.CMD_LISTGAMECONFIG: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_LISTGAMECONFIG); break;
+						default: super.sendMsg(channel, Config.help_unknown); break;
 					}
 				}
 				else
 				{
 					if (channel.equals(pubchan))
 					{
-						super.sendMsg(channel, Config.help_cmd_avi);
-						super.sendMsg(channel, Config.PUB_LIST);
+						super.sendMsg(channel, Config.help_cmd_avi + "\n" + Config.PUB_LIST);
 					}
 					if (hasAdminRights(user) && channel.type == DiscordChannelType.DM )
 					{
-						super.sendMsg(channel, Config.help_cmd_avi);
-						super.sendMsg(channel, Config.ADMIN_LIST);
+						super.sendMsg(channel, Config.help_cmd_avi + "\n" + Config.ADMIN_LIST);
 					}
 				}
 			}
@@ -451,7 +454,7 @@ public class PickupBot extends DiscordBot {
 		}
 	}
 		
-	private boolean hasAdminRights(DiscordUser user) {
+	public boolean hasAdminRights(DiscordUser user) {
 		List<String> roleList = user.getRoles(DiscordBot.getGuildID());
 		List<String> adminList = logic.getAdminList();
 		for (String s : roleList) {

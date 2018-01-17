@@ -236,7 +236,6 @@ public class PickupLogic {
 	}
 
 	public boolean cmdReset(String cmd, String mode) {
-		Gametype gt = getGametypeByString(mode);
 		if (cmd.equals("all")) {
 			for (Match match : ongoingMatches) {
 				match.reset();
@@ -248,7 +247,8 @@ public class PickupLogic {
 			bot.sendMsg(bot.getPubchan(), Config.pkup_reset_all);
 			return true;
 		} else if (cmd.equals("cur")) {
-			if (gt != null && curMatch.keySet().contains(gt)) {
+			Gametype gt = getGametypeByString(mode);
+			if (gt != null) {
 				curMatch.get(gt).reset();
 				createMatch(gt);
 			} else {
@@ -260,18 +260,25 @@ public class PickupLogic {
 			bot.sendMsg(bot.getPubchan(), Config.pkup_reset_cur);
 			return true;
 		} else {
-			try {
-				int idx = Integer.valueOf(cmd);
-				for (Match match : ongoingMatches) {
-					if (match.getID() == idx) {
-						match.reset();
-						bot.sendMsg(bot.getPubchan(), Config.pkup_reset_id.replace(".id.", cmd));
-						return true;
+			Gametype gt = getGametypeByString(cmd);
+			if (gt != null) {
+				curMatch.get(gt).reset();
+				createMatch(gt);
+				bot.sendMsg(bot.getPubchan(), Config.pkup_reset_type.replace(".gametype.", gt.getName()));
+			} else {
+				try {
+					int idx = Integer.valueOf(cmd);
+					for (Match match : ongoingMatches) {
+						if (match.getID() == idx) {
+							match.reset();
+							bot.sendMsg(bot.getPubchan(), Config.pkup_reset_id.replace(".id.", cmd));
+							return true;
+						}
 					}
+					
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
 				}
-				
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
 			}
 		}
 		return false;
@@ -387,7 +394,7 @@ public class PickupLogic {
 		return true;
 	}
 	
-	public boolean cmdListGameConfig(String gametype) {
+	public boolean cmdListGameConfig(DiscordUser user, String gametype) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
 		
@@ -402,8 +409,10 @@ public class PickupLogic {
 		String msg = Config.pkup_config_list;
 		msg = msg.replace(".gametype.", gt.getName());
 		msg = msg.replace(".configlist.", configlist);
+		bot.sendMsg(user, msg);
 		
 		return true;
+//		return !configlist.isEmpty(); // we sent the info anyways, so its fine
 	}
 	
 	public boolean cmdAddServer(String serveraddr, String rcon) {

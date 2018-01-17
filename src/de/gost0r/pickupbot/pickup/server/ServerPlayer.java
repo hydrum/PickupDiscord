@@ -18,9 +18,9 @@ public class ServerPlayer {
 	public String ip;
 	public String auth;
 	public Player player = null;
-	public CTF_Stats ctfstats = new CTF_Stats();
+	public CTF_Stats ctfstats;
 	
 	public ServerPlayer() {
-		
+		ctfstats = new CTF_Stats();
 	}
 }

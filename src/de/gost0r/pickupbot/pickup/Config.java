@@ -21,7 +21,7 @@ public class Config {
 
 	public static final String CMD_ADDGAMECONFIG		= "!addgameconfig";
 	public static final String CMD_REMOVEGAMECONFIG		= "!delgameconfig";
-	public static final String CMD_LISTGAMECONFIG		= "!listgameconfig";
+	public static final String CMD_LISTGAMECONFIG		= "!showgameconfig";
 	
 	public static final String CMD_REGISTER				= "!register";
 	public static final String CMD_GETELO				= "!elo";
@@ -60,7 +60,7 @@ public class Config {
 	public static final String USE_CMD_MAPS				= "!maps";
 	public static final String USE_CMD_MAP				= "!map <mapname>";
 	public static final String USE_CMD_STATUS			= "!status";
-	public static final String USE_CMD_HELP				= "!help <!command>";
+	public static final String USE_CMD_HELP				= "!help <command>";
 	
 	public static final String USE_CMD_LOCK				= "!lock";
 	public static final String USE_CMD_UNLOCK			= "!unlock";
@@ -75,7 +75,7 @@ public class Config {
 	
 	public static final String USE_CMD_ADDGAMECONFIG	= "!addgameconfig <gametype> <string>";
 	public static final String USE_CMD_REMOVEGAMECONFIG	= "!delgameconfig <gametype> <string>";
-	public static final String USE_CMD_LISTGAMECONFIG	= "!listgameconfig <gametype>";
+	public static final String USE_CMD_LISTGAMECONFIG	= "!showgameconfig <gametype>";
 	
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
 	public static final String USE_CMD_GETELO			= "!elo </urtauth/>";
@@ -115,7 +115,8 @@ public class Config {
 //	public static final String pkup_started				= "**.gametype.**: Game has already started. .status. - .time. minutes in.";
 
 	public static final String pkup_reset_all 			= "*All matches have been reset.*";
-	public static final String pkup_reset_cur 			= "*The current match have been reset.*";
+	public static final String pkup_reset_cur 			= "*The current matches have been reset.*";
+	public static final String pkup_reset_type 			= "*.gametype. has been reset.*";
 	public static final String pkup_reset_id 			= "*The match .id. has been reset.*";
 	
 	public static final String pkup_match_print_live	= "**[** Pickup Game #.gamenumber. **][** Live **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
@@ -136,7 +137,7 @@ public class Config {
 	public static final String pkup_aftermath_result	= ".team. team .result. (.score.) -";
 	public static final String pkup_aftermath_player	= ".player. (.elochange.)";
 
-	public static final String pkup_config_list 		= "Gameconfig for .gametype.:\n.configlist.";
+	public static final String pkup_config_list 		= "Gameconfig for .gametype.\n.configlist.";
 	
 	public static final String pkup_getelo				= "#.rank.\t **.urtauth.**\t .elo. (.elochange.)";
 	public static final String pkup_top5_header			= "**Top5:**";
@@ -167,7 +168,9 @@ public class Config {
 
 	public static final String wrong_argument_amount	= "Wrong amount of arguments: ";
 	public static final String help_prefix				= "How to use the command: ";
-	public static final String help_cmd_avi				= "These commands are available (use !help <!command> for more info): ";
+	public static final String help_cmd_avi				= "These commands are available (use " + USE_CMD_HELP + " for more info): ";
+	
+	public static final String help_unknown				= "I do not know that command.";
 
 	public static final String lock_enable				= "*Game is now locked.*";
 	public static final String lock_disable				= "*Game is now unlocked.*";

@@ -1,6 +1,7 @@
 package de.gost0r.pickupbot.pickup.server;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import de.gost0r.pickupbot.pickup.Match;
@@ -65,7 +66,7 @@ public class ServerMonitor implements Runnable {
 		updatePlayers(rpp);		
 		evaluateState(rpp);
 		
-//		forceplayers();
+		forceplayers();
 		
 		if (state == ServerState.WELCOME)
 		{
@@ -95,19 +96,19 @@ public class ServerMonitor implements Runnable {
 //			server.sendRcon("forceready");		
 //			
 //		}
-		if (players.size() < 10) {
-			int[] time = new int[3];
-			time[0] = Integer.valueOf(gameTime.split(":")[0]); // hours
-			time[1] = Integer.valueOf(gameTime.split(":")[1]); // mins
-			time[2] = Integer.valueOf(gameTime.split(":")[2]); // secs
-			if (time[1] < 5) {
-				// ABORT GAME
-				server.sendRcon("bigtext \"ABORT MATCH DUE TO NOSHOW.");
-				System.out.println("MATCH ABORT");
-				match.abort();
-				stop();
-			}
-		}
+//		if (players.size() < match.getGametype().getTeamSize()*2) {
+//			int[] time = new int[3];
+//			time[0] = Integer.valueOf(gameTime.split(":")[0]); // hours
+//			time[1] = Integer.valueOf(gameTime.split(":")[1]); // mins
+//			time[2] = Integer.valueOf(gameTime.split(":")[2]); // secs
+//			if (time[1] < 5) {
+//				// ABORT GAME
+//				server.sendRcon("bigtext \"ABORT MATCH DUE TO NOSHOW.");
+//				System.out.println("MATCH ABORT");
+//				match.abort();
+//				stop();
+//			}
+//		}
 	}
 
 	private void saveStats(RconPlayersParsed rpp) {
@@ -138,34 +139,33 @@ public class ServerMonitor implements Runnable {
 		for (ServerPlayer sp : players) {
 			if (sp.state == ServerPlayerState.Connected || sp.state == ServerPlayerState.Reconnected) {
 				Player player = Player.get(sp.auth);				
-				if (player != null) {
+				if (player != null && match.isInMatch(player)) {
 					sp.player = player;
 					match.getStats(player).updateStatus(MatchStats.Status.PLAYING);
 					match.getStats(player).updateIP(sp.ip);
-				} else { // if player not authed or player unknown -> kick
-					System.out.println("Didn't find " + sp.auth + " in the registered player list. -> kick");
-					server.sendRcon("kick " + sp.id);
+				} else if (player != null && match.getLogic().bot.hasAdminRights(player.getDiscordUser())) {
+					// PLAYER IS AN ADMIN, DONT FORCE/KICK HIM
+					continue;
+				} else { // if player not authed, auth not registered or not playing in this match -> kick
+					System.out.println("Didn't find " + sp.name + " (" + sp.auth + ") signed up for this match  -> kick");
+//					server.sendRcon("kick " + sp.id);
 					continue;
 				}
 				
-				String team = match.getTeam(player);
-				if (team == null) { // player not in match
-					System.out.println("Player " + sp.auth + " is not listed as match player. -> kick");
-					server.sendRcon("KICK " + sp.id);
-				}
-				
-				if (team != null && state != ServerState.SCORE) {
-						String oppTeam = team.equalsIgnoreCase("red") ? "blue" : "red";
-						if (!sp.team.equalsIgnoreCase(team) && firstHalf)
-						{
-							System.out.println("Player " + sp.auth + " is in the wrong team.");
-							server.sendRcon("force " + sp.id + " " + team.toUpperCase());
-						}
-						else if (sp.team.equalsIgnoreCase(team) && !firstHalf)
-						{
-							System.out.println("Player " + sp.auth + " is in the wrong team.");
-							server.sendRcon("force " + sp.id + " " + oppTeam.toUpperCase());
-						}
+				String team = match.getTeam(player);				
+				if (team != null && state != ServerState.SCORE)
+				{
+					String oppTeam = team.equalsIgnoreCase("red") ? "blue" : "red";
+					if (!sp.team.equalsIgnoreCase(oppTeam) && firstHalf)
+					{
+						System.out.println("Player " + sp.name + " (" + sp.auth + ") is in the wrong team. Supposed to be: " + team + " but currently " + sp.team);
+//						server.sendRcon("force " + sp.id + " " + team.toUpperCase());
+					}
+					else if (sp.team.equalsIgnoreCase(team) && !firstHalf)
+					{
+						System.out.println("Player " + sp.name + " (" + sp.auth + ") is in the wrong team. Supposed to be: " + oppTeam + " but currently " + sp.team);
+//						server.sendRcon("force " + sp.id + " " + oppTeam.toUpperCase());
+					}
 				}
 			
 			} else { // not active
@@ -183,14 +183,17 @@ public class ServerMonitor implements Runnable {
 		if (state == ServerState.WELCOME) {
 			if (rpp.matchready[0] && rpp.matchready[1] && rpp.warmupphase) {
 				state = ServerState.WARMUP;
+				System.out.println("SWITCHED WELCOME -> WARMUP");
 			}
 		} else if (state == ServerState.WARMUP) {
 			if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase) {
 				state = ServerState.LIVE;
+				System.out.println("SWITCHED WARMUP -> LIVE");
 			}
 		} else if (state == ServerState.LIVE && rpp.gametime.equals("00:00:00")) {
 			if (!rpp.matchready[0] && !rpp.matchready[1]) {
 				state = ServerState.SCORE;
+				System.out.println("SWITCHED LIVE -> SCORE");
 				saveStats(rpp);
 				if (!swapRoles || (swapRoles && !firstHalf)) {
 					endGame();
@@ -199,8 +202,10 @@ public class ServerMonitor implements Runnable {
 		} else if (state == ServerState.SCORE && !rpp.gametime.equals("00:00:00")) {
 			if (!rpp.matchready[0] && !rpp.matchready[1] && !rpp.warmupphase) {
 				state = ServerState.WELCOME;
+				System.out.println("SWITCHED SCORE -> WELCOME");
 			} else if (rpp.matchready[0] && rpp.matchready[1] && rpp.warmupphase) {
 				state = ServerState.WARMUP;
+				System.out.println("SWITCHED SCORE -> WARMUP");
 			}
 		}
 	}
@@ -222,12 +227,12 @@ public class ServerMonitor implements Runnable {
 			
 			if (found != null) {
 				if (found.state == ServerPlayerState.Disconnected) {
-					System.out.println("Player " + found.auth + " reconnected.");
 					found.state = ServerPlayerState.Reconnected;
+					System.out.println("Player " + player.name + " (" + found.auth + ") reconnected.");
 				}
 				oldPlayers.remove(found);
 			} else {
-				System.out.println("Player " + player.auth + " connected.");
+				System.out.println("Player " + player.name + " (" + player.auth + ") connected.");
 				newPlayers.add(player);
 			}
 		}
@@ -235,8 +240,8 @@ public class ServerMonitor implements Runnable {
 		for (ServerPlayer player : oldPlayers) {
 			if (player.state != ServerPlayerState.Disconnected) {
 				player.state = ServerPlayerState.Disconnected;
+				System.out.println("Player " + player.name + " (" + player.auth + ") disconnected.");
 			}
-			System.out.println("Player " + player.auth + " disconnected.");
 		}
 		
 		for (ServerPlayer player : newPlayers) {
@@ -258,74 +263,93 @@ public class ServerMonitor implements Runnable {
 		RconPlayersParsed rpp = new RconPlayersParsed();
 		
 		String playersString = server.sendRcon("players");
+		System.out.println("rcon players: >>>" + playersString + "<<<");
 		String[] stripped = playersString.split("\n");
 		
-		for (int i = 0; i < stripped.length; i++) {
-			
-			if (stripped[i].startsWith("Map:"))
+		boolean awaitsStats = false;		
+		for (String line : stripped)
+		{
+			System.out.println("line: =]]]" + line + "[[[=");
+			if (line.startsWith("Map:"))
 			{
-				rpp.map = stripped[i].split(" ")[1];
+				rpp.map = line.split(" ")[1];
 			}
-			else if (stripped[i].startsWith("Players"))
+			else if (line.startsWith("Players"))
 			{
-				rpp.playercount = Integer.valueOf(stripped[i].split(" ")[1]);				
+				rpp.playercount = Integer.valueOf(line.split(" ")[1]);				
 			}
-			else if (stripped[i].startsWith("GameType"))
+			else if (line.startsWith("GameType"))
 			{
-				rpp.gametype = stripped[i].split(" ")[1];
+				rpp.gametype = line.split(" ")[1];
 			}
-			else if (stripped[i].startsWith("Scores"))
+			else if (line.startsWith("Scores"))
 			{
-				rpp.scores[0] = Integer.valueOf(stripped[i].split(" ")[1].split(":")[1]);
-				rpp.scores[1] = Integer.valueOf(stripped[i].split(" ")[2].split(":")[1]);
+				rpp.scores[0] = Integer.valueOf(line.split(" ")[1].split(":")[1]);
+				rpp.scores[1] = Integer.valueOf(line.split(" ")[2].split(":")[1]);
 			}
-			else if (stripped[i].startsWith("MatchMode"))
+			else if (line.startsWith("MatchMode"))
 			{
-				rpp.matchmode = stripped[i].split(" ")[1].equals("ON") ? true : false;
+				rpp.matchmode = line.split(" ")[1].equals("ON") ? true : false;
 			}
-			else if (stripped[i].startsWith("MatchReady"))
+			else if (line.startsWith("MatchReady"))
 			{
-				rpp.matchready[0] = stripped[i].split(" ")[1].split(":")[1].equals("YES") ? true : false;
-				rpp.matchready[1] = stripped[i].split(" ")[2].split(":")[1].equals("YES") ? true : false;
+				rpp.matchready[0] = line.split(" ")[1].split(":")[1].equals("YES") ? true : false;
+				rpp.matchready[1] = line.split(" ")[2].split(":")[1].equals("YES") ? true : false;
 			}
-			else if (stripped[i].startsWith("WarmupPhase"))
+			else if (line.startsWith("WarmupPhase"))
 			{
-				rpp.warmupphase = stripped[i].split(" ")[1].equals("YES") ? true : false;
+				rpp.warmupphase = line.split(" ")[1].equals("YES") ? true : false;
 			}
-			else if (stripped[i].startsWith("GameTime"))
+			else if (line.startsWith("GameTime"))
 			{
-				rpp.gametime = stripped[i].split(" ")[1];
+				rpp.gametime = line.split(" ")[1];
 			}
 			else
 			{
+				System.out.println("NOW PLAYERS:");
+				String[] splitted = line.split(" ");
+				System.out.println("splitted = " + Arrays.toString(splitted));
 				
-				String[] line = stripped[i].split(" ");
+				if (splitted.equals("[connecting]")) continue;
 				
-				if (line[0].equals("[connecting]")) continue;
-				
-				if (line[0].equals("CTF:")) {
+				if (splitted.equals("CTF:") && awaitsStats) {
 					// ctfstats
-					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).caps = line[1].split(":")[1];
-					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).returns = line[2].split(":")[1];
-					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).fc_kills = line[3].split(":")[1];
-					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).stop_caps = line[4].split(":")[1];
-					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).protect_flag = line[5].split(":")[1];
+					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).caps = splitted[1].split(":")[1];
+					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).returns = splitted[2].split(":")[1];
+					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).fc_kills = splitted[3].split(":")[1];
+					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).stop_caps = splitted[4].split(":")[1];
+					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).protect_flag = splitted[5].split(":")[1];
+					awaitsStats = false;
 				}
-				else if (rpp.players.size() < rpp.playercount) // TODO: use something else
+				else if (splitted.equals("BOMB:") && awaitsStats)
+				{
+					/*	BOMB: PLT:%i SBM:%i PKB:%i DEF:%i KBD:%i KBC:%i PKBC:%i
+						>BOMB_PLANT
+						>BOMB_BOOM
+						>BOMBED
+						>BOMB_DEFUSE
+						>KILL_DEFUSE
+						>KILL_BC
+						>PROTECT_BC
+					*/
+					awaitsStats = false;
+				}
+				else if (rpp.players.size() < rpp.playercount) 
 				{
 					ServerPlayer sp = new ServerPlayer();
 					sp.state = ServerPlayerState.Connected;
-					sp.id = line[0].split(":")[0];
-					sp.name = line[0].split(":")[1];
-					sp.team = line[1].split(":")[1];
-					sp.ctfstats.score = line[2].split(":")[1];
-					sp.ctfstats.deaths = line[3].split(":")[1];
-					sp.ctfstats.assists = line[4].split(":")[1];
-					sp.ping = line[5].split(":")[1];
-					sp.auth = line[6].split(":")[1];
-					sp.ip = line[7].split(":")[1];
+					sp.id = splitted[0].split(":")[0];
+					sp.name = splitted[0].split(":")[1];
+					sp.team = splitted[1].split(":")[1];
+					sp.ctfstats.score = splitted[2].split(":")[1];
+					sp.ctfstats.deaths = splitted[3].split(":")[1];
+					sp.ctfstats.assists = splitted[4].split(":")[1];
+					sp.ping = splitted[5].split(":")[1];
+					sp.auth = splitted[6].split(":")[1];
+					sp.ip = splitted[7].split(":")[1];
 					
 					rpp.players.add(sp);
+					awaitsStats = true;
 				}
 				
 			}

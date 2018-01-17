@@ -357,6 +357,7 @@ public class Database {
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				Gametype gametype = new Gametype(rs.getString("gametype"), rs.getInt("teamsize"), Boolean.valueOf(rs.getString("active")));
+				System.out.println("loadGametypes(): " + gametype.getName() + " active=" + gametype.getActive());
 				sql = "SELECT config FROM gameconfig WHERE gametype=?";
 				PreparedStatement pstmt = c.prepareStatement(sql);
 				pstmt.setString(1, gametype.getName());
@@ -391,6 +392,7 @@ public class Database {
 					maplist.add(map);
 				}
 				map.setGametype(logic.getGametypeByString(rs.getString("gametype")), Boolean.valueOf(rs.getString("active")));
+				System.out.println(map.name + " " + rs.getString("gametype") + "="+ map.isActiveForGametype(logic.getGametypeByString(rs.getString("gametype"))));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -667,10 +669,11 @@ public class Database {
 			pstmt.setInt(1, gt.getTeamSize());
 			pstmt.setString(2, String.valueOf(gt.getActive()));
 			pstmt.setString(3, gt.getName());
+			pstmt.executeUpdate();
 			sql = "DELETE FROM gameconfig WHERE gametype=?";
 			pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, gt.getName());
-			pstmt.executeQuery();
+			pstmt.executeUpdate();
 			for (String config : gt.getConfig()) {
 				sql = "INSERT INTO gameconfig (gametype, config) VALUES (?, ?)";
 				pstmt = c.prepareStatement(sql);
@@ -678,7 +681,6 @@ public class Database {
 				pstmt.setString(2, config);
 				pstmt.executeUpdate();
 			}
-			pstmt.executeUpdate();
 			pstmt.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
