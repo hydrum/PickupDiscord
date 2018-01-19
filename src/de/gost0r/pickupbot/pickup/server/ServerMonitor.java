@@ -31,6 +31,8 @@ public class ServerMonitor implements Runnable {
 	private ServerState state;
 	private boolean firstHalf;
 	private boolean swapRoles;
+	
+	private RconPlayersParsed prevRPP;
 
 	public ServerMonitor(Server server, Match match) {
 		this.server = server;
@@ -86,10 +88,7 @@ public class ServerMonitor implements Runnable {
 		}
 		else if (state == ServerState.SCORE)
 		{
-			if (swapRoles && firstHalf) {
-				firstHalf = false;
-				System.out.println("first half ended!");
-			}
+			
 		}		
 	}
 
@@ -114,10 +113,10 @@ public class ServerMonitor implements Runnable {
 //		}
 	}
 
-	private void saveStats(RconPlayersParsed rpp) {
+	private void saveStats(int[] scorex) {
 		int half = firstHalf ? 0 : 1;
 		
-		score[half] = rpp.scores;
+		score[half] = scorex;
 
 		// save playerscores
 		for (ServerPlayer player : players) {
@@ -157,19 +156,19 @@ public class ServerMonitor implements Runnable {
 					continue;
 				}
 				
-				String team = match.getTeam(player);				
+				String team = match.getTeam(player);
 				if (team != null && state != ServerState.SCORE)
 				{
 					String oppTeam = team.equalsIgnoreCase("red") ? "blue" : "red";
-					if (!sp.team.equalsIgnoreCase(oppTeam) && firstHalf)
+					if (sp.team.equalsIgnoreCase(oppTeam) && firstHalf)
 					{
-						System.out.println("Player " + sp.name + " (" + sp.auth + ") is in the wrong team. Supposed to be: " + team + " but currently " + sp.team);
-//						server.sendRcon("force " + sp.id + " " + team.toUpperCase());
+						System.out.println("Player " + sp.name + " (" + sp.auth + ") is in the wrong team. Supposed to be: " + team.toUpperCase() + " but currently " + sp.team);
+						server.sendRcon("forceteam " + sp.id + " " + team.toUpperCase());
 					}
-					else if (sp.team.equalsIgnoreCase(team) && !firstHalf)
+					else if (!sp.team.equalsIgnoreCase(team) && !firstHalf)
 					{
-						System.out.println("Player " + sp.name + " (" + sp.auth + ") is in the wrong team. Supposed to be: " + oppTeam + " but currently " + sp.team);
-//						server.sendRcon("force " + sp.id + " " + oppTeam.toUpperCase());
+						System.out.println("Player " + sp.name + " (" + sp.auth + ") is in the wrong team. Supposed to be: " + oppTeam.toUpperCase() + " but currently " + sp.team);
+						server.sendRcon("forceteam " + sp.id + " " + oppTeam.toUpperCase());
 					}
 				}
 			
@@ -198,24 +197,32 @@ public class ServerMonitor implements Runnable {
 				state = ServerState.LIVE;
 				System.out.println("SWITCHED WARMUP -> LIVE");
 			}
-		} else if (state == ServerState.LIVE && rpp.gametime.equals("00:00:00")) {
-			if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase) {
+		} else if (state == ServerState.LIVE) {
+			if (rpp.gametime.equals("00:00:00")) {
 				state = ServerState.SCORE;
 				System.out.println("SWITCHED LIVE -> SCORE");
-				saveStats(rpp);
+			}
+		} else if (state == ServerState.SCORE) {
+			if (rpp.warmupphase) {				
+				if (rpp.matchready[0] && rpp.matchready[1]) {
+					state = ServerState.WARMUP;
+					System.out.println("SWITCHED SCORE -> WARMUP");
+				} else {
+					state = ServerState.WELCOME;
+					System.out.println("SWITCHED SCORE -> WELCOME");
+				}				
+
+				if (swapRoles && firstHalf) {
+					firstHalf = false;
+				}
+				
+				saveStats(prevRPP.scores);
 				if (!swapRoles || (swapRoles && !firstHalf)) {
 					endGame();
 				}
 			}
-		} else if (state == ServerState.SCORE && !rpp.gametime.equals("00:00:00")) {
-			if (!rpp.matchready[0] && !rpp.matchready[1] && !rpp.warmupphase) {
-				state = ServerState.WELCOME;
-				System.out.println("SWITCHED SCORE -> WELCOME");
-			} else if (rpp.matchready[0] && rpp.matchready[1] && rpp.warmupphase) {
-				state = ServerState.WARMUP;
-				System.out.println("SWITCHED SCORE -> WARMUP");
-			}
 		}
+		prevRPP = rpp;
 	}
 
 	private void updatePlayers(RconPlayersParsed rpp) {
@@ -223,6 +230,9 @@ public class ServerMonitor implements Runnable {
 		List<ServerPlayer> newPlayers = new ArrayList<ServerPlayer>();
 		
 		for (ServerPlayer player : rpp.players) {
+			
+			if (player.state == ServerPlayerState.Connecting) continue; // ignore connecting players
+			
 			if (player.auth.equals("---")) {
 				requestAuth(player);
 			}
@@ -230,7 +240,8 @@ public class ServerMonitor implements Runnable {
 			// find player in serverplayerlist
 			ServerPlayer found = null;
 			for (ServerPlayer player_x : players) {
-				if (player_x.auth.equalsIgnoreCase(player.auth) && !player.auth.equals("---")) {
+				if (player.ip.equals(player_x.ip) && player_x.auth.equalsIgnoreCase(player.auth) && !player.auth.equals("---")) {
+					player_x.copy(player);
 					found = player_x;
 					break;
 				}
@@ -264,8 +275,10 @@ public class ServerMonitor implements Runnable {
 		String replyAuth = server.sendRcon("auth-whois " + player.id);
 		System.out.println(replyAuth);
 		if (replyAuth != null && !replyAuth.isEmpty()) {
+			if (replyAuth.startsWith("Client in slot")) return;
 			String[] splitted = replyAuth.split(" ");
 			player.auth = splitted[8];
+			player.auth = player.auth.isEmpty() ? "---" : player.auth;
 		} else {
 			requestAuth(player);
 		}
@@ -273,9 +286,10 @@ public class ServerMonitor implements Runnable {
 
 	private boolean getSwapRoles() {
 		String swaproles = server.sendRcon("g_swaproles");
+//		System.out.println(swaproles);
 		String[] split = swaproles.split("\"");
 		if (split.length > 4) {
-			return split[3].equals("1");
+			return split[3].equals("1^7");
 		}
 		return false;
 	}
@@ -329,6 +343,10 @@ public class ServerMonitor implements Runnable {
 			{
 				rpp.gametime = line.split(" ")[1];
 			}
+			else if (line.startsWith("RoundTime"))
+			{
+				rpp.roundtime = line.split(" ")[1];
+			}
 			else
 			{
 				String[] splitted = line.split(" ");
@@ -361,7 +379,6 @@ public class ServerMonitor implements Runnable {
 				else if (rpp.players.size() < rpp.playercount) 
 				{
 					ServerPlayer sp = new ServerPlayer();
-					sp.state = ServerPlayerState.Connected;
 					sp.id = splitted[0].split(":")[0];
 					sp.name = splitted[0].split(":")[1];
 					sp.team = splitted[1].split(":")[1];
@@ -371,6 +388,12 @@ public class ServerMonitor implements Runnable {
 					sp.ping = splitted[5].split(":")[1];
 					sp.auth = splitted[6].split(":")[1];
 					sp.ip = splitted[7].split(":")[1];
+					
+					if (sp.ping.equals("0")) {
+						sp.state = ServerPlayerState.Connecting;
+					} else {
+						sp.state = ServerPlayerState.Connected;
+					}
 					
 					rpp.players.add(sp);
 					awaitsStats = true;
@@ -386,9 +409,9 @@ public class ServerMonitor implements Runnable {
 
 		// PROCEED WITH STATS/ELO GENERATING
 
-        int redscore = score[0][0] + score[1][1]; //score_red_first + score_blue_second;
-        int bluescore = score[0][1] + score[1][0]; //score_blue_first + score_red_second;
-        int[] finalscore = { redscore, bluescore };
+		int redscore = score[0][0] + score[1][1]; //score_red_first + score_blue_second;
+		int bluescore = score[0][1] + score[1][0]; //score_blue_first + score_red_second;
+		int[] finalscore = { redscore, bluescore };
         for (ServerPlayer player : players) {
         	if (player.player != null) {
         		int team = match.getTeam(player.player).equalsIgnoreCase("red") ? 0 : 1;
@@ -406,13 +429,13 @@ public class ServerMonitor implements Runnable {
         		
         		double result = 32d * (w - e);
         		int elochange = (int) Math.floor(result);
-    			int newelo = player.player.getElo() + elochange;
-    			System.out.println("ELO player: " + player.auth + " old ELO: " + player.player.getElo() + " new ELO: " + newelo + " (" + (!String.valueOf(elochange).startsWith("-") ? "+" : "") + elochange + ")");
-    			player.player.addElo(elochange);
+				int newelo = player.player.getElo() + elochange;
+				System.out.println("ELO player: " + player.auth + " old ELO: " + player.player.getElo() + " new ELO: " + newelo + " (" + (!String.valueOf(elochange).startsWith("-") ? "+" : "") + elochange + ")");
+				player.player.addElo(elochange);
         	}
         }
         match.setScore(finalscore);
-        match.end();
+		match.end();
 		stop();
 	}
 }

@@ -142,12 +142,11 @@ public class PickupLogic {
 		String msg = Config.pkup_getelo;
 		msg = msg.replace(".urtauth.", p.getUrtauth());
 		msg = msg.replace(".elo.", String.valueOf(p.getElo()));
-		String elochange;
+		String elochange = "";
 		if (p.getEloChange() >= 0) {
 			elochange = "+" + String.valueOf(p.getEloChange());
-		} else {
-			elochange = "-" + String.valueOf(p.getEloChange());
 		}
+		elochange += String.valueOf(p.getEloChange());
 		msg = msg.replace(".elochange.", elochange);
 		msg = msg.replace(".rank.", String.valueOf(db.getRankForPlayer(p)));
 		if (sendMsg) {

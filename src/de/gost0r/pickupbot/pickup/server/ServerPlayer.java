@@ -5,6 +5,7 @@ import de.gost0r.pickupbot.pickup.Player;
 public class ServerPlayer {
 	
 	public enum ServerPlayerState {
+		Connecting,
 		Connected,
 		Disconnected,
 		Reconnected
@@ -22,5 +23,17 @@ public class ServerPlayer {
 	
 	public ServerPlayer() {
 		ctfstats = new CTF_Stats();
+	}
+	
+	public void copy(ServerPlayer other) {
+		this.state = other.state;
+		this.id = other.id;
+		this.name = other.name;
+		this.team = other.team;
+		this.ping = other.ping;
+		this.ip = other.ip;
+		this.auth = other.auth;
+		this.player = other.player;
+		this.ctfstats = other.ctfstats;
 	}
 }

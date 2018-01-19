@@ -291,8 +291,6 @@ public class Match {
 			
 			id = logic.db.createMatch(this);
 			
-			server.startObservation(this);
-			
 			// MESSAGE HYPE
 			
 			
@@ -363,6 +361,9 @@ public class Match {
 			}
 			server.sendRcon("g_password " + server.password);
 			server.sendRcon("map " + this.map.name);
+			server.sendRcon("warmup 10");
+			
+			server.startObservation(this);
 			
 			logic.matchStarted(this);
 		}

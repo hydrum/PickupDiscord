@@ -13,6 +13,7 @@ public class RconPlayersParsed {
 	public boolean[] matchready = new boolean[2];
 	public boolean warmupphase;
 	public String gametime;
+	public String roundtime;
 	
 	public List<ServerPlayer> players = new ArrayList<>();
 	
