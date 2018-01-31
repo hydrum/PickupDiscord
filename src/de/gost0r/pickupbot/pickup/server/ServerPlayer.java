@@ -1,5 +1,6 @@
 package de.gost0r.pickupbot.pickup.server;
 
+import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.pickup.Player;
 
 public class ServerPlayer {
@@ -35,5 +36,14 @@ public class ServerPlayer {
 		this.auth = other.auth;
 		this.player = other.player;
 		this.ctfstats = other.ctfstats;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof ServerPlayer) {
+			ServerPlayer p = (ServerPlayer) o;
+			return p.auth.equals(auth) && p.ip.equals(ip);
+		}
+		return false;
 	}
 }

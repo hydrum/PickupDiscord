@@ -65,7 +65,6 @@ public class ServerMonitor implements Runnable {
 	private void observe() {
 		RconPlayersParsed rpp = parseRconPlayers();		
 		gameTime = rpp.gametime;
-		swapRoles = getSwapRoles();
 		
 		updatePlayers(rpp);		
 		evaluateState(rpp);
@@ -117,6 +116,16 @@ public class ServerMonitor implements Runnable {
 		int half = firstHalf ? 0 : 1;
 		
 		score[half] = scorex;
+		
+		// reset matchstats to previous
+		for (ServerPlayer sp : prevRPP.players) {
+			for (ServerPlayer player : players) {
+				if (sp.equals(player)) {
+					player.copy(sp);
+					continue;
+				}
+			}
+		}
 
 		// save playerscores
 		for (ServerPlayer player : players) {
@@ -160,12 +169,12 @@ public class ServerMonitor implements Runnable {
 				if (team != null && state != ServerState.SCORE)
 				{
 					String oppTeam = team.equalsIgnoreCase("red") ? "blue" : "red";
-					if (sp.team.equalsIgnoreCase(oppTeam) && firstHalf)
+					if (!sp.team.equalsIgnoreCase(team) && firstHalf)
 					{
 						System.out.println("Player " + sp.name + " (" + sp.auth + ") is in the wrong team. Supposed to be: " + team.toUpperCase() + " but currently " + sp.team);
 						server.sendRcon("forceteam " + sp.id + " " + team.toUpperCase());
 					}
-					else if (!sp.team.equalsIgnoreCase(team) && !firstHalf)
+					else if (!sp.team.equalsIgnoreCase(oppTeam) && !firstHalf) // we should have switched teams -.-
 					{
 						System.out.println("Player " + sp.name + " (" + sp.auth + ") is in the wrong team. Supposed to be: " + oppTeam.toUpperCase() + " but currently " + sp.team);
 						server.sendRcon("forceteam " + sp.id + " " + oppTeam.toUpperCase());
@@ -184,41 +193,54 @@ public class ServerMonitor implements Runnable {
 
 
 	private void evaluateState(RconPlayersParsed rpp) {
-		if (state == ServerState.WELCOME) {
-			if (rpp.matchready[0] && rpp.matchready[1] && rpp.warmupphase) {
+		if (state == ServerState.WELCOME)
+		{
+			if (rpp.matchready[0] && rpp.matchready[1] && rpp.warmupphase)
+			{
 				state = ServerState.WARMUP;
 				System.out.println("SWITCHED WELCOME -> WARMUP");
-			} else if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase) {
+			}
+			else if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase)
+			{
 				state = ServerState.LIVE;
 				System.out.println("SWITCHED WELCOME -> LIVE");
 			}
-		} else if (state == ServerState.WARMUP) {
-			if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase) {
+		}
+		else if (state == ServerState.WARMUP)
+		{
+			if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase)
+			{
 				state = ServerState.LIVE;
 				System.out.println("SWITCHED WARMUP -> LIVE");
 			}
-		} else if (state == ServerState.LIVE) {
-			if (rpp.gametime.equals("00:00:00")) {
+		}
+		else if (state == ServerState.LIVE)
+		{
+			if (rpp.gametime.equals("00:00:00"))
+			{
 				state = ServerState.SCORE;
 				System.out.println("SWITCHED LIVE -> SCORE");
 			}
-		} else if (state == ServerState.SCORE) {
+		}
+		else if (state == ServerState.SCORE)
+		{
 			if (rpp.warmupphase) {				
-				if (rpp.matchready[0] && rpp.matchready[1]) {
+				if (rpp.matchready[0] && rpp.matchready[1])
+				{
 					state = ServerState.WARMUP;
 					System.out.println("SWITCHED SCORE -> WARMUP");
 				} else {
 					state = ServerState.WELCOME;
 					System.out.println("SWITCHED SCORE -> WELCOME");
-				}				
-
-				if (swapRoles && firstHalf) {
-					firstHalf = false;
 				}
+				
+				swapRoles = getSwapRoles();
 				
 				saveStats(prevRPP.scores);
 				if (!swapRoles || (swapRoles && !firstHalf)) {
 					endGame();
+				} else {
+					firstHalf = false;
 				}
 			}
 		}
@@ -240,7 +262,7 @@ public class ServerMonitor implements Runnable {
 			// find player in serverplayerlist
 			ServerPlayer found = null;
 			for (ServerPlayer player_x : players) {
-				if (player.ip.equals(player_x.ip) && player_x.auth.equalsIgnoreCase(player.auth) && !player.auth.equals("---")) {
+				if (player.equals(player_x)) {
 					player_x.copy(player);
 					found = player_x;
 					break;
@@ -286,7 +308,7 @@ public class ServerMonitor implements Runnable {
 
 	private boolean getSwapRoles() {
 		String swaproles = server.sendRcon("g_swaproles");
-//		System.out.println(swaproles);
+		System.out.println(swaproles);
 		String[] split = swaproles.split("\"");
 		if (split.length > 4) {
 			return split[3].equals("1^7");
@@ -412,7 +434,10 @@ public class ServerMonitor implements Runnable {
 		int redscore = score[0][0] + score[1][1]; //score_red_first + score_blue_second;
 		int bluescore = score[0][1] + score[1][0]; //score_blue_first + score_red_second;
 		int[] finalscore = { redscore, bluescore };
+		System.out.println("Score: " + Arrays.toString(finalscore));
         for (ServerPlayer player : players) {
+        	System.out.println("Checking " + player.name);
+        	System.out.println("Player.player == null: " + player.player == null);
         	if (player.player != null) {
         		int team = match.getTeam(player.player).equalsIgnoreCase("red") ? 0 : 1;
         		int opp = (team + 1) % 2;
