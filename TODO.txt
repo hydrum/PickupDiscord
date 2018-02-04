@@ -27,6 +27,7 @@ TODO:
 (x) rs2 closed => failed pstmt
 (x) !add should highlight the added player
 ( ) !reset saveMatch not working - when aborting (see stacktrace)
+( ) rework match abort/cancel/end behaviour to be more consistent
 (x) !help !cmd without !
 (x) !top5 crash on 5th entry: nullpointer for player
 ( ) !showmatch starttime
@@ -36,24 +37,12 @@ TODO:
 ( ) !reset 19 didn't stop the server monitor
 
 (x) test whether swaproles is actually detecting stuff
-( ) matchstats aren't recorded at all - check out why  => related to us using the newly-overwritten version of rpp when the warmup was detected?
-( ) check why such msgs happen:
-	[03:28] BOTUrTPickupBot: TEST: Aftermath #26:
-	Red team lost (1-4) - @Gost0r (12)
-	Blue team won (4-1) - @Biddle (0)
-( ) check why such msgs happen:
-	[03:31] BOTUrTPickupBot: Top5:
-	#1     gost0r     1073 (+1212)
-	#2     zmb     1048 (+00)
-	#3     biddle     1000 (+00)
-	#4     v3nd3tta     973 (-13)
-( ) "ELO player: auth old ELO: elo new ELO: newelo (elochange)" not being displayed on window - why?	
-( ) forceteam ignores spec
+(x) matchstats aren't recorded at all - check out why  => related to us using the newly-overwritten version of rpp when the warmup was detected?
 
-	
-	
-	
-	
+(x) forceteam ignores spec
+( ) check if ServerPlayer.player is now != null and proceed with statscalculation
+( ) fix SCORE->WELCOME transition when a full team left the match
+(x) implement error output for "no map for gametype"
 	
 	
 	

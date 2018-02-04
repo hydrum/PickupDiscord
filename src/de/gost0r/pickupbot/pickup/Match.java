@@ -145,6 +145,7 @@ public class Match {
 	public void abort() {
 		state = MatchState.Abort;
 		cleanUp();
+		logic.db.saveMatch(this);
 	}
 
 	public void end() {
@@ -152,14 +153,20 @@ public class Match {
 		cleanUp();
 		sendAftermath();
 		logic.matchRemove(this);
+		logic.db.saveMatch(this);
+	}
+
+	public void cancelStart() {
+		state = MatchState.Abort;
+		cleanUp();
+		logic.matchStarted(this);
+		logic.matchRemove(this);
 	}
 	
 	private void cleanUp() {
 		for(Player p : playerStats.keySet()) {
 			p.resetMap();
 		}
-		System.out.println(logic == null);
-		logic.db.saveMatch(this);
 		server.free();
 
 		logic.matchEnded(this);
@@ -231,6 +238,11 @@ public class Match {
 			}
 			System.out.println(tmp.size());
 			System.out.println(Arrays.toString(tmp.toArray()));
+			if (tmp.size() == 0) {
+				logic.bot.sendMsg(logic.bot.getPubchan(), "ERROR: NO MAP FOR GAMETYPE");
+				cancelStart();
+				return;
+			}
 			this.map = tmp.size() == 1 ? tmp.get(0) : tmp.get(rand.nextInt(tmp.size()-1));
 			System.out.println("Map: " + this.map.name);
 
@@ -361,7 +373,7 @@ public class Match {
 			}
 			server.sendRcon("g_password " + server.password);
 			server.sendRcon("map " + this.map.name);
-			server.sendRcon("warmup 10");
+			server.sendRcon("g_warmup 10");
 			
 			server.startObservation(this);
 			

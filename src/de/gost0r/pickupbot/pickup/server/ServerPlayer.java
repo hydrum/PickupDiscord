@@ -34,7 +34,7 @@ public class ServerPlayer {
 		this.ping = other.ping;
 		this.ip = other.ip;
 		this.auth = other.auth;
-		this.player = other.player;
+//		this.player = other.player; // don't override player reference
 		this.ctfstats = other.ctfstats;
 	}
 	

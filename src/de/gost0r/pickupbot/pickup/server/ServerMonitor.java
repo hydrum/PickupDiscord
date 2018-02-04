@@ -161,7 +161,7 @@ public class ServerMonitor implements Runnable {
 					continue;
 				} else { // if player not authed, auth not registered or not playing in this match -> kick
 					System.out.println("Didn't find " + sp.name + " (" + sp.auth + ") signed up for this match  -> kick");
-//					server.sendRcon("kick " + sp.id);
+					server.sendRcon("kick " + sp.id);
 					continue;
 				}
 				
@@ -224,7 +224,7 @@ public class ServerMonitor implements Runnable {
 		}
 		else if (state == ServerState.SCORE)
 		{
-			if (rpp.warmupphase) {				
+			if (rpp.warmupphase) {
 				if (rpp.matchready[0] && rpp.matchready[1])
 				{
 					state = ServerState.WARMUP;
@@ -233,18 +233,39 @@ public class ServerMonitor implements Runnable {
 					state = ServerState.WELCOME;
 					System.out.println("SWITCHED SCORE -> WELCOME");
 				}
-				
-				swapRoles = getSwapRoles();
-				
-				saveStats(prevRPP.scores);
-				if (!swapRoles || (swapRoles && !firstHalf)) {
-					endGame();
-				} else {
-					firstHalf = false;
+				handleScoreTransition();
+			} else {
+				if (getPlayerCount("red") == 0 || getPlayerCount("blue") == 0) {
+					state = ServerState.WELCOME;
+					System.out.println("SWITCHED SCORE -> WELCOME");
+					handleScoreTransition();
 				}
 			}
 		}
 		prevRPP = rpp;
+	}
+
+	private int getPlayerCount(String team) {
+		int count = 0;
+		for (ServerPlayer player : players) {
+			if (player.state == ServerPlayer.ServerPlayerState.Connected || player.state == ServerPlayer.ServerPlayerState.Reconnected) {
+				if (player.team.equalsIgnoreCase(team)) {
+					count++;
+				}
+			}
+		}
+		return count;
+	}
+
+	private void handleScoreTransition() {		
+		swapRoles = getSwapRoles();
+		
+		saveStats(prevRPP.scores);
+		if (!swapRoles || (swapRoles && !firstHalf)) {
+			endGame();
+		} else {
+			firstHalf = false;
+		}
 	}
 
 	private void updatePlayers(RconPlayersParsed rpp) {
