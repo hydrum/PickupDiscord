@@ -45,7 +45,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(user, Config.user_not_registered);
 				}
-				else sendNotice(user, Config.wrong_argument_amount + Config.USE_CMD_ADD);
+				else sendNotice(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADD));
 			}
 			else if (data[0].equals(Config.CMD_REMOVE))
 			{
@@ -58,7 +58,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(user, Config.user_not_registered);
 				}
-				else sendNotice(user, Config.wrong_argument_amount + Config.USE_CMD_REMOVE);
+				else sendNotice(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_REMOVE));
 			}
 			else if (data[0].equals(Config.CMD_MAPS) || data[0].equals(Config.CMD_MAP))
 			{
@@ -73,7 +73,7 @@ public class PickupBot extends DiscordBot {
 					{
 						logic.cmdMapVote(p, data[1]);
 					}
-					else sendNotice(user, Config.wrong_argument_amount + Config.USE_CMD_MAP);
+					else sendNotice(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_MAP));
 				}
 				else sendNotice(user, Config.user_not_registered);
 			}
@@ -84,7 +84,7 @@ public class PickupBot extends DiscordBot {
 				{
 					logic.cmdStatus();
 				}
-				else super.sendMsg(channel, Config.wrong_argument_amount + Config.USE_CMD_STATUS);
+				else super.sendMsg(channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_STATUS));
 					
 			}
 			else if (data[0].equals(Config.CMD_RESET))
@@ -99,7 +99,7 @@ public class PickupBot extends DiscordBot {
 					{
 						logic.cmdReset(data[1]);
 					}
-					else sendNotice(user, Config.wrong_argument_amount + Config.USE_CMD_RESET);
+					else sendNotice(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_RESET));
 				}
 			}
 			else if (data[0].equals(Config.CMD_LOCK))
@@ -110,7 +110,7 @@ public class PickupBot extends DiscordBot {
 					{
 						logic.cmdLock();
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_LOCK);
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_LOCK));
 				}
 			}
 			else if (data[0].equals(Config.CMD_UNLOCK))
@@ -121,7 +121,7 @@ public class PickupBot extends DiscordBot {
 					{
 						logic.cmdUnlock();
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_UNLOCK);
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_UNLOCK));
 				}
 			}
 			else if (data[0].equals(Config.CMD_GETELO))
@@ -152,7 +152,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else sendNotice(user, Config.player_not_found);
 					}
-					else sendNotice(user, Config.wrong_argument_amount + Config.USE_CMD_GETELO);	
+					else sendNotice(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_GETELO));	
 				}
 				else sendNotice(user, Config.user_not_registered);			
 			}
@@ -165,7 +165,7 @@ public class PickupBot extends DiscordBot {
 					{
 						logic.cmdTopElo(5);
 					}
-					else super.sendMsg(channel, Config.wrong_argument_amount + Config.USE_CMD_TOP5);
+					else super.sendMsg(channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_TOP5));
 				}
 				else sendNotice(user, Config.user_not_registered);					
 			}
@@ -175,7 +175,7 @@ public class PickupBot extends DiscordBot {
 				{
 					logic.cmdRegisterPlayer(user, data[1].toLowerCase());
 				}
-				else sendNotice(user, Config.wrong_argument_amount + Config.USE_CMD_REGISTER);				
+				else sendNotice(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_REGISTER));				
 			}
 			
 		}
@@ -190,7 +190,7 @@ public class PickupBot extends DiscordBot {
 					{
 						logic.cmdGetData(user, data[1]);
 					}
-					else super.sendMsg(channel, Config.wrong_argument_amount + Config.USE_CMD_GETDATA);
+					else super.sendMsg(channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_GETDATA));
 				}
 				else if (data[0].equals(Config.CMD_ENABLEMAP))
 				{
@@ -202,7 +202,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLEMAP);
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ENABLEMAP));
 				}
 				else if (data[0].equals(Config.CMD_DISABLEMAP))
 				{
@@ -214,7 +214,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_DISABLEMAP);					
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_DISABLEMAP));					
 				}
 				else if (data[0].equals(Config.CMD_ENABLEGAMETYPE))
 				{
@@ -226,7 +226,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLEGAMETYPE);					
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ENABLEGAMETYPE));					
 				}
 				else if (data[0].equals(Config.CMD_DISABLEGAMETYPE))
 				{
@@ -238,7 +238,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLEGAMETYPE);					
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ENABLEGAMETYPE));					
 				}
 				else if (data[0].equals(Config.CMD_ADDGAMECONFIG))
 				{
@@ -250,7 +250,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ADDGAMECONFIG);					
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADDGAMECONFIG));					
 				}
 				else if (data[0].equals(Config.CMD_REMOVEGAMECONFIG))
 				{
@@ -262,7 +262,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_REMOVEGAMECONFIG);					
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_REMOVEGAMECONFIG));					
 				}
 				else if (data[0].equals(Config.CMD_LISTGAMECONFIG))
 				{
@@ -274,7 +274,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_LISTGAMECONFIG);					
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_LISTGAMECONFIG));					
 				}
 				else if (data[0].equals(Config.CMD_ADDSERVER))
 				{
@@ -286,7 +286,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ADDSERVER);
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADDSERVER));
 						
 				}
 				else if (data[0].equals(Config.CMD_ENABLESERVER))
@@ -299,7 +299,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_ENABLESERVER);
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ENABLESERVER));
 					
 				}
 				else if (data[0].equals(Config.CMD_DISABLESERVER))
@@ -312,7 +312,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_DISABLESERVER);
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_DISABLESERVER));
 					
 				}
 				else if (data[0].equals(Config.CMD_UPDATESERVER))
@@ -325,7 +325,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_UPDATESERVER);
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_UPDATESERVER));
 					
 				}				
 				else if (data[0].equals(Config.CMD_SHOWSERVERS))
@@ -334,7 +334,7 @@ public class PickupBot extends DiscordBot {
 					{
 						logic.cmdServerList(user);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_SHOWSERVERS);
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_SHOWSERVERS));
 				}
 				else if (data[0].equals(Config.CMD_RCON))
 				{
@@ -345,6 +345,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(channel, Config.admin_cmd_unsuccessful + msg);
 					}
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_RCON));
 				}
 				else if (data[0].equals(Config.CMD_SHOWMATCHES))
 				{
@@ -352,7 +353,7 @@ public class PickupBot extends DiscordBot {
 					{
 						logic.cmdMatchList(user);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_SHOWMATCHES);
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_SHOWMATCHES));
 				}
 				else if (data[0].equals(Config.CMD_UNREGISTER))
 				{
@@ -369,7 +370,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else sendNotice(user, Config.player_not_found);
 					}
-					else super.sendMsg(user, Config.wrong_argument_amount + Config.USE_CMD_UNREGISTER);
+					else super.sendMsg(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_UNREGISTER));
 				}
 			}
 		}
@@ -382,38 +383,38 @@ public class PickupBot extends DiscordBot {
 					String cmd = (!data[1].startsWith("!") ? "!" : "") + data[1];
 					switch (cmd)
 					{
-						case Config.CMD_ADD: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ADD); break;
-						case Config.CMD_REMOVE: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_REMOVE); break;
-						case Config.CMD_MAPS: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_MAPS); break;
-						case Config.CMD_MAP: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_MAP); break;
-						case Config.CMD_STATUS: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_STATUS); break;
-						case Config.CMD_HELP: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_HELP); break;
-						case Config.CMD_LOCK: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_LOCK); break;
-						case Config.CMD_UNLOCK: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_UNLOCK); break;
-						case Config.CMD_RESET: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_RESET); break;
-						case Config.CMD_GETDATA: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_GETDATA); break;
-						case Config.CMD_ENABLEMAP: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ENABLEMAP); break;
-						case Config.CMD_DISABLEMAP: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_DISABLEMAP); break;
-						case Config.CMD_RCON: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_RCON); break;
-						case Config.CMD_REGISTER: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_REGISTER); break;
-						case Config.CMD_GETELO: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_GETELO); break;
-						case Config.CMD_TOP5: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_TOP5); break;
-						//case Config.CMD_REPORT: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_REPORT); break;
-						//case Config.CMD_EXCUSE: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_EXCUSE); break;
-						//case Config.CMD_REPORTLIST: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_REPORTLIST); break;
-						//case Config.CMD_ADDBAN: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ADDBAN); break;
-						//case Config.CMD_REMOVEBAN: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_REMOVEBAN); break;
-						case Config.CMD_SHOWSERVERS: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_SHOWSERVERS); break;
-						case Config.CMD_ADDSERVER: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ADDSERVER); break;
-						case Config.CMD_ENABLESERVER: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ENABLESERVER); break;
-						case Config.CMD_DISABLESERVER: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_DISABLESERVER); break;
-						case Config.CMD_UPDATESERVER: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_UPDATESERVER); break;
-						case Config.CMD_ENABLEGAMETYPE: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ENABLEGAMETYPE); break;
-						case Config.CMD_DISABLEGAMETYPE: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_DISABLEGAMETYPE); break;
-						case Config.CMD_SHOWMATCHES: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_SHOWMATCHES); break;
-						case Config.CMD_ADDGAMECONFIG: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_ADDGAMECONFIG); break;
-						case Config.CMD_REMOVEGAMECONFIG: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_REMOVEGAMECONFIG); break;
-						case Config.CMD_LISTGAMECONFIG: super.sendMsg(channel, Config.help_prefix + Config.USE_CMD_LISTGAMECONFIG); break;
+						case Config.CMD_ADD: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADD)); break;
+						case Config.CMD_REMOVE: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVE)); break;
+						case Config.CMD_MAPS: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_MAPS)); break;
+						case Config.CMD_MAP: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_MAP)); break;
+						case Config.CMD_STATUS: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_STATUS)); break;
+						case Config.CMD_HELP: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_HELP)); break;
+						case Config.CMD_LOCK: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LOCK)); break;
+						case Config.CMD_UNLOCK: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_UNLOCK)); break;
+						case Config.CMD_RESET: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_RESET)); break;
+						case Config.CMD_GETDATA: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETDATA)); break;
+						case Config.CMD_ENABLEMAP: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ENABLEMAP)); break;
+						case Config.CMD_DISABLEMAP: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DISABLEMAP)); break;
+						case Config.CMD_RCON: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_RCON)); break;
+						case Config.CMD_REGISTER: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REGISTER)); break;
+						case Config.CMD_GETELO: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETELO)); break;
+						case Config.CMD_TOP5: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP5)); break;
+						//case Config.CMD_REPORT: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REPORT)); break;
+						//case Config.CMD_EXCUSE: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_EXCUSE)); break;
+						//case Config.CMD_REPORTLIST: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REPORTLIST)); break;
+						//case Config.CMD_ADDBAN: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDBAN)); break;
+						//case Config.CMD_REMOVEBAN: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVEBAN)); break;
+						case Config.CMD_SHOWSERVERS: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SHOWSERVERS)); break;
+						case Config.CMD_ADDSERVER: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDSERVER)); break;
+						case Config.CMD_ENABLESERVER: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ENABLESERVER)); break;
+						case Config.CMD_DISABLESERVER: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DISABLESERVER)); break;
+						case Config.CMD_UPDATESERVER: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_UPDATESERVER)); break;
+						case Config.CMD_ENABLEGAMETYPE: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ENABLEGAMETYPE)); break;
+						case Config.CMD_DISABLEGAMETYPE: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DISABLEGAMETYPE)); break;
+						case Config.CMD_SHOWMATCHES: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SHOWMATCHES)); break;
+						case Config.CMD_ADDGAMECONFIG: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDGAMECONFIG)); break;
+						case Config.CMD_REMOVEGAMECONFIG: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVEGAMECONFIG)); break;
+						case Config.CMD_LISTGAMECONFIG: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LISTGAMECONFIG)); break;
 						default: super.sendMsg(channel, Config.help_unknown); break;
 					}
 				}
@@ -421,11 +422,11 @@ public class PickupBot extends DiscordBot {
 				{
 					if (channel.equals(pubchan))
 					{
-						super.sendMsg(channel, Config.help_cmd_avi + "\n" + Config.PUB_LIST);
+						super.sendMsg(channel, Config.help_cmd_avi.replace(".cmds.", Config.PUB_LIST));
 					}
 					if (hasAdminRights(user) && channel.type == DiscordChannelType.DM )
 					{
-						super.sendMsg(channel, Config.help_cmd_avi + "\n" + Config.ADMIN_LIST);
+						super.sendMsg(channel, Config.help_cmd_avi.replace(".cmds.", Config.ADMIN_LIST));
 					}
 				}
 			}
@@ -446,7 +447,7 @@ public class PickupBot extends DiscordBot {
 			sendNotice(u, message);
 		}
 		if (data[0].equals("!showadminroles")) {			
-			String message = " Admin roles: ";
+			String message = "Admin roles: ";
 			for (String s : logic.getAdminList()) {
 				message += "<@&" + s + "> ";
 			}

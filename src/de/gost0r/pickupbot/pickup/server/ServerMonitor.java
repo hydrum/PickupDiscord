@@ -51,7 +51,7 @@ public class ServerMonitor implements Runnable {
 		while (!stopped) {
 			observe();
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(200);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -456,14 +456,12 @@ public class ServerMonitor implements Runnable {
 		int bluescore = score[0][1] + score[1][0]; //score_blue_first + score_red_second;
 		int[] finalscore = { redscore, bluescore };
 		System.out.println("Score: " + Arrays.toString(finalscore));
-        for (ServerPlayer player : players) {
-        	System.out.println("Checking " + player.name);
-        	System.out.println("Player.player == null: " + player.player == null);
-        	if (player.player != null) {
-        		int team = match.getTeam(player.player).equalsIgnoreCase("red") ? 0 : 1;
+        for (Player player : match.getPlayerList()) {
+        	if (player != null) {
+        		int team = match.getTeam(player).equalsIgnoreCase("red") ? 0 : 1;
         		int opp = (team + 1) % 2;
         		
-        		int eloSelf = player.player.getElo();
+        		int eloSelf = player.getElo();
         		int eloOpp = match.getElo()[opp];
         		
         		// 1 win, 0.5 draw, 0 loss
@@ -475,9 +473,9 @@ public class ServerMonitor implements Runnable {
         		
         		double result = 32d * (w - e);
         		int elochange = (int) Math.floor(result);
-				int newelo = player.player.getElo() + elochange;
-				System.out.println("ELO player: " + player.auth + " old ELO: " + player.player.getElo() + " new ELO: " + newelo + " (" + (!String.valueOf(elochange).startsWith("-") ? "+" : "") + elochange + ")");
-				player.player.addElo(elochange);
+				int newelo = player.getElo() + elochange;
+				System.out.println("ELO player: " + player.getUrtauth() + " old ELO: " + player.getElo() + " new ELO: " + newelo + " (" + (!String.valueOf(elochange).startsWith("-") ? "+" : "") + elochange + ")");
+				player.addElo(elochange);
         	}
         }
         match.setScore(finalscore);

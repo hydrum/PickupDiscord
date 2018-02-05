@@ -99,16 +99,15 @@ public class Config {
 	
 	public static final String USE_CMD_UNREGISTER		= "!unregister <urtauth>";
 	
-	
-	
-	
+
+	//------------------------------------------------------------------------------------//
 
 	public static final String pkup_lock				= "This game is currently locked";
 	public static final String pkup_map					= "Map was successfully voted.";
 	public static final String pkup_map_list			= "**.gametype.**: .maplist.";
 //	public static final String pkup_signup				= "You can sign up again!";
 	public static final String pkup_pw					= "[ /connect .server. ; password .password. ]";
-	public static final String pkup_status_noone		= "**.gametype.**: Nobody has signed up. Type " + USE_CMD_ADD + " to play.";
+	public static final String pkup_status_noone		= "**.gametype.**: Nobody has signed up. Type `" + USE_CMD_ADD + "` to play.";
 	public static final String pkup_status_signup		= "**.gametype.**: Sign up: [.playernumber./.maxplayer.] .playerlist.";
 	public static final String pkup_status_server		= "**.gametype.**: Awaiting available server.";
 //	public static final String pkup_status_players		= "**.gametype.**: Players [.playernumber./10]: .playerlist.";
@@ -148,7 +147,7 @@ public class Config {
 	public static final String map_already_voted		= "You have already voted.";
 
 	public static final String player_not_found			= "Player not found.";
-	public static final String user_not_registered		= "You're not registered. Please use " + USE_CMD_REGISTER;
+	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
 
 	public static final String auth_taken				= "Your auth has been already registered with another account.";
 	public static final String auth_invalid				= "Your urtauth seems to be invalid.";
@@ -166,9 +165,9 @@ public class Config {
 //	public static final String report_successful		= "Your report was successfully stored.";
 //	public static final String report_raise_issue		= ".urtauth. has been auto-banned. [strength: .strength.] Type !review .urtauth. to review the ban.";
 
-	public static final String wrong_argument_amount	= "Wrong amount of arguments: ";
-	public static final String help_prefix				= "How to use the command: ";
-	public static final String help_cmd_avi				= "These commands are available (use " + USE_CMD_HELP + " for more info): ";
+	public static final String wrong_argument_amount	= "Wrong amount of arguments: `.cmd.`";
+	public static final String help_prefix				= "How to use the command: `.cmd.`";
+	public static final String help_cmd_avi				= "These commands are available (use `" + USE_CMD_HELP + "` for more info):\n`.cmds.`";
 	
 	public static final String help_unknown				= "I do not know that command.";
 

@@ -144,7 +144,7 @@ public class PickupLogic {
 		msg = msg.replace(".elo.", String.valueOf(p.getElo()));
 		String elochange = "";
 		if (p.getEloChange() >= 0) {
-			elochange = "+" + String.valueOf(p.getEloChange());
+			elochange = "+";
 		}
 		elochange += String.valueOf(p.getEloChange());
 		msg = msg.replace(".elochange.", elochange);
@@ -203,6 +203,7 @@ public class PickupLogic {
 		if (playerCount == 0) {
 			msg = Config.pkup_status_noone;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
+			msg = msg.replace("<gametype>", match.getGametype().getName().toLowerCase());
 		} else if (match.getMatchState() == MatchState.Signup){
 			msg = Config.pkup_status_signup;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());

@@ -40,8 +40,8 @@ TODO:
 (x) matchstats aren't recorded at all - check out why  => related to us using the newly-overwritten version of rpp when the warmup was detected?
 
 (x) forceteam ignores spec
-( ) check if ServerPlayer.player is now != null and proceed with statscalculation
-( ) fix SCORE->WELCOME transition when a full team left the match
+(x) check if ServerPlayer.player is now != null and proceed with statscalculation
+(x) fix SCORE->WELCOME transition when a full team left the match
 (x) implement error output for "no map for gametype"
 	
 	
