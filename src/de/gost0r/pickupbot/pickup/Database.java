@@ -213,7 +213,7 @@ public class Database {
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, map.name);
 			pstmt.setString(2, gametype.getName());
-			pstmt.setString(3, String.valueOf(map.active));
+			pstmt.setString(3, String.valueOf(map.isActiveForGametype(gametype)));
 			pstmt.executeUpdate();
 			pstmt.close();
 		} catch (SQLException e) {
@@ -567,8 +567,17 @@ public class Database {
 
 	public void updateMap(GameMap map, Gametype gametype) {
 		try {
-			String sql = "UPDATE map SET active=? WHERE map=? AND gametype=?";
+			String sql = "SELECT * FROM map WHERE map=? AND gametype=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, map.name);
+			pstmt.setString(2, gametype.getName());
+			ResultSet rs = pstmt.executeQuery();
+			if (!rs.next()) {
+				createMap(map, gametype);
+				return;
+			}			
+			sql = "UPDATE map SET active=? WHERE map=? AND gametype=?";
+			pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, String.valueOf(map.isActiveForGametype(gametype)));
 			pstmt.setString(2, map.name);
 			pstmt.setString(3, gametype.getName());

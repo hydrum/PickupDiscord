@@ -184,7 +184,7 @@ public class PickupLogic {
 				m.voteMap(player, map); // handles sending a msg itself
 			}
 		}
-		bot.sendNotice(player.getDiscordUser(), Config.player_already_removed);
+		else bot.sendNotice(player.getDiscordUser(), Config.player_already_removed);
 	}
 	
 	public void cmdStatus() {

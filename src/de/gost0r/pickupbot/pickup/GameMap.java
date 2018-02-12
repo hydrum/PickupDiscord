@@ -6,7 +6,6 @@ import java.util.Map;
 public class GameMap {
 	
 	public String name;
-	public boolean active;
 	public Map<Gametype, Boolean> gametypeList = new HashMap<Gametype, Boolean>();
 
 	public GameMap(String name) {
