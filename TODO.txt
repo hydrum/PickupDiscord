@@ -43,8 +43,9 @@ TODO:
 (x) check if ServerPlayer.player is now != null and proceed with statscalculation
 (x) fix SCORE->WELCOME transition when a full team left the match
 (x) implement error output for "no map for gametype"
-	
-	
+( ) "Your auth has been already registered with another account." -> auth/user
+( ) implement rank equivalents "> 1600 = diamond / > 1350 = platinium / > 1150 = gold / > 1000 = silver / <1000 = bronze / < 850 = Wood"
+( ) !elo </urtauth/> not working for urtauths
 	
 
 (x) add expected auth-whois msgs
