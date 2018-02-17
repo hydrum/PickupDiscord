@@ -53,7 +53,7 @@ public class DiscordAPI {
 			
 			if (c.getResponseCode() != 200) {
 				System.out.println("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + request);
-				if (c.getResponseCode() == 429) {
+				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {
 						Thread.sleep(1000);
 						return sendPostRequest(request, content);
@@ -98,7 +98,7 @@ public class DiscordAPI {
 			
 			if (c.getResponseCode() != 200) {
 				System.out.println("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + request);
-				if (c.getResponseCode() == 429) {
+				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {
 						Thread.sleep(1000);
 						return sendGetRequest(request);
