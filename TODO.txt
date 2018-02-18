@@ -45,8 +45,13 @@ TODO:
 (x) implement error output for "no map for gametype"
 ( ) "Your auth has been already registered with another account." -> auth/user
 ( ) implement rank equivalents "> 1600 = diamond / > 1350 = platinium / > 1150 = gold / > 1000 = silver / <1000 = bronze / < 850 = Wood"
-( ) !elo </urtauth/> not working for urtauths
-	
+(x) !elo </urtauth/> not working for urtauths
+( ) implement !surrender
+( ) display voted map
+( ) make sure id's are strings, but digits only (DiscordUser.get(id))
+( ) add + to positive elochange on aftermath
+( ) allow admins to !remove <!discorduser/urtauth>
+( ) use log4j for propper logging
 
 (x) add expected auth-whois msgs
 (x) copy new stats to the existing player in case we found him

@@ -147,7 +147,7 @@ public class DiscordAPI {
 
 	public static JSONArray requestDM() {
 		String reply = sendGetRequest("/users/@me/channels");
-		if (!reply.isEmpty()) {
+		if (reply != null && !reply.isEmpty()) {
 			try {
 				return new JSONArray(reply);
 			} catch (JSONException e) {
@@ -159,7 +159,7 @@ public class DiscordAPI {
 
 	public static JSONObject requestUser(String userID) {
 		String reply = sendGetRequest("/users/" + userID);
-		if (!reply.isEmpty()) {
+		if (reply != null && !reply.isEmpty()) {
 			try {
 				return new JSONObject(reply);
 			} catch (JSONException e) {
@@ -171,7 +171,7 @@ public class DiscordAPI {
 
 	public static JSONObject requestChannel(String channelID) {
 		String reply = sendGetRequest("/channels/" + channelID);
-		if (!reply.isEmpty()) {
+		if (reply != null && !reply.isEmpty()) {
 			try {
 				return new JSONObject(reply);
 			} catch (JSONException e) {
@@ -183,7 +183,7 @@ public class DiscordAPI {
 	
 	public static JSONArray requestUserGuildRoles(String guild, String userID) {
 		String reply = sendGetRequest("/guilds/" + guild + "/members/" + userID);
-		if (!reply.isEmpty()) {
+		if (reply != null && !reply.isEmpty()) {
 			try {
 				return new JSONObject(reply).getJSONArray("roles");
 			} catch (JSONException e) {
