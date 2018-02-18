@@ -68,7 +68,7 @@ public class Config {
 	public static final String USE_CMD_GETDATA			= "!getdata <id>";
 	public static final String USE_CMD_ENABLEMAP		= "!enablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_DISABLEMAP		= "!disablemap <ut4_map> <gametype>";
-	public static final String USE_CMD_RCON				= "!rcon <rconstring>";
+	public static final String USE_CMD_RCON				= "!rcon <serverid> <rconstring>";
 
 	public static final String USE_CMD_ENABLEGAMETYPE	= "!enablegametype <name> <teamsize>";
 	public static final String USE_CMD_DISABLEGAMETYPE	= "!disablegametype <name>";
@@ -78,7 +78,7 @@ public class Config {
 	public static final String USE_CMD_LISTGAMECONFIG	= "!showgameconfig <gametype>";
 	
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
-	public static final String USE_CMD_GETELO			= "!elo </urtauth/>";
+	public static final String USE_CMD_GETELO			= "!elo </@DiscordUser|urtauth/>";
 	public static final String USE_CMD_TOP5				= "!top5";
 	
 	//public static final String USE_CMD_REPORT			= "!report <qauth> <reason>";
