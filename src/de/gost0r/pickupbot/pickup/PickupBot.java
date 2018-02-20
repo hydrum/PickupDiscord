@@ -74,7 +74,9 @@ public class PickupBot extends DiscordBot {
 								if (player != null) {
 									logic.cmdRemovePlayer(player);
 								}
+								else sendNotice(user, Config.player_not_found);
 							}
+							else sendNotice(user, Config.player_not_found);
 						}
 						else sendNotice(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_REMOVE));
 					}

@@ -229,6 +229,7 @@ public class PickupLogic {
 				}
 			} else {
 				playernames = player.getDiscordUser().getMentionString();
+				playernames += (match.isInMatch(player)) ? " added." : " removed.";
 			}
 			
 			msg = msg.replace(".playerlist.", playernames);
