@@ -156,7 +156,7 @@ public class PickupLogic {
 		elochange += String.valueOf(p.getEloChange());
 		msg = msg.replace(".elochange.", elochange);
 		msg = msg.replace(".position.", String.valueOf(db.getRankForPlayer(p)));
-		msg = msg.replace(".rank.", p.getRank().name());
+		msg = msg.replace(".rank.", p.getRank().getEmoji());
 		if (sendMsg) {
 			bot.sendMsg(bot.getPubchan(), msg);
 		}
@@ -238,6 +238,14 @@ public class PickupLogic {
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 		}
 		bot.sendMsg(bot.getPubchan(), msg);
+	}
+	
+	public void cmdSurrender(Player player) {
+		Match match = playerInMatch(player);
+		if (match != null && match.getMatchState() == MatchState.Live) {
+			match.voteSurrender(player);
+		}
+		else bot.sendNotice(player.getDiscordUser(), Config.player_not_in_match);
 	}
 
 	public boolean cmdReset(String cmd) {

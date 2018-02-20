@@ -46,9 +46,9 @@ TODO:
 (x) implement error output for "no map for gametype"
 (x) "Your auth has been already registered with another account." -> auth/user
 (x) implement rank equivalents "> 1600 = diamond / > 1350 = platinum / > 1150 = gold / > 1000 = silver / <1000 = bronze / < 850 = Wood"
-( ) use rank-emojis instead of SILVER etc
+(x) use rank-emojis instead of SILVER etc
 (x) !elo </urtauth/> not working for urtauths
-( ) implement !surrender
+(x) implement !surrender
 (x) display voted map
 (x) make sure id's are strings, but digits only (DiscordUser.get(id))
 (x) add + to positive elochange on aftermath

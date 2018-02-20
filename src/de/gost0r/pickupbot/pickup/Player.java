@@ -18,20 +18,27 @@ public class Player {
 	
 	private boolean banned;
 	
+	private boolean surrender = false;
+	
 	public Player(DiscordUser user, String urtauth) {
 		this.user = user;
 		this.setUrtauth(urtauth);
 		playerList.add(this);
 	}
 	
-	public void vote(GameMap map) {
+	public void voteMap(GameMap map) {
 		if (votedMap == null) {
 			votedMap = map;
 		}
 	}
 	
-	public void resetMap() {
+	public void voteSurrender() {
+		surrender = true;
+	}
+	
+	public void resetVotes() {
 		votedMap = null;
+		surrender = false;
 	}
 	
 
@@ -44,6 +51,10 @@ public class Player {
 	
 	public GameMap getVotedMap() {
 		return votedMap;
+	}
+	
+	public boolean hasVotedSurrender() {
+		return surrender;
 	}
 
 	public DiscordUser getDiscordUser() {

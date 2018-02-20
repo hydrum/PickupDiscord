@@ -93,13 +93,15 @@ public class Server {
         return null;
 	}
 	
-	public void startObservation(Match match) {
-		this.monitor = new ServerMonitor(this, match);
-		monitorThread = new Thread(this.monitor);
-		monitorThread.start();
+	public void startMonitoring(Match match) {
+		if (this.monitor == null) {
+			this.monitor = new ServerMonitor(this, match);
+			monitorThread = new Thread(this.monitor);
+			monitorThread.start();
+		}
 	}
 	
-	public void stopObservation() {
+	public void stopMonitoring() {
 		if (monitor != null) {
 			this.monitor.stop();
 		}
@@ -111,7 +113,11 @@ public class Server {
 	
 	public void free() {
 		taken = false;
-		stopObservation();
+		stopMonitoring();
+	}
+
+	public ServerMonitor getServerMonitor() {
+		return monitor;
 	}
 
 	public InetAddress getInetIP() {

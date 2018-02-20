@@ -5,5 +5,6 @@ public enum MatchState {
 	AwaitingServer,
 	Live,
 	Done,
-	Abort
+	Abort,
+	Surrender
 }

@@ -459,9 +459,12 @@ public class ServerMonitor implements Runnable {
 	}
 	
 	private void endGame() {
-
-		// PROCEED WITH STATS/ELO GENERATING
-
+		calcStats();
+		match.end();
+		stop();
+	}
+	
+	private void calcStats() {
 		int redscore = score[0][0] + score[1][1]; //score_red_first + score_blue_second;
 		int bluescore = score[0][1] + score[1][0]; //score_blue_first + score_red_second;
 		int[] finalscore = { redscore, bluescore };
@@ -489,7 +492,21 @@ public class ServerMonitor implements Runnable {
         	}
         }
         match.setScore(finalscore);
-		match.end();
+	}
+	
+	public void surrender(int teamid) {
+		// save stats
+		if (state == ServerState.LIVE || state == ServerState.SCORE) {
+			saveStats(new int[] {0, 0}); // score don't matter as we override them. don't matter
+		}
+		
+		int[] scorex = new int[2];
+		scorex[teamid] = 0;
+		scorex[(teamid + 1) % 2] = 15;
+		score[0] = scorex;
+		score[1] = new int[] {0, 0};
+
+		calcStats();
 		stop();
 	}
 

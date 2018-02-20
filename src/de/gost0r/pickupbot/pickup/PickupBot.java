@@ -23,6 +23,7 @@ public class PickupBot extends DiscordBot {
 		pubchan = DiscordChannel.findChannel("402541587164561419"); // public testchan
 		
 		logic = new PickupLogic(this);
+//		logic.cmdEnableGametype("TEST", "1");
 	}
 
 	@Override
@@ -69,7 +70,7 @@ public class PickupBot extends DiscordBot {
 						{
 							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
 							if (u != null) {
-								Player player = Player.get(user);
+								Player player = Player.get(u);
 								if (player != null) {
 									logic.cmdRemovePlayer(player);
 								}
@@ -103,6 +104,17 @@ public class PickupBot extends DiscordBot {
 						logic.cmdStatus();
 					}
 					else super.sendMsg(channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_STATUS));
+					break;
+					
+				case Config.CMD_SURRENDER:
+					if (data.length == 1)
+					{
+						if (p != null)
+						{
+							logic.cmdSurrender(p);
+						}
+					}
+					else super.sendMsg(channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_SURRENDER));
 					break;
 					
 				case Config.CMD_RESET:
@@ -414,6 +426,7 @@ public class PickupBot extends DiscordBot {
 						case Config.CMD_REGISTER: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REGISTER)); break;
 						case Config.CMD_GETELO: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETELO)); break;
 						case Config.CMD_TOP5: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP5)); break;
+						case Config.CMD_SURRENDER: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SURRENDER)); break;
 						//case Config.CMD_REPORT: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REPORT)); break;
 						//case Config.CMD_EXCUSE: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_EXCUSE)); break;
 						//case Config.CMD_REPORTLIST: super.sendMsg(channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REPORTLIST)); break;

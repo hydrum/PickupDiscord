@@ -27,6 +27,8 @@ public class Match {
 	private int[] elo = new int[2];	
 	private int[] score = new int[2];
 	
+	private int[] surrender;
+	
 	private long startTime;
 	
 	private PickupLogic logic;
@@ -47,11 +49,14 @@ public class Match {
 			mapVotes.put(m, 0);
 		}
 		state = MatchState.Signup;
+
+		surrender = new int[] { gametype.getTeamSize() - 1, gametype.getTeamSize() - 1};
 	}
 
 	public Match(int id, long startTime, GameMap map, int[] score, int[] elo,
 			Map<String, List<Player>> teamList, MatchState state, Gametype gametype, Server server,
 			Map<Player, MatchStats> playerStats) {
+		this();
 		this.id = id;
 		this.startTime = startTime;
 		this.map = map;
@@ -62,6 +67,12 @@ public class Match {
 		this.gametype = gametype;
 		this.server = server;
 		this.playerStats = playerStats;
+		
+		if (!isOver()) {
+			server.startMonitoring(this);
+		}
+
+		surrender = new int[] { gametype.getTeamSize() - 1, gametype.getTeamSize() - 1};
 	}
 
 	public void reset() {
@@ -71,7 +82,7 @@ public class Match {
 			resetAwaitingServer();
 		} else if (state == MatchState.Live) {
 			resetLive();
-		} else if (state == MatchState.Done || state == MatchState.Abort) {
+		} else if (isOver()) {
 			// do nothing
 		}
 	}
@@ -79,7 +90,7 @@ public class Match {
 	private void resetSignup() {
 		// reset mapvote
 		for(Player p : playerStats.keySet()) {
-			p.resetMap();
+			p.resetVotes();
 		}
 		for (GameMap m : mapVotes.keySet()) {
 			mapVotes.put(m, 0);
@@ -110,7 +121,7 @@ public class Match {
 			GameMap map = player.getVotedMap();
 			if (map != null) {
 				mapVotes.put(map, mapVotes.get(map).intValue() - 1);
-				player.resetMap();
+				player.resetVotes();
 			}
 			playerStats.remove(player);
 			checkServerState();
@@ -121,12 +132,55 @@ public class Match {
 	public void voteMap(Player player, GameMap map) {
 		if ((state == MatchState.Signup || state == MatchState.AwaitingServer) && isInMatch(player) && player.getVotedMap() == null) {
 			mapVotes.put(map, mapVotes.get(map).intValue() + 1);
-			player.vote(map);
+			player.voteMap(map);
 			String msg = Config.pkup_map;
 			msg = msg.replace(".map.", map.name);
 			logic.bot.sendNotice(player.getDiscordUser(), msg);
 		} else {
 			logic.bot.sendNotice(player.getDiscordUser(), Config.map_already_voted);
+		}
+	}
+	
+	public void voteSurrender(Player player) {
+		long timeUntilSurrender = (startTime + 600000L) - System.currentTimeMillis(); // 10min in milliseconds
+		if (timeUntilSurrender < 0) {
+			if (!player.hasVotedSurrender()) {
+				player.voteSurrender();
+				int teamnum = getTeam(player).equals("red") ? 0 : 1;
+				surrender[teamnum]--;
+				checkSurrender();
+				if (!isOver()) {
+					String msg = Config.pkup_surrender_cast;
+					msg = msg.replace(".num.", String.valueOf(surrender[teamnum]));
+					msg = msg.replace(".s.", surrender[teamnum] > 1 ? "s" : "");
+					logic.bot.sendNotice(player.getDiscordUser(), msg);
+				}
+			} else {
+				logic.bot.sendNotice(player.getDiscordUser(), Config.player_already_surrender);
+			}
+		} else {
+			timeUntilSurrender /= 1000d;
+			String min = String.valueOf((int) (Math.floor(timeUntilSurrender / 60d)));
+			String sec = String.valueOf((int) (Math.floor(timeUntilSurrender % 60d)));
+			min = min.length() == 1 ? "0" + min : min;
+			sec = sec.length() == 1 ? "0" + sec : sec;
+			String msg = Config.pkup_surrender_time;
+			msg = msg.replace(".time.", min + ":" + sec);
+			logic.bot.sendNotice(player.getDiscordUser(), msg);
+		}
+	}
+	
+	public void checkSurrender() {
+		for (int i = 0; i < 2; ++i) {
+			if (surrender[i] <= 0) {
+				state = MatchState.Surrender;
+				server.getServerMonitor().surrender(i);
+				cleanUp();
+				sendAftermath();
+				logic.matchRemove(this);
+				logic.db.saveMatch(this);
+				return;
+			}
 		}
 	}
 	
@@ -169,7 +223,7 @@ public class Match {
 	
 	private void cleanUp() {
 		for(Player p : playerStats.keySet()) {
-			p.resetMap();
+			p.resetVotes();
 		}
 		server.free();
 
@@ -209,7 +263,7 @@ public class Match {
 				String msg = Config.pkup_aftermath_rank;
 				msg = msg.replace(".player.", player.getDiscordUser().getMentionString());
 				msg = msg.replace(".updown.", player.getEloChange() > 0 ? "up" : "down");
-				msg = msg.replace(".rank.", player.getRank().name());
+				msg = msg.replace(".rank.", player.getRank().getEmoji());
 				fullmsg += "\n" + msg;
 			}
 		}
@@ -219,7 +273,7 @@ public class Match {
 	
 
 	public void start(Server server) {
-		if (!(state == MatchState.Abort || state == MatchState.Done)) {
+		if (!isOver()) {
 			
 			this.server = server;
 			server.take();
@@ -388,7 +442,7 @@ public class Match {
 			server.sendRcon("map " + this.map.name);
 			server.sendRcon("g_warmup 10");
 			
-			server.startObservation(this);
+			server.startMonitoring(this);
 			
 			logic.matchStarted(this);
 		}
@@ -404,6 +458,10 @@ public class Match {
 				msg += " || " + map.name + ": " + String.valueOf(mapVotes.get(map));
 		}
 		return msg;
+	}
+	
+	public boolean isOver() {
+		return state == MatchState.Done || state == MatchState.Abort || state == MatchState.Surrender;
 	}
 	
 	public MatchState getMatchState() {
@@ -516,6 +574,7 @@ public class Match {
 		case Live: msg = Config.pkup_match_print_live; break;
 		case Done: msg = Config.pkup_match_print_done; break;
 		case Abort: msg = Config.pkup_match_print_abort; break;
+		case Surrender: msg = Config.pkup_match_print_sur; break;
 		}
 		
 		String playernames = "None";
@@ -535,6 +594,7 @@ public class Match {
 		msg = msg.replace(".playernumber.", String.valueOf(getPlayerCount()));
 		msg = msg.replace(".maxplayer.", String.valueOf(gametype.getTeamSize() * 2));
 		msg = msg.replace(".playerlist.", playernames);
+		msg = msg.replace(".score.", String.valueOf(score[0]) + " " + String.valueOf(score[1]));
 		return msg;
 	}
 }
