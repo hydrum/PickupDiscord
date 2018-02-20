@@ -33,6 +33,7 @@ TODO:
 ( ) !showmatch starttime
 (x) check scoreboard roundtime for modes like ts, bomb etc => else possible prematurely entering SCORE state
 ( ) need prematurely leaver detection
+( ) acknowledge role changes and therefore caching it
 
 ( ) !reset 19 didn't stop the server monitor
 
@@ -43,14 +44,15 @@ TODO:
 (x) check if ServerPlayer.player is now != null and proceed with statscalculation
 (x) fix SCORE->WELCOME transition when a full team left the match
 (x) implement error output for "no map for gametype"
-( ) "Your auth has been already registered with another account." -> auth/user
-( ) implement rank equivalents "> 1600 = diamond / > 1350 = platinium / > 1150 = gold / > 1000 = silver / <1000 = bronze / < 850 = Wood"
+(x) "Your auth has been already registered with another account." -> auth/user
+(x) implement rank equivalents "> 1600 = diamond / > 1350 = platinum / > 1150 = gold / > 1000 = silver / <1000 = bronze / < 850 = Wood"
+( ) use rank-emojis instead of SILVER etc
 (x) !elo </urtauth/> not working for urtauths
 ( ) implement !surrender
-( ) display voted map
-( ) make sure id's are strings, but digits only (DiscordUser.get(id))
-( ) add + to positive elochange on aftermath
-( ) allow admins to !remove <!discorduser/urtauth>
+(x) display voted map
+(x) make sure id's are strings, but digits only (DiscordUser.get(id))
+(x) add + to positive elochange on aftermath
+(x) allow admins to !remove <discorduser>
 (x) use logger for proper logging
 
 (x) add expected auth-whois msgs

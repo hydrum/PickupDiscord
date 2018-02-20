@@ -63,6 +63,20 @@ public class PickupBot extends DiscordBot {
 						}
 						else sendNotice(user, Config.user_not_registered);
 					}
+					else if (data.length == 2)
+					{
+						if (hasAdminRights(user))
+						{
+							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
+							if (u != null) {
+								Player player = Player.get(user);
+								if (player != null) {
+									logic.cmdRemovePlayer(player);
+								}
+							}
+						}
+						else sendNotice(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_REMOVE));
+					}
 					else sendNotice(user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_REMOVE));
 					break;
 					

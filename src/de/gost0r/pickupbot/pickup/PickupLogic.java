@@ -98,16 +98,20 @@ public class PickupLogic {
 	
 	public void cmdRegisterPlayer(DiscordUser user, String urtauth) {
 		// check whether the user and the urtauth aren't taken
-		if (Player.get(urtauth) == null && Player.get(user) == null) {
-			if (urtauth.matches("^[a-z0-9]*$")) {
-				Player p = new Player(user, urtauth);
-				db.createPlayer(p);
-				bot.sendNotice(user, Config.auth_success);
+		if (Player.get(urtauth) == null) {
+			if (Player.get(user) == null) {
+				if (urtauth.matches("^[a-z0-9]*$")) {
+					Player p = new Player(user, urtauth);
+					db.createPlayer(p);
+					bot.sendNotice(user, Config.auth_success);
+				} else {
+					bot.sendNotice(user, Config.auth_invalid);
+				}
 			} else {
-				bot.sendNotice(user, Config.auth_invalid);
+				bot.sendNotice(user, Config.auth_taken_user);
 			}
 		} else {
-			bot.sendNotice(user, Config.auth_taken);
+			bot.sendNotice(user, Config.auth_taken_urtauth);
 		}
 	}
 	
@@ -151,7 +155,8 @@ public class PickupLogic {
 		}
 		elochange += String.valueOf(p.getEloChange());
 		msg = msg.replace(".elochange.", elochange);
-		msg = msg.replace(".rank.", String.valueOf(db.getRankForPlayer(p)));
+		msg = msg.replace(".position.", String.valueOf(db.getRankForPlayer(p)));
+		msg = msg.replace(".rank.", p.getRank().name());
 		if (sendMsg) {
 			bot.sendMsg(bot.getPubchan(), msg);
 		}

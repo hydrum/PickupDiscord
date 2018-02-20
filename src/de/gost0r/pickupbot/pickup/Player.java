@@ -78,6 +78,31 @@ public class Player {
 		return banned;
 	}
 	
+	public PlayerRank getRank() {
+		return getRank(elo);
+	}
+	
+	private PlayerRank getRank(int elo) {
+		if (elo > 1600) {
+			return PlayerRank.DIAMOND;
+		} else if (elo > 1350) {
+			return PlayerRank.PLATINUM;
+		} else if (elo > 1150) {
+			return PlayerRank.GOLD;
+		} else if (elo > 1000) {
+			return PlayerRank.SILVER;
+		} else if (elo > 850) {
+			return PlayerRank.BRONZE;
+		} else {
+			return PlayerRank.WOOD;
+		}
+	}
+	
+	public boolean didChangeRank() {
+		PlayerRank currentRank = getRank(elo);
+		PlayerRank previousRank = getRank(elo-eloChange);
+		return currentRank != previousRank;
+	}
 
 	private static List<Player> playerList = new ArrayList<Player>();
 	public static Player get(String urtauth) {

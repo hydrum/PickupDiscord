@@ -103,7 +103,7 @@ public class Config {
 	//------------------------------------------------------------------------------------//
 
 	public static final String pkup_lock				= "This game is currently locked";
-	public static final String pkup_map					= "Map was successfully voted.";
+	public static final String pkup_map					= "Your vote for .map. was successfully casted.";
 	public static final String pkup_map_list			= "**.gametype.**: .maplist.";
 //	public static final String pkup_signup				= "You can sign up again!";
 	public static final String pkup_pw					= "[ /connect .server. ; password .password. ]";
@@ -135,10 +135,11 @@ public class Config {
 	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber.:";
 	public static final String pkup_aftermath_result	= ".team. team .result. (.score.) -";
 	public static final String pkup_aftermath_player	= ".player. (.elochange.)";
+	public static final String pkup_aftermath_rank		= ".player. was ranked .updown. to **.rank.**";
 
 	public static final String pkup_config_list 		= "Gameconfig for .gametype.\n.configlist.";
 	
-	public static final String pkup_getelo				= "#.rank.\t **.urtauth.**\t .elo. (.elochange.)";
+	public static final String pkup_getelo				= "#.position.\t **.urtauth.**\t .elo. (.elochange.)\t **.rank.**";
 	public static final String pkup_top5_header			= "**Top5:**";
 			 
 	public static final String is_banned				= "You are banned and therefore you cannot participate.";
@@ -149,7 +150,8 @@ public class Config {
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
 
-	public static final String auth_taken				= "Your auth has been already registered with another account.";
+	public static final String auth_taken_urtauth		= "The urtauth has been already registered.";
+	public static final String auth_taken_user			= "You have already been registered with an account.";
 	public static final String auth_invalid				= "Your urtauth seems to be invalid.";
 	public static final String auth_success				= "Your auth has been successfully registered with your account.";
 

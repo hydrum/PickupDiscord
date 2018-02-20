@@ -122,7 +122,9 @@ public class Match {
 		if ((state == MatchState.Signup || state == MatchState.AwaitingServer) && isInMatch(player) && player.getVotedMap() == null) {
 			mapVotes.put(map, mapVotes.get(map).intValue() + 1);
 			player.vote(map);
-			logic.bot.sendNotice(player.getDiscordUser(), Config.pkup_map);
+			String msg = Config.pkup_map;
+			msg = msg.replace(".map.", map.name);
+			logic.bot.sendNotice(player.getDiscordUser(), msg);
 		} else {
 			logic.bot.sendNotice(player.getDiscordUser(), Config.map_already_voted);
 		}
@@ -196,11 +198,22 @@ public class Match {
 			for (Player p : teamList.get(teamname.toLowerCase())) {
 				String msgelo = Config.pkup_aftermath_player;
 				msgelo = msgelo.replace(".player.", p.getDiscordUser().getMentionString());
-				msgelo = msgelo.replace(".elochange.", String.valueOf(p.getEloChange()));
+				String elochange = ((p.getEloChange() >= 0) ? "+" : "") + String.valueOf(p.getEloChange());
+				msgelo = msgelo.replace(".elochange.", elochange);
 				msg += " " + msgelo;
 			}
 			fullmsg += "\n" + msg;
 		}
+		for (Player player : getPlayerList()) {
+			if (player.didChangeRank()) {
+				String msg = Config.pkup_aftermath_rank;
+				msg = msg.replace(".player.", player.getDiscordUser().getMentionString());
+				msg = msg.replace(".updown.", player.getEloChange() > 0 ? "up" : "down");
+				msg = msg.replace(".rank.", player.getRank().name());
+				fullmsg += "\n" + msg;
+			}
+		}
+		
 		logic.bot.sendMsg(logic.bot.getPubchan(), fullmsg);
 	}
 	
