@@ -7,10 +7,13 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.pickup.Match;
 
 public class Server {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	public int id;
 	
@@ -44,7 +47,7 @@ public class Server {
 			this.socket.setSoTimeout(1000);
 			monitor = null;
 		} catch (SocketException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 	}
 
@@ -72,6 +75,7 @@ public class Server {
 	        	try {
 	        		this.socket.receive(recvPacket);
 	        		string += new String(recvPacket.getData());
+	        		
 	        		recvPacket = new DatagramPacket(recvBuffer, recvBuffer.length);
 	        	} catch (SocketTimeoutException e) {
 	        		break;
@@ -81,10 +85,10 @@ public class Server {
 	        string = string.replace("" + (char) 0, "");
 	        Thread.sleep(100);
 	        return string;
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (IOException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
         return null;
 	}
@@ -114,7 +118,7 @@ public class Server {
 		try {
 			return InetAddress.getByName(IP);
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return null;
 	}

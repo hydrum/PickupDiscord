@@ -1,9 +1,14 @@
 package de.gost0r.pickupbot.discord.web;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class DiscordPacket {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    
 	public DiscordGatewayOpcode op;	// opcode
 	public JSONObject d; 			// event data
 	public int s; 					// sequence number
@@ -31,7 +36,7 @@ public class DiscordPacket {
 //			msg.put("t", t);
 			return msg.toString();
 		} catch (JSONException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return null;		
 	}

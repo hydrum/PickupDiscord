@@ -2,6 +2,9 @@ package de.gost0r.pickupbot.discord.web;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
@@ -14,6 +17,7 @@ import javax.websocket.WebSocketContainer;
 
 @ClientEndpoint
 public class WsClientEndPoint {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	Session userSession = null;
 	private MessageHandler messageHandler;
@@ -23,21 +27,21 @@ public class WsClientEndPoint {
         		WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 				container.connectToServer(this, endpointURI);
 			} catch (DeploymentException e) {
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Exception: ", e);
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Exception: ", e);
 			}
     }
     
     @OnOpen
     public void onOpen(Session userSession) {
-        System.out.println("opening websocket");
+		LOGGER.warning("WebSocket opened. ");
         this.userSession = userSession;
     }
     
     @OnClose
     public void onClose(Session userSession, CloseReason reason) {
-        System.out.println("closing websocket: " + reason.getReasonPhrase());
+		LOGGER.warning("WebSocket closed. " + reason.toString());
         this.userSession = null;
     }
 
@@ -56,7 +60,7 @@ public class WsClientEndPoint {
     	if (this.userSession != null && this.userSession.isOpen()) {
     		this.userSession.getAsyncRemote().sendText(message);
     	} else {
-    		System.out.println("Unable to send msg, session is closed.");
+    		LOGGER.warning("Unable to send msg, session is closed.");
     	}
     }
     

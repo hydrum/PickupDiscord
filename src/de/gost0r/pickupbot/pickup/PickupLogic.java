@@ -7,11 +7,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.pickup.server.Server;
 
 public class PickupLogic {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	public PickupBot bot;
 	public Database db;
@@ -286,7 +289,7 @@ public class PickupLogic {
 					}
 					
 				} catch (NumberFormatException e) {
-					e.printStackTrace();
+					LOGGER.log(Level.WARNING, "Exception: ", e);
 				}
 			}
 		}
@@ -307,7 +310,7 @@ public class PickupLogic {
 				}
 			}
 		} catch (NumberFormatException e) {
-			
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		bot.sendMsg(user, msg);
 		return false;
@@ -367,7 +370,7 @@ public class PickupLogic {
 			createMatch(gt);
 			return true;
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 			return false;
 		}
 	}
@@ -444,7 +447,7 @@ public class PickupLogic {
 			checkServer();
 			return true;
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 			return false;
 		}
 	}
@@ -452,7 +455,6 @@ public class PickupLogic {
 	public boolean cmdServerActivation(String id, boolean active) {
 		try {
 			int idx = Integer.valueOf(id);
-			System.out.println(idx);
 			for (Server server : serverList) {
 				if (server.id == idx && !server.isTaken() && server.active != active) {
 					server.active = active;
@@ -462,7 +464,7 @@ public class PickupLogic {
 				}
 			}
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return false;
 	}
@@ -478,7 +480,7 @@ public class PickupLogic {
 				}
 			}
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return false;
 	}
@@ -493,7 +495,7 @@ public class PickupLogic {
 				}
 			}
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return false;
 	}

@@ -14,6 +14,7 @@ public class RconPlayersParsed {
 	public boolean warmupphase;
 	public String gametime;
 	public String roundtime;
+	public String half;
 	
 	public List<ServerPlayer> players = new ArrayList<>();
 	

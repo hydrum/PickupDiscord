@@ -1,6 +1,8 @@
 package de.gost0r.pickupbot.discord.web;
 
 import java.util.Timer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -9,7 +11,8 @@ import org.json.JSONObject;
 import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.web.WsClientEndPoint.MessageHandler;
 
-public class DiscordGateway implements MessageHandler{
+public class DiscordGateway implements MessageHandler {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private Timer heartbeatTimer = new Timer();
 	private HeartbeatTask heartbeatTask;
@@ -28,10 +31,11 @@ public class DiscordGateway implements MessageHandler{
 		if (clientEP.isConnected()) {
 			
 			msg = msg.replaceAll("\"__null__\"", "null");
-			System.out.println("SendMsg: " + msg);
-			
+
+			LOGGER.finer("OUT DiscordPacket: " + msg);
 			clientEP.sendMessage(msg);
 		} else {
+			LOGGER.info("Cancel heartbeatTimer");
 			heartbeatTimer.cancel();
 		}
 	}
@@ -40,7 +44,6 @@ public class DiscordGateway implements MessageHandler{
 	public void handleMessage(String message) {
 		try {
 			JSONObject jsonObj = new JSONObject(message);
-//			System.out.println("INC " + jsonObj);
 			
 			// Parse to packet
 			int op = jsonObj.getInt("op");
@@ -48,12 +51,15 @@ public class DiscordGateway implements MessageHandler{
 			int s = jsonObj.isNull("s") ? -1 : jsonObj.getInt("s") ;
 			String t = jsonObj.isNull("t") ? null : jsonObj.getString("t");
 			DiscordPacket incPak = new DiscordPacket(DiscordGatewayOpcode.values()[op], d, s, t);
-
-//			System.out.println("IncPacket: " + incPak);
+			
+			// DON'T LOG THIS EVENT [spamming all user info of the server]
+			if (t == null || !t.equals(DiscordGatewayEvent.GUILD_CREATE.name())) {
+				LOGGER.finer("INC DiscordPacket: " + incPak.toString());
+			}
 			handlePacket(incPak);
 			
 		} catch (JSONException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 	}
 	
@@ -73,7 +79,7 @@ public class DiscordGateway implements MessageHandler{
 			long interval = p.d.getLong("heartbeat_interval");
 			heartbeatTimer.scheduleAtFixedRate(heartbeatTask, interval/2, interval);			
 		} catch (JSONException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		
 		// sending identify
@@ -104,7 +110,7 @@ public class DiscordGateway implements MessageHandler{
 			sendMessage(outP.toSend());
 			
 		} catch (JSONException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		
 	}

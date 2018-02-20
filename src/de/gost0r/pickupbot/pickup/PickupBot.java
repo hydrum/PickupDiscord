@@ -1,6 +1,7 @@
 package de.gost0r.pickupbot.pickup;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.DiscordChannel;
@@ -8,6 +9,7 @@ import de.gost0r.pickupbot.discord.DiscordChannelType;
 import de.gost0r.pickupbot.discord.DiscordUser;
 
 public class PickupBot extends DiscordBot {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	private DiscordChannel pubchan;
 	
@@ -25,7 +27,7 @@ public class PickupBot extends DiscordBot {
 
 	@Override
 	protected void recvMessage(DiscordUser user, DiscordChannel channel, String msg) {
-		System.out.println("RECV #" + ((channel == null || channel.name == null) ?  "null" : channel.name) + " " + user.username + ": " + msg);
+		LOGGER.info("RECV #" + ((channel == null || channel.name == null) ?  "null" : channel.name) + " " + user.username + ": " + msg);
 		
 		if (user.equals(self)) {
 //			System.out.println("Msg from self, ignore.");

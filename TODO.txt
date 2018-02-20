@@ -26,7 +26,7 @@ TODO:
 ( ) todo server.connect adjust // when do you connect to the server?
 (x) rs2 closed => failed pstmt
 (x) !add should highlight the added player
-( ) !reset saveMatch not working - when aborting (see stacktrace)
+(x) !reset saveMatch not working - when aborting (see stacktrace)
 ( ) rework match abort/cancel/end behaviour to be more consistent
 (x) !help !cmd without !
 (x) !top5 crash on 5th entry: nullpointer for player
@@ -51,7 +51,7 @@ TODO:
 ( ) make sure id's are strings, but digits only (DiscordUser.get(id))
 ( ) add + to positive elochange on aftermath
 ( ) allow admins to !remove <!discorduser/urtauth>
-( ) use log4j for propper logging
+(x) use logger for proper logging
 
 (x) add expected auth-whois msgs
 (x) copy new stats to the existing player in case we found him

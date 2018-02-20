@@ -39,7 +39,7 @@ public class Player {
 		this.elo += elochange;
 		this.eloChange = elochange;
 		
-		// update done by servermonitor
+		// db update done by servermonitor
 	}
 	
 	public GameMap getVotedMap() {

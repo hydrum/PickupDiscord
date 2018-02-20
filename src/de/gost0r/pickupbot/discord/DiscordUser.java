@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,6 +14,7 @@ import org.json.JSONObject;
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
 
 public class DiscordUser {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	public String id;
 	public String username;
@@ -36,7 +39,7 @@ public class DiscordUser {
 			this.discriminator = user.getString("discriminator");
 			this.avatar = user.getString("avatar");
 		} catch (JSONException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 	}
 	
@@ -48,7 +51,7 @@ public class DiscordUser {
 //		if (roles.containsKey(guild)) {
 //			return roles.get(guild);
 //		} else
-		// DON'T SAVE THEM FOR NOW, NEED GUILD_MEMBER_UPDATE EVENTS TO TAKE CARE OF IT INSTEAD (later)
+		//  TODO: DON'T SAVE THEM FOR NOW, NEED GUILD_MEMBER_UPDATE EVENTS TO TAKE CARE OF IT INSTEAD (later)
 		{
 			JSONArray ar = DiscordAPI.requestUserGuildRoles(guild, id);
 			List<String> list = new ArrayList<String>();
@@ -56,7 +59,7 @@ public class DiscordUser {
 				try {
 					list.add(ar.getString(i));
 				} catch (JSONException e) {
-					e.printStackTrace();
+					LOGGER.log(Level.WARNING, "Exception: ", e);
 				}
 			}
 			roles.put(guild, list);
@@ -73,9 +76,9 @@ public class DiscordUser {
 			}
 			return channel;
 		} catch (JSONException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		} catch (NullPointerException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return null;
 	}
@@ -91,26 +94,30 @@ public class DiscordUser {
 			userList.put(userID, newUser);
 			return newUser;
 		} catch (JSONException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return null;
 	}
 	public static DiscordUser getUser(String id) {
-		if (userList.containsKey(id)) {
-			return userList.get(id);
-		}
-		JSONObject user = DiscordAPI.requestUser(id);
-		if (user != null) {
-			DiscordUser newUser = new DiscordUser(user);
-			userList.put(newUser.id, newUser);
-			return newUser;
+		if (id.matches("[0-9]+")) {
+			if (userList.containsKey(id)) {
+				return userList.get(id);
+			}
+			JSONObject user = DiscordAPI.requestUser(id);
+			if (user != null) {
+				DiscordUser newUser = new DiscordUser(user);
+				userList.put(newUser.id, newUser);
+				return newUser;
+			}
 		}
 		return null;
 	}
 	
 	public static DiscordUser findUser(String id) {
-		if (userList.containsKey(id)) {
-			return userList.get(id);
+		if (id.matches("[0-9]+")) {
+			if (userList.containsKey(id)) {
+				return userList.get(id);
+			}
 		}
 		return null;
 	}

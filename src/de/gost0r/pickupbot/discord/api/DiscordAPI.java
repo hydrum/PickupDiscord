@@ -8,6 +8,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,6 +19,7 @@ import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.DiscordChannel;
 
 public class DiscordAPI {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	public static final String api_url = "https://discordapp.com/api/";
 	public static final String api_version = "v6";
@@ -25,14 +28,15 @@ public class DiscordAPI {
 		try {
 			String reply = sendPostRequest("/channels/"+ channel.id + "/messages", new JSONObject().put("content", msg));
 			JSONObject obj = new JSONObject(reply);
-			return !obj.has("code");
+			return obj != null && !obj.has("code");
 		} catch (JSONException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return false;
 	}
 	
 	private static String sendPostRequest(String request, JSONObject content) {
+//		Thread.dumpStack();
 		try {
 			byte[] postData       = content.toString().getBytes( StandardCharsets.UTF_8 );
 			int    postDataLength = postData.length;
@@ -52,13 +56,13 @@ public class DiscordAPI {
 			}
 			
 			if (c.getResponseCode() != 200) {
-				System.out.println("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + request);
+				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
 				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {
 						Thread.sleep(1000);
 						return sendPostRequest(request, content);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						LOGGER.log(Level.WARNING, "Exception: ", e);
 					}
 				}
 				return null;
@@ -71,24 +75,26 @@ public class DiscordAPI {
 				try {
 					fullmsg += output;
 				} catch (ClassCastException e) {
-					e.printStackTrace();
+					LOGGER.log(Level.WARNING, "Exception: ", e);
 				} catch (NullPointerException e) {
-					e.printStackTrace();
+					LOGGER.log(Level.WARNING, "Exception: ", e);
 				}
 			}
 			c.disconnect();
 			
+			LOGGER.fine("API call complete for " + request + ": " + fullmsg);
 			return fullmsg;
 			
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return null;
 	}
 	
 	private static String sendGetRequest(String request) {
+//		Thread.dumpStack();
 		try {
 			URL url = new URL(api_url + api_version + request);
 			HttpURLConnection c = (HttpURLConnection) url.openConnection();
@@ -97,13 +103,13 @@ public class DiscordAPI {
 			c.setRequestProperty("Authorization", "Bot " + DiscordBot.getToken());
 			
 			if (c.getResponseCode() != 200) {
-				System.out.println("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + request);
+				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
 				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {
 						Thread.sleep(1000);
 						return sendGetRequest(request);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						LOGGER.log(Level.WARNING, "Exception: ", e);
 					}
 					return null;
 				}
@@ -116,19 +122,20 @@ public class DiscordAPI {
 				try {
 					fullmsg += output;
 				} catch (ClassCastException e) {
-					e.printStackTrace();
+					LOGGER.log(Level.WARNING, "Exception: ", e);
 				} catch (NullPointerException e) {
-					e.printStackTrace();
+					LOGGER.log(Level.WARNING, "Exception: ", e);
 				}
 			}
 			c.disconnect();
-			
+
+			LOGGER.fine("API call complete for " + request + ": " + fullmsg);
 			return fullmsg;
 			
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return null;
 	}
@@ -140,7 +147,7 @@ public class DiscordAPI {
 			JSONObject obj = new JSONObject(reply);
 			return obj;
 		} catch (JSONException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return null;
 	}
@@ -151,7 +158,7 @@ public class DiscordAPI {
 			try {
 				return new JSONArray(reply);
 			} catch (JSONException e) {
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Exception: ", e);
 			}
 		}
 		return null;
@@ -163,7 +170,7 @@ public class DiscordAPI {
 			try {
 				return new JSONObject(reply);
 			} catch (JSONException e) {
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Exception: ", e);
 			}
 		}
 		return null;
@@ -175,7 +182,7 @@ public class DiscordAPI {
 			try {
 				return new JSONObject(reply);
 			} catch (JSONException e) {
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Exception: ", e);
 			}
 		}
 		return null;
@@ -187,7 +194,7 @@ public class DiscordAPI {
 			try {
 				return new JSONObject(reply).getJSONArray("roles");
 			} catch (JSONException e) {
-				e.printStackTrace();
+				LOGGER.log(Level.WARNING, "Exception: ", e);
 			}
 		}
 		return null;

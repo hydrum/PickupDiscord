@@ -13,4 +13,4 @@ public enum DiscordGatewayOpcode {
 	Invalid_Session,		// R: notfiy client of invalid session id
 	Hello,					// R: sent after connecting
 	Heartbeat_ACK			// R: following heartbeat
-	}
+}

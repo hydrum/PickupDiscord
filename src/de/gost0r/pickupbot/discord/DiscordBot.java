@@ -2,6 +2,10 @@ package de.gost0r.pickupbot.discord;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.websocket.DeploymentException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +16,7 @@ import de.gost0r.pickupbot.discord.web.DiscordGatewayEvent;
 import de.gost0r.pickupbot.discord.web.WsClientEndPoint;
 
 public class DiscordBot  {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static String token = "";
 	private static String guildID = "117622053061787657";
@@ -35,7 +40,12 @@ public class DiscordBot  {
 			self = DiscordUser.getUser("@me");
 			
 		} catch (URISyntaxException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		} catch (Exception e) {
+			// we can trigger a handshake exception for endpoint. if that's the case, simply try again.
+			// TODO: need to check that this is really working
+			LOGGER.log(Level.SEVERE, "Exception: ", e);
+			init();
 		}
 	}
 	
@@ -49,7 +59,7 @@ public class DiscordBot  {
 				default: break;
 			}
 		} catch (JSONException e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 	}
 

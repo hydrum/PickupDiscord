@@ -7,10 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.pickup.server.Server;
 
 public class Match {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private Gametype gametype;
 	private MatchState state;
@@ -69,7 +71,7 @@ public class Match {
 			resetAwaitingServer();
 		} else if (state == MatchState.Live) {
 			resetLive();
-		} else if (state == MatchState.Done || state == MatchState.Abort){
+		} else if (state == MatchState.Done || state == MatchState.Abort) {
 			// do nothing
 		}
 	}
@@ -216,7 +218,7 @@ public class Match {
 			Random rand = new Random();
 			int password = rand.nextInt((999999-100000) + 1) + 100000;
 			server.password = String.valueOf(password);
-			System.out.println("Password: " + server.password);
+			LOGGER.info("Password: " + server.password);
 
 			// Get most voted map
 			List<GameMap> tmp = new ArrayList<GameMap>();
@@ -236,15 +238,13 @@ public class Match {
 					tmp.add(map);
 				}
 			}
-			System.out.println(tmp.size());
-			System.out.println(Arrays.toString(tmp.toArray()));
 			if (tmp.size() == 0) {
 				logic.bot.sendMsg(logic.bot.getPubchan(), "ERROR: NO MAP FOR GAMETYPE");
 				cancelStart();
 				return;
 			}
 			this.map = tmp.size() == 1 ? tmp.get(0) : tmp.get(rand.nextInt(tmp.size()-1));
-			System.out.println("Map: " + this.map.name);
+			LOGGER.info("Map: " + this.map.name);
 
 			// Sort players by elo
 			List<Player> playerList = new ArrayList<Player>();
@@ -298,8 +298,8 @@ public class Match {
 			elo[0] /= gametype.getTeamSize();
 			elo[1] /= gametype.getTeamSize();
 	
-			System.out.println("Team Red: " + elo[0] + " " + Arrays.toString(teamList.get("red").toArray()));
-			System.out.println("Team Blue: " + elo[1] + " " + Arrays.toString(teamList.get("blue").toArray()));
+			LOGGER.info("Team Red: " + elo[0] + " " + Arrays.toString(teamList.get("red").toArray()));
+			LOGGER.info("Team Blue: " + elo[1] + " " + Arrays.toString(teamList.get("blue").toArray()));
 			
 			id = logic.db.createMatch(this);
 			

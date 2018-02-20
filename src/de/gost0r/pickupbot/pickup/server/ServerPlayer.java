@@ -1,6 +1,5 @@
 package de.gost0r.pickupbot.pickup.server;
 
-import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.pickup.Player;
 
 public class ServerPlayer {
