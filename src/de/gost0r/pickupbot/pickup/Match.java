@@ -179,7 +179,6 @@ public class Match {
 				sendAftermath();
 				logic.matchRemove(this);
 				logic.db.saveMatch(this);
-				return;
 			}
 		}
 	}

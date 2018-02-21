@@ -67,7 +67,7 @@ public class DiscordGateway implements MessageHandler {
 		latestPacket = p;
 		switch(p.op) {
 			case Hello: handlePacketHello(p); break;
-			case Dispatch: bot.handleEvent(DiscordGatewayEvent.valueOf(p.t), p.d);
+			case Dispatch: bot.handleEvent(DiscordGatewayEvent.valueOf(p.t), p.d); break;
 			default: break;
 		}
 	}

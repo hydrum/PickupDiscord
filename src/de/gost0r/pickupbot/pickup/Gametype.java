@@ -13,10 +13,8 @@ public class Gametype {
 	private List<String> config;
 	
 	public Gametype(String name, int teamSize, boolean active) {
-		
 		this.setName(name);
 		this.setActive(active);
-
 		this.setTeamSize(teamSize);
 		
 		config = new ArrayList<String>();
