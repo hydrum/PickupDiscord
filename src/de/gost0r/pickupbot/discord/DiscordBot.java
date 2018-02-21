@@ -49,12 +49,10 @@ public class DiscordBot  {
 	
 	public void handleEvent(DiscordGatewayEvent event, JSONObject obj) {
 		try {
-			switch(event) {
-				case MESSAGE_CREATE: 		recvMessage(DiscordUser.getUser(obj.getJSONObject("author")),
-														DiscordChannel.findChannel(obj.getString("channel_id")),
-														obj.getString("content"));
-											break;
-				default: break;
+			if (event == DiscordGatewayEvent.MESSAGE_CREATE) {
+				recvMessage(DiscordUser.getUser(obj.getJSONObject("author")),
+				DiscordChannel.findChannel(obj.getString("channel_id")),
+				obj.getString("content"));
 			}
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
