@@ -100,7 +100,7 @@ public class PickupLogic {
 		// check whether the user and the urtauth aren't taken
 		if (Player.get(urtauth) == null) {
 			if (Player.get(user) == null) {
-				if (urtauth.matches("^[a-z0-9]*$")) {
+				if (urtauth.matches("^[a-z0-9]*$") && urtauth.length() != 32) {
 					Player p = new Player(user, urtauth);
 					db.createPlayer(p);
 					bot.sendNotice(user, Config.auth_success);

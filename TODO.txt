@@ -60,6 +60,8 @@ TODO:
 (x) #4     v3nd3tta     986 (--14)
 (x) fix g_swaproles reply actually contains "1^7" and not just "1"
 
+( ) find out why the bot isn't sometimes launching the ServerMonitor or randomly stop observing
+
 
 server monitor: forceplayers rework
 -> auths not displayed

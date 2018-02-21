@@ -283,10 +283,6 @@ public class ServerMonitor implements Runnable {
 				requestAuth(player);
 			}
 			
-			if (player.ping.equals("0")) {
-				continue;
-			}
-			
 			// find player in serverplayerlist
 			ServerPlayer found = null;
 			for (ServerPlayer player_x : players) {
