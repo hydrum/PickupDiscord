@@ -69,7 +69,6 @@ public class WsClientEndPoint {
     }
 
     public static interface MessageHandler {
-
         public void handleMessage(String message);
     }
     
