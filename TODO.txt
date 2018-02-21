@@ -34,6 +34,8 @@ TODO:
 (x) check scoreboard roundtime for modes like ts, bomb etc => else possible prematurely entering SCORE state
 ( ) need prematurely leaver detection
 ( ) acknowledge role changes and therefore caching it
+( ) ability to queue up for multiple gametypes
+( ) replace status 0/10 when removed with leaving player
 
 ( ) !reset 19 didn't stop the server monitor
 
@@ -61,6 +63,8 @@ TODO:
 (x) fix g_swaproles reply actually contains "1^7" and not just "1"
 
 ( ) find out why the bot isn't sometimes launching the ServerMonitor or randomly stop observing
+
+( ) URGENT: if ServerMonitor is active and !rcon <string> is sent, bot goes into an endless loop.
 
 
 server monitor: forceplayers rework
