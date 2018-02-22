@@ -39,21 +39,25 @@ public class Server {
 		this.active = active;
 		
 		connect();
+		monitor = null;
 	}
 
 	public void connect() {
 		try {
 			this.socket = new DatagramSocket();
 			this.socket.setSoTimeout(1000);
-			monitor = null;
 		} catch (SocketException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 	}
 
 
-	public String sendRcon(String rconString) {
+	public synchronized String sendRcon(String rconString) {
 		try {
+			if (this.socket.isClosed()) {
+				LOGGER.severe("SOCKET IS CLOSED");
+				connect();
+			}
 			String rcon = "xxxxrcon " + rconpassword + " " + rconString;
 			
 			byte[] recvBuffer = new byte[2048];
