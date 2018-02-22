@@ -99,8 +99,8 @@ public class PickupLogic {
 	
 	public void cmdRegisterPlayer(DiscordUser user, String urtauth, String msgid) {
 		// check whether the user and the urtauth aren't taken
-		if (Player.get(urtauth) == null) {
-			if (Player.get(user) == null) {
+		if (Player.get(user) == null) {
+			if (Player.get(urtauth) == null) {
 				if (urtauth.matches("^[a-z0-9]*$")) {
 					if (urtauth.length() != 32) {
 						Player p = new Player(user, urtauth);
@@ -114,10 +114,10 @@ public class PickupLogic {
 					bot.sendNotice(user, Config.auth_invalid);
 				}
 			} else {
-				bot.sendNotice(user, Config.auth_taken_user);
+				bot.sendNotice(user, Config.auth_taken_urtauth);
 			}
 		} else {
-			bot.sendNotice(user, Config.auth_taken_urtauth);
+			bot.sendNotice(user, Config.auth_taken_user);
 		}
 	}
 	

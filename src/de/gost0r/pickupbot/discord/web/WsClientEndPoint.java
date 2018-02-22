@@ -15,6 +15,8 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
+import de.gost0r.pickupbot.discord.DiscordBot;
+
 @ClientEndpoint
 public class WsClientEndPoint {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -22,15 +24,36 @@ public class WsClientEndPoint {
 	Session userSession = null;
 	private MessageHandler messageHandler;
 	
-    public WsClientEndPoint(URI endpointURI) {
+	DiscordBot bot;
+	
+	URI endpointURI = null;
+	
+    public WsClientEndPoint(DiscordBot bot, URI endpointURI) {
+    	this.bot = bot;
+    	this.endpointURI = endpointURI;
+    	connect();
+    }
+    
+    private void connect() {
         try {
-        		WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-				container.connectToServer(this, endpointURI);
-			} catch (DeploymentException e) {
-				LOGGER.log(Level.WARNING, "Exception: ", e);
-			} catch (IOException e) {
-				LOGGER.log(Level.WARNING, "Exception: ", e);
-			}
+    		WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+			container.connectToServer(this, endpointURI);
+		} catch (DeploymentException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		} catch (IOException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+    }
+    
+    public void reconnect() {
+		try {
+	    	if (userSession.isOpen()) {
+				userSession.close();
+	    	}
+    		connect();
+		} catch (IOException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
     }
     
     @OnOpen
@@ -43,6 +66,7 @@ public class WsClientEndPoint {
     public void onClose(Session userSession, CloseReason reason) {
 		LOGGER.warning("WebSocket closed. " + reason.toString());
         this.userSession = null;
+        bot.reconnect();
     }
 
     @OnMessage

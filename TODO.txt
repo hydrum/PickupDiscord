@@ -5,7 +5,7 @@ TODO:
 (x) handle matchstart: if playercount == 10 => request a server, if one is avi -> startGame() -> move match to ongoing and be ready for a new signup
 (x) be able to vote/remove during AwaitingServer state
 (x) cmd to get matchinfo for ongoing matches
-( ) whitelist certain players on the server (admins)
+(x) whitelist certain players on the server (admins)
 (x) !reset for live matches
 (x) !getdata
 (x) somehow gametype related maps isnt working -> to check
@@ -85,6 +85,7 @@ server monitor: forceplayers rework
 ( ) reconnect (resume) function
 ( ) get gateway if fails to connect
 ( ) ability to reply to heartbeat event
+(x) reconnect if WebSocket was shut down
 
 IDEA:
 - display newly connected/disconnected people in the chat

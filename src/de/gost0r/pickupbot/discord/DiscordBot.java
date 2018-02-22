@@ -21,22 +21,30 @@ public class DiscordBot  {
 	
 	protected DiscordUser self = null;
 		
-	private DiscordGateway gateway;
-	private WsClientEndPoint endpoint;
+	private DiscordGateway gateway = null;
+	private WsClientEndPoint endpoint = null;
 	
 	public DiscordBot() {
 	}
 	
 	public void init() {
+		reconnect();
+		self = DiscordUser.getUser("@me");
+	}
+	
+	public void reconnect() {
 		try {
-			
-			endpoint = new WsClientEndPoint(new URI("wss://gateway.discord.gg/?encoding=json&v=6"));
-			gateway = new DiscordGateway(this, endpoint);
-			
+			if (endpoint == null) {
+				endpoint = new WsClientEndPoint(this, new URI("wss://gateway.discord.gg/?encoding=json&v=6"));
+			} else {
+				endpoint.reconnect();
+			}
+			if (gateway == null) {
+				gateway = new DiscordGateway(this, endpoint);
+			} else {
+				gateway.reconnect();
+			}
 			endpoint.addMessageHandler(gateway);
-			
-			self = DiscordUser.getUser("@me");
-			
 		} catch (URISyntaxException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		} catch (Exception e) {

@@ -75,6 +75,9 @@ public class DiscordGateway implements MessageHandler {
 	private void handlePacketHello(DiscordPacket p) {
 		// setting heartbeat timer
 		try {
+			if (heartbeatTask != null) {
+				heartbeatTask.cancel();
+			}
 			heartbeatTask = new HeartbeatTask(this);			
 			long interval = p.d.getLong("heartbeat_interval");
 			heartbeatTimer.scheduleAtFixedRate(heartbeatTask, interval/2, interval);			
@@ -113,6 +116,14 @@ public class DiscordGateway implements MessageHandler {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		
+	}
+	
+	public void setClientEP(WsClientEndPoint clientEP) {
+		this.clientEP = clientEP;
+	}
+	
+	public void reconnect() {
+		// do nothing for now.
 	}
 	
 	public int getLatestSeq() {

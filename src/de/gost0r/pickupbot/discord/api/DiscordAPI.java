@@ -41,6 +41,10 @@ public class DiscordAPI {
 			LOGGER.info(reply); // TODO: Remove
 			JSONObject obj = null;
 			if (reply != null) {
+				if (reply.isEmpty()) {
+					// a successful deletemsg will return a 204 error
+					return true;
+				}
 				obj = new JSONObject(reply);
 			}
 			return obj != null && !obj.has("code");
