@@ -35,6 +35,21 @@ public class DiscordAPI {
 		return false;
 	}
 	
+	public static boolean deleteMessage(DiscordChannel channel, String msgid) {
+		try {
+			String reply = sendDeleteRequest("/channels/"+ channel.id + "/messages/" + msgid);
+			LOGGER.info(reply); // TODO: Remove
+			JSONObject obj = null;
+			if (reply != null) {
+				obj = new JSONObject(reply);
+			}
+			return obj != null && !obj.has("code");
+		} catch (JSONException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return false;
+	}
+	
 	private static String sendPostRequest(String request, JSONObject content) {
 //		Thread.dumpStack();
 		try {
@@ -99,6 +114,54 @@ public class DiscordAPI {
 			URL url = new URL(api_url + api_version + request);
 			HttpURLConnection c = (HttpURLConnection) url.openConnection();
 			c.setRequestMethod("GET");
+			c.setRequestProperty("User-Agent", "Bot");
+			c.setRequestProperty("Authorization", "Bot " + DiscordBot.getToken());
+			
+			if (c.getResponseCode() != 200) {
+				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
+				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
+					try {
+						Thread.sleep(1000);
+						return sendGetRequest(request);
+					} catch (InterruptedException e) {
+						LOGGER.log(Level.WARNING, "Exception: ", e);
+					}
+					return null;
+				}
+			}
+			
+			BufferedReader br = new BufferedReader(new InputStreamReader((c.getInputStream())));
+			String fullmsg = "";
+			String output = "";
+			while ((output = br.readLine()) != null) {
+				try {
+					fullmsg += output;
+				} catch (ClassCastException e) {
+					LOGGER.log(Level.WARNING, "Exception: ", e);
+				} catch (NullPointerException e) {
+					LOGGER.log(Level.WARNING, "Exception: ", e);
+				}
+			}
+			c.disconnect();
+
+			LOGGER.fine("API call complete for " + request + ": " + fullmsg);
+			return fullmsg;
+			
+		} catch (MalformedURLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		} catch (IOException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return null;
+	}
+
+	
+	private static String sendDeleteRequest(String request) {
+//		Thread.dumpStack();
+		try {
+			URL url = new URL(api_url + api_version + request);
+			HttpURLConnection c = (HttpURLConnection) url.openConnection();
+			c.setRequestMethod("DELETE");
 			c.setRequestProperty("User-Agent", "Bot");
 			c.setRequestProperty("Authorization", "Bot " + DiscordBot.getToken());
 			

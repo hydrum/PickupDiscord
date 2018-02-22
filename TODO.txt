@@ -36,6 +36,7 @@ TODO:
 ( ) acknowledge role changes and therefore caching it
 ( ) ability to queue up for multiple gametypes
 ( ) replace status 0/10 when removed with leaving player
+(x) delete failed !register <authkey> msg and tell the player to use his authname instead.
 
 ( ) !reset 19 didn't stop the server monitor
 

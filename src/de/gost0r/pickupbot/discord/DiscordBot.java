@@ -50,16 +50,18 @@ public class DiscordBot  {
 	public void handleEvent(DiscordGatewayEvent event, JSONObject obj) {
 		try {
 			if (event == DiscordGatewayEvent.MESSAGE_CREATE) {
-				recvMessage(DiscordUser.getUser(obj.getJSONObject("author")),
-				DiscordChannel.findChannel(obj.getString("channel_id")),
-				obj.getString("content"));
+				DiscordMessage msg = new DiscordMessage(obj.getString("id"),
+								DiscordUser.getUser(obj.getJSONObject("author")),
+								DiscordChannel.findChannel(obj.getString("channel_id")),
+								obj.getString("content"));
+				recvMessage(msg);
 			}
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 	}
 
-	protected void recvMessage(DiscordUser user, DiscordChannel channel, String msg) {
+	protected void recvMessage(DiscordMessage msg) {
 		
 	}
 	

@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.discord.DiscordUser;
+import de.gost0r.pickupbot.discord.api.DiscordAPI;
 import de.gost0r.pickupbot.pickup.server.Server;
 
 public class PickupLogic {
@@ -96,14 +97,19 @@ public class PickupLogic {
 		return true;
 	}
 	
-	public void cmdRegisterPlayer(DiscordUser user, String urtauth) {
+	public void cmdRegisterPlayer(DiscordUser user, String urtauth, String msgid) {
 		// check whether the user and the urtauth aren't taken
 		if (Player.get(urtauth) == null) {
 			if (Player.get(user) == null) {
-				if (urtauth.matches("^[a-z0-9]*$") && urtauth.length() != 32) {
-					Player p = new Player(user, urtauth);
-					db.createPlayer(p);
-					bot.sendNotice(user, Config.auth_success);
+				if (urtauth.matches("^[a-z0-9]*$")) {
+					if (urtauth.length() != 32) {
+						Player p = new Player(user, urtauth);
+						db.createPlayer(p);
+						bot.sendNotice(user, Config.auth_success);
+					} else {
+						DiscordAPI.deleteMessage(bot.getPubchan(), msgid);
+						bot.sendNotice(user, Config.auth_sent_key);
+					}
 				} else {
 					bot.sendNotice(user, Config.auth_invalid);
 				}
