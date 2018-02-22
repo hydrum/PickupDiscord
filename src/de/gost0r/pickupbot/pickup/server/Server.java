@@ -79,7 +79,8 @@ public class Server {
 	        	try {
 	        		this.socket.receive(recvPacket);
 	        		string += new String(recvPacket.getData());
-	        		
+
+	    			recvBuffer = new byte[2048]; // empty buffer
 	        		recvPacket = new DatagramPacket(recvBuffer, recvBuffer.length);
 	        	} catch (SocketTimeoutException e) {
 	        		break;
@@ -108,6 +109,7 @@ public class Server {
 	public void stopMonitoring() {
 		if (monitor != null) {
 			this.monitor.stop();
+			this.monitor = null;
 		}
 	}
 

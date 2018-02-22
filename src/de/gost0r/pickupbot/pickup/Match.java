@@ -142,7 +142,7 @@ public class Match {
 	}
 	
 	public void voteSurrender(Player player) {
-		long timeUntilSurrender = (startTime + 600000L) - System.currentTimeMillis(); // 10min in milliseconds
+		long timeUntilSurrender = (startTime + 300000L) - System.currentTimeMillis(); // 5min in milliseconds
 		if (timeUntilSurrender < 0) {
 			if (!player.hasVotedSurrender()) {
 				player.voteSurrender();

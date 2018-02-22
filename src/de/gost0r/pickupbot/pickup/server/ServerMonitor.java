@@ -51,6 +51,7 @@ public class ServerMonitor implements Runnable {
 
 	@Override
 	public void run() {
+		LOGGER.severe("run() started");
 		while (!stopped) {
 			observe();
 			try {
@@ -59,10 +60,12 @@ public class ServerMonitor implements Runnable {
 				LOGGER.log(Level.WARNING, "Exception: ", e);
 			}
 		}
+		LOGGER.severe("run() ended");
 	}
 	
 	public void stop() {
 		stopped = true;
+		LOGGER.severe("stop() called");
 	}
 	
 	private void observe() {

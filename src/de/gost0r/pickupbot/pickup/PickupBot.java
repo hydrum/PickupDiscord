@@ -20,8 +20,8 @@ public class PickupBot extends DiscordBot {
 	public void init() {
 		super.init();
 		
-		pubchan = DiscordChannel.findChannel("143233743107129344"); // pickup_dev
-//		pubchan = DiscordChannel.findChannel("402541587164561419"); // urtpickup
+//		pubchan = DiscordChannel.findChannel("143233743107129344"); // pickup_dev
+		pubchan = DiscordChannel.findChannel("402541587164561419"); // urtpickup
 		
 		logic = new PickupLogic(this);
 //		logic.cmdEnableGametype("TEST", "1");

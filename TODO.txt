@@ -23,7 +23,7 @@ TODO:
 (x) !status give only urtauth
 (x) API call failed: (429) TOO MANY REQUESTS
 (x) send msgs once (gamestart)
-( ) todo server.connect adjust // when do you connect to the server?
+(x) todo server.connect adjust // when do you connect to the server?
 (x) rs2 closed => failed pstmt
 (x) !add should highlight the added player
 (x) !reset saveMatch not working - when aborting (see stacktrace)
@@ -57,6 +57,9 @@ TODO:
 (x) add + to positive elochange on aftermath
 (x) allow admins to !remove <discorduser>
 (x) use logger for proper logging
+( ) don't display default port if serverip is a domain
+( ) add the ability to move users into certain voicechans: https://discordapp.com/developers/docs/resources/guild#modify-guild-member
+( ) pub func !ongoing with gametime, ready etc
 
 (x) add expected auth-whois msgs
 (x) copy new stats to the existing player in case we found him
@@ -74,6 +77,13 @@ server monitor: forceplayers rework
 -> teams not updating
 -> how does auth-whois look like for non-authed ppl
 -> swaproles not working
+
+( ) parseRconPlayers can be empty! - why/how?
+Exception in thread "Thread-2" java.lang.NullPointerException
+	at de.gost0r.pickupbot.pickup.server.ServerMonitor.evaluateState(ServerMonitor.java:225)
+	at de.gost0r.pickupbot.pickup.server.ServerMonitor.observe(ServerMonitor.java:76)
+	at de.gost0r.pickupbot.pickup.server.ServerMonitor.run(ServerMonitor.java:56)
+	at java.lang.Thread.run(Unknown Source)
 
 
 ( ) !expire 15m timer until autoremove
