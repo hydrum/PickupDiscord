@@ -47,7 +47,7 @@ public class WsClientEndPoint {
     
     public void reconnect() {
 		try {
-	    	if (userSession.isOpen()) {
+	    	if (userSession != null && userSession.isOpen()) {
 				userSession.close();
 	    	}
     		connect();
