@@ -267,7 +267,7 @@ public class Match {
 			}
 		}
 		
-		logic.bot.sendMsg(logic.bot.getPubchan(), fullmsg);
+		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg);
 	}
 	
 
@@ -305,7 +305,7 @@ public class Match {
 				}
 			}
 			if (tmp.size() == 0) {
-				logic.bot.sendMsg(logic.bot.getPubchan(), "ERROR: NO MAP FOR GAMETYPE");
+				logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), "ERROR: NO MAP FOR GAMETYPE");
 				cancelStart();
 				return;
 			}
@@ -417,7 +417,7 @@ public class Match {
 			msg = msg.replace(".gametype.", gametype.getName());
 			fullmsg += "\n" + msg;
 			
-			logic.bot.sendMsg(logic.bot.getPubchan(), fullmsg);
+			logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg);
 
 			msg = Config.pkup_go_player;
 			msg = msg.replace(".server.", server.getAddress());
@@ -431,7 +431,7 @@ public class Match {
 			
 			msg = Config.pkup_go_pub_sent;
 			msg = msg.replace(".gametype.", gametype.getName());
-			logic.bot.sendMsg(logic.bot.getPubchan(), msg);
+			logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), msg);
 
 			// set server data
 			for (String s : this.gametype.getConfig()) {

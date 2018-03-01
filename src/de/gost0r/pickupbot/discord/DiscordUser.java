@@ -23,7 +23,7 @@ public class DiscordUser {
 	
 	public DiscordChannel channel = null;
 	
-	private Map<String, List<String>> roles = new HashMap<String, List<String>>();
+	private Map<DiscordGuild, List<DiscordRole>> roles = new HashMap<DiscordGuild, List<DiscordRole>>();
 	
 	public DiscordUser(String id, String username, String discriminator, String avatar) {
 		this.id = id;
@@ -47,17 +47,16 @@ public class DiscordUser {
 		return "<@" + id + ">";
 	}
 	
-	public List<String> getRoles(String guild) {
-//		if (roles.containsKey(guild)) {
-//			return roles.get(guild);
-//		} else
-		//  TODO: DON'T SAVE THEM FOR NOW, NEED GUILD_MEMBER_UPDATE EVENTS TO TAKE CARE OF IT INSTEAD (later)
-		{
-			JSONArray ar = DiscordAPI.requestUserGuildRoles(guild, id);
-			List<String> list = new ArrayList<String>();
+	public List<DiscordRole> getRoles(DiscordGuild guild) {
+		if (roles.containsKey(guild)) {
+			return roles.get(guild);
+		} else {
+			JSONArray ar = DiscordAPI.requestUserGuildRoles(guild.id, this.id);
+			List<DiscordRole> list = new ArrayList<DiscordRole>();
 			for (int i = 0; i < ar.length(); ++i) {
 				try {
-					list.add(ar.getString(i));
+					DiscordRole role = DiscordRole.getRole(ar.getString(i));
+					list.add(role);
 				} catch (JSONException e) {
 					LOGGER.log(Level.WARNING, "Exception: ", e);
 				}

@@ -7,12 +7,13 @@ import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordChannelType;
 import de.gost0r.pickupbot.discord.DiscordMessage;
+import de.gost0r.pickupbot.discord.DiscordRole;
 import de.gost0r.pickupbot.discord.DiscordUser;
 
 public class PickupBot extends DiscordBot {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-	private DiscordChannel pubchan;
+	private DiscordChannel latestMessageChannel;
 	
 	private PickupLogic logic;
 	
@@ -21,7 +22,7 @@ public class PickupBot extends DiscordBot {
 		super.init();
 		
 //		pubchan = DiscordChannel.findChannel("143233743107129344"); // pickup_dev
-		pubchan = DiscordChannel.findChannel("402541587164561419"); // urtpickup
+//		pubchan = DiscordChannel.findChannel("402541587164561419"); // urtpickup
 		
 		logic = new PickupLogic(this);
 //		logic.cmdEnableGametype("TEST", "1");
@@ -31,6 +32,8 @@ public class PickupBot extends DiscordBot {
 	protected void recvMessage(DiscordMessage msg) {
 		LOGGER.info("RECV #" + ((msg.channel == null || msg.channel.name == null) ?  "null" : msg.channel.name) + " " + msg.user.username + ": " + msg.content);
 		
+		this.latestMessageChannel = msg.channel;
+		
 		if (msg.user.equals(self)) {
 //			System.out.println("Msg from self, ignore.");
 			return;
@@ -38,7 +41,7 @@ public class PickupBot extends DiscordBot {
 		
 		String[] data = msg.content.split(" ");
 
-		if (msg.channel.equals(pubchan))
+		if (isPublicChannel(msg.channel))
 		{
 			Player p = Player.get(msg.user);
 			// Execute code according to cmd
@@ -404,7 +407,8 @@ public class PickupBot extends DiscordBot {
 				}
 			}
 		}
-		if (msg.channel == getPubchan() || msg.channel.type == DiscordChannelType.DM )
+		
+		if (isPublicChannel(msg.channel) || msg.channel.type == DiscordChannelType.DM )
 		{
 			if (data[0].toLowerCase().equals(Config.CMD_HELP))
 			{
@@ -451,7 +455,7 @@ public class PickupBot extends DiscordBot {
 				}
 				else
 				{
-					if (msg.channel.equals(pubchan))
+					if (isPublicChannel(msg.channel))
 					{
 						super.sendMsg(msg.channel, Config.help_cmd_avi.replace(".cmds.", Config.PUB_LIST));
 					}
@@ -461,7 +465,97 @@ public class PickupBot extends DiscordBot {
 					}
 				}
 			}
+			else if (data[0].toLowerCase().equals(Config.CMD_ADDCHANNEL))
+			{
+				if (hasAdminRights(msg.user))
+				{
+					if (data.length == 3)
+					{
+						DiscordChannel targetChannel = DiscordChannel.findChannel(data[1].replaceAll("[^\\d.]", ""));
+						PickupChannelType type = PickupChannelType.valueOf(data[2].toUpperCase()); // TODO: check what exception might be thrown
+						if (targetChannel != null)
+						{
+							if (type != null)
+							{
+								if (!logic.getChannelByType(type).contains(targetChannel)) 
+								{
+									logic.addChannel(type, targetChannel);
+									sendNotice(msg.user, "successfully added the channel.");
+								}
+							} // TODO: write return msgs
+						}
+					}
+				}
+			}
+			else if (data[0].toLowerCase().equals(Config.CMD_REMOVECHANNEL))
+			{
+				if (hasAdminRights(msg.user))
+				{
+					if (data.length == 3)
+					{
+						DiscordChannel targetChannel = DiscordChannel.findChannel(data[1].replaceAll("[^\\d.]", ""));
+						PickupChannelType type = PickupChannelType.valueOf(data[2].toUpperCase()); // TODO: check what exception might be thrown
+						if (targetChannel != null)
+						{
+							if (type != null)
+							{
+								if (logic.getChannelByType(type).contains(targetChannel))
+								{
+									logic.removeChannel(type, targetChannel);
+									sendNotice(msg.user, "successfully removed the channel.");
+								}
+							} // TODO: write return msgs
+						}
+					}
+				}
+			}
+			else if (data[0].toLowerCase().equals(Config.CMD_ADDROLE))
+			{
+				if (hasAdminRights(msg.user))
+				{
+					if (data.length == 3)
+					{
+						DiscordRole targetRole = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
+						PickupRoleType type = PickupRoleType.valueOf(data[2].toUpperCase()); // TODO: check what exception might be thrown
+						if (targetRole != null)
+						{
+							if (type != null)
+							{
+								if (!logic.getRoleByType(type).contains(targetRole)) 
+								{
+									logic.addRole(type, targetRole);
+									sendNotice(msg.user, "successfully added the role.");
+								}
+							} // TODO: write return msgs
+						}
+					}
+				}
+			}
+			else if (data[0].toLowerCase().equals(Config.CMD_REMOVEROLE))
+			{
+				if (hasAdminRights(msg.user))
+				{
+					if (data.length == 3)
+					{
+						DiscordRole targetRole = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
+						PickupRoleType type = PickupRoleType.valueOf(data[2].toUpperCase()); // TODO: check what exception might be thrown
+						if (targetRole != null)
+						{
+							if (type != null)
+							{
+								if (logic.getRoleByType(type).contains(targetRole)) 
+								{
+									logic.removeRole(type, targetRole);
+									sendNotice(msg.user, "successfully removed the role.");
+								}
+							} // TODO: write return msgs
+						}
+					}
+				}
+			}
+				
 		}
+		
 		if (data[0].toLowerCase().equals("!showroles"))
 		{
 			DiscordUser u = msg.user;
@@ -473,30 +567,49 @@ public class PickupBot extends DiscordBot {
 					u = testUser;
 				}
 			}
-			List<String> list = u.getRoles(DiscordBot.getGuildID());
+			List<DiscordRole> list = u.getRoles(DiscordBot.getGuild());
 			String message = "";
-			for (String s : list)
+			for (DiscordRole role : list)
 			{
-				message += "<@&" + s + "> ";
+				message += "<@&" + role.id + "> ";
 			}
 			sendNotice(u, message);
 		}
-		if (data[0].toLowerCase().equals("!showadminroles"))
-		{			
-			String message = "Admin roles: ";
-			for (String s : logic.getAdminList())
-			{
-				message += "<@&" + s + "> ";
+		
+		if (data[0].toLowerCase().equals("!showknownroles"))
+		{
+			String message = "Roles: ";
+			for (PickupRoleType type : logic.getRoleTypes()) {
+				message += "\n" + type.name() + ":";
+
+				for (DiscordRole role : logic.getRoleByType(type))
+				{
+					message += " <@&" + role.id + "> ";
+				}
 			}
 			sendNotice(msg.user, message);
 		}
+		
+		if (data[0].toLowerCase().equals("!godrole")) {
+			if (logic.getRoleByType(PickupRoleType.SUPERADMIN).size() == 0) {
+				if (data.length == 2) {
+					DiscordRole role = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
+					logic.addRole(PickupRoleType.SUPERADMIN, role);
+					sendNotice(msg.user, "*Channel set as SUPERADMIN channel*");
+				}
+			}
+		}
+	}
+	
+	public boolean isPublicChannel(DiscordChannel channel) {
+		return logic.getChannelByType(PickupChannelType.PUBLIC).contains(channel);
 	}
 		
 	public boolean hasAdminRights(DiscordUser user) {
-		List<String> roleList = user.getRoles(DiscordBot.getGuildID());
-		List<String> adminList = logic.getAdminList();
-		for (String s : roleList) {
-			for (String r : adminList) {
+		List<DiscordRole> roleList = user.getRoles(DiscordBot.getGuild());
+		List<DiscordRole> adminList = logic.getAdminList();
+		for (DiscordRole s : roleList) {
+			for (DiscordRole r : adminList) {
 				if (s.equals(r)) {
 					return true;
 				}
@@ -507,14 +620,16 @@ public class PickupBot extends DiscordBot {
 
 
 	public void sendNotice(DiscordUser user, String msg) {
-		sendMsg(getPubchan(), user.getMentionString() + " " + msg);
-	}
-	
-	public DiscordChannel getPubchan() {
-		return pubchan;
+		sendMsg(getLatestMessageChannel(), user.getMentionString() + " " + msg);
 	}
 
-	public void setPubchan(DiscordChannel pubchan) {
-		this.pubchan = pubchan;
+	public void sendMsg(List<DiscordChannel> channelList, String msg) {
+		for (DiscordChannel channel : channelList) {
+			sendMsg(channel, msg);
+		}
+	}
+	
+	public DiscordChannel getLatestMessageChannel() {
+		return latestMessageChannel;
 	}
 }

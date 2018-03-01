@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.gost0r.pickupbot.discord.DiscordChannel;
+import de.gost0r.pickupbot.discord.DiscordRole;
 import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.pickup.server.Server;
 
@@ -150,6 +152,16 @@ public class Database {
 			sql = "CREATE TABLE IF NOT EXISTS admin_role (role TEXT PRIMARY KEY)";
 			stmt.executeUpdate(sql);
 			
+			sql = "CREATE TABLE IF NOT EXISTS roles (role TEXT,"
+													+ "type TEXT,"
+													+ "PRIMARY KEY (role)";
+			stmt.executeUpdate(sql);
+			
+			sql = "CREATE TABLE IF NOT EXISTS channels (channel TEXT,"
+													+ "type TEXT,"
+													+ "PRIMARY KEY (channel)";
+			stmt.executeUpdate(sql);
+			
 			stmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
@@ -281,51 +293,50 @@ public class Database {
 	}
 	
 	
-	// Admin role
+	// LOADING
 	
-	public void createAdminRole(String role) {
+	public Map<PickupRoleType, List<DiscordRole>> loadRoles() {
+		Map<PickupRoleType, List<DiscordRole>> map = new HashMap<PickupRoleType, List<DiscordRole>>();
 		try {
-			String sql = "INSERT INTO admin_role (role) VALUES (?)";
-			PreparedStatement pstmt = c.prepareStatement(sql);
-			pstmt.setString(1, role);
-			pstmt.executeUpdate();
-			pstmt.close();
-		} catch (SQLException e) {
-			LOGGER.log(Level.WARNING, "Exception: ", e);
-		}
-	}
-	
-	public List<String> loadAdminRoles() {
-		List<String> adminList = new ArrayList<String>();
-		try {
-			String sql = "SELECT role FROM admin_role";
+			String sql = "SELECT role, type FROM roles";
 			Statement stmt = c.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				adminList.add(rs.getString("role"));
+				PickupRoleType type = PickupRoleType.valueOf(rs.getString("type"));
+				if (!map.containsKey(type)) {
+					map.put(type, new ArrayList<DiscordRole>());
+				}
+				map.get(type).add(DiscordRole.getRole(rs.getString("role")));
 			}
 			
 			stmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
-		return adminList;
+		return map;
 	}
-	
-	public void deleteAdminRole(String role) {
+
+	public Map<PickupChannelType, List<DiscordChannel>> loadChannels() {
+		Map<PickupChannelType, List<DiscordChannel>> map = new HashMap<PickupChannelType, List<DiscordChannel>>();
 		try {
-			String sql = "DELETE FROM admin_role WHERE role=?";
-			PreparedStatement pstmt = c.prepareStatement(sql);
-			pstmt.setString(1, role);
-			pstmt.executeUpdate();
-			pstmt.close();
+			String sql = "SELECT channel, type FROM channels";
+			Statement stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			while (rs.next()) {
+				PickupChannelType type = PickupChannelType.valueOf(rs.getString("type"));
+				if (!map.containsKey(type)) {
+					map.put(type, new ArrayList<DiscordChannel>());
+				}
+				map.get(type).add(DiscordChannel.findChannel(rs.getString("channel")));
+			}
+			
+			stmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
+		return map;
 	}
 	
-	
-	// LOADING
 	
 	public List<Server> loadServers() {		
 		List<Server> serverList = new ArrayList<Server>();		
@@ -590,7 +601,52 @@ public class Database {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}		
 	}
-	
+
+	public void updateChannel(DiscordChannel channel, PickupChannelType type) {
+		try {
+			String sql = "SELECT * FROM channels WHERE channel=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, channel.id);
+			ResultSet rs = pstmt.executeQuery();
+			if (!rs.next()) {
+				sql = "INSERT INTO channels (channel) VALUES (?)";
+				pstmt = c.prepareStatement(sql);
+				pstmt.setString(1, channel.id);
+				pstmt.executeUpdate();
+			}			
+			sql = "UPDATE channels SET type=? WHERE channel=?";
+			pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, type.name());
+			pstmt.setString(2, channel.id);
+			pstmt.executeUpdate();
+			pstmt.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}		
+	}
+
+	public void updateRole(DiscordRole role, PickupRoleType type) {
+		try {
+			String sql = "SELECT * FROM roles WHERE role=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, role.id);
+			ResultSet rs = pstmt.executeQuery();
+			if (!rs.next()) {
+				sql = "INSERT INTO roles (role) VALUES (?)";
+				pstmt = c.prepareStatement(sql);
+				pstmt.setString(1, role.id);
+				pstmt.executeUpdate();
+			}			
+			sql = "UPDATE roles SET type=? WHERE role=?";
+			pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, type.name());
+			pstmt.setString(2, role.id);
+			pstmt.executeUpdate();
+			pstmt.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}		
+	}
 	
 
 	// SAVE MATCH

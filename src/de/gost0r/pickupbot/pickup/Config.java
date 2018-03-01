@@ -45,6 +45,12 @@ public class Config {
 	
 	public static final String CMD_UNREGISTER			= "!unregister";
 
+	public static final String CMD_ADDCHANNEL			= "!addchannel";
+	public static final String CMD_REMOVECHANNEL		= "!removechannel";
+
+	public static final String CMD_ADDROLE				= "!addrole";
+	public static final String CMD_REMOVEROLE			= "!removerole";
+
 	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " "
 	+ CMD_MAP + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP5 + " " + CMD_SURRENDER;
 	

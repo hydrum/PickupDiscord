@@ -7,9 +7,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.gost0r.pickupbot.discord.DiscordChannel;
+import de.gost0r.pickupbot.discord.DiscordRole;
 import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
 import de.gost0r.pickupbot.pickup.server.Server;
@@ -23,7 +26,8 @@ public class PickupLogic {
 	private List<Server> serverList;
 	private List<GameMap> mapList;
 
-	private List<String> adminRoles;
+	private Map<PickupRoleType, List<DiscordRole>> roles;
+	private Map<PickupChannelType, List<DiscordChannel>> channels;
 	
 	private List<Match> ongoingMatches; // ongoing matches (live)
 	
@@ -40,7 +44,8 @@ public class PickupLogic {
 		Player.db = db;		
 		// handle db stuff
 		serverList = db.loadServers();
-		adminRoles = db.loadAdminRoles();
+		roles = db.loadRoles();
+		channels = db.loadChannels();
 		
 		curMatch = new HashMap<Gametype, Match>();
 		for (Gametype gt : db.loadGametypes()) {
@@ -54,9 +59,6 @@ public class PickupLogic {
 		createCurrentMatches();
 		
 		awaitingServer = new LinkedList<Match>();
-		
-		adminRoles.add("401821506205646858"); // pickupadmin
-		adminRoles.add("309752235611389953"); // owner
 	}
 	
 	public void cmdAddPlayer(Player player, String mode) {
@@ -87,13 +89,13 @@ public class PickupLogic {
 	
 	public boolean cmdLock() {
 		locked = true;
-		bot.sendMsg(bot.getPubchan(), Config.lock_enable);
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.lock_enable);
 		return true;
 	}
 	
 	public boolean cmdUnlock() {
 		locked = false;
-		bot.sendMsg(bot.getPubchan(), Config.lock_disable);
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.lock_disable);
 		return true;
 	}
 	
@@ -107,7 +109,7 @@ public class PickupLogic {
 						db.createPlayer(p);
 						bot.sendNotice(user, Config.auth_success);
 					} else {
-						DiscordAPI.deleteMessage(bot.getPubchan(), msgid);
+						DiscordAPI.deleteMessage(bot.getLatestMessageChannel(), msgid);
 						bot.sendNotice(user, Config.auth_sent_key);
 					}
 				} else {
@@ -138,12 +140,12 @@ public class PickupLogic {
 		
 		List<Player> players = db.getTopPlayers(number);
 		if (players.isEmpty()) {
-			bot.sendMsg(bot.getPubchan(), msg + "  None");
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg + "  None");
 		} else {
 			for (Player p : players) {
 				msg += "\n" + cmdGetElo(p, false);
 			}
-			bot.sendMsg(bot.getPubchan(), msg);
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 		}
 	}
 
@@ -164,7 +166,7 @@ public class PickupLogic {
 		msg = msg.replace(".position.", String.valueOf(db.getRankForPlayer(p)));
 		msg = msg.replace(".rank.", p.getRank().getEmoji());
 		if (sendMsg) {
-			bot.sendMsg(bot.getPubchan(), msg);
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 		}
 		return msg;
 	}
@@ -174,7 +176,7 @@ public class PickupLogic {
 			String msg = Config.pkup_map_list;
 			msg = msg.replace(".gametype.", gametype.getName());
 			msg = msg.replace(".maplist.", curMatch.get(gametype).getMapVotes());
-			bot.sendMsg(bot.getPubchan(), msg);
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 		}
 	}
 
@@ -203,7 +205,7 @@ public class PickupLogic {
 	
 	public void cmdStatus() {
 		if (curMatch.isEmpty()) {
-			bot.sendMsg(bot.getPubchan(), Config.pkup_match_unavi);
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_match_unavi);
 			return;
 		}
 		for (Match m : curMatch.values()) {
@@ -244,7 +246,7 @@ public class PickupLogic {
 			msg = Config.pkup_status_server;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 		}
-		bot.sendMsg(bot.getPubchan(), msg);
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 	}
 	
 	public void cmdSurrender(Player player) {
@@ -273,7 +275,7 @@ public class PickupLogic {
 				m.reset();
 				createCurrentMatches();
 			}
-			bot.sendMsg(bot.getPubchan(), Config.pkup_reset_all);
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_reset_all);
 			return true;
 		} else if (cmd.equals("cur")) {
 			Gametype gt = getGametypeByString(mode);
@@ -286,14 +288,14 @@ public class PickupLogic {
 				}
 				createCurrentMatches();
 			}
-			bot.sendMsg(bot.getPubchan(), Config.pkup_reset_cur);
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_reset_cur);
 			return true;
 		} else {
 			Gametype gt = getGametypeByString(cmd);
 			if (gt != null) {
 				curMatch.get(gt).reset();
 				createMatch(gt);
-				bot.sendMsg(bot.getPubchan(), Config.pkup_reset_type.replace(".gametype.", gt.getName()));
+				bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_reset_type.replace(".gametype.", gt.getName()));
 			} else {
 				try {
 					int idx = Integer.valueOf(cmd);
@@ -303,7 +305,7 @@ public class PickupLogic {
 						if (match.getID() == idx) {
 							match.reset();
 							ongoingMatches.remove(match);
-							bot.sendMsg(bot.getPubchan(), Config.pkup_reset_id.replace(".id.", cmd));
+							bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_reset_id.replace(".id.", cmd));
 							return true;
 						}
 					}
@@ -611,6 +613,39 @@ public class PickupLogic {
 		}
 	}
 	
+	
+	// ROLES & CHANNEL
+	
+	public void addRole(PickupRoleType type, DiscordRole role) {
+		if (!roles.containsKey(type)) {
+			roles.put(type, new ArrayList<DiscordRole>());
+		}
+		roles.get(type).add(role);
+		db.updateRole(role, type);
+	}
+	
+	public void removeRole(PickupRoleType type, DiscordRole role) {
+		if (roles.containsKey(type)) {
+			roles.get(type).remove(role);
+		}
+		db.updateRole(role, PickupRoleType.NONE);
+	}
+	
+	public void addChannel(PickupChannelType type, DiscordChannel channel) {
+		if (!channels.containsKey(type)) {
+			channels.put(type, new ArrayList<DiscordChannel>());
+		}
+		channels.get(type).add(channel);
+		db.updateChannel(channel, type);
+	}
+	
+	public void removeChannel(PickupChannelType type, DiscordChannel channel) {
+		if (channels.containsKey(type)) {
+			channels.get(type).remove(channel);
+		}
+		db.updateChannel(channel, PickupChannelType.NONE);
+	}
+	
 	// HELPER
 
 	public Gametype getGametypeByString(String mode) {
@@ -640,8 +675,37 @@ public class PickupLogic {
 		return locked;
 	}
 
-	public List<String> getAdminList() {
-		return adminRoles;
+	public List<DiscordRole> getAdminList() {
+		List<DiscordRole> list = new ArrayList<DiscordRole>();
+		list.addAll(roles.get(PickupRoleType.ADMIN));
+		list.addAll(roles.get(PickupRoleType.SUPERADMIN));
+		return list;
+	}
+	
+	public List<DiscordRole> getSuperAdminList() {
+		return roles.get(PickupRoleType.SUPERADMIN);
+	}
+
+	public List<DiscordRole> getRoleByType(PickupRoleType type) {
+		if (roles.containsKey(type)) {
+			return roles.get(type);
+		}
+		return new ArrayList<DiscordRole>();
+	}
+	
+	public List<DiscordChannel> getChannelByType(PickupChannelType type) {
+		if (channels.containsKey(type)) {
+			return channels.get(type);
+		}
+		return new ArrayList<DiscordChannel>();
+	}
+
+	public Set<PickupRoleType> getRoleTypes() {
+		return roles.keySet();
+	}
+
+	public Set<PickupChannelType> getChannelTypes() {
+		return channels.keySet();
 	}
 
 	public Server getServerByID(int id) {
