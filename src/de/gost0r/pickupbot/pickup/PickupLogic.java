@@ -616,34 +616,46 @@ public class PickupLogic {
 	
 	// ROLES & CHANNEL
 	
-	public void addRole(PickupRoleType type, DiscordRole role) {
+	public boolean addRole(PickupRoleType type, DiscordRole role) {
 		if (!roles.containsKey(type)) {
 			roles.put(type, new ArrayList<DiscordRole>());
 		}
-		roles.get(type).add(role);
-		db.updateRole(role, type);
+		if (!roles.get(type).contains(role)) {
+			roles.get(type).add(role);
+			db.updateRole(role, type);
+			return true;
+		}
+		return false;
 	}
 	
-	public void removeRole(PickupRoleType type, DiscordRole role) {
+	public boolean removeRole(PickupRoleType type, DiscordRole role) {
 		if (roles.containsKey(type)) {
 			roles.get(type).remove(role);
+			db.updateRole(role, PickupRoleType.NONE);
+			return true;
 		}
-		db.updateRole(role, PickupRoleType.NONE);
+		return false;
 	}
 	
-	public void addChannel(PickupChannelType type, DiscordChannel channel) {
+	public boolean addChannel(PickupChannelType type, DiscordChannel channel) {
 		if (!channels.containsKey(type)) {
 			channels.put(type, new ArrayList<DiscordChannel>());
 		}
-		channels.get(type).add(channel);
-		db.updateChannel(channel, type);
+		if (!channels.get(type).contains(channel)) {
+			channels.get(type).add(channel);
+			db.updateChannel(channel, type);
+			return true;
+		}
+		return false;
 	}
 	
-	public void removeChannel(PickupChannelType type, DiscordChannel channel) {
+	public boolean removeChannel(PickupChannelType type, DiscordChannel channel) {
 		if (channels.containsKey(type)) {
 			channels.get(type).remove(channel);
+			db.updateChannel(channel, PickupChannelType.NONE);
+			return true;
 		}
-		db.updateChannel(channel, PickupChannelType.NONE);
+		return false;
 	}
 	
 	// HELPER
@@ -677,13 +689,21 @@ public class PickupLogic {
 
 	public List<DiscordRole> getAdminList() {
 		List<DiscordRole> list = new ArrayList<DiscordRole>();
-		list.addAll(roles.get(PickupRoleType.ADMIN));
-		list.addAll(roles.get(PickupRoleType.SUPERADMIN));
+		if (roles.containsKey(PickupRoleType.ADMIN)) {
+			list.addAll(roles.get(PickupRoleType.ADMIN));
+		}
+		if (roles.containsKey(PickupRoleType.SUPERADMIN)) {
+			list.addAll(roles.get(PickupRoleType.SUPERADMIN));
+		}
 		return list;
 	}
 	
 	public List<DiscordRole> getSuperAdminList() {
-		return roles.get(PickupRoleType.SUPERADMIN);
+		List<DiscordRole> list = new ArrayList<DiscordRole>();
+		if (roles.containsKey(PickupRoleType.SUPERADMIN)) {
+			list.addAll(roles.get(PickupRoleType.SUPERADMIN));
+		}
+		return list;
 	}
 
 	public List<DiscordRole> getRoleByType(PickupRoleType type) {

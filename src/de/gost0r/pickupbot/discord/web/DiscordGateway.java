@@ -59,7 +59,7 @@ public class DiscordGateway implements MessageHandler {
 			handlePacket(incPak);
 			
 		} catch (JSONException e) {
-			LOGGER.log(Level.WARNING, "Exception: ", e);
+			LOGGER.log(Level.WARNING, "Exception for '" + message + "': ", e);
 		}
 	}
 	

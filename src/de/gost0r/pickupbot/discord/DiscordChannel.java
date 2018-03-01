@@ -30,6 +30,11 @@ public class DiscordChannel {
 	}
 
 
+
+	public String getMentionString() {
+		return "<#" + id + ">";
+	}
+
 	public static Map<String, DiscordChannel> channelList = new HashMap<String, DiscordChannel>();
 	public static DiscordChannel findChannel(String channelID) {
 		if (channelID.matches("[0-9]+")) {
@@ -55,5 +60,11 @@ public class DiscordChannel {
 			return chan.id == this.id;
 		}
 		return false;
+	}
+	
+
+	@Override
+	public String toString() {
+		return id;
 	}
 }

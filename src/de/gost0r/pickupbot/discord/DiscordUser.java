@@ -47,6 +47,19 @@ public class DiscordUser {
 		return "<@" + id + ">";
 	}
 	
+
+	public void setRoles(DiscordGuild guild, JSONArray array) {
+		List<DiscordRole> roleList = new ArrayList<DiscordRole>();
+		try {
+			for (int i = 0; i < array.length(); ++i) {
+				roleList.add(DiscordRole.getRole(array.getString(i)));
+			}
+			roles.put(guild, roleList);
+		} catch (JSONException e) {
+			LOGGER.log(Level.WARNING, "Exception for " + array.toString() + ": ", e);
+		}
+	}
+	
 	public List<DiscordRole> getRoles(DiscordGuild guild) {
 		if (roles.containsKey(guild)) {
 			return roles.get(guild);
@@ -129,4 +142,5 @@ public class DiscordUser {
 		}
 		return false;
 	}
+
 }

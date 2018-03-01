@@ -154,12 +154,12 @@ public class Database {
 			
 			sql = "CREATE TABLE IF NOT EXISTS roles (role TEXT,"
 													+ "type TEXT,"
-													+ "PRIMARY KEY (role)";
+													+ "PRIMARY KEY (role) )";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS channels (channel TEXT,"
 													+ "type TEXT,"
-													+ "PRIMARY KEY (channel)";
+													+ "PRIMARY KEY (channel) )";
 			stmt.executeUpdate(sql);
 			
 			stmt.close();
@@ -303,10 +303,13 @@ public class Database {
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				PickupRoleType type = PickupRoleType.valueOf(rs.getString("type"));
+				if (type == PickupRoleType.NONE) continue;
 				if (!map.containsKey(type)) {
 					map.put(type, new ArrayList<DiscordRole>());
 				}
-				map.get(type).add(DiscordRole.getRole(rs.getString("role")));
+				DiscordRole role = DiscordRole.getRole(rs.getString("role"));
+				LOGGER.config("loadRoles(): " + role.id + " type=" + type.name());
+				map.get(type).add(role);
 			}
 			
 			stmt.close();
@@ -324,10 +327,13 @@ public class Database {
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				PickupChannelType type = PickupChannelType.valueOf(rs.getString("type"));
+				if (type == PickupChannelType.NONE) continue;
 				if (!map.containsKey(type)) {
 					map.put(type, new ArrayList<DiscordChannel>());
 				}
-				map.get(type).add(DiscordChannel.findChannel(rs.getString("channel")));
+				DiscordChannel channel = DiscordChannel.findChannel(rs.getString("channel"));
+				map.get(type).add(channel);
+				LOGGER.config("loadChannels(): " + channel.id + " name=" + channel.name + " type=" + type.name());
 			}
 			
 			stmt.close();

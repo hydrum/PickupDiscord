@@ -11,6 +11,10 @@ public class DiscordRole {
 	public DiscordRole(String id) {
 		this.id = id;
 	}
+	
+	public String getMentionString() {
+		return "<@&" + id + ">";
+	}
 
 	
 	public static Map<String, DiscordRole> roleList = new HashMap<String, DiscordRole>();
@@ -31,5 +35,19 @@ public class DiscordRole {
 			return newRole;
 		}
 		return null;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof DiscordRole) {
+			DiscordRole other = (DiscordRole) o;
+			return this.id == other.id;
+		}
+		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return "id=" + id + " name=" + name;
 	}
 }

@@ -1,5 +1,5 @@
 TODO:
-( ) update admin roles: instead of hardcoding, claim right by !iamgod <role>, then be able to add or remove roles 
+(x) update admin roles: instead of hardcoding, claim right by !iamgod <role>, then be able to add or remove roles 
 (x) ability to remove a urtauth from a user (admin cmd)
 (x) !top5 function
 (x) handle matchstart: if playercount == 10 => request a server, if one is avi -> startGame() -> move match to ongoing and be ready for a new signup
@@ -16,7 +16,7 @@ TODO:
 (x) use !elo <@userid> for retrieving elo
 (x) move !lock to pubchan
 (x) !reset <gametype>
-( ) don't hardcode pubchan
+(x) don't hardcode pubchan
 (x) make playercount dynamically
 (x) !map vote no msg
 (x) [ Pickup Game #cur ][ Signup ][ Gametype: CTF ][ 5/10 ][ Players: None@Slide @RaideR @v3nd3tta | Jonathan @Biddle @Gost0r ]
@@ -33,7 +33,7 @@ TODO:
 ( ) !showmatch starttime
 (x) check scoreboard roundtime for modes like ts, bomb etc => else possible prematurely entering SCORE state
 ( ) need prematurely leaver detection
-( ) acknowledge role changes and therefore caching it
+(x) acknowledge role changes and therefore caching it
 ( ) ability to queue up for multiple gametypes
 ( ) replace status 0/10 when removed with leaving player
 (x) delete failed !register <authkey> msg and tell the player to use his authname instead.

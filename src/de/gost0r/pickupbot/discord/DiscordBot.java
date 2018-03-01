@@ -58,12 +58,19 @@ public class DiscordBot  {
 	
 	public void handleEvent(DiscordGatewayEvent event, JSONObject obj) {
 		try {
-			if (event == DiscordGatewayEvent.MESSAGE_CREATE) {
+			switch(event){
+			case MESSAGE_CREATE:
 				DiscordMessage msg = new DiscordMessage(obj.getString("id"),
 								DiscordUser.getUser(obj.getJSONObject("author")),
 								DiscordChannel.findChannel(obj.getString("channel_id")),
 								obj.getString("content"));
 				recvMessage(msg);
+				break;
+			case GUILD_MEMBER_UPDATE:
+				DiscordUser.getUser(obj.getJSONObject("user").getString("id")).setRoles(DiscordGuild.getGuild("guild_id"), obj.getJSONArray("roles"));
+				break;
+			default:
+				break;
 			}
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);

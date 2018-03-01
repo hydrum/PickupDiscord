@@ -1,5 +1,6 @@
 package de.gost0r.pickupbot.pickup;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -472,19 +473,27 @@ public class PickupBot extends DiscordBot {
 					if (data.length == 3)
 					{
 						DiscordChannel targetChannel = DiscordChannel.findChannel(data[1].replaceAll("[^\\d.]", ""));
-						PickupChannelType type = PickupChannelType.valueOf(data[2].toUpperCase()); // TODO: check what exception might be thrown
 						if (targetChannel != null)
 						{
-							if (type != null)
-							{
+							try {
+								PickupChannelType type = PickupChannelType.valueOf(data[2].toUpperCase());
 								if (!logic.getChannelByType(type).contains(targetChannel)) 
 								{
-									logic.addChannel(type, targetChannel);
-									sendNotice(msg.user, "successfully added the channel.");
+									if (logic.addChannel(type, targetChannel))
+									{
+										sendNotice(msg.user, "successfully added the channel");
+									}
+									else sendNotice(msg.user, "unsuccessfully added the channel");
 								}
-							} // TODO: write return msgs
+					        }
+							catch (IllegalArgumentException e)
+							{
+								sendNotice(msg.user, "unknown channel type");
+					        }
 						}
+						else sendNotice(msg.user, "invalid channel");
 					}
+					else sendNotice(msg.user, "invalid options");
 				}
 			}
 			else if (data[0].toLowerCase().equals(Config.CMD_REMOVECHANNEL))
@@ -494,63 +503,92 @@ public class PickupBot extends DiscordBot {
 					if (data.length == 3)
 					{
 						DiscordChannel targetChannel = DiscordChannel.findChannel(data[1].replaceAll("[^\\d.]", ""));
-						PickupChannelType type = PickupChannelType.valueOf(data[2].toUpperCase()); // TODO: check what exception might be thrown
 						if (targetChannel != null)
 						{
-							if (type != null)
+							try
 							{
+								PickupChannelType type = PickupChannelType.valueOf(data[2].toUpperCase());
 								if (logic.getChannelByType(type).contains(targetChannel))
 								{
-									logic.removeChannel(type, targetChannel);
-									sendNotice(msg.user, "successfully removed the channel.");
+									if (logic.removeChannel(type, targetChannel))
+									{
+										sendNotice(msg.user, "successfully removed the channel.");
+									}
+									else sendNotice(msg.user, "unsuccessfully removed the channel.");
 								}
-							} // TODO: write return msgs
+
+					        }
+							catch (IllegalArgumentException e)
+							{
+								sendNotice(msg.user, "unknown role type");
+					        }
 						}
+						else sendNotice(msg.user, "invalid channel");
 					}
+					else sendNotice(msg.user, "invalid options");
 				}
 			}
 			else if (data[0].toLowerCase().equals(Config.CMD_ADDROLE))
 			{
-				if (hasAdminRights(msg.user))
+				if (hasSuperAdminRights(msg.user))
 				{
 					if (data.length == 3)
 					{
 						DiscordRole targetRole = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
-						PickupRoleType type = PickupRoleType.valueOf(data[2].toUpperCase()); // TODO: check what exception might be thrown
 						if (targetRole != null)
 						{
-							if (type != null)
+							try
 							{
+								PickupRoleType type = PickupRoleType.valueOf(data[2].toUpperCase());
 								if (!logic.getRoleByType(type).contains(targetRole)) 
 								{
-									logic.addRole(type, targetRole);
-									sendNotice(msg.user, "successfully added the role.");
+									if (logic.addRole(type, targetRole))
+									{
+										sendNotice(msg.user, "successfully added the role.");
+									}
+									else sendNotice(msg.user, "unsuccessfully removed the role.");
 								}
-							} // TODO: write return msgs
+
+					        }
+							catch (IllegalArgumentException e)
+							{
+								sendNotice(msg.user, "unknown role type");
+					        }
 						}
+						else sendNotice(msg.user, "invalid channel");
 					}
+					else sendNotice(msg.user, "invalid options");
 				}
 			}
 			else if (data[0].toLowerCase().equals(Config.CMD_REMOVEROLE))
 			{
-				if (hasAdminRights(msg.user))
+				if (hasSuperAdminRights(msg.user))
 				{
 					if (data.length == 3)
 					{
 						DiscordRole targetRole = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
-						PickupRoleType type = PickupRoleType.valueOf(data[2].toUpperCase()); // TODO: check what exception might be thrown
 						if (targetRole != null)
 						{
-							if (type != null)
+							try
 							{
+								PickupRoleType type = PickupRoleType.valueOf(data[2].toUpperCase());
 								if (logic.getRoleByType(type).contains(targetRole)) 
 								{
-									logic.removeRole(type, targetRole);
-									sendNotice(msg.user, "successfully removed the role.");
+									if (logic.removeRole(type, targetRole))
+									{
+										sendNotice(msg.user, "successfully removed the role.");
+									}
+									else sendNotice(msg.user, "unsuccessfully removed the role.");
 								}
-							} // TODO: write return msgs
+							}
+							catch (IllegalArgumentException e)
+							{
+								sendNotice(msg.user, "unknown role type");
+					        }
 						}
+						else sendNotice(msg.user, "invalid role");
 					}
+					else sendNotice(msg.user, "invalid options");
 				}
 			}
 				
@@ -571,7 +609,7 @@ public class PickupBot extends DiscordBot {
 			String message = "";
 			for (DiscordRole role : list)
 			{
-				message += "<@&" + role.id + "> ";
+				message += role.getMentionString() + " ";
 			}
 			sendNotice(u, message);
 		}
@@ -580,22 +618,38 @@ public class PickupBot extends DiscordBot {
 		{
 			String message = "Roles: ";
 			for (PickupRoleType type : logic.getRoleTypes()) {
-				message += "\n" + type.name() + ":";
+				message += "\n**" + type.name() + "**:";
 
 				for (DiscordRole role : logic.getRoleByType(type))
 				{
-					message += " <@&" + role.id + "> ";
+					message += " " + role.getMentionString() + " ";
 				}
 			}
-			sendNotice(msg.user, message);
+			sendMsg(msg.channel, message);
+		}
+		
+		if (data[0].toLowerCase().equals("!showknownchannels"))
+		{
+			String message = "Channels: ";
+			for (PickupChannelType type : logic.getChannelTypes()) {
+				message += "\n**" + type.name() + "**:";
+
+				for (DiscordChannel channel : logic.getChannelByType(type))
+				{
+					message += " " + channel.getMentionString() + " ";
+				}
+			}
+			sendMsg(msg.channel, message);
 		}
 		
 		if (data[0].toLowerCase().equals("!godrole")) {
 			if (logic.getRoleByType(PickupRoleType.SUPERADMIN).size() == 0) {
 				if (data.length == 2) {
 					DiscordRole role = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
-					logic.addRole(PickupRoleType.SUPERADMIN, role);
-					sendNotice(msg.user, "*Channel set as SUPERADMIN channel*");
+					if (role != null) {
+						logic.addRole(PickupRoleType.SUPERADMIN, role);
+						sendNotice(msg.user, "*" + role.getMentionString() + " set as SUPERADMIN role*");
+					}
 				}
 			}
 		}
@@ -617,6 +671,19 @@ public class PickupBot extends DiscordBot {
 		}
 		return false;
 	}
+	
+public boolean hasSuperAdminRights(DiscordUser user) {
+	List<DiscordRole> roleList = user.getRoles(DiscordBot.getGuild());
+	List<DiscordRole> adminList = logic.getSuperAdminList();
+	for (DiscordRole s : roleList) {
+		for (DiscordRole r : adminList) {
+			if (s.equals(r)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
 
 
 	public void sendNotice(DiscordUser user, String msg) {
