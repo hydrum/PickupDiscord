@@ -78,16 +78,21 @@ public class Server {
 	        while (true) {
 	        	try {
 	        		this.socket.receive(recvPacket);
-	        		string += new String(recvPacket.getData());
+	        		String newString = new String(recvPacket.getData());
+	        		
+	        		newString = newString.substring(4); // remove the goddamn first 4 chars
+	        		
+	        		string += newString;
 
 	    			recvBuffer = new byte[2048]; // empty buffer
 	        		recvPacket = new DatagramPacket(recvBuffer, recvBuffer.length);
 	        	} catch (SocketTimeoutException e) {
 	        		break;
-	        	}		        
+	        	}       
 	        }
-	        string = string.replace("ÿÿÿÿprint\n", "");
+
 	        string = string.replace("" + (char) 0, "");
+	        
 	        Thread.sleep(100);
 	        return string;
 		} catch (IOException e) {

@@ -330,6 +330,7 @@ public class ServerMonitor implements Runnable {
 			player.auth = player.auth.isEmpty() ? "---" : player.auth;
 		} else {
 			requestAuth(player);
+			LOGGER.severe("requesting auth again for " + player.name);
 		}
 	}
 
@@ -356,6 +357,7 @@ public class ServerMonitor implements Runnable {
 		{
 			LOGGER.fine("parseRconPlayers: " + line);
 			if (line.isEmpty()) continue;
+			if (line.equals("print")) continue;
 			if (line.equals("==== ShutdownGame ====")) break;
 			
 			if (line.startsWith("Map:"))
