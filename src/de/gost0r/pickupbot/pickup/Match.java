@@ -196,6 +196,7 @@ public class Match {
 	public void checkServerState() {
 		if (state == MatchState.AwaitingServer && playerStats.keySet().size() != gametype.getTeamSize() * 2) {
 			state = MatchState.Signup;
+			logic.cancelRequestServer(this);
 		}
 	}
 

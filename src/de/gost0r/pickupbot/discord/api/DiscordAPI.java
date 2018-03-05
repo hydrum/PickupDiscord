@@ -75,7 +75,7 @@ public class DiscordAPI {
 			}
 			
 			if (c.getResponseCode() != 200) {
-				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
+				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
 				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {
 						Thread.sleep(1000);

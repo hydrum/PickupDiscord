@@ -159,6 +159,7 @@ public class ServerMonitor implements Runnable {
 			} else if (state == ServerState.LIVE) {
 				timeleft = (earliestLeaver + 180000L) - earliestLeaver; // 3min
 				shouldPause = true;
+				// TODO: give some tolerance
 			} else if (state == ServerState.SCORE) {
 				return; // ignore leavers in the score screen
 			}
