@@ -111,7 +111,7 @@ public class Config {
 	//------------------------------------------------------------------------------------//
 
 	public static final String pkup_lock				= "This game is currently locked";
-	public static final String pkup_map					= "Your vote for .map. was successfully cast.";
+	public static final String pkup_map					= "You successfully voted for .map..";
 	public static final String pkup_map_list			= "**.gametype.**: .maplist.";
 //	public static final String pkup_signup				= "You can sign up again!";
 	public static final String pkup_pw					= "[ /connect .server. ; password .password. ]";
@@ -135,7 +135,7 @@ public class Config {
 	public static final String pkup_match_print_sur		= "**[** Pickup Game #.gamenumber. **][** Surrender **][** Score: .score. **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 	
 	public static final String pkup_go_admin			= "[ Pickup Game #.gamenumber. ][ Password: .password. ][ Map: .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
-	public static final String pkup_go_player			= "UrTPickup starts now! Connect to the server and join team *.team.* in order to play. Make up positions and ready up! [ /connect .server. ; password .password. ]";
+	public static final String pkup_go_player			= "UrTPickup starts now! Connect to the server and join team *.team.* in order to play. Choose positions and ready up! [ /connect .server. ; password .password. ]";
 	public static final String pkup_go_pub_head			= "**.gametype.**: UrTPickup #.gamenumber. (avg ELO: .elo.) is about to start!";
 	public static final String pkup_go_pub_team			= "**.gametype.**: .team. team: .playerlist.";
 	public static final String pkup_go_pub_map			= "**.gametype.**: Map: .map.";
@@ -163,25 +163,25 @@ public class Config {
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
 
-	public static final String auth_taken_urtauth		= "The urtauth has been already registered.";
-	public static final String auth_taken_user			= "You have already been registered with an account.";
+	public static final String auth_taken_urtauth		= "This urtauth has already been registered.";
+	public static final String auth_taken_user			= "You have already registered an account.";
 	public static final String auth_invalid				= "Your urtauth seems to be invalid.";
-	public static final String auth_success				= "Your auth has been successfully registered with your account.";
+	public static final String auth_success				= "Your auth has been successfully linked to your account.";
 	public static final String auth_sent_key			= "You have to register your auth name and not your auth key!!!";
 
 	public static final String player_already_added		= "You are already added to a pickup game.";
-	public static final String player_already_removed	= "You are currently not added.";
+	public static final String player_already_removed	= "You are not added to any pickup game.";
 	public static final String player_cannot_remove		= "You cannot remove.";
 	public static final String player_not_in_match		= "You are currently not in a match.";
 
 	public static final String player_already_surrender	= "You have already surrendered.";
 
-//	public static final String report_wrong_arg			= "Your report reason is invalid, check !reportlist to check the list.";
-//	public static final String report_invalid_urtauth	= "No player could be found to the specific urtauth.";
+//	public static final String report_wrong_arg			= "Your report reason is invalid, check !reportlist to check the possible reasons.";
+//	public static final String report_invalid_urtauth	= "No player could be found with this urtauth.";
 //	public static final String report_not_played		= "The reported player hasn't played the past match.";
 //	public static final String report_didnt_play		= "You haven't played the last match, you aren't able to report someone.";
 //	public static final String report_already_reported	= "This player has already been reported by you.";
-//	public static final String report_successful		= "Your report was successfully stored.";
+//	public static final String report_successful		= "Your report was successfully submited.";
 //	public static final String report_raise_issue		= ".urtauth. has been auto-banned. [strength: .strength.] Type !review .urtauth. to review the ban.";
 
 	public static final String wrong_argument_amount	= "Wrong amount of arguments: `.cmd.`";
