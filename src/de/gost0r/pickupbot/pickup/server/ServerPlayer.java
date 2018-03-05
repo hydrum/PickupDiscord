@@ -21,6 +21,8 @@ public class ServerPlayer {
 	public Player player = null;
 	public CTF_Stats ctfstats;
 	
+	public long timeDisconnect = -1L;
+	
 	public ServerPlayer() {
 		ctfstats = new CTF_Stats();
 	}
@@ -35,13 +37,18 @@ public class ServerPlayer {
 		this.auth = other.auth;
 //		this.player = other.player; // don't override player reference
 		this.ctfstats = other.ctfstats;
+		this.timeDisconnect = other.timeDisconnect;
 	}
 	
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof ServerPlayer) {
 			ServerPlayer p = (ServerPlayer) o;
-			return p.auth.equals(auth) && p.ip.equals(ip);
+			if (p.auth == null || p.auth.isEmpty() || p.auth.equals("---")) {
+				// don't compare if the auth is not set
+				return false;
+			}
+			return p.auth.equals(auth);// && p.ip.equals(ip);
 		}
 		return false;
 	}

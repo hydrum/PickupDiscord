@@ -41,8 +41,11 @@ public class PickupLogic {
 		this.bot = bot;
 		
 		db = new Database(this);
-		Player.db = db;		
+		Player.db = db;
 		// handle db stuff
+		
+//		db.resetStats();
+		
 		serverList = db.loadServers();
 		roles = db.loadRoles();
 		channels = db.loadChannels();

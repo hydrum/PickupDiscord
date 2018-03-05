@@ -68,7 +68,11 @@ TODO:
 
 ( ) find out why the bot isn't sometimes launching the ServerMonitor or randomly stop observing
 
-( ) URGENT: if ServerMonitor is active and !rcon <string> is sent, bot goes into an endless loop.
+(x) URGENT: if ServerMonitor is active and !rcon <string> is sent, bot goes into an endless loop.
+
+( ) when server is added, check via rcon call whether its working
+(x) add kick msg to kick
+
 
 
 server monitor: forceplayers rework

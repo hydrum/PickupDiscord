@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.pickup.Match;
 import de.gost0r.pickupbot.pickup.MatchStats;
+import de.gost0r.pickupbot.pickup.MatchStats.Status;
 import de.gost0r.pickupbot.pickup.Player;
 import de.gost0r.pickupbot.pickup.server.ServerPlayer.ServerPlayerState;
 
@@ -30,10 +31,13 @@ public class ServerMonitor implements Runnable {
 	
 	
 	private List<ServerPlayer> players;
+	private List<ServerPlayer> leavers;
 	private String gameTime;
 	private ServerState state;
 	private boolean firstHalf;
 	private boolean swapRoles;
+	
+	private boolean hasPaused;
 	
 	private RconPlayersParsed prevRPP;
 
@@ -46,7 +50,10 @@ public class ServerMonitor implements Runnable {
 		
 		firstHalf = true;
 		
+		hasPaused = false;
+		
 		players = new ArrayList<ServerPlayer>();
+		leavers = new ArrayList<ServerPlayer>();
 	}
 
 	@Override
@@ -80,7 +87,7 @@ public class ServerMonitor implements Runnable {
 		if (state == ServerState.WELCOME)
 		{
 			if (firstHalf) {
-				checkMatchStart();
+				checkNoshow();
 			}
 		}
 		else if (state == ServerState.WARMUP)
@@ -94,28 +101,88 @@ public class ServerMonitor implements Runnable {
 		else if (state == ServerState.SCORE)
 		{
 			
-		}		
+		}
+		checkRagequit();
 	}
 
-	private void checkMatchStart() {
-
-//		if (players.size() >= 10 && (!rpp.matchready[0] || !rpp.matchready[1])) {
-//			server.sendRcon("forceready");		
-//			
-//		}
-//		if (players.size() < match.getGametype().getTeamSize()*2) {
-//			int[] time = new int[3];
-//			time[0] = Integer.valueOf(gameTime.split(":")[0]); // hours
-//			time[1] = Integer.valueOf(gameTime.split(":")[1]); // mins
-//			time[2] = Integer.valueOf(gameTime.split(":")[2]); // secs
-//			if (time[1] < 5) {
-//				// ABORT GAME
-//				server.sendRcon("bigtext \"ABORT MATCH DUE TO NOSHOW.");
-//				System.out.println("MATCH ABORT");
-//				match.abort();
-//				stop();
-//			}
-//		}
+	private void checkNoshow() {
+		List<Player> noshowPlayers = new ArrayList<Player>();
+		String playerlist = "";
+		for (Player player : match.getPlayerList()) {			
+			if (match.getStats(player).getStatus() == MatchStats.Status.NOSHOW) {
+				if (!playerlist.isEmpty()) {
+					playerlist += ", ";
+				}
+				playerlist += player.getUrtauth();
+				noshowPlayers.add(player);
+			}
+		}
+		
+		if (!playerlist.isEmpty()) {
+			long timeleft = (match.getStartTime() + 300000L) - match.getStartTime(); // 5min
+			if (timeleft > 0) {
+				String time = getTimeString(timeleft); 
+				String sendString = "(" + time + ") Waiting for: " + playerlist;
+				server.sendRcon(sendString);
+			} else {
+				abandonMatch(MatchStats.Status.NOSHOW, noshowPlayers);
+			}
+		}
+	}
+	
+	private void checkRagequit() {
+		long earliestLeaver = -1L;
+		String playerlist = "";
+		List<Player> leaverPlayer = new ArrayList<Player>();
+		for (ServerPlayer sp : leavers) {
+			if (sp.player == null) continue;
+			if (match.getStats(sp.player).getStatus() == MatchStats.Status.LEFT) {
+				if (!playerlist.isEmpty()) {
+					playerlist += ", ";
+				}
+				playerlist += sp.player.getUrtauth();
+				leaverPlayer.add(sp.player);
+				if (earliestLeaver == -1L || sp.timeDisconnect < earliestLeaver) {
+					earliestLeaver = sp.timeDisconnect;
+				}
+			}
+		}
+		
+		if (earliestLeaver > -1L) {
+			boolean shouldPause = false;
+			long timeleft = 0;
+			if (state == ServerState.WELCOME) {
+				timeleft = (earliestLeaver + 300000L) - earliestLeaver; // 5min
+			} else if (state == ServerState.WARMUP) {
+				timeleft = (earliestLeaver + 300000L) - earliestLeaver; // 3min
+				server.sendRcon("restart"); // restart map
+			} else if (state == ServerState.LIVE) {
+				timeleft = (earliestLeaver + 180000L) - earliestLeaver; // 3min
+				shouldPause = true;
+			} else if (state == ServerState.SCORE) {
+				return; // ignore leavers in the score screen
+			}
+			if (timeleft > 0) {
+				if (!hasPaused && shouldPause) {
+					server.sendRcon("pause");
+					hasPaused = false;
+				}
+				String time = getTimeString(timeleft); 
+				String sendString = "(" + time + ") Time to reconnect for: " + playerlist;
+				server.sendRcon(sendString);
+			} else {
+				abandonMatch(MatchStats.Status.LEFT, leaverPlayer);
+			}
+		}
+		
+		if (leaverPlayer.size() == 0) {
+			if (hasPaused) {
+				if (state == ServerState.LIVE) {
+					server.sendRcon("pause");
+				}
+				hasPaused = false;
+			}
+		}
 	}
 
 	private void saveStats(int[] scorex) {
@@ -167,7 +234,8 @@ public class ServerMonitor implements Runnable {
 					continue;
 				} else { // if player not authed, auth not registered or not playing in this match -> kick
 					LOGGER.info("Didn't find " + sp.name + " (" + sp.auth + ") signed up for this match  -> kick");
-					server.sendRcon("kick " + sp.id);
+					server.sendRcon("kick " + sp.id + " You are not authed and/or not signed up for this match.");
+					sp.state = ServerPlayerState.Disconnected;
 					continue;
 				}
 				
@@ -299,7 +367,8 @@ public class ServerMonitor implements Runnable {
 			if (found != null) {
 				if (found.state == ServerPlayerState.Disconnected) {
 					found.state = ServerPlayerState.Reconnected;
-					LOGGER.info("Player " + player.name + " (" + found.auth + ") reconnected.");
+					LOGGER.info("Player " + found.name + " (" + found.auth + ") reconnected.");
+					found.timeDisconnect = -1L;
 				}
 				oldPlayers.remove(found);
 			} else {
@@ -311,9 +380,12 @@ public class ServerMonitor implements Runnable {
 		for (ServerPlayer player : oldPlayers) {
 			if (player.state != ServerPlayerState.Disconnected) {
 				player.state = ServerPlayerState.Disconnected;
+				player.timeDisconnect = System.currentTimeMillis();
 				LOGGER.info("Player " + player.name + " (" + player.auth + ") disconnected.");
 			}
 		}
+		
+		leavers = oldPlayers;
 		
 		for (ServerPlayer player : newPlayers) {
 			players.add(player);
@@ -472,27 +544,31 @@ public class ServerMonitor implements Runnable {
 		LOGGER.info("Score: " + Arrays.toString(finalscore));
         for (Player player : match.getPlayerList()) {
         	if (player != null) {
-        		int team = match.getTeam(player).equalsIgnoreCase("red") ? 0 : 1;
-        		int opp = (team + 1) % 2;
-        		
-        		int eloSelf = player.getElo();
-        		int eloOpp = match.getElo()[opp];
-        		
-        		// 1 win, 0.5 draw, 0 loss
-        		double w = finalscore[team] > finalscore[opp] ? 1d : (finalscore[team] < finalscore[opp] ? 0d : 0.5d);
-        		
-        		double tSelf = Math.pow(10d, eloSelf/400d);
-        		double tOpp = Math.pow(10d, eloOpp/400d);
-        		double e = tSelf / (tSelf + tOpp);
-        		
-        		double result = 32d * (w - e);
-        		int elochange = (int) Math.floor(result);
-				int newelo = player.getElo() + elochange;
-				LOGGER.info("ELO player: " + player.getUrtauth() + " old ELO: " + player.getElo() + " new ELO: " + newelo + " (" + (!String.valueOf(elochange).startsWith("-") ? "+" : "") + elochange + ")");
-				player.addElo(elochange);
+        		calcElo(player, finalscore);
         	}
         }
         match.setScore(finalscore);
+	}
+	
+	public void calcElo(Player player, int[] score) {
+		int team = match.getTeam(player).equalsIgnoreCase("red") ? 0 : 1;
+		int opp = (team + 1) % 2;
+		
+		int eloSelf = player.getElo();
+		int eloOpp = match.getElo()[opp];
+		
+		// 1 win, 0.5 draw, 0 loss
+		double w = score[team] > score[opp] ? 1d : (score[team] < score[opp] ? 0d : 0.5d);
+		
+		double tSelf = Math.pow(10d, eloSelf/400d);
+		double tOpp = Math.pow(10d, eloOpp/400d);
+		double e = tSelf / (tSelf + tOpp);
+		
+		double result = 32d * (w - e);
+		int elochange = (int) Math.floor(result);
+		int newelo = player.getElo() + elochange;
+		LOGGER.info("ELO player: " + player.getUrtauth() + " old ELO: " + player.getElo() + " new ELO: " + newelo + " (" + (!String.valueOf(elochange).startsWith("-") ? "+" : "") + elochange + ")");
+		player.addElo(elochange);
 	}
 	
 	public void surrender(int teamid) {
@@ -504,14 +580,41 @@ public class ServerMonitor implements Runnable {
 		int[] scorex = new int[2];
 		scorex[teamid] = 0;
 		scorex[(teamid + 1) % 2] = 15;
-		score[0] = scorex;
 		score[1] = new int[] {0, 0};
 
 		calcStats();
 		stop();
 	}
+	
+
+
+	private void abandonMatch(Status status, List<Player> involvedPlayers) {
+		for (Player player : match.getPlayerList()) {
+			player.setEloChange(0);
+		}
+		
+		int[][] lostScore = new int[][] { new int[] {0, 1}, new int[] {1, 0} }; // fill array with enemy won score
+		for (Player player : involvedPlayers) {
+			int team = match.getTeam(player).equalsIgnoreCase("red") ? 0 : 1;
+			calcElo(player, lostScore[team]);
+		}
+		
+		stop();		
+		match.abandon();
+	}
 
 	public String getGameTime() {
 		return gameTime;
+	}
+	
+	private String getTimeString(long time) {
+		time /= 1000L; // time in s
+
+		String min = String.valueOf((int) (Math.floor(time / 60d)));
+		String sec = String.valueOf((int) (Math.floor(time % 60d)));
+		min = min.length() == 1 ? "0" + min : min;
+		sec = sec.length() == 1 ? "0" + sec : sec;
+		
+		return min + ":" + sec;
 	}
 }

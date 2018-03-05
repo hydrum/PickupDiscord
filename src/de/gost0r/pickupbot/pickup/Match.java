@@ -142,7 +142,7 @@ public class Match {
 	}
 	
 	public void voteSurrender(Player player) {
-		long timeUntilSurrender = (startTime + 300000L) - System.currentTimeMillis(); // 5min in milliseconds
+		long timeUntilSurrender = (startTime + 600000L) - System.currentTimeMillis(); // 10min in milliseconds
 		if (timeUntilSurrender < 0) {
 			if (!player.hasVotedSurrender()) {
 				player.voteSurrender();
@@ -202,6 +202,14 @@ public class Match {
 	public void abort() {
 		state = MatchState.Abort;
 		cleanUp();
+		logic.db.saveMatch(this);
+	}
+
+	public void abandon() {
+		state = MatchState.Abandon;
+		cleanUp();
+		sendAftermath();
+		logic.matchRemove(this);
 		logic.db.saveMatch(this);
 	}
 
@@ -573,7 +581,9 @@ public class Match {
 		case Live: msg = Config.pkup_match_print_live; break;
 		case Done: msg = Config.pkup_match_print_done; break;
 		case Abort: msg = Config.pkup_match_print_abort; break;
+		case Abandon: msg = Config.pkup_match_print_abandon; break;
 		case Surrender: msg = Config.pkup_match_print_sur; break;
+		default: break;
 		}
 		
 		String playernames = "None";
