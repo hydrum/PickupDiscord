@@ -149,9 +149,6 @@ public class Database {
 													+ "active TEXT)";
 			stmt.executeUpdate(sql);
 			
-			sql = "CREATE TABLE IF NOT EXISTS admin_role (role TEXT PRIMARY KEY)";
-			stmt.executeUpdate(sql);
-			
 			sql = "CREATE TABLE IF NOT EXISTS roles (role TEXT,"
 													+ "type TEXT,"
 													+ "PRIMARY KEY (role) )";
@@ -813,6 +810,27 @@ public class Database {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return rank;
+	}
+	
+	
+	public void resetStats() {
+		try {
+			Statement stmt = c.createStatement();
+			String sql = "DELETE FROM match";
+			stmt.executeUpdate(sql);
+			sql = "DELETE FROM player_in_match";
+			stmt.executeUpdate(sql);
+			sql = "DELETE FROM score";
+			stmt.executeUpdate(sql);
+			sql = "DELETE FROM stats";
+			stmt.executeUpdate(sql);
+			sql = "DELETE FROM SQLITE_SEQUENCE WHERE NAME='match' OR NAME='player_in_match' OR NAME='score' OR NAME='stats'";
+			stmt.executeUpdate(sql);
+//			sql = "UPDATE player SET elo=1000, elochange=0";
+//			stmt.executeUpdate(sql);
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
 	}
 
 }

@@ -41,8 +41,11 @@ public class PickupLogic {
 		this.bot = bot;
 		
 		db = new Database(this);
-		Player.db = db;		
+		Player.db = db;
 		// handle db stuff
+		
+//		db.resetStats();
+		
 		serverList = db.loadServers();
 		roles = db.loadRoles();
 		channels = db.loadChannels();
@@ -183,7 +186,7 @@ public class PickupLogic {
 
 	public void cmdMapVote(Player player, String mapname) {
 		Match m = playerInMatch(player);
-		if (m != null && m.getMatchState() == MatchState.Signup) {
+		if (m != null && m.getMatchState() == MatchState.Signup || m.getMatchState() == MatchState.AwaitingServer) {
 			int counter = 0;
 			GameMap map = null;
 			for (GameMap xmap : m.getMapList()) {
@@ -606,7 +609,7 @@ public class PickupLogic {
 		for (Server server : serverList) {
 			if (server.active && !server.isTaken() && !awaitingServer.isEmpty()) {
 				Match m = awaitingServer.poll();
-				if (m != null) {
+				if (m != null && m.getMatchState() == MatchState.AwaitingServer) {
 					m.start(server);
 				}
 			}

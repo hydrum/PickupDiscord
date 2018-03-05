@@ -350,9 +350,9 @@ public class PickupBot extends DiscordBot {
 						break;
 						
 					case Config.CMD_UPDATESERVER:
-						if (data.length == 2)
+						if (data.length == 3)
 						{
-							if (logic.cmdServerChangeRcon(data[1], data[1]))
+							if (logic.cmdServerChangeRcon(data[1], data[2]))
 							{
 								super.sendMsg(msg.channel, Config.admin_cmd_successful + msg.content);
 							}
