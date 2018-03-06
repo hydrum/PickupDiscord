@@ -119,11 +119,12 @@ public class ServerMonitor implements Runnable {
 		}
 		
 		if (!playerlist.isEmpty()) {
-			long timeleft = (match.getStartTime() + 300000L) - match.getStartTime(); // 5min
+			long timeleft = (match.getStartTime() + 300000L) - System.currentTimeMillis(); // 5min
 			if (timeleft > 0) {
 				String time = getTimeString(timeleft); 
 				String sendString = "(" + time + ") Waiting for: " + playerlist;
-				server.sendRcon(sendString);
+				server.sendRcon("say " + sendString);
+				LOGGER.fine(sendString);
 			} else {
 				abandonMatch(MatchStats.Status.NOSHOW, noshowPlayers);
 			}
@@ -152,25 +153,27 @@ public class ServerMonitor implements Runnable {
 			boolean shouldPause = false;
 			long timeleft = 0;
 			if (state == ServerState.WELCOME) {
-				timeleft = (earliestLeaver + 300000L) - earliestLeaver; // 5min
+				timeleft = (earliestLeaver + 300000L) - System.currentTimeMillis(); // 5min
 			} else if (state == ServerState.WARMUP) {
-				timeleft = (earliestLeaver + 300000L) - earliestLeaver; // 3min
+				timeleft = (earliestLeaver + 300000L) - System.currentTimeMillis(); // 3min
 				server.sendRcon("restart"); // restart map
 			} else if (state == ServerState.LIVE) {
-				timeleft = (earliestLeaver + 180000L) - earliestLeaver; // 3min
-				shouldPause = true;
-				// TODO: give some tolerance
-			} else if (state == ServerState.SCORE) {
+				if (getRemainingSeconds() > 45 && isLastHalf()) {
+					timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
+					shouldPause = true;
+				}
+			} else if (state == ServerState.SCORE) { // TODO: need to remove them from the leaver list though.
 				return; // ignore leavers in the score screen
 			}
 			if (timeleft > 0) {
 				if (!hasPaused && shouldPause) {
 					server.sendRcon("pause");
-					hasPaused = false;
+					hasPaused = true;
 				}
 				String time = getTimeString(timeleft); 
 				String sendString = "(" + time + ") Time to reconnect for: " + playerlist;
-				server.sendRcon(sendString);
+				server.sendRcon("say " + sendString);
+				LOGGER.fine(sendString);
 			} else {
 				abandonMatch(MatchStats.Status.LEFT, leaverPlayer);
 			}
@@ -600,7 +603,15 @@ public class ServerMonitor implements Runnable {
 			calcElo(player, lostScore[team]);
 		}
 		
-		stop();		
+		String reason = status == Status.NOSHOW ? "NOSHOW" : status == Status.LEFT ? "RAGEQUIT" : "UNKNOWN";
+		String sendString = "Abandoning due to " + reason + ". You may sign up again.";
+		
+		for (int i = 0; i < 3; i++) {
+			server.sendRcon("say " + sendString);
+		}
+		LOGGER.info(sendString);
+		
+		stop();
 		match.abandon();
 	}
 
@@ -617,5 +628,14 @@ public class ServerMonitor implements Runnable {
 		sec = sec.length() == 1 ? "0" + sec : sec;
 		
 		return min + ":" + sec;
+	}
+	
+	private int getRemainingSeconds() {
+		String[] split = gameTime.split(":");
+		return Integer.valueOf(split[0]) * 3600 + Integer.valueOf(split[1]) * 60 + Integer.valueOf(split[2]);
+	}
+
+	private boolean isLastHalf() {
+		return this.prevRPP.half == null || !firstHalf;
 	}
 }

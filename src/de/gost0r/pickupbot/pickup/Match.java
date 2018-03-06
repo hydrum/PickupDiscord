@@ -281,7 +281,7 @@ public class Match {
 	
 
 	public void start(Server server) {
-		if (!isOver()) {
+		if (!isOver() && state != MatchState.Live) {
 			
 			this.server = server;
 			server.take();
@@ -469,7 +469,7 @@ public class Match {
 	}
 	
 	public boolean isOver() {
-		return state == MatchState.Done || state == MatchState.Abort || state == MatchState.Surrender;
+		return state == MatchState.Done || state == MatchState.Abort || state == MatchState.Abandon || state == MatchState.Surrender;
 	}
 	
 	public MatchState getMatchState() {

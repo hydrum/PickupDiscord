@@ -579,8 +579,10 @@ public class PickupLogic {
 	}
 
 	public void requestServer(Match match) {
-		awaitingServer.add(match);
-		checkServer();
+		if (!awaitingServer.contains(match)) {
+			awaitingServer.add(match);
+			checkServer();
+		}
 	}
 	
 	public void cancelRequestServer(Match match) {
