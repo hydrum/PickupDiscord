@@ -38,6 +38,7 @@ public class ServerMonitor implements Runnable {
 	private boolean swapRoles;
 	
 	private boolean hasPaused;
+	private boolean isPauseDetected;
 	
 	private RconPlayersParsed prevRPP;
 
@@ -51,6 +52,7 @@ public class ServerMonitor implements Runnable {
 		firstHalf = true;
 		
 		hasPaused = false;
+		isPauseDetected = false;
 		
 		players = new ArrayList<ServerPlayer>();
 		leavers = new ArrayList<ServerPlayer>();
@@ -78,6 +80,10 @@ public class ServerMonitor implements Runnable {
 	private void observe() {
 		RconPlayersParsed rpp = parseRconPlayers();		
 		gameTime = rpp.gametime;
+		
+		if (prevRPP != null) {
+			isPauseDetected = prevRPP.gametime.equals(rpp.gametime);
+		}
 		
 		updatePlayers(rpp);		
 		evaluateState(rpp);
@@ -158,7 +164,7 @@ public class ServerMonitor implements Runnable {
 				timeleft = (earliestLeaver + 300000L) - System.currentTimeMillis(); // 3min
 				server.sendRcon("restart"); // restart map
 			} else if (state == ServerState.LIVE) {
-				if (getRemainingSeconds() > 45 && isLastHalf()) {
+				if (getRemainingSeconds() > 90 && !isLastHalf()) {
 					timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
 					shouldPause = true;
 				}
@@ -167,7 +173,9 @@ public class ServerMonitor implements Runnable {
 			}
 			if (timeleft > 0) {
 				if (!hasPaused && shouldPause) {
-					server.sendRcon("pause");
+					if (!isPauseDetected) {
+						server.sendRcon("pause");
+					}
 					hasPaused = true;
 				}
 				String time = getTimeString(timeleft); 
@@ -180,7 +188,7 @@ public class ServerMonitor implements Runnable {
 		}
 		
 		if (leaverPlayer.size() == 0) {
-			if (hasPaused) {
+			if (hasPaused && isPauseDetected) {
 				if (state == ServerState.LIVE) {
 					server.sendRcon("pause");
 				}
@@ -584,6 +592,7 @@ public class ServerMonitor implements Runnable {
 		int[] scorex = new int[2];
 		scorex[teamid] = 0;
 		scorex[(teamid + 1) % 2] = 15;
+		score[0] = scorex;
 		score[1] = new int[] {0, 0};
 
 		calcStats();
