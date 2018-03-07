@@ -128,7 +128,7 @@ public class ServerMonitor implements Runnable {
 			long timeleft = (match.getStartTime() + 300000L) - System.currentTimeMillis(); // 5min
 			if (timeleft > 0) {
 				String time = getTimeString(timeleft); 
-				String sendString = "(" + time + ") ^3Waiting for: ^1" + playerlist;
+				String sendString = "(" + time + ") Waiting for: ^1" + playerlist;
 				server.sendRcon("say " + sendString);
 				LOGGER.fine(sendString);
 			} else {
@@ -179,7 +179,7 @@ public class ServerMonitor implements Runnable {
 					hasPaused = true;
 				}
 				String time = getTimeString(timeleft); 
-				String sendString = "(" + time + ") ^3Time to reconnect for: ^1" + playerlist;
+				String sendString = "(" + time + ") Time to reconnect for: ^1" + playerlist;
 				server.sendRcon("say " + sendString);
 				LOGGER.fine(sendString);
 			} else {
@@ -613,7 +613,7 @@ public class ServerMonitor implements Runnable {
 		}
 		
 		String reason = status == Status.NOSHOW ? "NOSHOW" : status == Status.LEFT ? "RAGEQUIT" : "UNKNOWN";
-		String sendString = "^3Abandoning due to ^1" + reason + "^3. You may sign up again.";
+		String sendString = "Abandoning due to ^1" + reason + "^3. You may sign up again.";
 		
 		for (int i = 0; i < 3; i++) {
 			server.sendRcon("say " + sendString);
