@@ -60,32 +60,32 @@ public class ServerMonitor implements Runnable {
 
 	@Override
 	public void run() {
-		LOGGER.severe("run() started");
-		while (!stopped) {
-			observe();
-			try {
+		LOGGER.info("run() started");
+		try {
+			while (!stopped) {
+				observe();
 				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				LOGGER.log(Level.WARNING, "Exception: ", e);
 			}
+		} catch (InterruptedException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
-		LOGGER.severe("run() ended");
+		LOGGER.info("run() ended");
 	}
 	
 	public void stop() {
 		stopped = true;
-		LOGGER.severe("stop() called");
+		LOGGER.info("stop() called");
 	}
 	
 	private void observe() {
-		RconPlayersParsed rpp = parseRconPlayers();		
+		RconPlayersParsed rpp = parseRconPlayers();
 		gameTime = rpp.gametime;
 		
-		if (prevRPP != null) {
+		if (prevRPP != null && prevRPP.gametime != null && rpp.gametime != null) {
 			isPauseDetected = prevRPP.gametime.equals(rpp.gametime);
 		}
 		
-		updatePlayers(rpp);		
+		updatePlayers(rpp);	
 		evaluateState(rpp);
 		
 		forceplayers();
@@ -167,6 +167,8 @@ public class ServerMonitor implements Runnable {
 				if (getRemainingSeconds() > 90 && !isLastHalf()) {
 					timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
 					shouldPause = true;
+				} else {
+					return;
 				}
 			} else if (state == ServerState.SCORE) { // TODO: need to remove them from the leaver list though.
 				return; // ignore leavers in the score screen
@@ -435,6 +437,7 @@ public class ServerMonitor implements Runnable {
 		String playersString = server.sendRcon("players");
 //		LOGGER.fine("rcon players: >>>" + playersString + "<<<");
 		String[] stripped = playersString.split("\n");
+//		LOGGER.severe("lines.length = " + stripped.length);
 		
 		boolean awaitsStats = false;		
 		for (String line : stripped)
@@ -489,7 +492,7 @@ public class ServerMonitor implements Runnable {
 			else
 			{
 				String[] splitted = line.split(" ");
-//				LOGGER.fine("splitted = " + Arrays.toString(splitted));
+//				LOGGER.severe("splitted = " + Arrays.toString(splitted));
 				
 				if (splitted[0].equals("[connecting]")) continue;
 				
