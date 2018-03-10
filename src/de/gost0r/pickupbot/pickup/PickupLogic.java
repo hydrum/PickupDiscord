@@ -370,7 +370,7 @@ public class PickupLogic {
 		
 		for (GameMap map : mapList) {
 			if (map.name.equals(mapname)) {
-				map.setGametype(gt, true);
+				map.setGametype(gt, false);
 				db.updateMap(map, gt);
 				return true;
 			}

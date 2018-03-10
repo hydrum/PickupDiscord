@@ -248,7 +248,7 @@ public class PickupBot extends DiscordBot {
 							{
 								super.sendMsg(msg.channel, Config.admin_cmd_successful + msg.content);
 							}
-							else super.sendMsg(msg.channel, Config.admin_cmd_unsuccessful + msg);
+							else super.sendMsg(msg.channel, Config.admin_cmd_unsuccessful + msg.content);
 						}
 						else super.sendMsg(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_DISABLEMAP));
 						break;
