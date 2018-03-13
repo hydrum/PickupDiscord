@@ -77,7 +77,7 @@ public class ServerMonitor implements Runnable {
 		LOGGER.info("stop() called");
 	}
 	
-	private void observe() {
+	private void observe() throws InterruptedException {
 		RconPlayersParsed rpp = parseRconPlayers();
 		gameTime = rpp.gametime;
 		
@@ -93,6 +93,8 @@ public class ServerMonitor implements Runnable {
 		if (state == ServerState.WELCOME)
 		{
 			if (firstHalf) {
+				// Check no show every 10s to avoid spam
+				Thread.sleep(10000);
 				checkNoshow();
 			}
 		}
