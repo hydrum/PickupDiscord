@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.pickup.server.Server;
@@ -174,7 +175,11 @@ public class Match {
 		for (int i = 0; i < 2; ++i) {
 			if (surrender[i] <= 0) {
 				state = MatchState.Surrender;
-				server.getServerMonitor().surrender(i);
+				try {
+					server.getServerMonitor().surrender(i);
+				} catch (Exception e) {
+					LOGGER.log(Level.WARNING, "Exception: ", e);
+				}
 				cleanUp();
 				sendAftermath();
 				logic.matchRemove(this);

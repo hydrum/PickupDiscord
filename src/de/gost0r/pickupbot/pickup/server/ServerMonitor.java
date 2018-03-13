@@ -66,7 +66,7 @@ public class ServerMonitor implements Runnable {
 				observe();
 				Thread.sleep(200);
 			}
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		LOGGER.info("run() ended");
@@ -77,7 +77,7 @@ public class ServerMonitor implements Runnable {
 		LOGGER.info("stop() called");
 	}
 	
-	private void observe() {
+	private void observe() throws Exception {
 		RconPlayersParsed rpp = parseRconPlayers();
 		gameTime = rpp.gametime;
 		
@@ -111,7 +111,7 @@ public class ServerMonitor implements Runnable {
 		checkRagequit();
 	}
 
-	private void checkNoshow() {
+	private void checkNoshow() throws Exception {
 		List<Player> noshowPlayers = new ArrayList<Player>();
 		String playerlist = "";
 		for (Player player : match.getPlayerList()) {			
@@ -137,7 +137,7 @@ public class ServerMonitor implements Runnable {
 		}
 	}
 	
-	private void checkRagequit() {
+	private void checkRagequit() throws Exception {
 		long earliestLeaver = -1L;
 		String playerlist = "";
 		List<Player> leaverPlayer = new ArrayList<Player>();
@@ -155,6 +155,10 @@ public class ServerMonitor implements Runnable {
 			}
 		}
 		
+		if (leaverPlayer.size() > 0) {
+			LOGGER.warning("Leavers: " + Arrays.toString(leaverPlayer.toArray()) + " earliest leaver: " + (earliestLeaver > 0 ? getTimeString(earliestLeaver) : "none"));
+		}
+		
 		if (earliestLeaver > -1L) {
 			boolean shouldPause = false;
 			long timeleft = 0;
@@ -164,12 +168,12 @@ public class ServerMonitor implements Runnable {
 				timeleft = (earliestLeaver + 300000L) - System.currentTimeMillis(); // 3min
 				server.sendRcon("restart"); // restart map
 			} else if (state == ServerState.LIVE) {
-				if (getRemainingSeconds() > 90 && !isLastHalf()) {
-					timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
-					shouldPause = true;
-				} else {
-					return;
+				if (getRemainingSeconds() < 90 && isLastHalf()) {
+					LOGGER.warning(getRemainingSeconds() + "s remaining, don't report.");
+					return;				
 				}
+				timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
+				shouldPause = true;
 			} else if (state == ServerState.SCORE) { // TODO: need to remove them from the leaver list though.
 				return; // ignore leavers in the score screen
 			}
@@ -199,7 +203,7 @@ public class ServerMonitor implements Runnable {
 		}
 	}
 
-	private void saveStats(int[] scorex) {
+	private void saveStats(int[] scorex) throws Exception {
 		int half = firstHalf ? 0 : 1;
 		
 		score[half] = scorex;
@@ -234,7 +238,7 @@ public class ServerMonitor implements Runnable {
 		
 	}
 
-	private void forceplayers() {
+	private void forceplayers() throws Exception {
 		
 		for (ServerPlayer sp : players) {
 			if (sp.state == ServerPlayerState.Connected || sp.state == ServerPlayerState.Reconnected) {
@@ -280,7 +284,7 @@ public class ServerMonitor implements Runnable {
 	
 
 
-	private void evaluateState(RconPlayersParsed rpp) {
+	private void evaluateState(RconPlayersParsed rpp) throws Exception {
 		if (state == ServerState.WELCOME)
 		{
 			if (rpp.matchready[0] && rpp.matchready[1] && rpp.warmupphase)
@@ -333,7 +337,7 @@ public class ServerMonitor implements Runnable {
 		prevRPP = rpp;
 	}
 
-	private int getPlayerCount(String team) {
+	private int getPlayerCount(String team) throws Exception {
 		int count = 0;
 		for (ServerPlayer player : players) {
 			if (player.state == ServerPlayer.ServerPlayerState.Connected || player.state == ServerPlayer.ServerPlayerState.Reconnected) {
@@ -345,7 +349,7 @@ public class ServerMonitor implements Runnable {
 		return count;
 	}
 
-	private void handleScoreTransition() {		
+	private void handleScoreTransition() throws Exception {		
 		swapRoles = getSwapRoles();
 		
 		saveStats(prevRPP.scores);
@@ -356,7 +360,7 @@ public class ServerMonitor implements Runnable {
 		}
 	}
 
-	private void updatePlayers(RconPlayersParsed rpp) {
+	private void updatePlayers(RconPlayersParsed rpp) throws Exception {
 		List<ServerPlayer> oldPlayers = new ArrayList<ServerPlayer>(players);
 		List<ServerPlayer> newPlayers = new ArrayList<ServerPlayer>();
 		
@@ -406,7 +410,7 @@ public class ServerMonitor implements Runnable {
 		}
 	}
 	
-	private void requestAuth(ServerPlayer player) {
+	private void requestAuth(ServerPlayer player) throws Exception {
 		String replyAuth = server.sendRcon("auth-whois " + player.id);
 		LOGGER.fine(replyAuth);
 		if (replyAuth != null && !replyAuth.isEmpty()) {
@@ -420,7 +424,7 @@ public class ServerMonitor implements Runnable {
 		}
 	}
 
-	private boolean getSwapRoles() {
+	private boolean getSwapRoles() throws Exception {
 		String swaproles = server.sendRcon("g_swaproles");
 		LOGGER.fine(swaproles);
 		String[] split = swaproles.split("\"");
@@ -430,7 +434,7 @@ public class ServerMonitor implements Runnable {
 		return false;
 	}
 
-	private RconPlayersParsed parseRconPlayers() {
+	private RconPlayersParsed parseRconPlayers() throws Exception {
 
 		RconPlayersParsed rpp = new RconPlayersParsed();
 		
@@ -546,13 +550,13 @@ public class ServerMonitor implements Runnable {
 		return rpp;
 	}
 	
-	private void endGame() {
+	private void endGame() throws Exception {
 		calcStats();
 		match.end();
 		stop();
 	}
 	
-	private void calcStats() {
+	private void calcStats() throws Exception {
 		int redscore = score[0][0] + score[1][1]; //score_red_first + score_blue_second;
 		int bluescore = score[0][1] + score[1][0]; //score_blue_first + score_red_second;
 		int[] finalscore = { redscore, bluescore };
@@ -565,7 +569,7 @@ public class ServerMonitor implements Runnable {
         match.setScore(finalscore);
 	}
 	
-	public void calcElo(Player player, int[] score) {
+	public void calcElo(Player player, int[] score) throws Exception {
 		int team = match.getTeam(player).equalsIgnoreCase("red") ? 0 : 1;
 		int opp = (team + 1) % 2;
 		
@@ -586,7 +590,7 @@ public class ServerMonitor implements Runnable {
 		player.addElo(elochange);
 	}
 	
-	public void surrender(int teamid) {
+	public void surrender(int teamid) throws Exception {
 		// save stats
 		if (state == ServerState.LIVE || state == ServerState.SCORE) {
 			saveStats(new int[] {0, 0}); // score don't matter as we override them. don't matter
@@ -604,7 +608,7 @@ public class ServerMonitor implements Runnable {
 	
 
 
-	private void abandonMatch(Status status, List<Player> involvedPlayers) {
+	private void abandonMatch(Status status, List<Player> involvedPlayers) throws Exception {
 		for (Player player : match.getPlayerList()) {
 			player.setEloChange(0);
 		}
@@ -631,7 +635,7 @@ public class ServerMonitor implements Runnable {
 		return gameTime;
 	}
 	
-	private String getTimeString(long time) {
+	private String getTimeString(long time) throws Exception {
 		time /= 1000L; // time in s
 
 		String min = String.valueOf((int) (Math.floor(time / 60d)));
@@ -642,12 +646,15 @@ public class ServerMonitor implements Runnable {
 		return min + ":" + sec;
 	}
 	
-	private int getRemainingSeconds() {
+	private int getRemainingSeconds() throws Exception {
 		String[] split = gameTime.split(":");
 		return Integer.valueOf(split[0]) * 3600 + Integer.valueOf(split[1]) * 60 + Integer.valueOf(split[2]);
 	}
 
-	private boolean isLastHalf() {
-		return this.prevRPP.half == null || !firstHalf;
+	private boolean isLastHalf() throws Exception {
+		if (this.prevRPP != null) {
+			return this.prevRPP.half == null || !firstHalf;
+		}
+		return false;
 	}
 }

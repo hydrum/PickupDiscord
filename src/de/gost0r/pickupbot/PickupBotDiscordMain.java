@@ -65,7 +65,7 @@ public class PickupBotDiscordMain {
 		
         FileHandler logfile = new FileHandler("bot.log");
         logfile.setFormatter(new SimpleFormatter());
-        logfile.setLevel(Level.CONFIG);
+        logfile.setLevel(Level.ALL);
         logger.addHandler(logfile);
         
         LOGGER.severe("Bot started.");
