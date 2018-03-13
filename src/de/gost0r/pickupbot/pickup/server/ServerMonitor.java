@@ -40,6 +40,8 @@ public class ServerMonitor implements Runnable {
 	private boolean hasPaused;
 	private boolean isPauseDetected;
 	
+	private long lastMessage = 0L;
+	
 	private RconPlayersParsed prevRPP;
 
 	public ServerMonitor(Server server, Match match) {
@@ -129,7 +131,7 @@ public class ServerMonitor implements Runnable {
 			if (timeleft > 0) {
 				String time = getTimeString(timeleft); 
 				String sendString = "(" + time + ") Waiting for: ^1" + playerlist;
-				server.sendRcon("say " + sendString);
+				sendMsg("say " + sendString);
 				LOGGER.fine(sendString);
 			} else {
 				abandonMatch(MatchStats.Status.NOSHOW, noshowPlayers);
@@ -186,7 +188,7 @@ public class ServerMonitor implements Runnable {
 				}
 				String time = getTimeString(timeleft); 
 				String sendString = "(" + time + ") Time to reconnect for: ^1" + playerlist;
-				server.sendRcon("say " + sendString);
+				sendMsg("say " + sendString);
 				LOGGER.fine(sendString);
 			} else {
 				abandonMatch(MatchStats.Status.LEFT, leaverPlayer);
@@ -252,7 +254,7 @@ public class ServerMonitor implements Runnable {
 					continue;
 				} else { // if player not authed, auth not registered or not playing in this match -> kick
 					LOGGER.info("Didn't find " + sp.name + " (" + sp.auth + ") signed up for this match  -> kick");
-					server.sendRcon("kick " + sp.id + " You are not authed and/or not signed up for this match.");
+					server.sendRcon("kick " + sp.id); // You are not authed and/or not signed up for this match.");
 					sp.state = ServerPlayerState.Disconnected;
 					continue;
 				}
@@ -656,5 +658,12 @@ public class ServerMonitor implements Runnable {
 			return this.prevRPP.half == null || !firstHalf;
 		}
 		return false;
+	}
+	
+	private void sendMsg(String text) {
+		if (lastMessage + 10000L < System.currentTimeMillis()) {
+			server.sendRcon(text);
+			lastMessage = System.currentTimeMillis();
+		}
 	}
 }

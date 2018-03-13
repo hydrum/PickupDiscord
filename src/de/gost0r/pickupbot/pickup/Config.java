@@ -135,7 +135,7 @@ public class Config {
 	public static final String pkup_match_print_sur		= "**[** Pickup Game #.gamenumber. **][** Surrender **][** Score: .score. **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 	
 	public static final String pkup_go_admin			= "[ Pickup Game #.gamenumber. ][ Password: .password. ][ Map: .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
-	public static final String pkup_go_player			= "UrTPickup starts now! Connect to the server and join team *.team.* in order to play. Choose positions and ready up! [ /connect .server. ; password .password. ]";
+	public static final String pkup_go_player			= "UrTPickup starts now! Connect to the server and join team **.team.** in order to play. Choose positions and ready up! [ /connect .server. ; password .password. ]";
 	public static final String pkup_go_pub_head			= "**.gametype.**: UrTPickup #.gamenumber. (avg ELO: .elo.) is about to start!";
 	public static final String pkup_go_pub_team			= "**.gametype.**: .team. team: .playerlist.";
 	public static final String pkup_go_pub_map			= "**.gametype.**: Map: .map.";

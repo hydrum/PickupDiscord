@@ -438,7 +438,7 @@ public class Match {
 			msg = msg.replace(".password.", server.password);
 			for (String team : teamList.keySet()) {
 				for (Player player : teamList.get(team)) {
-					String msg_t = msg.replace(".team.", team);
+					String msg_t = msg.replace(".team.", team.toUpperCase());
 					logic.bot.sendMsg(player.getDiscordUser(), msg_t);
 				}
 			}
