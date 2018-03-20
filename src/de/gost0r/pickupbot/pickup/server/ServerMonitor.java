@@ -528,7 +528,7 @@ public class ServerMonitor implements Runnable {
 				{
 					ServerPlayer sp = new ServerPlayer();
 					sp.id = splitted[0].split(":")[0];
-					sp.name = splitted[0].split(":")[1];
+					sp.name = splitted[0].split(":").length > 1 ? splitted[0].split(":")[1] : "unknown";
 					sp.team = splitted[1].split(":")[1];
 					sp.ctfstats.score = splitted[2].split(":")[1];
 					sp.ctfstats.deaths = splitted[3].split(":")[1];
