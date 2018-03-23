@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import de.gost0r.pickupbot.pickup.Match;
 import de.gost0r.pickupbot.pickup.MatchStats;
 import de.gost0r.pickupbot.pickup.MatchStats.Status;
+import de.gost0r.pickupbot.pickup.PickupChannelType;
 import de.gost0r.pickupbot.pickup.Player;
 import de.gost0r.pickupbot.pickup.server.ServerPlayer.ServerPlayerState;
 
@@ -70,6 +71,7 @@ public class ServerMonitor implements Runnable {
 			}
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			match.getLogic().bot.sendMsg(match.getLogic().getChannelByType(PickupChannelType.ADMIN), "ServerMonitor " + e.toString());
 		}
 		LOGGER.info("run() ended");
 	}
@@ -443,12 +445,16 @@ public class ServerMonitor implements Runnable {
 		String playersString = server.sendRcon("players");
 //		LOGGER.fine("rcon players: >>>" + playersString + "<<<");
 		String[] stripped = playersString.split("\n");
-//		LOGGER.severe("lines.length = " + stripped.length);
+		
+		if (stripped.length == 1) {
+	        Thread.sleep(100);
+			return parseRconPlayers();
+		}
 		
 		boolean awaitsStats = false;		
 		for (String line : stripped)
 		{
-			LOGGER.fine("parseRconPlayers: " + line);
+			LOGGER.fine("line " + line);
 			if (line.isEmpty()) continue;
 			if (line.equals("print")) continue;
 			if (line.equals("==== ShutdownGame ====")) break;

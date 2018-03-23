@@ -54,7 +54,7 @@ public class DiscordAPI {
 		return false;
 	}
 	
-	private static String sendPostRequest(String request, JSONObject content) {
+	private static synchronized String sendPostRequest(String request, JSONObject content) {
 //		Thread.dumpStack();
 		try {
 			byte[] postData       = content.toString().getBytes( StandardCharsets.UTF_8 );
@@ -112,7 +112,7 @@ public class DiscordAPI {
 		return null;
 	}
 	
-	private static String sendGetRequest(String request) {
+	private static synchronized String sendGetRequest(String request) {
 //		Thread.dumpStack();
 		try {
 			URL url = new URL(api_url + api_version + request);
@@ -160,7 +160,7 @@ public class DiscordAPI {
 	}
 
 	
-	private static String sendDeleteRequest(String request) {
+	private static synchronized String sendDeleteRequest(String request) {
 //		Thread.dumpStack();
 		try {
 			URL url = new URL(api_url + api_version + request);
