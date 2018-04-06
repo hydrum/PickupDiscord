@@ -142,7 +142,7 @@ public class Config {
 	public static final String pkup_go_pub_calm			= "**.gametype.**: You will receive the connection info via DM.";
 	public static final String pkup_go_pub_sent			= "**.gametype.**: All connection info has been sent. Enjoy the match!";
 
-	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber.:";
+	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber.:\nMap :.map.";
 	public static final String pkup_aftermath_result	= ".team. team .result. (.score.) -";
 	public static final String pkup_aftermath_player	= ".player. (.elochange.)";
 	public static final String pkup_aftermath_rank		= ".player. was ranked .updown. to **.rank.**";

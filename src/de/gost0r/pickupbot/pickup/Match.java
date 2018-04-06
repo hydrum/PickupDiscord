@@ -247,6 +247,7 @@ public class Match {
 		String fullmsg = Config.pkup_aftermath_head;
 		fullmsg = fullmsg.replace(".gametype.", gametype.getName());
 		fullmsg = fullmsg.replace(".gamenumber.", String.valueOf(id));
+		fullmsg = fullmsg.replace(".map.",map.name);
 		for (int i = 0; i < 2; ++i) {
     		int team = i;
     		int opp = (team + 1) % 2;
