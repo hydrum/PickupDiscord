@@ -105,7 +105,7 @@ public class PickupBot extends DiscordBot {
 						DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
 						if (u != null)
 						{
-							p = Player.get(u);
+							player = Player.get(u);
 							if (data.length > 2)
 							{
 								startindex = 2;
