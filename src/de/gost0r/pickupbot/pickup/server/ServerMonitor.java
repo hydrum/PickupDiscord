@@ -139,6 +139,8 @@ public class ServerMonitor implements Runnable {
 				String sendString = "(" + time + ") Waiting for: ^1" + playerlist;
 				sendServerMsg("say " + sendString);
 				LOGGER.fine(sendString);
+				String sendDiscordString = "(" + time + ") Please connect: " + getPlayerlistForDiscord(noshowPlayers);
+				sendDiscordMsg(sendDiscordString);
 			} else {
 				abandonMatch(MatchStats.Status.NOSHOW, noshowPlayers);
 			}
@@ -146,6 +148,10 @@ public class ServerMonitor implements Runnable {
 	}
 	
 	private void checkRagequit() throws Exception {
+		if (stopped) {
+			return;
+		}
+		
 		long earliestLeaver = -1L;
 		String playerlist = "";
 		List<Player> leaverPlayer = new ArrayList<Player>();
@@ -200,10 +206,10 @@ public class ServerMonitor implements Runnable {
 				
 				// send message
 				String time = getTimeString(timeleft); 
-				String sendServerString = "(" + time + ") Time to connect for: ^1" + playerlist;
+				String sendServerString = "(" + time + ") Time to reconnect for: ^1" + playerlist;
 				sendServerMsg("say " + sendServerString);
 				LOGGER.fine(sendServerString);
-				String sendDiscordString = "(" + time + ") Time to connect for: " + getPlayerlistForDiscord(leaverPlayer);
+				String sendDiscordString = "(" + time + ") Time to reconnect for: " + getPlayerlistForDiscord(leaverPlayer);
 				sendDiscordMsg(sendDiscordString);
 			} else {
 				abandonMatch(MatchStats.Status.LEFT, leaverPlayer);
