@@ -11,6 +11,7 @@ import de.gost0r.pickupbot.discord.DiscordChannelType;
 import de.gost0r.pickupbot.discord.DiscordMessage;
 import de.gost0r.pickupbot.discord.DiscordRole;
 import de.gost0r.pickupbot.discord.DiscordUser;
+import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 
 public class PickupBot extends DiscordBot {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -511,6 +512,44 @@ public class PickupBot extends DiscordBot {
 							else sendMsg(msg.channel, Config.player_not_found);
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_UNREGISTER));
+						break;
+						
+					case Config.CMD_ADDBAN:
+						if (data.length == 4)
+						{
+							Player p = null;							
+							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
+							if (u != null)
+							{
+								p = Player.get(u);
+							}
+							else
+							{
+								p = Player.get(data[1].toLowerCase());
+							}
+							
+							if (p != null)
+							{
+								BanReason reason = null;
+								for (BanReason banReason : BanReason.values()) {
+									if (banReason.name().equals(data[2].toUpperCase())) {
+										reason = banReason;
+										break;
+									}
+								}
+								if (reason != null) {
+									long duration = PickupLogic.parseDurationFromString(data[3]);
+									if (duration > 0L) {
+										logic.banPlayer(p, reason, duration);
+										// no need to send msg due to banmsg being sent in that case
+									}
+									else sendMsg(msg.channel, Config.banduration_invalid);
+								}
+								else sendMsg(msg.channel, Config.banreason_not_found.replace(".banreasons.", Arrays.toString(BanReason.values())));
+							}
+							else sendMsg(msg.channel, Config.player_not_found);
+						}
+						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADDBAN));
 						break;		
 				}
 			}
@@ -549,7 +588,7 @@ public class PickupBot extends DiscordBot {
 						//case Config.CMD_REPORT: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REPORT)); break;
 						//case Config.CMD_EXCUSE: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_EXCUSE)); break;
 						//case Config.CMD_REPORTLIST: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REPORTLIST)); break;
-						//case Config.CMD_ADDBAN: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDBAN)); break;
+						case Config.CMD_ADDBAN: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDBAN)); break;
 						//case Config.CMD_REMOVEBAN: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVEBAN)); break;
 						case Config.CMD_BANINFO: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_BANINFO)); break;
 						case Config.CMD_SHOWSERVERS: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SHOWSERVERS)); break;

@@ -665,7 +665,7 @@ public class ServerMonitor implements Runnable {
 			} else if (match.getStats(player).getStatus() == Status.RAGEQUIT) {
 				reason = BanReason.RAGEQUIT;
 			}
-			match.getLogic().banPlayer(player, reason);
+			match.getLogic().autoBanPlayer(player, reason);
 		}
 		
 		String reason = status == Status.NOSHOW ? "NOSHOW" : status == Status.RAGEQUIT ? "RAGEQUIT" : "UNKNOWN";

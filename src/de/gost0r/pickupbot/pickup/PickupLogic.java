@@ -799,7 +799,7 @@ public class PickupLogic {
 		return player.getDiscordUser().status != DiscordUserStatus.online;
 	}
 	
-	public void banPlayer(Player player, BanReason reason) {
+	public void autoBanPlayer(Player player, BanReason reason) {
 		String[] durationString = banDuration.get(reason);
 		PlayerBan latestBan = player.getLatestBan();
 		
@@ -812,10 +812,22 @@ public class PickupLogic {
 		}
 		long duration = parseDurationFromString(durationString[strength]);
 		
+		banPlayer(player, reason, duration);
+	}
+	
+	public void banPlayer(Player player, BanReason reason, long duration) {
+		
+		// add reminaing bantime to the new ban
+		long endTime = -1L;
+		if (player.isBanned()) {
+			endTime = player.getLatestBan().endTime + duration;
+		} else {
+			endTime = System.currentTimeMillis() + duration;
+		}
 		PlayerBan ban = new PlayerBan();
 		ban.player = player;
 		ban.startTime = System.currentTimeMillis();
-		ban.endTime = System.currentTimeMillis() + duration;
+		ban.endTime = endTime;
 		ban.reason = reason;
 		
 		player.addBan(ban);
@@ -823,6 +835,10 @@ public class PickupLogic {
 		
 		bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), printBanInfo(player));
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), printBanInfo(player));
+		
+		for (Match match : playerInMatch(player)) {
+			match.removePlayer(player, true);
+		}
 	}
 	
 	public String printBanInfo(Player player) {
@@ -855,7 +871,7 @@ public class PickupLogic {
 			if (Character.isDigit(string.charAt(i))) {
 				curDuration += String.valueOf(string.charAt(i));
 			} else {
-				int duration = Integer.valueOf(curDuration);
+				long duration = Long.valueOf(curDuration);
 				switch (string.charAt(i)) {
 				case 'y': duration *= 12;
 				case 'M': duration *= 4;

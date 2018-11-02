@@ -6,7 +6,10 @@ public class PlayerBan {
 	
 	public enum BanReason {
 		NOSHOW,
-		RAGEQUIT
+		RAGEQUIT,
+		INSULT,
+		TROLL,
+		AFK
 	}
 	
 	public Player player;

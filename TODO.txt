@@ -2,42 +2,29 @@ TODO:
 
 ( ) rework match abort/cancel/end behaviour to be more consistent
 ( ) !showmatch starttime
-(x) need prematurely leaver detection
-(x) ability to queue up for multiple gametypes
-(x) replace status 0/10 when removed with leaving player
 
 ( ) !reset 19 didn't stop the server monitor
 
 ( ) don't display default port if serverip is a domain
-(x) pub func !live with gametime, ready etc
 ( ) when server is added, check via rcon call whether its working
 ( ) add kick msg to kick
 
-(x) improve aftermath msg (in case of NOSHOW or RAGEQUIT)
-(x) add ban system
-(x) afk-check (demand !here for ppl that are added > 25m - if failed within 5m: removal)
-(x) show most voted map (if there is any) in bold
-(x) reduce spam for multiple gametypes (!status, !maps)
-(x) reduce voted maps on start to the ones that are actually voted - if none, state NO VOTES - RANDOM!
 ( ) appropriate info msg on failure
 ( ) add !commentate functionality (connection, score, CTF stats difference)
 ( ) make admin cmds accessible in ADMIN channels
 ( ) add round ending conditions (timelimit, fraglimit, caplimit, maxrounds)
-(x) add threading to match start
-(x) default elo: AVG elo on start
-(x) allow vote change
-
 
 ( ) !expire 15m timer until autoremove
 ( ) admin cmds to lookup user/auths/ips etc
 ( ) !player profiles (stats stats stats (matches played etc...))
 ( ) match history
 
+( ) allow channels to have two functions (PUBLIC + ADMIN for example)
+
 // Discord:
 ( ) reconnect (resume) function
 ( ) get gateway if fails to connect
 ( ) ability to reply to heartbeat event
-(x) reconnect if WebSocket was shut down
 
 IDEA:
 - display newly connected/disconnected people in the chat

@@ -34,8 +34,8 @@ public class Config {
 	//public static final String CMD_EXCUSE				= "!excuse";
 	//public static final String CMD_REPORTLIST			= "!reportlist";
 	
-	//public static final String CMD_ADDBAN				= "!addban";
-	//public static final String CMD_REMOVEBAN			= "!removeban";
+	public static final String CMD_ADDBAN				= "!ban";
+	//public static final String CMD_REMOVEBAN			= "!unban";
 	
 	public static final String CMD_BANINFO				= "!baninfo";
 
@@ -61,7 +61,7 @@ public class Config {
 	
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " "
 	+ CMD_ENABLEMAP + " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE
-	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_SHOWMATCHES
+	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_ADDBAN + " " + CMD_SHOWMATCHES
 	+ " " + CMD_UNREGISTER + " " + CMD_ADDGAMECONFIG + " " + CMD_REMOVEGAMECONFIG + " " + CMD_LISTGAMECONFIG;
 		
 //------------------------------------------------------------------------------------//
@@ -100,8 +100,8 @@ public class Config {
 	//public static final String USE_CMD_EXCUSE			= "!excuse <excuse>";
 	//public static final String USE_CMD_REPORTLIST		= "!reportlist";
 	
-	//public static final String USE_CMD_ADDBAN			= "!addban <urtauth>";
-	//public static final String USE_CMD_REMOVEBAN		= "!removeban <urtauth>";
+	public static final String USE_CMD_ADDBAN			= "!ban <urtauth> <reason> <duration> (duration=1y1M1w1d1h1m1s)";
+	//public static final String USE_CMD_REMOVEBAN		= "!unban <urtauth>";
 	
 	public static final String USE_CMD_BANINFO			= "!baninfo </@DiscordUser|urtauth/>";
 
@@ -215,6 +215,9 @@ public class Config {
 	public static final String pkup_match_unavi 		= "Match is not available right now.";
 	public static final String pkup_match_invalid_gt	= "No match for that gametype is available right now.";
 	public static final String no_gt_found				= "Unable to find a matching gametype.";
+	
+	public static final String banreason_not_found		= "Banreason not found in .banreasons.";	
+	public static final String banduration_invalid		= "Ban duration invalid.";
 	
 	public static final String admin_cmd_successful		= "Successful: ";
 	public static final String admin_cmd_unsuccessful	= "Unsuccessful: ";
