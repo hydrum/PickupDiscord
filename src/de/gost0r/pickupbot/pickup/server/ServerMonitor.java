@@ -43,7 +43,8 @@ public class ServerMonitor implements Runnable {
 	private boolean hasPaused;
 	private boolean isPauseDetected;
 	
-	private long lastMessage = 0L;
+	private long lastServerMessage = 0L;
+	private long lastDiscordMessage = System.currentTimeMillis();
 	
 	private RconPlayersParsed prevRPP = new RconPlayersParsed();
 
@@ -136,7 +137,7 @@ public class ServerMonitor implements Runnable {
 			if (timeleft > 0) {
 				String time = getTimeString(timeleft); 
 				String sendString = "(" + time + ") Waiting for: ^1" + playerlist;
-				sendMsg("say " + sendString);
+				sendServerMsg("say " + sendString);
 				LOGGER.fine(sendString);
 			} else {
 				abandonMatch(MatchStats.Status.NOSHOW, noshowPlayers);
@@ -173,7 +174,7 @@ public class ServerMonitor implements Runnable {
 			if (state == ServerState.WELCOME) {
 				timeleft = (earliestLeaver + 300000L) - System.currentTimeMillis(); // 5min
 			} else if (state == ServerState.WARMUP) {
-				timeleft = (earliestLeaver + 300000L) - System.currentTimeMillis(); // 3min
+				timeleft = (earliestLeaver + 300000L) - System.currentTimeMillis(); // 5min
 				server.sendRcon("restart"); // restart map
 			} else if (state == ServerState.LIVE) {
 				if (getRemainingSeconds() < 90 && isLastHalf()) {
@@ -183,26 +184,33 @@ public class ServerMonitor implements Runnable {
 				}
 				timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
 				shouldPause = true;
-			} else if (state == ServerState.SCORE) { // TODO: need to remove them from the leaver list though.
+			} else if (state == ServerState.SCORE) {
+				// TODO: need to remove them from the leaver list though.
 				setAllPlayersStatus(leaverPlayer, Status.LEFT);
 				return; // ignore leavers in the score screen
 			}
 			if (timeleft > 0) {
+				// pause if someone left
 				if (!hasPaused && shouldPause) {
 					if (!isPauseDetected) {
 						server.sendRcon("pause");
 					}
 					hasPaused = true;
 				}
+				
+				// send message
 				String time = getTimeString(timeleft); 
-				String sendString = "(" + time + ") Time to reconnect for: ^1" + playerlist;
-				sendMsg("say " + sendString);
-				LOGGER.fine(sendString);
+				String sendServerString = "(" + time + ") Time to connect for: ^1" + playerlist;
+				sendServerMsg("say " + sendServerString);
+				LOGGER.fine(sendServerString);
+				String sendDiscordString = "(" + time + ") Time to connect for: " + getPlayerlistForDiscord(leaverPlayer);
+				sendDiscordMsg(sendDiscordString);
 			} else {
 				abandonMatch(MatchStats.Status.LEFT, leaverPlayer);
 			}
 		}
 		
+		// unpause if noone left
 		if (leaverPlayer.size() == 0) {
 			if (hasPaused && isPauseDetected) {
 				if (state == ServerState.LIVE) {
@@ -213,6 +221,17 @@ public class ServerMonitor implements Runnable {
 		}
 	}
 	
+	private String getPlayerlistForDiscord(List<Player> playerlist) {
+		if (playerlist.size() > 0) {
+			String playerstring = "";
+			for (Player player : playerlist) {
+				playerstring += " " + player.getDiscordUser().getMentionString();
+			}
+			return playerstring.substring(1);
+		}
+		return "";
+	}
+
 	private void setAllPlayersStatus(List<Player> playerList, Status status) {
 		for (Player player : playerList) {
 			match.getStats(player).updateStatus(status);
@@ -706,10 +725,17 @@ public class ServerMonitor implements Runnable {
 		return false;
 	}
 	
-	private void sendMsg(String text) {
-		if (lastMessage + 10000L < System.currentTimeMillis()) {
+	private void sendServerMsg(String text) {
+		if (lastServerMessage + 10000L < System.currentTimeMillis()) {
 			server.sendRcon(text);
-			lastMessage = System.currentTimeMillis();
+			lastServerMessage = System.currentTimeMillis();
+		}
+	}
+	
+	private void sendDiscordMsg(String text) {
+		if (lastDiscordMessage + 60000L < System.currentTimeMillis()) {
+			match.getLogic().bot.sendMsg(match.getLogic().getChannelByType(PickupChannelType.PUBLIC), text);
+			lastDiscordMessage = System.currentTimeMillis();
 		}
 	}
 
