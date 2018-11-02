@@ -2,6 +2,7 @@ package de.gost0r.pickupbot.pickup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +15,9 @@ import java.util.logging.Logger;
 import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordRole;
 import de.gost0r.pickupbot.discord.DiscordUser;
+import de.gost0r.pickupbot.discord.DiscordUserStatus;
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
+import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
 
 public class PickupLogic {
@@ -36,6 +39,8 @@ public class PickupLogic {
 	private Map<Gametype, Match> curMatch;
 	
 	private boolean locked;
+	
+	private Map<BanReason, String[]> banDuration;
 	
 	public PickupLogic(PickupBot bot) {
 		this.bot = bot;
@@ -61,33 +66,69 @@ public class PickupLogic {
 
 		createCurrentMatches();
 		
+		banDuration = new HashMap<BanReason, String[]>();
+		banDuration.put(BanReason.NOSHOW, new String[] {"10m", "2h", "12h", "1d", "3d", "1w", "2w", "1M", "3M", "1y"});
+		banDuration.put(BanReason.RAGEQUIT, new String[] {"12h", "1d", "3d", "1w", "2w", "1M", "3M", "1y"});
+		
 		awaitingServer = new LinkedList<Match>();
 	}
 	
-	public void cmdAddPlayer(Player player, String mode) {
-		Gametype gt = getGametypeByString(mode);
-		if (gt != null && curMatch.keySet().contains(gt)) {
-			if (!locked) {
-				if (curMatch.get(gt).getMatchState() == MatchState.Signup) {
-					if (!player.isBanned()) {
-						if (playerInMatch(player) == null) {
-							curMatch.get(gt).addPlayer(player);
-						} else bot.sendNotice(player.getDiscordUser(), Config.player_already_added);
-					} else bot.sendNotice(player.getDiscordUser(), Config.is_banned);
-				} else bot.sendNotice(player.getDiscordUser(), Config.pkup_match_unavi);
-			} else bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
-		} else bot.sendNotice(player.getDiscordUser(), Config.pkup_match_invalid_gt);
+	public void cmdAddPlayer(Player player, List<Gametype> modes) {
+
+		if (locked) {
+			bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
+			return;
+		}
+		if (player.isBanned()) {
+			bot.sendMsg(bot.getLatestMessageChannel(), printBanInfo(player));
+			return;
+		}
+		if (playerInActiveMatch(player) != null) {
+			bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
+			return;
+		}
+
+		String defmsg = "Unable to sign up for:";
+		String msg = defmsg;
+		for (Gametype gt : modes) {
+			if (gt != null && curMatch.keySet().contains(gt)) {
+				Match m = curMatch.get(gt);
+				if (m.getMatchState() != MatchState.Signup || m.isInMatch(player)) {
+					msg += " " + gt.getName();
+				} else {
+					m.addPlayer(player);
+				}
+			}
+		}
+		
+		if (!msg.equals(defmsg)) {
+			bot.sendNotice(player.getDiscordUser(), msg);
+		}
 	}
 	
-	public void cmdRemovePlayer(Player player) {
-		if (!locked) {
-			Match m = playerInMatch(player);
-			if (m != null) {
-				if (m.getMatchState() == MatchState.Signup || m.getMatchState() == MatchState.AwaitingServer) {
-					m.removePlayer(player);
-				} else bot.sendNotice(player.getDiscordUser(), Config.player_cannot_remove);
-			} else bot.sendNotice(player.getDiscordUser(), Config.player_already_removed);
-		} else bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
+	public void cmdRemovePlayer(Player player, List<Gametype> modes) {
+		if (locked) {
+			bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
+			return;
+		}
+		if (playerInActiveMatch(player) != null) {
+			bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
+			return;
+		}
+		
+		// remove from all if null
+		if (modes == null) {
+			for (Match match : curMatch.values()) {
+				match.removePlayer(player, true);
+			}
+			return;
+		}
+		
+		for (Gametype gt : modes) {
+			if (gt != null && curMatch.keySet().contains(gt)) {
+				curMatch.get(gt).removePlayer(player, true); // conditions checked within function
+			}
+		}
 	}
 	
 	public boolean cmdLock() {
@@ -109,6 +150,7 @@ public class PickupLogic {
 				if (urtauth.matches("^[a-z0-9]*$")) {
 					if (urtauth.length() != 32) {
 						Player p = new Player(user, urtauth);
+						p.setElo(db.getAvgElo());
 						db.createPlayer(p);
 						bot.sendNotice(user, Config.auth_success);
 					} else {
@@ -127,11 +169,9 @@ public class PickupLogic {
 	}
 	
 	public boolean cmdUnregisterPlayer(Player player) {
-		Match m = playerInMatch(player);
-		if (m != null) {
-			if (m.getMatchState() == MatchState.Signup) {
-				m.removePlayer(player);
-			}
+		List<Match> matches = playerInMatch(player);
+		for (Match m : matches) {
+			m.removePlayer(player, true);
 		}
 		db.removePlayer(player);
 		Player.remove(player);
@@ -157,15 +197,13 @@ public class PickupLogic {
 	}
 
 	public String cmdGetElo(Player p, boolean sendMsg) {
+		if (p == null) {
+			return "";
+		}
 		String msg = Config.pkup_getelo;
 		msg = msg.replace(".urtauth.", p.getUrtauth());
 		msg = msg.replace(".elo.", String.valueOf(p.getElo()));
-		String elochange = "";
-		if (p.getEloChange() >= 0) {
-			elochange = "+";
-		}
-		elochange += String.valueOf(p.getEloChange());
-		msg = msg.replace(".elochange.", elochange);
+		msg = msg.replace(".wdl.", String.valueOf(Math.round(db.getWDLForPlayer(p).calcWinRatio() * 100d)));
 		msg = msg.replace(".position.", String.valueOf(db.getRankForPlayer(p)));
 		msg = msg.replace(".rank.", p.getRank().getEmoji());
 		if (sendMsg) {
@@ -175,35 +213,55 @@ public class PickupLogic {
 	}
 	
 	public void cmdGetMaps() {
+		String msg = "None";
 		for (Gametype gametype : curMatch.keySet()) {
-			String msg = Config.pkup_map_list;
-			msg = msg.replace(".gametype.", gametype.getName());
-			msg = msg.replace(".maplist.", curMatch.get(gametype).getMapVotes());
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+			if (msg.equals("None")) {
+				msg = "";
+			} else {
+				msg += "\n";
+			}
+			String mapString = Config.pkup_map_list;
+			mapString = mapString.replace(".gametype.", gametype.getName());
+			mapString = mapString.replace(".maplist.", curMatch.get(gametype).getMapVotes(false));
+			msg += mapString;
 		}
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 	}
 
 
-	public void cmdMapVote(Player player, String mapname) {
-		Match m = playerInMatch(player);
-		if (m != null && m.getMatchState() == MatchState.Signup || m.getMatchState() == MatchState.AwaitingServer) {
-			int counter = 0;
-			GameMap map = null;
-			for (GameMap xmap : m.getMapList()) {
-				if (xmap.name.contains(mapname)) {
-					counter++;
-					map = xmap;
-				}
-			}
-			if (counter > 1) {
-				bot.sendNotice(player.getDiscordUser(), Config.map_not_unique);
-			} else if (counter == 0) {
-				bot.sendNotice(player.getDiscordUser(), Config.map_not_found);
+	public void cmdMapVote(Player player, Gametype gametype, String mapname) {
+		if (gametype == null) {
+			List<Match> matches = playerInMatch(player);
+			if (matches.size() == 1) {
+				gametype = matches.get(0).getGametype();
+			} else if (matches.size() == 0) {
+				bot.sendNotice(player.getDiscordUser(), Config.player_not_in_match);
+				return;
 			} else {
-				m.voteMap(player, map); // handles sending a msg itself
+				bot.sendNotice(player.getDiscordUser(), Config.map_specify_gametype);
+				return;
 			}
 		}
-		else bot.sendNotice(player.getDiscordUser(), Config.player_already_removed);
+		if (curMatch.containsKey(gametype)) {
+			Match m = curMatch.get(gametype);
+			if (m.getMatchState() == MatchState.Signup || m.getMatchState() == MatchState.AwaitingServer) {
+				int counter = 0;
+				GameMap map = null;
+				for (GameMap xmap : m.getMapList()) {
+					if (xmap.name.contains(mapname)) {
+						counter++;
+						map = xmap;
+					}
+				}
+				if (counter > 1) {
+					bot.sendNotice(player.getDiscordUser(), Config.map_not_unique);
+				} else if (counter == 0) {
+					bot.sendNotice(player.getDiscordUser(), Config.map_not_found);
+				} else {
+					m.voteMap(player, map); // handles sending a msg itself
+				}
+			}
+		}
 	}
 	
 	public void cmdStatus() {
@@ -211,15 +269,22 @@ public class PickupLogic {
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_match_unavi);
 			return;
 		}
+		String msg = "None";
 		for (Match m : curMatch.values()) {
-			cmdStatus(m, null);
+			if (msg.equals("None")) {
+				msg = "";
+			} else {
+				msg += "\n";
+			}
+			msg += cmdStatus(m, null, false);
 		}
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 	}
 	
-	public void cmdStatus(Match match, Player player) {
+	public String cmdStatus(Match match, Player player, boolean shouldSend) {
 		String msg = "";
 		int playerCount = match.getPlayerCount();
-		if (playerCount == 0) {
+		if (playerCount == 0 && player == null) {
 			msg = Config.pkup_status_noone;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 			msg = msg.replace("<gametype>", match.getGametype().getName().toLowerCase());
@@ -249,11 +314,14 @@ public class PickupLogic {
 			msg = Config.pkup_status_server;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 		}
-		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+		if (shouldSend) {
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+		}
+		return msg;
 	}
 	
 	public void cmdSurrender(Player player) {
-		Match match = playerInMatch(player);
+		Match match = playerInActiveMatch(player);
 		if (match != null && match.getMatchState() == MatchState.Live) {
 			match.voteSurrender(player);
 		}
@@ -384,7 +452,9 @@ public class PickupLogic {
 			Gametype gt = getGametypeByString(gametype);
 			if (gt == null) {
 				gt = new Gametype(gametype.toUpperCase(), i_teamSize, true);
+				db.loadGameConfig(gt);
 			}
+			gt.setTeamSize(i_teamSize);
 			gt.setActive(true);
 			db.updateGametype(gt);
 			// checking whether this was active before
@@ -431,7 +501,7 @@ public class PickupLogic {
 		return true;
 	}
 	
-	public boolean cmdListGameConfig(DiscordUser user, String gametype) {
+	public boolean cmdListGameConfig(DiscordChannel channel, String gametype) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
 		
@@ -446,7 +516,7 @@ public class PickupLogic {
 		String msg = Config.pkup_config_list;
 		msg = msg.replace(".gametype.", gt.getName());
 		msg = msg.replace(".configlist.", configlist);
-		bot.sendMsg(user, msg);
+		bot.sendMsg(channel, msg);
 		
 		return true;
 //		return !configlist.isEmpty(); // we sent the info anyways, so its fine
@@ -525,7 +595,7 @@ public class PickupLogic {
 		return false;
 	}
 	
-	public boolean cmdServerList(DiscordUser user) {
+	public boolean cmdServerList(DiscordChannel channel) {
 		String msg = "None";
 		for (Server server : serverList) {
 			if (msg.equals("None")) {
@@ -534,11 +604,11 @@ public class PickupLogic {
 				msg += "\n" + server.toString();
 			}
 		}
-		bot.sendMsg(user, msg);
+		bot.sendMsg(channel, msg);
 		return true;
 	}
 	
-	public boolean cmdMatchList(DiscordUser user) {
+	public boolean cmdMatchList(DiscordChannel channel) {
 		String msg = "None";
 		for (Match match : curMatch.values()) {
 			if (msg.equals("None")) {
@@ -554,8 +624,44 @@ public class PickupLogic {
 				msg += "\n" + match.toString();
 			}
 		}
-		bot.sendMsg(user, msg);
+		bot.sendMsg(channel, msg);
 		return true;
+	}
+	
+	public boolean cmdLive() {
+		String msg = "No live matches found.";
+		for (Match match : ongoingMatches) {
+			if (msg.equals("No live matches found.")) {
+				msg = match.getMatchInfo();
+			} else {
+				msg += "\n" + match.getMatchInfo();
+			}
+		}
+		bot.sendMsg(bot.getLatestMessageChannel(), msg);
+		return true;
+	}
+	
+	public boolean cmdDisplayMatch(String matchid) {
+		try {
+			int idx = Integer.valueOf(matchid);
+			for (Match match : ongoingMatches) {
+				if (match.getID() == idx) {
+					bot.sendMsg(bot.getLatestMessageChannel(), match.getMatchInfo());
+					return true;
+				}
+			}
+			
+			Match match = db.loadMatch(idx); // TODO: cache?
+			if (match != null) {
+				bot.sendMsg(bot.getLatestMessageChannel(), match.getMatchInfo());
+				return true;
+			}			
+		
+		} catch (NumberFormatException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
+		return false;
 	}
 	
 	// Matchcreation
@@ -612,7 +718,7 @@ public class PickupLogic {
 			if (server.active && !server.isTaken() && !awaitingServer.isEmpty()) {
 				Match m = awaitingServer.poll();
 				if (m != null && m.getMatchState() == MatchState.AwaitingServer) {
-					m.start(server);
+					m.launch(server);
 				}
 			}
 		}
@@ -663,7 +769,163 @@ public class PickupLogic {
 		return false;
 	}
 	
+	// AFK CHECK
+	
+	public void afkCheck() {
+		Set<Player> playerList = new HashSet<Player>();
+		for (Match m : curMatch.values()) {			
+			playerList.addAll(m.getPlayerList());
+		}
+		
+		for (Player p : playerList) {
+			long latestAFKmsg = p.getDiscordUser().statusChangeTime > p.getLastMessage() ? p.getDiscordUser().statusChangeTime : p.getLastMessage();
+			long afkKickTime = latestAFKmsg + 30 * 60 * 1000;
+			long afkReminderTime = latestAFKmsg + 25 * 60 * 1000;
+			if (afkKickTime < System.currentTimeMillis() && isPlayerStatusAFK(p)) {
+				LOGGER.info("AFK: REMOVE - " + p.getUrtauth() + ": " + afkKickTime + " > " + System.currentTimeMillis());
+				cmdRemovePlayer(p, null);
+			} else if (afkReminderTime < System.currentTimeMillis() && !p.getAfkReminderSent() && isPlayerStatusAFK(p)) {
+				p.setAfkReminderSent(true);
+				LOGGER.info("AFK: REMINDER - " + p.getUrtauth() + ": " + afkKickTime + " > " + System.currentTimeMillis());
+				String msg = Config.afk_reminder;
+				msg = msg.replace(".user.", p.getDiscordUser().getMentionString());
+				bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+				
+			}
+		}
+	}
+	
+	private boolean isPlayerStatusAFK(Player player) {
+		return player.getDiscordUser().status != DiscordUserStatus.online;
+	}
+	
+	public void banPlayer(Player player, BanReason reason) {
+		String[] durationString = banDuration.get(reason);
+		PlayerBan latestBan = player.getLatestBan();
+		
+		int strength = 0;
+		if (latestBan != null) {
+			long latestBanDuration = latestBan.endTime - latestBan.startTime;
+			latestBanDuration = Math.max(latestBanDuration * 2, parseDurationFromString("1w"));
+			strength = player.getPlayerBanCountSince(System.currentTimeMillis() - latestBanDuration);
+			strength = Math.min(strength, durationString.length - 1);
+		}
+		long duration = parseDurationFromString(durationString[strength]);
+		
+		PlayerBan ban = new PlayerBan();
+		ban.player = player;
+		ban.startTime = System.currentTimeMillis();
+		ban.endTime = System.currentTimeMillis() + duration;
+		ban.reason = reason;
+		
+		player.addBan(ban);
+		db.createBan(ban);
+		
+		bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), printBanInfo(player));
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), printBanInfo(player));
+	}
+	
+	public String printBanInfo(Player player) {
+		PlayerBan ban = player.getLatestBan();
+		
+		if (ban == null || ban.endTime <= System.currentTimeMillis()) {
+			String msg = Config.not_banned;
+			msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
+			msg = msg.replace(".urtauth.", player.getUrtauth());
+			return msg;
+		}
+		
+		String time = parseStringFromDuration(ban.endTime - System.currentTimeMillis());
+		
+		String msg = Config.is_banned;
+		msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
+		msg = msg.replace(".urtauth.", player.getUrtauth());
+		msg = msg.replace(".reason.", ban.reason.name());
+		msg = msg.replace(".time.", time);
+		return msg;
+	}
+	
 	// HELPER
+	
+	public static long parseDurationFromString(String string) {
+		long total = 0;
+		
+		String curDuration = "";
+		for (int i = 0; i < string.length(); ++i) {
+			if (Character.isDigit(string.charAt(i))) {
+				curDuration += String.valueOf(string.charAt(i));
+			} else {
+				int duration = Integer.valueOf(curDuration);
+				switch (string.charAt(i)) {
+				case 'y': duration *= 12;
+				case 'M': duration *= 4;
+				case 'w': duration *= 7;
+				case 'd': duration *= 24;
+				case 'h': duration *= 60;
+				case 'm': duration *= 60;
+				case 's': duration *= 1000;
+				}
+				total += duration;
+				curDuration = "";
+			}
+		}
+		return total;
+	}
+	
+	public static String parseStringFromDuration(long duration) {
+		String string = "";
+		
+		int acc = 2;
+		
+		// TODO REFACTOR
+		long second = 1000;
+		long minute = second * 60;
+		long hour = minute * 60;
+		long day = hour * 24;
+		long week = day * 7;
+		long month = week * 4;
+		long year = month * 12;
+		
+		long curAmount;
+		if ((curAmount = duration / year) > 0 && acc > 0) {
+			string += curAmount + "y";
+			duration = duration % year;
+			--acc;
+		}		
+		if ((curAmount = duration / month) > 0 && acc > 0) {
+			string += curAmount + "M";
+			duration = duration % month;
+			--acc;
+		}
+		if ((curAmount = duration / week) > 0 && acc > 0) {
+			string += curAmount + "w";
+			duration = duration % week;
+			--acc;
+		}
+		if ((curAmount = duration / day) > 0 && acc > 0) {
+			string += curAmount + "d";
+			duration = duration % day;
+			--acc;
+		}
+		if ((curAmount = duration / hour) > 0 && acc > 0) {
+			string += curAmount + "h";
+			duration = duration % hour;
+			--acc;
+		}
+		if ((curAmount = duration / minute) > 0 && acc > 0) {
+			string += curAmount + "m";
+			duration = duration % minute;
+			--acc;
+		}
+		if ((curAmount = duration / second) > 0 && acc > 0) {
+			string += curAmount + "s";
+			duration = duration % second;
+			--acc;
+		}
+		
+		
+		return string;
+	}
 
 	public Gametype getGametypeByString(String mode) {
 		for (Gametype gt : curMatch.keySet()) {
@@ -674,15 +936,30 @@ public class PickupLogic {
 		return null;
 	}
 	
-	public Match playerInMatch(Player player) {
-		for (Match m : curMatch.values()) {
+	public List<Match> playerInMatch(Player player) {
+		List<Match> matchlist = new ArrayList<Match>();
+		for (Gametype gt : curMatch.keySet()) {
+			Match m = playerInMatch(gt, player);
+			if (m != null) {
+				matchlist.add(m);
+			}
+		}
+		return matchlist;
+	}
+	
+	public Match playerInActiveMatch(Player player) {
+		for (Match m : ongoingMatches) {
 			if (m.isInMatch(player)) {
 				return m;
 			}
 		}
-		for (Match m : ongoingMatches) {
-			if (m.isInMatch(player)) {
-				return m;
+		return null;
+	}
+	
+	public Match playerInMatch(Gametype gametype, Player player) {
+		if (curMatch.containsKey(gametype)) {
+			if (curMatch.get(gametype).isInMatch(player)) {
+				return curMatch.get(gametype);
 			}
 		}
 		return null;

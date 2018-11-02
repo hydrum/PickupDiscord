@@ -7,10 +7,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.pickup.Match;
+import de.gost0r.pickupbot.pickup.MatchState;
 import de.gost0r.pickupbot.pickup.MatchStats;
 import de.gost0r.pickupbot.pickup.MatchStats.Status;
 import de.gost0r.pickupbot.pickup.PickupChannelType;
 import de.gost0r.pickupbot.pickup.Player;
+import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.ServerPlayer.ServerPlayerState;
 
 public class ServerMonitor implements Runnable {
@@ -43,7 +45,7 @@ public class ServerMonitor implements Runnable {
 	
 	private long lastMessage = 0L;
 	
-	private RconPlayersParsed prevRPP;
+	private RconPlayersParsed prevRPP = new RconPlayersParsed();
 
 	public ServerMonitor(Server server, Match match) {
 		this.server = server;
@@ -67,7 +69,7 @@ public class ServerMonitor implements Runnable {
 		try {
 			while (!stopped) {
 				observe();
-				Thread.sleep(200);
+				Thread.sleep(1000);
 			}
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
@@ -125,6 +127,7 @@ public class ServerMonitor implements Runnable {
 				}
 				playerlist += player.getUrtauth();
 				noshowPlayers.add(player);
+				match.getStats(player).updateStatus(MatchStats.Status.NOSHOW);
 			}
 		}
 		
@@ -158,6 +161,7 @@ public class ServerMonitor implements Runnable {
 				}
 			}
 		}
+		setAllPlayersStatus(leaverPlayer, Status.RAGEQUIT);
 		
 		if (leaverPlayer.size() > 0) {
 			LOGGER.warning("Leavers: " + Arrays.toString(leaverPlayer.toArray()) + " earliest leaver: " + (earliestLeaver > 0 ? getTimeString(earliestLeaver) : "none"));
@@ -174,11 +178,13 @@ public class ServerMonitor implements Runnable {
 			} else if (state == ServerState.LIVE) {
 				if (getRemainingSeconds() < 90 && isLastHalf()) {
 					LOGGER.warning(getRemainingSeconds() + "s remaining, don't report.");
+					setAllPlayersStatus(leaverPlayer, Status.LEFT);
 					return;				
 				}
 				timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
 				shouldPause = true;
 			} else if (state == ServerState.SCORE) { // TODO: need to remove them from the leaver list though.
+				setAllPlayersStatus(leaverPlayer, Status.LEFT);
 				return; // ignore leavers in the score screen
 			}
 			if (timeleft > 0) {
@@ -204,6 +210,12 @@ public class ServerMonitor implements Runnable {
 				}
 				hasPaused = false;
 			}
+		}
+	}
+	
+	private void setAllPlayersStatus(List<Player> playerList, Status status) {
+		for (Player player : playerList) {
+			match.getStats(player).updateStatus(status);
 		}
 	}
 
@@ -312,7 +324,7 @@ public class ServerMonitor implements Runnable {
 		}
 		else if (state == ServerState.LIVE)
 		{
-			if (rpp.gametime.equals("00:00:00"))
+			if (rpp.gametime != null && rpp.gametime.equals("00:00:00"))
 			{
 				state = ServerState.SCORE;
 				LOGGER.info("SWITCHED LIVE -> SCORE");
@@ -331,7 +343,7 @@ public class ServerMonitor implements Runnable {
 				}
 				handleScoreTransition();
 			} else {
-				if (getPlayerCount("red") == 0 || getPlayerCount("blue") == 0) {
+				if (getPlayerCount("red") == 0 || getPlayerCount("blue") == 0 || !rpp.matchready[0] || !rpp.matchready[1]) {
 					state = ServerState.WELCOME;
 					LOGGER.info("SWITCHED SCORE -> WELCOME");
 					handleScoreTransition();
@@ -445,10 +457,11 @@ public class ServerMonitor implements Runnable {
 		String playersString = server.sendRcon("players");
 //		LOGGER.fine("rcon players: >>>" + playersString + "<<<");
 		String[] stripped = playersString.split("\n");
-		
+
+		// hax to avoid empty
 		if (stripped.length == 1) {
-	        Thread.sleep(100);
-			return parseRconPlayers();
+			LOGGER.warning("Corrupted RPP (too short), taking prevRPP instead");
+			return prevRPP;
 		}
 		
 		boolean awaitsStats = false;		
@@ -543,17 +556,22 @@ public class ServerMonitor implements Runnable {
 					sp.auth = splitted[6].split(":")[1];
 					sp.ip = splitted[7].split(":")[1];
 					
-					if (sp.ping.equals("0")) {
-						sp.state = ServerPlayerState.Connecting;
-					} else {
+//					if (sp.ping.equals("0")) {
+//						sp.state = ServerPlayerState.Connecting;
+//					} else {
 						sp.state = ServerPlayerState.Connected;
-					}
+//					}
 					
 					rpp.players.add(sp);
 					awaitsStats = true;
 				}
 				
 			}
+		}
+		// hax to avoid empty
+		if (rpp.map == null || rpp.playercount != rpp.players.size()) {
+			LOGGER.warning("Corrupted RPP, taking prevRPP instead");
+			return prevRPP;
 		}
 		return rpp;
 	}
@@ -621,13 +639,17 @@ public class ServerMonitor implements Runnable {
 			player.setEloChange(0);
 		}
 		
-		int[][] lostScore = new int[][] { new int[] {0, 1}, new int[] {1, 0} }; // fill array with enemy won score
-		for (Player player : involvedPlayers) {
-			int team = match.getTeam(player).equalsIgnoreCase("red") ? 0 : 1;
-			calcElo(player, lostScore[team]);
+		for (Player player : involvedPlayers) {			
+			BanReason reason = BanReason.NOSHOW;
+			if (match.getStats(player).getStatus() == Status.NOSHOW) {
+				reason = BanReason.NOSHOW;
+			} else if (match.getStats(player).getStatus() == Status.RAGEQUIT) {
+				reason = BanReason.RAGEQUIT;
+			}
+			match.getLogic().banPlayer(player, reason);
 		}
 		
-		String reason = status == Status.NOSHOW ? "NOSHOW" : status == Status.LEFT ? "RAGEQUIT" : "UNKNOWN";
+		String reason = status == Status.NOSHOW ? "NOSHOW" : status == Status.RAGEQUIT ? "RAGEQUIT" : "UNKNOWN";
 		String sendString = "Abandoning due to ^1" + reason + "^3. You may sign up again.";
 		
 		for (int i = 0; i < 3; i++) {
@@ -636,11 +658,29 @@ public class ServerMonitor implements Runnable {
 		LOGGER.info(sendString);
 		
 		stop();
-		match.abandon();
+		match.abandon(status, involvedPlayers);
 	}
 
 	public String getGameTime() {
 		return gameTime;
+	}
+
+	public String getScore() {
+		
+		int[] total = new int[] { 0, 0 };
+		if (!firstHalf) {
+			total[0] = score[0][0];
+			total[1] = score[0][1];
+		}
+		
+		if (state == ServerState.LIVE || state == ServerState.SCORE) {
+			int team1 = firstHalf ? 0 : 1;
+			int team2 = firstHalf ? 1 : 0;
+			total[0] += prevRPP.scores[team1];
+			total[1] += prevRPP.scores[team2];
+		}
+		
+		return String.valueOf(total[0]) + "-" + String.valueOf(total[1]);
 	}
 	
 	private String getTimeString(long time) throws Exception {
@@ -671,5 +711,9 @@ public class ServerMonitor implements Runnable {
 			server.sendRcon(text);
 			lastMessage = System.currentTimeMillis();
 		}
+	}
+
+	public ServerState getState() {
+		return state;
 	}
 }

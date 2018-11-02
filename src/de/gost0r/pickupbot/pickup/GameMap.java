@@ -24,6 +24,15 @@ public class GameMap {
 	}
 	
 	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof GameMap) {
+			GameMap other = (GameMap) obj;
+			return other.name == this.name;
+		}
+		return false;
+	}
+	
+	@Override
 	public String toString() {
 		return name;
 	}

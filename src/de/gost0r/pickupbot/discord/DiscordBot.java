@@ -58,6 +58,7 @@ public class DiscordBot  {
 	
 	public void handleEvent(DiscordGatewayEvent event, JSONObject obj) {
 		try {
+			DiscordUser user = null;
 			switch(event){
 			case MESSAGE_CREATE:
 				DiscordMessage msg = new DiscordMessage(obj.getString("id"),
@@ -67,7 +68,18 @@ public class DiscordBot  {
 				recvMessage(msg);
 				break;
 			case GUILD_MEMBER_UPDATE:
-				DiscordUser.getUser(obj.getJSONObject("user").getString("id")).setRoles(DiscordGuild.getGuild("guild_id"), obj.getJSONArray("roles"));
+				user = DiscordUser.findUser(obj.getJSONObject("user").getString("id"));
+				if (user != null) {
+					// only update roles of users that we already know
+					user.setRoles(DiscordGuild.getGuild("guild_id"), obj.getJSONArray("roles"));
+				}
+				break;
+			case PRESENCE_UPDATE:
+				user = DiscordUser.findUser(obj.getJSONObject("user").getString("id"));
+				if (user != null) {
+					DiscordUserStatus userStatus = DiscordUserStatus.valueOf(obj.getString("status"));
+					user.setStatus(userStatus);
+				}
 				break;
 			default:
 				break;
@@ -75,6 +87,11 @@ public class DiscordBot  {
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
+		tick();
+	}
+	
+	protected void tick() {
+		
 	}
 
 	protected void recvMessage(DiscordMessage msg) {

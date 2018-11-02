@@ -16,7 +16,9 @@ import java.util.logging.Logger;
 import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordRole;
 import de.gost0r.pickupbot.discord.DiscordUser;
+import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
+import de.gost0r.pickupbot.pickup.stats.WinDrawLoss;
 
 public class Database {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -81,6 +83,7 @@ public class Database {
 													+ "reason TEXT,"
 													+ "start INTEGER,"
 													+ "end INTEGER,"
+													+ "pardon TEXT,"
 													+ "FOREIGN KEY (player_userid, player_urtauth) REFERENCES player(userid, urtauth) )";
 			stmt.executeUpdate(sql);
 			
@@ -156,7 +159,7 @@ public class Database {
 			
 			sql = "CREATE TABLE IF NOT EXISTS channels (channel TEXT,"
 													+ "type TEXT,"
-													+ "PRIMARY KEY (channel) )";
+													+ "PRIMARY KEY (channel, type) )";
 			stmt.executeUpdate(sql);
 			
 			stmt.close();
@@ -193,6 +196,21 @@ public class Database {
 				pstmt.executeUpdate();
 			}
 			pstmt.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+	}
+	
+	public void createBan(PlayerBan ban) {
+		try {
+			String sql = "INSERT INTO banlist (player_userid, player_urtauth, start, end, reason, pardon) VALUES (?, ?, ?, ?, ?, 'null')";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, ban.player.getDiscordUser().id);
+			pstmt.setString(2, ban.player.getUrtauth());
+			pstmt.setLong(3, ban.startTime);
+			pstmt.setLong(4, ban.endTime);
+			pstmt.setString(5, ban.reason.name());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -374,20 +392,31 @@ public class Database {
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				Gametype gametype = new Gametype(rs.getString("gametype"), rs.getInt("teamsize"), Boolean.valueOf(rs.getString("active")));
-				LOGGER.config("loadGametypes(): " + gametype.getName() + " active=" + gametype.getActive());
-				sql = "SELECT config FROM gameconfig WHERE gametype=?";
-				PreparedStatement pstmt = c.prepareStatement(sql);
-				pstmt.setString(1, gametype.getName());
-				ResultSet rs1 = pstmt.executeQuery();
-				while (rs1.next()) {
-					gametype.addConfig(rs1.getString("config"));
-				}
+				LOGGER.config(gametype.getName() + " active=" + gametype.getActive());
+				loadGameConfig(gametype);
 				gametypeList.add(gametype);
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return gametypeList;
+	}
+	
+
+
+	public void loadGameConfig(Gametype gametype) {
+		try {
+			String sql = "SELECT config FROM gameconfig WHERE gametype=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, gametype.getName());
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				gametype.addConfig(rs.getString("config"));
+			}
+			LOGGER.config(gametype.getName() + " count=" + gametype.getConfig().size());
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
 	}
 
 	public List<GameMap> loadMaps() {
@@ -445,115 +474,122 @@ public class Database {
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setInt(1, id);
 			rs = pstmt.executeQuery();
-			rs.next();
+			if (rs.next()) {
 			
-			Map<Player, MatchStats> stats = new HashMap<Player, MatchStats>();
-			Map<String, List<Player>> teamList = new HashMap<String, List<Player>>();
-			teamList.put("red", new ArrayList<Player>());
-			teamList.put("blue", new ArrayList<Player>());
-				
-			// getting players in match
-			sql = "SELECT ID, player_userid, player_urtauth, team FROM player_in_match WHERE matchid=?";
-			pstmt = c.prepareStatement(sql);
-			pstmt.setInt(1, id);
-			rs1 = pstmt.executeQuery();
-			while (rs1.next()) {
-				int pidmid = rs1.getInt("ID");
-//				String userid = rs1.getString("player_userid"); // not needed as we potentially load the player via loadPlayer(urtauth)
-				String urtauth = rs1.getString("player_urtauth");
-				String team = rs1.getString("team");
-				
-				// getting stats
-				sql = "SELECT ip, score_1, score_2, status FROM stats WHERE pim=?";
-				pstmt = c.prepareStatement(sql);
-				pstmt.setInt(1, pidmid);
-				rs2 = pstmt.executeQuery();
-				rs2.next();
-				
-				int[] scoreid = new int[] { rs2.getInt("score_1"), rs2.getInt("score_2") };
-				String ip = rs2.getString("ip");
-				MatchStats.Status status = MatchStats.Status.valueOf(rs2.getString("status"));
-				
-				Score[] scores = new Score[2];
-				
-				// getting score
-				for(int i = 0; i < 2; ++i) {
-					sql = "SELECT kills, deaths, assists, caps, returns, fckills, stopcaps, protflag FROM score WHERE ID=? ORDER BY ID DESC";
-					pstmt = c.prepareStatement(sql);
-					pstmt.setInt(1, scoreid[i]);
-					rs3 = pstmt.executeQuery();
-					rs3.next();
+				Map<Player, MatchStats> stats = new HashMap<Player, MatchStats>();
+				Map<String, List<Player>> teamList = new HashMap<String, List<Player>>();
+				teamList.put("red", new ArrayList<Player>());
+				teamList.put("blue", new ArrayList<Player>());
 					
-					scores[i] = new Score();
-					scores[i].score = rs3.getInt("kills");
-					scores[i].deaths = rs3.getInt("deaths");
-					scores[i].assists = rs3.getInt("assists");
-					scores[i].caps = rs3.getInt("caps");
-					scores[i].returns = rs3.getInt("returns");
-					scores[i].fc_kills = rs3.getInt("fckills");
-					scores[i].stop_caps = rs3.getInt("stopcaps");
-					scores[i].protect_flag = rs3.getInt("protflag");
+				// getting players in match
+				sql = "SELECT ID, player_userid, player_urtauth, team FROM player_in_match WHERE matchid=?";
+				pstmt = c.prepareStatement(sql);
+				pstmt.setInt(1, id);
+				rs1 = pstmt.executeQuery();
+				while (rs1.next()) {
+					int pidmid = rs1.getInt("ID");
+					String userid = rs1.getString("player_userid"); // not needed as we potentially load the player via loadPlayer(urtauth)
+					String urtauth = rs1.getString("player_urtauth");
+					String team = rs1.getString("team");
+					
+					// getting stats
+					sql = "SELECT ip, score_1, score_2, status FROM stats WHERE pim=?";
+					pstmt = c.prepareStatement(sql);
+					pstmt.setInt(1, pidmid);
+					rs2 = pstmt.executeQuery();
+					rs2.next();
+					
+					int[] scoreid = new int[] { rs2.getInt("score_1"), rs2.getInt("score_2") };
+					String ip = rs2.getString("ip");
+					MatchStats.Status status = MatchStats.Status.valueOf(rs2.getString("status"));
+					
+					Score[] scores = new Score[2];
+					
+					// getting score
+					for(int i = 0; i < 2; ++i) {
+						sql = "SELECT kills, deaths, assists, caps, returns, fckills, stopcaps, protflag FROM score WHERE ID=? ORDER BY ID DESC";
+						pstmt = c.prepareStatement(sql);
+						pstmt.setInt(1, scoreid[i]);
+						rs3 = pstmt.executeQuery();
+						rs3.next();
+						
+						scores[i] = new Score();
+						scores[i].score = rs3.getInt("kills");
+						scores[i].deaths = rs3.getInt("deaths");
+						scores[i].assists = rs3.getInt("assists");
+						scores[i].caps = rs3.getInt("caps");
+						scores[i].returns = rs3.getInt("returns");
+						scores[i].fc_kills = rs3.getInt("fckills");
+						scores[i].stop_caps = rs3.getInt("stopcaps");
+						scores[i].protect_flag = rs3.getInt("protflag");
+					}
+						
+					// assemble stats
+					Player player = Player.get(DiscordUser.getUser(userid), urtauth);
+					stats.put(player, new MatchStats(scores[0], scores[1], ip, status));
+					teamList.get(team).add(player);
 				}
 					
-				// assemble stats
-				Player player = Player.get(urtauth);
-				stats.put(player, new MatchStats(scores[0], scores[1], ip, status));				
-				teamList.get(team).add(player);
-			}
+				Gametype gametype = logic.getGametypeByString(rs.getString("gametype"));
+				Server server = logic.getServerByID(rs.getInt("server"));
+				GameMap map = logic.getMapByName(rs.getString("map"));
+				MatchState state = MatchState.valueOf(rs.getString("state"));
 				
-			Gametype gametype = logic.getGametypeByString(rs.getString("gametype"));				
-			Server server = logic.getServerByID(rs.getInt("server"));
-			GameMap map = logic.getMapByName(rs.getString("map"));
-			MatchState state = MatchState.valueOf(rs.getString("state"));
-			
-			match = new Match(id, rs.getLong("starttime"),
-									map,
-									new int[] { rs.getInt("score_red"), rs.getInt("score_blue") },
-									new int[] { rs.getInt("elo_red"), rs.getInt("elo_blue") },
-									teamList,
-									state,
-									gametype,
-									server,
-									stats); 
-			match.setLogic(logic);
+				match = new Match(id, rs.getLong("starttime"),
+										map,
+										new int[] { rs.getInt("score_red"), rs.getInt("score_blue") },
+										new int[] { rs.getInt("elo_red"), rs.getInt("elo_blue") },
+										teamList,
+										state,
+										gametype,
+										server,
+										stats); 
+				match.setLogic(logic);
+			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return match;
 	}
-	
-	public Player loadPlayer(DiscordUser user) {
-		Player player = null;
-		try {
-			String sql = "SELECT urtauth, elo, elochange FROM player WHERE userid=? AND active=?";
-			PreparedStatement pstmt = c.prepareStatement(sql);
-			pstmt.setString(1, user.id);
-			pstmt.setString(2, String.valueOf(true));
-			ResultSet rs = pstmt.executeQuery();
-			if (rs.next()) {
-				player = new Player(user, rs.getString("urtauth"));
-				player.setElo(rs.getInt("elo"));
-				player.setEloChange(rs.getInt("elochange"));
-			}
-		} catch (SQLException e) {
-			LOGGER.log(Level.WARNING, "Exception: ", e);
-		}
-		return player;
-	}
 
 	public Player loadPlayer(String urtauth) {
+		return loadPlayer(null, urtauth, true);
+	}
+
+	public Player loadPlayer(DiscordUser user) {
+		return loadPlayer(user, null, true);
+	}
+
+	// can load inactive users
+	public Player loadPlayer(DiscordUser user, String urtauth, boolean onlyActive) {
 		Player player = null;
 		try {
-			String sql = "SELECT userid, elo, elochange FROM player WHERE urtauth=? AND active=?";
+			String sql = "SELECT userid, urtauth, elo, elochange, active FROM player WHERE userid LIKE ? AND urtauth LIKE ? AND active LIKE ?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
-			pstmt.setString(1, urtauth);
-			pstmt.setString(2, String.valueOf(true));
+			pstmt.setString(1, user == null ? "%" : user.id);
+			pstmt.setString(2, urtauth == null ? "%" : urtauth);
+			pstmt.setString(3, onlyActive ? String.valueOf(true) : "%");
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
-				DiscordUser user = DiscordUser.getUser(rs.getString("userid"));
-				player = new Player(user, urtauth);
+				player = new Player(DiscordUser.getUser(rs.getString("userid")), rs.getString("urtauth"));
 				player.setElo(rs.getInt("elo"));
 				player.setEloChange(rs.getInt("elochange"));
+				player.setActive(Boolean.valueOf(rs.getString("active")));
+
+				sql = "SELECT start, end, reason, pardon FROM banlist WHERE player_userid=? AND player_urtauth=?";
+				PreparedStatement banstmt = c.prepareStatement(sql);
+				banstmt.setString(1, player.getDiscordUser().id);
+				banstmt.setString(2, player.getUrtauth());
+				ResultSet banSet = banstmt.executeQuery();
+				while (banSet.next()) {
+					PlayerBan ban = new PlayerBan();
+					ban.player = player;
+					ban.startTime = banSet.getLong("start");
+					ban.endTime = banSet.getLong("end");
+					ban.reason = BanReason.valueOf(banSet.getString("reason"));
+					ban.pardon = banSet.getString("pardon").matches("^[0-9]*$") ? DiscordUser.getUser(banSet.getString("pardon")) : null;
+					player.addBan(ban);
+				}
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
@@ -812,6 +848,52 @@ public class Database {
 		return rank;
 	}
 	
+	public WinDrawLoss getWDLForPlayer(Player player) {
+		WinDrawLoss wdl = new WinDrawLoss();
+		try {
+			String sql = "SELECT SUM(CASE WHEN stat.myscore > stat.oppscore THEN 1 ELSE 0 END) AS win, "
+							+ "SUM(CASE WHEN stat.myscore = stat.oppscore THEN 1 END) AS draw, "
+							+ "SUM(CASE WHEN stat.myscore < stat.oppscore THEN 1 END) AS loss "
+						+ "FROM ("
+							+ "SELECT pim.player_urtauth AS urtauth, "
+								+ "(CASE WHEN pim.team = 'red' THEN m.score_red ELSE m.score_blue END) AS myscore, "
+								+ "(CASE WHEN pim.team = 'blue' THEN m.score_red ELSE m.score_blue END) AS oppscore "
+							+ "FROM 'player_in_match' AS pim "
+							+ "JOIN 'match' AS m ON m.id = pim.matchid "
+							+ "JOIN 'player' AS p ON pim.player_urtauth=p.urtauth AND pim.player_userid=p.userid "							
+							+ "WHERE (m.state = 'Done' OR m.state = 'Surrender') "
+							+ "AND p.urtauth=? AND p.userid=?) AS stat ";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, player.getUrtauth());
+			pstmt.setString(2, player.getDiscordUser().id);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				wdl.win = rs.getInt("win");
+				wdl.draw = rs.getInt("draw");
+				wdl.loss = rs.getInt("loss");
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return wdl;
+	}
+	
+	public int getAvgElo() {
+		int elo = -1;
+		try {
+			String sql = "SELECT AVG(elo) AS avg_elo FROM player WHERE active=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, String.valueOf(true));
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				elo = rs.getInt("avg_elo");
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return elo;
+	}
+	
 	
 	public void resetStats() {
 		try {
@@ -826,8 +908,10 @@ public class Database {
 			stmt.executeUpdate(sql);
 			sql = "DELETE FROM SQLITE_SEQUENCE WHERE NAME='match' OR NAME='player_in_match' OR NAME='score' OR NAME='stats'";
 			stmt.executeUpdate(sql);
-//			sql = "UPDATE player SET elo=1000, elochange=0";
-//			stmt.executeUpdate(sql);
+			sql = "UPDATE player SET elo=1000, elochange=0";
+			stmt.executeUpdate(sql);
+			sql = "DELETE FROM player WHERE active='false'";
+			stmt.executeUpdate(sql);
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}

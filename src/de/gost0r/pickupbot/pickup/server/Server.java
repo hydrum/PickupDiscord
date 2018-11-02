@@ -68,7 +68,7 @@ public class Server {
 			sendBuffer[2] = (byte) 0xff;
 			sendBuffer[3] = (byte) 0xff;
 
-//			System.out.println(rcon);
+			LOGGER.fine(rcon);
 
 			DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, getInetIP(), port);
 			DatagramPacket recvPacket = new DatagramPacket(recvBuffer, recvBuffer.length);

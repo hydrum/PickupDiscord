@@ -5,7 +5,8 @@ public class MatchStats {
 	public enum Status {
 		PLAYING,
 		LEFT,
-		NOSHOW
+		NOSHOW,
+		RAGEQUIT
 	}
 	
 	private String ip;	

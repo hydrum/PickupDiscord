@@ -8,6 +8,7 @@ public class Config {
 	public static final String CMD_STATUS				= "!status";
 	public static final String CMD_HELP					= "!help";
 	public static final String CMD_SURRENDER			= "!surrender";
+	public static final String CMD_LIVE					= "!live";
 	
 	public static final String CMD_LOCK					= "!lock";
 	public static final String CMD_UNLOCK				= "!unlock";
@@ -27,6 +28,7 @@ public class Config {
 	public static final String CMD_REGISTER				= "!register";
 	public static final String CMD_GETELO				= "!elo";
 	public static final String CMD_TOP5					= "!top5";
+	public static final String CMD_MATCH				= "!match";
 	
 	//public static final String CMD_REPORT				= "!report";
 	//public static final String CMD_EXCUSE				= "!excuse";
@@ -34,6 +36,8 @@ public class Config {
 	
 	//public static final String CMD_ADDBAN				= "!addban";
 	//public static final String CMD_REMOVEBAN			= "!removeban";
+	
+	public static final String CMD_BANINFO				= "!baninfo";
 
 	public static final String CMD_SHOWSERVERS			= "!showservers";
 	public static final String CMD_ADDSERVER			= "!addserver";
@@ -51,8 +55,9 @@ public class Config {
 	public static final String CMD_ADDROLE				= "!addrole";
 	public static final String CMD_REMOVEROLE			= "!removerole";
 
-	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " "
-	+ CMD_MAP + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP5 + " " + CMD_SURRENDER;
+	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_LIVE + " " + CMD_MATCH + " "
+	+ CMD_MAP + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP5 + " " + CMD_SURRENDER
+	+ " " + CMD_BANINFO;
 	
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " "
 	+ CMD_ENABLEMAP + " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE
@@ -62,13 +67,14 @@ public class Config {
 //------------------------------------------------------------------------------------//
 	
 
-	public static final String USE_CMD_ADD				= "!add <gametype>";
-	public static final String USE_CMD_REMOVE			= "!remove";
+	public static final String USE_CMD_ADD				= "!add <gametype ..>";
+	public static final String USE_CMD_REMOVE			= "!remove <gametype ..>";
 	public static final String USE_CMD_MAPS				= "!maps";
-	public static final String USE_CMD_MAP				= "!map <mapname>";
+	public static final String USE_CMD_MAP				= "!map <gametype> <mapname>";
 	public static final String USE_CMD_STATUS			= "!status";
 	public static final String USE_CMD_HELP				= "!help <command>";
 	public static final String USE_CMD_SURRENDER		= "!surrender";
+	public static final String USE_CMD_LIVE				= "!live";
 	
 	public static final String USE_CMD_LOCK				= "!lock";
 	public static final String USE_CMD_UNLOCK			= "!unlock";
@@ -88,6 +94,7 @@ public class Config {
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
 	public static final String USE_CMD_GETELO			= "!elo </@DiscordUser|urtauth/>";
 	public static final String USE_CMD_TOP5				= "!top5";
+	public static final String USE_CMD_MATCH			= "!match <id>";
 	
 	//public static final String USE_CMD_REPORT			= "!report <qauth> <reason>";
 	//public static final String USE_CMD_EXCUSE			= "!excuse <excuse>";
@@ -95,6 +102,8 @@ public class Config {
 	
 	//public static final String USE_CMD_ADDBAN			= "!addban <urtauth>";
 	//public static final String USE_CMD_REMOVEBAN		= "!removeban <urtauth>";
+	
+	public static final String USE_CMD_BANINFO			= "!baninfo </@DiscordUser|urtauth/>";
 
 	public static final String USE_CMD_SHOWSERVERS		= "!showservers";
 	public static final String USE_CMD_ADDSERVER		= "!addserver <ip:port> <rcon>";
@@ -133,6 +142,8 @@ public class Config {
 	public static final String pkup_match_print_abort	= "**[** Pickup Game #.gamenumber. **][** Abort **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 	public static final String pkup_match_print_abandon	= "**[** Pickup Game #.gamenumber. **][** Abandon **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 	public static final String pkup_match_print_sur		= "**[** Pickup Game #.gamenumber. **][** Surrender **][** Score: .score. **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
+
+	public static final String pkup_match_print_info	= "**.gametype.**: #.gamenumber. **][** .map. **][** .ingame. **][** `.redteam.` **][** `.blueteam.`";
 	
 	public static final String pkup_go_admin			= "[ Pickup Game #.gamenumber. ][ Password: .password. ][ Map: .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
 	public static final String pkup_go_player			= "UrTPickup starts now! Connect to the server and join team **.team.** in order to play. Choose positions and ready up! [ /connect .server. ; password .password. ]";
@@ -142,23 +153,27 @@ public class Config {
 	public static final String pkup_go_pub_calm			= "**.gametype.**: You will receive the connection info via DM.";
 	public static final String pkup_go_pub_sent			= "**.gametype.**: All connection info has been sent. Enjoy the match!";
 
-	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber.:";
+	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber. (.map.):";
 	public static final String pkup_aftermath_result	= ".team. team .result. (.score.) -";
 	public static final String pkup_aftermath_player	= ".player. (.elochange.)";
 	public static final String pkup_aftermath_rank		= ".player. was ranked .updown. to **.rank.**";
+	public static final String pkup_aftermath_abandon_1	= "Match was abandoned due to **.reason.**.";
+	public static final String pkup_aftermath_abandon_2	= ".players. .be. punished accordingly.";
 
 	public static final String pkup_config_list 		= "Gameconfig for .gametype.\n.configlist.";
 	
-	public static final String pkup_getelo				= "#.position.\t **.rank.**\t **.urtauth.**\t .elo. (.elochange.)";
+	public static final String pkup_getelo				= "#.position.\t **.rank.**\t **.urtauth.**\t .elo.\t .wdl.%";
 	public static final String pkup_top5_header			= "**Top5:**";
 	
 	public static final String pkup_surrender_cast		= "You have voted to surrender. **.num.** more teammate.s. needed.";
 	public static final String pkup_surrender_time		= "You cannot surrender this early. You still have to wait for .time..";
 			 
-	public static final String is_banned				= "You are banned and therefore you cannot participate.";
+	public static final String is_banned				= ".user. (.urtauth.) is temporarily suspended for .reason. and cannot participate for .time.";
+	public static final String not_banned				= "No active bans found for .user. (.urtauth.)";
 	public static final String map_not_found			= "Map not found.";
 	public static final String map_not_unique			= "Mapstring not unique.";
-	public static final String map_already_voted		= "You have already voted.";
+	public static final String map_cannot_vote			= "You cannot vote right now.";
+	public static final String map_specify_gametype		= "You need to specify a gametype.";
 
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
@@ -171,10 +186,14 @@ public class Config {
 
 	public static final String player_already_added		= "You are already added to a pickup game.";
 	public static final String player_already_removed	= "You are not added to any pickup game.";
+	public static final String player_cannot_add		= "You cannot add right now.";
 	public static final String player_cannot_remove		= "You cannot remove.";
 	public static final String player_not_in_match		= "You are currently not in a match.";
+	public static final String player_already_match		= "You are already in a match.";
 
 	public static final String player_already_surrender	= "You have already surrendered.";
+	
+	public static final String afk_reminder				= "[*AFK CHECK*] .user. will be removed in 5 minutes.";
 
 //	public static final String report_wrong_arg			= "Your report reason is invalid, check !reportlist to check the possible reasons.";
 //	public static final String report_invalid_urtauth	= "No player could be found with this urtauth.";
@@ -195,6 +214,7 @@ public class Config {
 
 	public static final String pkup_match_unavi 		= "Match is not available right now.";
 	public static final String pkup_match_invalid_gt	= "No match for that gametype is available right now.";
+	public static final String no_gt_found				= "Unable to find a matching gametype.";
 	
 	public static final String admin_cmd_successful		= "Successful: ";
 	public static final String admin_cmd_unsuccessful	= "Unsuccessful: ";

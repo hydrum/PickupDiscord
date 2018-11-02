@@ -21,6 +21,9 @@ public class DiscordUser {
 	public String discriminator;
 	public String avatar;
 	
+	public DiscordUserStatus status = DiscordUserStatus.online;
+	public long statusChangeTime = -1L;
+	
 	public DiscordChannel channel = null;
 	
 	private Map<DiscordGuild, List<DiscordRole>> roles = new HashMap<DiscordGuild, List<DiscordRole>>();
@@ -41,6 +44,11 @@ public class DiscordUser {
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
+	}
+	
+	public void setStatus(DiscordUserStatus status) {
+		this.status = status;
+		this.statusChangeTime = System.currentTimeMillis();
 	}
 	
 	public String getMentionString() {

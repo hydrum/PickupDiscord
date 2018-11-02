@@ -2,6 +2,9 @@ package de.gost0r.pickupbot;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -31,11 +34,23 @@ public class PickupBotDiscordMain {
 			JSONObject cfg = new JSONObject(config);
 			DiscordBot.setToken(cfg.getString("token"));
 			
-			DiscordBot bot = new PickupBot();
+			PickupBot bot = new PickupBot();
 			bot.init();
 			
+			// TEST: make admin chan to pub chan.
+//			DiscordChannel targetChannel = DiscordChannel.findChannel("143233743107129344");
+//			if (!bot.logic.getChannelByType(PickupChannelType.PUBLIC).contains(targetChannel)) 
+//			{
+//				bot.logic.addChannel(PickupChannelType.PUBLIC, targetChannel);
+//			}
+//			targetChannel = DiscordChannel.findChannel("402541587164561419");
+//			if (bot.logic.getChannelByType(PickupChannelType.PUBLIC).contains(targetChannel)) 
+//			{
+//				bot.logic.removeChannel(PickupChannelType.PUBLIC, targetChannel);
+//			}
+			
 			while (true) {
-					Thread.sleep(5000);
+				Thread.sleep(5000);
 			}
 		} catch (InterruptedException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
@@ -50,6 +65,8 @@ public class PickupBotDiscordMain {
 		}
 		
 //		eloTest();
+		
+//		serverTest();
 	}
 	
 	public static void setupLogger() throws SecurityException, IOException {
@@ -84,6 +101,52 @@ public class PickupBotDiscordMain {
 		double resultSelf = 32d * (w - e);
 		int elochange = (int) Math.floor(resultSelf);
 		System.out.println(elochange);
+	}
+	
+	public static void serverTest() {
+		
+		try {
+			DatagramChannel channel = DatagramChannel.open();
+			channel.configureBlocking(true);
+			channel.connect(new InetSocketAddress("sd.biddle.cf", 27960));
+			
+			String rconpassword = "HereWeGo";
+			String rcon = "xxxxrcon " + rconpassword + " players";
+			
+			byte[] sendBuffer = rcon.getBytes();
+			
+			sendBuffer[0] = (byte) 0xff;
+			sendBuffer[1] = (byte) 0xff;
+			sendBuffer[2] = (byte) 0xff;
+			sendBuffer[3] = (byte) 0xff;
+			
+			ByteBuffer buf = ByteBuffer.allocate(2048);
+			buf.clear();
+			buf.put(sendBuffer);
+			buf.flip();
+			//int bytesWritten = channel.write(buf);
+			
+			buf = ByteBuffer.allocate(2000);
+			buf.clear();
+			
+			int bytesRead = 0;
+			while ((bytesRead = channel.read(buf)) > 0)
+			{
+				System.out.println(bytesRead);
+	    		String newString = new String(buf.array());
+	    		
+				buf = ByteBuffer.allocate(2000);
+	    		buf.clear();
+	    		
+	    		System.out.println(newString);
+			}
+			System.out.println("exit");
+		
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

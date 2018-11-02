@@ -1,98 +1,36 @@
 TODO:
-(x) update admin roles: instead of hardcoding, claim right by !iamgod <role>, then be able to add or remove roles 
-(x) ability to remove a urtauth from a user (admin cmd)
-(x) !top5 function
-(x) handle matchstart: if playercount == 10 => request a server, if one is avi -> startGame() -> move match to ongoing and be ready for a new signup
-(x) be able to vote/remove during AwaitingServer state
-(x) cmd to get matchinfo for ongoing matches
-(x) whitelist certain players on the server (admins)
-(x) !reset for live matches
-(x) !getdata
-(x) somehow gametype related maps isnt working -> to check
-(x) ignore messages from self
-(x) send !top5 msgs as one msg instead of 5 seperate ones
-(x) !gameconfig <gametype> <timelimit 10...> => would replace gametype.config
-(x) !register => to lowercase
-(x) use !elo <@userid> for retrieving elo
-(x) move !lock to pubchan
-(x) !reset <gametype>
-(x) don't hardcode pubchan
-(x) make playercount dynamically
-(x) !map vote no msg
-(x) [ Pickup Game #cur ][ Signup ][ Gametype: CTF ][ 5/10 ][ Players: None@Slide @RaideR @v3nd3tta | Jonathan @Biddle @Gost0r ]
-(x) !status give only urtauth
-(x) API call failed: (429) TOO MANY REQUESTS
-(x) send msgs once (gamestart)
-(x) todo server.connect adjust // when do you connect to the server?
-(x) rs2 closed => failed pstmt
-(x) !add should highlight the added player
-(x) !reset saveMatch not working - when aborting (see stacktrace)
+
 ( ) rework match abort/cancel/end behaviour to be more consistent
-(x) !help !cmd without !
-(x) !top5 crash on 5th entry: nullpointer for player
 ( ) !showmatch starttime
-(x) check scoreboard roundtime for modes like ts, bomb etc => else possible prematurely entering SCORE state
-( ) need prematurely leaver detection
-(x) acknowledge role changes and therefore caching it
-( ) ability to queue up for multiple gametypes
-( ) replace status 0/10 when removed with leaving player
-(x) delete failed !register <authkey> msg and tell the player to use his authname instead.
+(x) need prematurely leaver detection
+(x) ability to queue up for multiple gametypes
+(x) replace status 0/10 when removed with leaving player
 
 ( ) !reset 19 didn't stop the server monitor
 
-(x) test whether swaproles is actually detecting stuff
-(x) matchstats aren't recorded at all - check out why  => related to us using the newly-overwritten version of rpp when the warmup was detected?
-
-(x) forceteam ignores spec
-(x) check if ServerPlayer.player is now != null and proceed with statscalculation
-(x) fix SCORE->WELCOME transition when a full team left the match
-(x) implement error output for "no map for gametype"
-(x) "Your auth has been already registered with another account." -> auth/user
-(x) implement rank equivalents "> 1600 = diamond / > 1350 = platinum / > 1150 = gold / > 1000 = silver / <1000 = bronze / < 850 = Wood"
-(x) use rank-emojis instead of SILVER etc
-(x) !elo </urtauth/> not working for urtauths
-(x) implement !surrender
-(x) display voted map
-(x) make sure id's are strings, but digits only (DiscordUser.get(id))
-(x) add + to positive elochange on aftermath
-(x) allow admins to !remove <discorduser>
-(x) use logger for proper logging
 ( ) don't display default port if serverip is a domain
-( ) add the ability to move users into certain voicechans: https://discordapp.com/developers/docs/resources/guild#modify-guild-member
-( ) pub func !ongoing with gametime, ready etc
-
-(x) add expected auth-whois msgs
-(x) copy new stats to the existing player in case we found him
-(x) #4     v3nd3tta     986 (--14)
-(x) fix g_swaproles reply actually contains "1^7" and not just "1"
-
-( ) find out why the bot isn't sometimes launching the ServerMonitor or randomly stop observing
-
-(x) URGENT: if ServerMonitor is active and !rcon <string> is sent, bot goes into an endless loop.
-
+(x) pub func !live with gametime, ready etc
 ( ) when server is added, check via rcon call whether its working
-(x) add kick msg to kick
+( ) add kick msg to kick
 
-
-
-server monitor: forceplayers rework
--> auths not displayed
--> stats not updating?
--> teams not updating
--> how does auth-whois look like for non-authed ppl
--> swaproles not working
-
-( ) parseRconPlayers can be empty! - why/how?
-Exception in thread "Thread-2" java.lang.NullPointerException
-	at de.gost0r.pickupbot.pickup.server.ServerMonitor.evaluateState(ServerMonitor.java:225)
-	at de.gost0r.pickupbot.pickup.server.ServerMonitor.observe(ServerMonitor.java:76)
-	at de.gost0r.pickupbot.pickup.server.ServerMonitor.run(ServerMonitor.java:56)
-	at java.lang.Thread.run(Unknown Source)
+(x) improve aftermath msg (in case of NOSHOW or RAGEQUIT)
+(x) add ban system
+(x) afk-check (demand !here for ppl that are added > 25m - if failed within 5m: removal)
+(x) show most voted map (if there is any) in bold
+(x) reduce spam for multiple gametypes (!status, !maps)
+(x) reduce voted maps on start to the ones that are actually voted - if none, state NO VOTES - RANDOM!
+( ) appropriate info msg on failure
+( ) add !commentate functionality (connection, score, CTF stats difference)
+( ) make admin cmds accessible in ADMIN channels
+( ) add round ending conditions (timelimit, fraglimit, caplimit, maxrounds)
+(x) add threading to match start
+(x) default elo: AVG elo on start
+(x) allow vote change
 
 
 ( ) !expire 15m timer until autoremove
 ( ) admin cmds to lookup user/auths/ips etc
-( ) playerprofiles (stats stats stats (matches played etc...))
+( ) !player profiles (stats stats stats (matches played etc...))
 ( ) match history
 
 // Discord:
@@ -107,7 +45,57 @@ IDEA:
 - report/auto-ban system
 - multiple guilds
 
-ABORT: currently if 5min are over, match will be aborted - good?
+IDEA:
+select the highest 2 players of the game,
+let them select teams on discord.
+
+PLAYER PROFILES:
+- **urtauth** -
+Elo: badge elo
+Rank: number of allnumber
+---
+Total matches: number
+Winrate: number
+First match: date
+Stats - more details: !player urtauth gametype
+CTF: wins-draw-loss - percentage
+TS: wins-draw-loss - percentage
+
+AUTO BAN SYSTEM:
+Penalty for noshow: 2h, 12h, 1d, 3d, 1w, 2w, 1m, 3m, perm
+Penalty for ragequit: 12h, 1d, 3d, 1w, 2w, 1m, 3m, perm
+expire time: double the last ban, but minimum 1 week
+need !pardon <auth>
+
+TEAM SYSTEM:
+!create <team>
+!join <team>
+!leave <team>
+!accept <team> <urtauth>
+!reject <team> <urtauth>
+!kick <team> <urtauth>
+!teamadd <team> <gametype> : teammates may join the pickup - limit: ciel/floor(gametype.teamnum) || fullTeamAllowed
+!remove - removing from pickup regardless
+When someone queries up, GroupEntity is created. solo players are the groups of their own, other are grouped in a group.
+ISSUE: how to create fair teams? what if 5x duo queue up (we need to break them up? based on what rule?)
+approach:
+- if we have a group, we try to assemble from the other players a group that has the same avg elo together
+  for example, we have one duo group with 1000 avg elo, we iterate through the 8 remaining and try to find the closest avg elo between them
+
+  psuedo: #team = playercount, |team = avgelo
+  for team : teams > 1 player
+      find #team players AS otherTeam that equals |team the most
+      	condition: players may not be included in List<> and other teams are handled as own group entity
+      	if we do not have enough free players: team abandons
+      store in List<GroupEntity[]> AS groupList mit GroupEntity[] = {team, otherTeam}
+  Result: groupList with groups that are against eachother + some lose groups with # = 1
+  for groupEntity[] : groupList
+  	better = groupEntity[x] && worse = groupEntity[y]
+  	if |red < |blue => red.add groupEnitity[x] && blue.add groupEntity[y]
+  Result: teams should be now "somewhat" equal
+  with the remaining players, use the current algo to assign them to equal teams (teamsize as condition needs to be adjusted though!)
+Remaining issue: e.g.: TeamSize=4, 1x 3p, 2x 2p : solution: 2 2 vs 3 1 = algo: 3 vs 2 1 => break up 3rd team  
+
 
 REPORT SYSTEM:
 !report auth leave/noshow/insult/troll
