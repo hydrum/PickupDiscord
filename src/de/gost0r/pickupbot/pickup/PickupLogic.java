@@ -248,7 +248,7 @@ public class PickupLogic {
 				int counter = 0;
 				GameMap map = null;
 				for (GameMap xmap : m.getMapList()) {
-					if (xmap.name.contains(mapname)) {
+					if (xmap.name.toLowerCase().contains(mapname.toLowerCase())) {
 						counter++;
 						map = xmap;
 					}
