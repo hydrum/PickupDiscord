@@ -13,6 +13,7 @@ import de.gost0r.pickupbot.pickup.MatchStats.Status;
 import de.gost0r.pickupbot.pickup.PickupChannelType;
 import de.gost0r.pickupbot.pickup.Player;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
+import de.gost0r.pickupbot.pickup.Score;
 import de.gost0r.pickupbot.pickup.server.ServerPlayer.ServerPlayerState;
 
 public class ServerMonitor implements Runnable {
@@ -192,7 +193,7 @@ public class ServerMonitor implements Runnable {
 				shouldPause = true;
 			} else if (state == ServerState.SCORE) {
 				// TODO: need to remove them from the leaver list though.
-				setAllPlayersStatus(leaverPlayer, Status.LEFT);
+				//setAllPlayersStatus(leaverPlayer, Status.LEFT);
 				return; // ignore leavers in the score screen
 			}
 			if (timeleft > 0) {
@@ -636,6 +637,23 @@ public class ServerMonitor implements Runnable {
 		
 		double result = 32d * (w - e);
 		int elochange = (int) Math.floor(result);
+		
+		
+		// rate players based
+		Score[] playerStats = match.getStats(player).score;
+		int performance = 0;
+		for (Score stats : playerStats) {
+			performance += stats.score + stats.assists;
+		}
+		float performanceRating = 1;
+		if (elochange > 0) {
+			performanceRating += ((float) performance / 100f);
+		} else if (elochange < 0)  {
+			performanceRating -= ((float) performance / 100f);
+		}
+		elochange = (int) Math.floor(result * performanceRating);
+		
+				
 		int newelo = player.getElo() + elochange;
 		LOGGER.info("ELO player: " + player.getUrtauth() + " old ELO: " + player.getElo() + " new ELO: " + newelo + " (" + (!String.valueOf(elochange).startsWith("-") ? "+" : "") + elochange + ")");
 		player.addElo(elochange);
@@ -660,6 +678,11 @@ public class ServerMonitor implements Runnable {
 
 
 	private void abandonMatch(Status status, List<Player> involvedPlayers) throws Exception {
+		// save stats
+		if (state == ServerState.LIVE || state == ServerState.SCORE) {
+			saveStats(new int[] {0, 0}); // score don't matter as we override them. don't matter
+		}
+		
 		for (Player player : match.getPlayerList()) {
 			player.setEloChange(0);
 		}

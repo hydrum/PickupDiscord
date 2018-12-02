@@ -322,7 +322,9 @@ public class PickupBot extends DiscordBot {
 			}
 		}
 
-		if (isChannel(PickupChannelType.ADMIN, msg.channel) || msg.channel.type == DiscordChannelType.DM)
+		// use admin channel or DM for super admins
+		if (isChannel(PickupChannelType.ADMIN, msg.channel)
+				|| msg.channel.type == DiscordChannelType.DM && hasSuperAdminRights(msg.user))
 		{
 			if (hasAdminRights(msg.user))
 			{
