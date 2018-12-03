@@ -639,7 +639,7 @@ public class ServerMonitor implements Runnable {
 		int elochange = (int) Math.floor(result);
 		
 		
-		// rate players based
+		// rate players based on score
 		Score[] playerStats = match.getStats(player).score;
 		int performance = 0;
 		for (Score stats : playerStats) {
@@ -647,10 +647,11 @@ public class ServerMonitor implements Runnable {
 		}
 		float performanceRating = 1;
 		if (elochange > 0) {
-			performanceRating += ((float) performance / 100f);
+			performanceRating += ((float) performance / 100);
 		} else if (elochange < 0)  {
-			performanceRating -= ((float) performance / 100f);
+			performanceRating -= ((float) performance / 100);
 		}
+		performanceRating = Math.min(1.75f, Math.max(0.25f, performanceRating));
 		elochange = (int) Math.floor(result * performanceRating);
 		
 				
