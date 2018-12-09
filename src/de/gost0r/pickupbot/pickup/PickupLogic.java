@@ -93,7 +93,7 @@ public class PickupLogic {
 		for (Gametype gt : modes) {
 			if (gt != null && curMatch.keySet().contains(gt)) {
 				Match m = curMatch.get(gt);
-				if (m.getMatchState() != MatchState.Signup || m.isInMatch(player)) {
+				if (m.getMatchState() != MatchState.Signup || m.isInMatch(player) || playerInActiveMatch(player) != null) {
 					msg += " " + gt.getName();
 				} else {
 					m.addPlayer(player);
