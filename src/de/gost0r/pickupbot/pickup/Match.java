@@ -297,24 +297,26 @@ public class Match implements Runnable {
 		fullmsg = fullmsg.replace(".gametype.", gametype.getName());
 		fullmsg = fullmsg.replace(".gamenumber.", String.valueOf(id));
 		fullmsg = fullmsg.replace(".map.", map.name);
-		
-		String playerlist = "";
-		for (Player player : involvedPlayers) {
-			if (!playerlist.isEmpty()) {
-				playerlist += " ";
-			}
-			playerlist += player.getUrtauth();
-		}
-		String be = involvedPlayers.size() == 1 ? "was" : "were";
 
 		String msg = Config.pkup_aftermath_abandon_1;
 		msg = msg.replace(".reason.", status.name());
 		fullmsg += "\n" + msg;
 		
-		msg = Config.pkup_aftermath_abandon_2;
-		msg = msg.replace(".players.", playerlist);
-		msg = msg.replace(".be.", be);
-		fullmsg += "\n" + msg;
+		if (!involvedPlayers.isEmpty()) { // only if we have people who left	
+			String playerlist = "";
+			for (Player player : involvedPlayers) {
+				if (!playerlist.isEmpty()) {
+					playerlist += " ";
+				}
+				playerlist += player.getUrtauth();
+			}
+			String be = involvedPlayers.size() == 1 ? "was" : "were";
+			
+			msg = Config.pkup_aftermath_abandon_2;
+			msg = msg.replace(".players.", playerlist);
+			msg = msg.replace(".be.", be);
+			fullmsg += "\n" + msg;
+		}
 		
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg);
 	}

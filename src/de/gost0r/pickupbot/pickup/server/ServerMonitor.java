@@ -142,7 +142,10 @@ public class ServerMonitor implements Runnable {
 				LOGGER.fine(sendString);
 				String sendDiscordString = "(" + time + ") Please connect: " + getPlayerlistForDiscord(noshowPlayers);
 				sendDiscordMsg(sendDiscordString);
-			} else {
+			} else if (timeleft < -300000L) { // if noshow timer ran out twice
+				// we're way over time to accurately log a noshow, therefore simply abandon
+				abandonMatch(MatchStats.Status.NOSHOW, new ArrayList<Player>());
+			} else { // if the noshow time ran out
 				abandonMatch(MatchStats.Status.NOSHOW, noshowPlayers);
 			}
 		}
