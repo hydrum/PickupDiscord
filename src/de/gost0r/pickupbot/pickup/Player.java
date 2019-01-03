@@ -165,29 +165,15 @@ public class Player {
 	}
 	
 	private PlayerRank getRank(int elo) {
-//		if (elo > 1600) {
-//			return PlayerRank.DIAMOND;
-//		} else if (elo > 1350) {
-//			return PlayerRank.PLATINUM;
-//		} else if (elo > 1150) {
-//			return PlayerRank.GOLD;
-//		} else if (elo > 1000) {
-//			return PlayerRank.SILVER;
-//		} else if (elo > 850) {
-//			return PlayerRank.BRONZE;
-//		} else {
-//			return PlayerRank.WOOD;
-//		}
-		
-		if (elo > 1150) {
+		if (elo > 1600) {
 			return PlayerRank.DIAMOND;
-		} else if (elo > 1100) {
+		} else if (elo > 1350) {
 			return PlayerRank.PLATINUM;
-		} else if (elo > 1050) {
+		} else if (elo > 1150) {
 			return PlayerRank.GOLD;
 		} else if (elo > 1000) {
 			return PlayerRank.SILVER;
-		} else if (elo > 950) {
+		} else if (elo > 850) {
 			return PlayerRank.BRONZE;
 		} else {
 			return PlayerRank.WOOD;
