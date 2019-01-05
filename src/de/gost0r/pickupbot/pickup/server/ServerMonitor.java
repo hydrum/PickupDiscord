@@ -359,7 +359,7 @@ public class ServerMonitor implements Runnable {
 				state = ServerState.LIVE;
 				LOGGER.info("SWITCHED WARMUP -> LIVE");
 			}
-			else if ((!rpp.matchready[0] || !rpp.matchready[1] && !rpp.warmupphase))
+			else if (!rpp.matchready[0] || !rpp.matchready[1])
 			{
 				state = ServerState.WELCOME;
 				LOGGER.info("SWITCHED WARMUP -> WELCOME");
