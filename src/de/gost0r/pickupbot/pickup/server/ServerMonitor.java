@@ -100,9 +100,7 @@ public class ServerMonitor implements Runnable {
 		
 		if (state == ServerState.WELCOME)
 		{
-			if (firstHalf) {
-				checkNoshow();
-			}
+			
 		}
 		else if (state == ServerState.WARMUP)
 		{
@@ -116,6 +114,7 @@ public class ServerMonitor implements Runnable {
 		{
 			
 		}
+		checkNoshow();
 		checkRagequit();
 	}
 
@@ -129,7 +128,6 @@ public class ServerMonitor implements Runnable {
 				}
 				playerlist += player.getUrtauth();
 				noshowPlayers.add(player);
-				match.getStats(player).updateStatus(MatchStats.Status.NOSHOW);
 			}
 		}
 		
@@ -142,6 +140,9 @@ public class ServerMonitor implements Runnable {
 				LOGGER.fine(sendString);
 				String sendDiscordString = "(" + time + ") Please connect: " + getPlayerlistForDiscord(noshowPlayers);
 				sendDiscordMsg(sendDiscordString);
+				if (state == ServerState.WARMUP || state == ServerState.LIVE) {
+					server.sendRcon("restart"); // restart map
+				}
 			} else if (timeleft < -300000L) { // if noshow timer ran out twice
 				// we're way over time to accurately log a noshow, therefore simply abandon
 				abandonMatch(MatchStats.Status.NOSHOW, new ArrayList<Player>());
@@ -190,10 +191,18 @@ public class ServerMonitor implements Runnable {
 				if (getRemainingSeconds() < 90 && isLastHalf()) {
 					LOGGER.warning(getRemainingSeconds() + "s remaining, don't report.");
 					setAllPlayersStatus(leaverPlayer, Status.LEFT);
-					return;				
+					shouldPause = false;
+					if (hasPaused && isPauseDetected) {
+						if (state == ServerState.LIVE) {
+							server.sendRcon("pause");
+						}
+						hasPaused = false;
+					}
+					return;
+				} else {
+					timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
+					shouldPause = true;
 				}
-				timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
-				shouldPause = true;
 			} else if (state == ServerState.SCORE) {
 				// TODO: need to remove them from the leaver list though.
 				//setAllPlayersStatus(leaverPlayer, Status.LEFT);
@@ -349,6 +358,11 @@ public class ServerMonitor implements Runnable {
 			{
 				state = ServerState.LIVE;
 				LOGGER.info("SWITCHED WARMUP -> LIVE");
+			}
+			else if ((!rpp.matchready[0] || !rpp.matchready[1] && !rpp.warmupphase))
+			{
+				state = ServerState.WELCOME;
+				LOGGER.info("SWITCHED WARMUP -> WELCOME");
 			}
 		}
 		else if (state == ServerState.LIVE)
