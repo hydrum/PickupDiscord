@@ -9,7 +9,10 @@ public class PlayerBan {
 		RAGEQUIT,
 		INSULT,
 		TROLL,
-		AFK
+		AFK,
+		CHEAT,
+		DEMO,
+		FAKE
 	}
 	
 	public Player player;
