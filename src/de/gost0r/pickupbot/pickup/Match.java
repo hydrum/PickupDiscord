@@ -543,7 +543,7 @@ public class Match implements Runnable {
 			if (msg.equals("None")) {
 				msg = "";				
 			} else {
-				msg += " || ";
+				msg += " - ";
 			}
 			String mapString = map.name + ": " + String.valueOf(mapVotes.get(map));
 			if (mostMapVotes.size() < mapVotes.keySet().size() && mostMapVotes.contains(map)) {
