@@ -67,8 +67,8 @@ public class Config {
 //------------------------------------------------------------------------------------//
 	
 
-	public static final String USE_CMD_ADD				= "!add <gametype ..>";
-	public static final String USE_CMD_REMOVE			= "!remove <gametype ..>";
+	public static final String USE_CMD_ADD				= "!add <gametype>";
+	public static final String USE_CMD_REMOVE			= "!remove <gametype>";
 	public static final String USE_CMD_MAPS				= "!maps";
 	public static final String USE_CMD_MAP				= "!map <gametype> <mapname>";
 	public static final String USE_CMD_STATUS			= "!status";
@@ -120,7 +120,7 @@ public class Config {
 	//------------------------------------------------------------------------------------//
 
 	public static final String pkup_lock				= "This game is currently locked";
-	public static final String pkup_map					= "You successfully voted for .map..";
+	public static final String pkup_map					= "You voted for .map..";
 	public static final String pkup_map_list			= "**.gametype.**: .maplist.";
 //	public static final String pkup_signup				= "You can sign up again!";
 	public static final String pkup_pw					= "[ /connect .server. ; password .password. ]";
@@ -135,18 +135,18 @@ public class Config {
 	public static final String pkup_reset_type 			= "*.gametype. has been reset.*";
 	public static final String pkup_reset_id 			= "*The match .id. has been reset.*";
 	
-	public static final String pkup_match_print_live	= "**[** Pickup Game #.gamenumber. **][** Live **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_live	= "**[** Pickup Game #.gamenumber. **][** Live **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 	public static final String pkup_match_print_signup	= "**[** Pickup Game #--- **][** Signup **][** Gametype: .gametype. **][** .playernumber./.maxplayer. **][** Players: .playerlist. **]**";
 	public static final String pkup_match_print_server	= "**[** Pickup Game #--- **][** AwaitingServer **][** Gametype: .gametype. **][** Players: .playerlist. **]**";
-	public static final String pkup_match_print_done	= "**[** Pickup Game #.gamenumber. **][** Done **][** Score: .score. **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
-	public static final String pkup_match_print_abort	= "**[** Pickup Game #.gamenumber. **][** Abort **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
-	public static final String pkup_match_print_abandon	= "**[** Pickup Game #.gamenumber. **][** Abandon **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
-	public static final String pkup_match_print_sur		= "**[** Pickup Game #.gamenumber. **][** Surrender **][** Score: .score. **][** Gametype: .gametype. **][** Map: .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_done	= "**[** Pickup Game #.gamenumber. **][** Done **][** Score: .score. **][** Gametype: .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_abort	= "**[** Pickup Game #.gamenumber. **][** Abort **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_abandon	= "**[** Pickup Game #.gamenumber. **][** Abandon **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_sur		= "**[** Pickup Game #.gamenumber. **][** Surrender **][** Score: .score. **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 
 	public static final String pkup_match_print_info	= "**.gametype.**: #.gamenumber. **][** .map. **][** .ingame. **][** `.redteam.` **][** `.blueteam.`";
 	
-	public static final String pkup_go_admin			= "[ Pickup Game #.gamenumber. ][ Password: .password. ][ Map: .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
-	public static final String pkup_go_player			= "UrTPickup starts now! Connect to the server and join team **.team.** in order to play. Choose positions and ready up! [ /connect .server. ; password .password. ]";
+	public static final String pkup_go_admin			= "[ Pickup Game #.gamenumber. ][ Password: .password. ][ .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
+	public static final String pkup_go_player			= "UrTPickup starts now! Connect to the server, choose positions and ready up! [ /connect .server. ; password .password. ]";
 	public static final String pkup_go_pub_head			= "**.gametype.**: UrTPickup #.gamenumber. (avg ELO: .elo.) is about to start!";
 	public static final String pkup_go_pub_team			= "**.gametype.**: .team. team: .playerlist.";
 	public static final String pkup_go_pub_map			= "**.gametype.**: Map: .map.";
@@ -168,7 +168,7 @@ public class Config {
 	public static final String pkup_surrender_cast		= "You have voted to surrender. **.num.** more teammate.s. needed.";
 	public static final String pkup_surrender_time		= "You cannot surrender this early. You still have to wait for .time..";
 			 
-	public static final String is_banned				= ".user. (.urtauth.) is temporarily suspended for .reason. and cannot participate for .time.";
+	public static final String is_banned				= ".user. (.urtauth.) is suspended for .reason. and cannot participate for .time.";
 	public static final String not_banned				= "No active bans found for .user. (.urtauth.)";
 	public static final String map_not_found			= "Map not found.";
 	public static final String map_not_unique			= "Mapstring not unique.";
@@ -178,7 +178,7 @@ public class Config {
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
 
-	public static final String auth_taken_urtauth		= "This urtauth has already been registered.";
+	public static final String auth_taken_urtauth		= "This urtauth is already registered.";
 	public static final String auth_taken_user			= "You have already registered an account.";
 	public static final String auth_invalid				= "Your urtauth seems to be invalid.";
 	public static final String auth_success				= "Your auth has been successfully linked to your account.";
@@ -209,7 +209,7 @@ public class Config {
 	
 	public static final String help_unknown				= "I do not know that command.";
 
-	public static final String lock_enable				= "*Game is now locked.*";
+	public static final String lock_enable				= "*Game is LOCKED.*";
 	public static final String lock_disable				= "*Game is now unlocked.*";
 
 	public static final String pkup_match_unavi 		= "Match is not available right now.";
