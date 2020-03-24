@@ -40,7 +40,7 @@ public class DiscordUser {
 			this.id = user.getString("id");
 			this.username = user.getString("username");
 			this.discriminator = user.getString("discriminator");
-			this.avatar = user.getString("avatar");
+			this.avatar = user.isNull("avatar") ? null : user.getString("avatar");
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
