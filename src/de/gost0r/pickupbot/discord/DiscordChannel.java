@@ -22,8 +22,8 @@ public class DiscordChannel {
 		try {
 			this.id = channel.getString("id");
 			this.type = DiscordChannelType.values()[channel.getInt("type")];
-			this.name = channel.has("name") ? channel.getString("name") : null;
-			this.topic = channel.has("topic") ? channel.getString("topic") : null;
+			this.name = channel.isNull("name") ? null : channel.getString("name") ;
+			this.topic = channel.isNull("topic") ? null : channel.getString("topic");
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
