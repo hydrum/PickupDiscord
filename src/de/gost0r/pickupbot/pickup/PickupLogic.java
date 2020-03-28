@@ -177,6 +177,40 @@ public class PickupLogic {
 		Player.remove(player);
 		return true;
 	}
+	
+	public void cmdSetPlayerRegion(DiscordUser user, String str_region) {
+		
+			// check if user is already registered
+			if (Player.get(user) != null) {
+				Player p = db.loadPlayer(user);
+				
+				if(p.getRegion() == Region.WORLD || user.hasAdminRights()) {
+					try {
+						Region region = Region.valueOf(str_region);
+						
+						if(region != null) {
+							db.updatePlayerRegion(p, region);
+							p.setRegion(region);
+							bot.sendNotice(user, Config.region_added);
+						}
+						else {
+							// Nothing to do, catch will notice the user that the region is invalid
+						}
+					} catch (IllegalArgumentException e) {
+						bot.sendNotice(user, "Unknown region. Region must be EU|NA|SA|AU|ASIA|AFRICA");
+			        }
+				}
+				else {
+					// Region has been set by user, need an admin 
+					bot.sendNotice(user, "Your region is already set to " + p.getRegion().toString());
+				}
+			} 
+			else {
+				// send register first notice
+				bot.sendNotice(user, Config.user_not_registered);
+			}
+		
+	}
 
 	public void cmdTopElo(int number) {
 		String msg = Config.pkup_top5_header;
@@ -522,7 +556,7 @@ public class PickupLogic {
 //		return !configlist.isEmpty(); // we sent the info anyways, so its fine
 	}
 	
-	public boolean cmdAddServer(String serveraddr, String rcon) {
+	public boolean cmdAddServer(String serveraddr, String rcon, String str_region) {
 		try {
 			String ip = serveraddr;
 			int port = 27960;
@@ -536,12 +570,24 @@ public class PickupLogic {
 					return false;
 				}
 			}
-			Server server = new Server(-1, ip, port, rcon, "???", true);
-			db.createServer(server);
-			serverList.add(server);
-			checkServer();
-			return true;
+			
+			Region region = Region.valueOf(str_region);
+			
+			if(region != null) {
+				Server server = new Server(-1, ip, port, rcon, "???", true, region);
+				
+				db.createServer(server);
+				serverList.add(server);
+				checkServer();
+				return true;
+			}
+			else {
+				return false;
+			}
 		} catch (NumberFormatException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			return false;
+		} catch (IllegalArgumentException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 			return false;
 		}
@@ -841,10 +887,27 @@ public class PickupLogic {
 		}
 	}
 	
+	public void UnbanPlayer(Player player) {
+			
+			if (player.isBanned()) {
+				PlayerBan ban = new PlayerBan();
+				ban.player = player;
+				
+				player.forgiveBan();
+				
+				bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), printUnbanInfo(player));
+				bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), printUnbanInfo(player));
+			} else {
+				// Player is not banned 
+				bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), printPlayerNotBannedInfo(player));
+			}
+	}
+	
+	
 	public String printBanInfo(Player player) {
 		PlayerBan ban = player.getLatestBan();
 		
-		if (ban == null || ban.endTime <= System.currentTimeMillis()) {
+		if (ban == null || ban.endTime <= System.currentTimeMillis() || ban.forgiven) {
 			String msg = Config.not_banned;
 			msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
 			msg = msg.replace(".urtauth.", player.getUrtauth());
@@ -858,6 +921,20 @@ public class PickupLogic {
 		msg = msg.replace(".urtauth.", player.getUrtauth());
 		msg = msg.replace(".reason.", ban.reason.name());
 		msg = msg.replace(".time.", time);
+		return msg;
+	}
+	
+	public String printUnbanInfo(Player player) {
+		String msg = Config.is_unbanned;
+		msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
+		msg = msg.replace(".urtauth.", player.getUrtauth());
+		return msg;
+	}
+	
+	public String printPlayerNotBannedInfo(Player player) {
+		String msg = Config.is_notbanned;
+		msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
+		msg = msg.replace(".urtauth.", player.getUrtauth());
 		return msg;
 	}
 	

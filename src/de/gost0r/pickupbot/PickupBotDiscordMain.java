@@ -18,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.gost0r.pickupbot.discord.DiscordBot;
+import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.pickup.PickupBot;
 
 public class PickupBotDiscordMain {
@@ -38,7 +39,9 @@ public class PickupBotDiscordMain {
 			bot.init();
 			
 			// TEST: make admin chan to pub chan.
-//			DiscordChannel targetChannel = DiscordChannel.findChannel("143233743107129344");
+			DiscordChannel targetChannel = DiscordChannel.findChannel("687958620755066938");
+		//	bot.sendMsg(targetChannel, "test");
+			
 //			if (!bot.logic.getChannelByType(PickupChannelType.PUBLIC).contains(targetChannel)) 
 //			{
 //				bot.logic.addChannel(PickupChannelType.PUBLIC, targetChannel);

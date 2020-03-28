@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
+import de.gost0r.pickupbot.pickup.PickupBot;
 
 public class DiscordUser {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -140,6 +141,32 @@ public class DiscordUser {
 			}
 		}
 		return null;
+	}
+	
+	public boolean hasAdminRights() {
+		List<DiscordRole> roleList = this.getRoles(DiscordBot.getGuild());
+		List<DiscordRole> adminList = PickupBot.logic.getAdminList();
+		for (DiscordRole s : roleList) {
+			for (DiscordRole r : adminList) {
+				if (s.equals(r)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean hasSuperAdminRights() {
+		List<DiscordRole> roleList = this.getRoles(DiscordBot.getGuild());
+		List<DiscordRole> adminList = PickupBot.logic.getSuperAdminList();
+		for (DiscordRole s : roleList) {
+			for (DiscordRole r : adminList) {
+				if (s.equals(r)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	@Override

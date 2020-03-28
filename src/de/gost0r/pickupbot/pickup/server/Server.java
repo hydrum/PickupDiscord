@@ -11,8 +11,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.pickup.Match;
+import de.gost0r.pickupbot.pickup.Region;
 
 public class Server {
+	
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	public int id;
@@ -22,6 +24,7 @@ public class Server {
 	public String rconpassword;
 	public String password;
 	public boolean active;
+	public Region region;
 		
 	private boolean taken = false;
 	
@@ -30,13 +33,14 @@ public class Server {
 	private ServerMonitor monitor;
 	private Thread monitorThread;
 
-	public Server(int id, String ip, int port, String rconpassword, String password, boolean active) {
+	public Server(int id, String ip, int port, String rconpassword, String password, boolean active, Region region) {
 		this.id = id;
 		this.IP = ip;
 		this.port = port;
 		this.rconpassword = rconpassword;
 		this.password = password;
 		this.active = active;
+		this.region = region;
 		
 		connect();
 		monitor = null;

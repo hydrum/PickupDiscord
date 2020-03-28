@@ -301,7 +301,7 @@ public class ServerMonitor implements Runnable {
 					sp.player = player;
 					match.getStats(player).updateStatus(MatchStats.Status.PLAYING);
 					match.getStats(player).updateIP(sp.ip);
-				} else if (player != null && match.getLogic().bot.hasAdminRights(player.getDiscordUser())) {
+				} else if (player != null && player.getDiscordUser().hasAdminRights()) {
 					// PLAYER IS AN ADMIN, DONT FORCE/KICK HIM
 					continue;
 				} else { // if player not authed, auth not registered or not playing in this match -> kick

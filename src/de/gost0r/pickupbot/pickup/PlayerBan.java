@@ -22,5 +22,7 @@ public class PlayerBan {
 	public BanReason reason;
 	
 	public DiscordUser pardon = null;
+	
+	public Boolean forgiven = false;
 
 }

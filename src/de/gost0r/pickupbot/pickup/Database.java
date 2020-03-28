@@ -56,6 +56,7 @@ public class Database {
 													+ "elo INTEGER DEFAULT 1000,"
 													+ "elochange INTEGER DEFAULT 0,"
 													+ "active TEXT,"
+													+ "region TEXT,"
 													+ "PRIMARY KEY (userid, urtauth) )";
 			stmt.executeUpdate(sql);
 			
@@ -84,6 +85,7 @@ public class Database {
 													+ "start INTEGER,"
 													+ "end INTEGER,"
 													+ "pardon TEXT,"
+													+ "forgiven BOOLEAN,"
 													+ "FOREIGN KEY (player_userid, player_urtauth) REFERENCES player(userid, urtauth) )";
 			stmt.executeUpdate(sql);
 			
@@ -149,7 +151,8 @@ public class Database {
 													+ "port INTEGER,"
 													+ "rcon TEXT,"
 													+ "password TEXT,"
-													+ "active TEXT)";
+													+ "active TEXT,"
+													+ "region TEXT)";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS roles (role TEXT,"
@@ -179,13 +182,14 @@ public class Database {
 			pstmt.setString(2, player.getUrtauth());
 			ResultSet rs = pstmt.executeQuery();
 			if (!rs.next()) {				
-				sql = "INSERT INTO player (userid, urtauth, elo, elochange, active) VALUES (?, ?, ?, ?, ?)";
+				sql = "INSERT INTO player (userid, urtauth, elo, elochange, active, region) VALUES (?, ?, ?, ?, ?, ?)";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setString(1, player.getDiscordUser().id);
 				pstmt.setString(2, player.getUrtauth());
 				pstmt.setInt(3,  player.getElo());
 				pstmt.setInt(4,  player.getEloChange());
 				pstmt.setString(5, String.valueOf(true));
+				pstmt.setString(6, player.getRegion().toString());
 				pstmt.executeUpdate();
 			} else {
 				sql = "UPDATE player SET active=? WHERE userid=? AND urtauth=?";
@@ -203,7 +207,7 @@ public class Database {
 	
 	public void createBan(PlayerBan ban) {
 		try {
-			String sql = "INSERT INTO banlist (player_userid, player_urtauth, start, end, reason, pardon) VALUES (?, ?, ?, ?, ?, 'null')";
+			String sql = "INSERT INTO banlist (player_userid, player_urtauth, start, end, reason, pardon, forgiven) VALUES (?, ?, ?, ?, ?, 'null', 0)";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, ban.player.getDiscordUser().id);
 			pstmt.setString(2, ban.player.getUrtauth());
@@ -215,16 +219,28 @@ public class Database {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 	}
+	
+	public void forgiveBan(Player player) {
+		try {
+			String sql = "UPDATE banlist SET forgiven = 1 WHERE player_urtauth = ?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, player.getUrtauth());
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+	}
 
 	public void createServer(Server server) {
 		try {
-			String sql = "INSERT INTO server (ip, port, rcon, password, active) VALUES (?, ?, ?, ?, ?)";
+			String sql = "INSERT INTO server (ip, port, rcon, password, active, region) VALUES (?, ?, ?, ?, ?, ?)";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, server.IP);
 			pstmt.setInt(2, server.port);
 			pstmt.setString(3, server.rconpassword);
 			pstmt.setString(4, server.password);
 			pstmt.setString(5, String.valueOf(server.active));
+			pstmt.setString(6, server.region.toString());
 			pstmt.executeUpdate();
 			pstmt.close();
 			Statement stmt = c.createStatement();
@@ -363,7 +379,7 @@ public class Database {
 		List<Server> serverList = new ArrayList<Server>();		
 		try {
 			Statement stmt = c.createStatement();
-			String sql = "SELECT id, ip, port, rcon, password, active FROM server";
+			String sql = "SELECT id, ip, port, rcon, password, active, region FROM server";
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				int id = rs.getInt("id");
@@ -372,8 +388,9 @@ public class Database {
 				String rcon = rs.getString("rcon");
 				String password = rs.getString("password");
 				boolean active = Boolean.valueOf(rs.getString("active"));
+				String str_region = rs.getString("region");
 				
-				Server server = new Server(id, ip, port, rcon, password, active);
+				Server server = new Server(id, ip, port, rcon, password, active, Region.valueOf(str_region));
 				serverList.add(server);
 			}
 		} catch (SQLException e) {
@@ -564,7 +581,7 @@ public class Database {
 	public Player loadPlayer(DiscordUser user, String urtauth, boolean onlyActive) {
 		Player player = null;
 		try {
-			String sql = "SELECT userid, urtauth, elo, elochange, active FROM player WHERE userid LIKE ? AND urtauth LIKE ? AND active LIKE ?";
+			String sql = "SELECT userid, urtauth, elo, elochange, active, region FROM player WHERE userid LIKE ? AND urtauth LIKE ? AND active LIKE ?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, user == null ? "%" : user.id);
 			pstmt.setString(2, urtauth == null ? "%" : urtauth);
@@ -575,8 +592,9 @@ public class Database {
 				player.setElo(rs.getInt("elo"));
 				player.setEloChange(rs.getInt("elochange"));
 				player.setActive(Boolean.valueOf(rs.getString("active")));
+				player.setRegion(Region.valueOf(rs.getString("region")));
 
-				sql = "SELECT start, end, reason, pardon FROM banlist WHERE player_userid=? AND player_urtauth=?";
+				sql = "SELECT start, end, reason, pardon, forgiven FROM banlist WHERE player_userid=? AND player_urtauth=?";
 				PreparedStatement banstmt = c.prepareStatement(sql);
 				banstmt.setString(1, player.getDiscordUser().id);
 				banstmt.setString(2, player.getUrtauth());
@@ -588,6 +606,7 @@ public class Database {
 					ban.endTime = banSet.getLong("end");
 					ban.reason = BanReason.valueOf(banSet.getString("reason"));
 					ban.pardon = banSet.getString("pardon").matches("^[0-9]*$") ? DiscordUser.getUser(banSet.getString("pardon")) : null;
+					ban.forgiven = banSet.getBoolean("forgiven");
 					player.addBan(ban);
 				}
 			}
@@ -597,18 +616,31 @@ public class Database {
 		return player;
 	}
 	
-	
+	public void updatePlayerRegion(Player player, Region region) {
+		try {
+			String sql = "UPDATE player SET region=? WHERE userid=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, region.toString());
+			pstmt.setString(2, player.getDiscordUser().id);
+			pstmt.executeUpdate();
+			pstmt.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+	}
+
 	// UPDATE SERVER
 	public void updateServer(Server server) {
 		try {
-			String sql = "UPDATE server SET ip=?, port=?, rcon=?, password=?, active=? WHERE id=?";
+			String sql = "UPDATE server SET ip=?, port=?, rcon=?, password=?, active=?, region=? WHERE id=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, server.IP);
 			pstmt.setInt(2, server.port);
 			pstmt.setString(3, server.rconpassword);
 			pstmt.setString(4, server.password);
 			pstmt.setString(5, String.valueOf(server.active));
-			pstmt.setInt(6, server.id);
+			pstmt.setString(6, server.region.toString());
+			pstmt.setInt(7, server.id);
 			pstmt.executeUpdate();
 			pstmt.close();
 		} catch (SQLException e) {

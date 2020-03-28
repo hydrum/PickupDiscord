@@ -2,6 +2,8 @@ package de.gost0r.pickupbot.pickup;
 
 public class Config {
 	public static final String CMD_ADD					= "!add";
+	public static final String CMD_TS					= "!ts";
+	public static final String CMD_CTF					= "!ctf";
 	public static final String CMD_REMOVE				= "!remove";
 	public static final String CMD_MAPS					= "!maps";
 	public static final String CMD_MAP					= "!map";
@@ -26,6 +28,7 @@ public class Config {
 	public static final String CMD_LISTGAMECONFIG		= "!showgameconfig";
 	
 	public static final String CMD_REGISTER				= "!register";
+	public static final String CMD_REGION	    	    = "!region";
 	public static final String CMD_GETELO				= "!elo";
 	public static final String CMD_TOP5					= "!top5";
 	public static final String CMD_MATCH				= "!match";
@@ -35,7 +38,7 @@ public class Config {
 	//public static final String CMD_REPORTLIST			= "!reportlist";
 	
 	public static final String CMD_ADDBAN				= "!ban";
-	//public static final String CMD_REMOVEBAN			= "!unban";
+	public static final String CMD_REMOVEBAN			= "!unban";
 	
 	public static final String CMD_BANINFO				= "!baninfo";
 
@@ -92,6 +95,7 @@ public class Config {
 	public static final String USE_CMD_LISTGAMECONFIG	= "!showgameconfig <gametype>";
 	
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
+	public static final String USE_CMD_REGION		= "!region <EU|NA|SA|AU|ASIA|AFRICA>";
 	public static final String USE_CMD_GETELO			= "!elo </@DiscordUser|urtauth/>";
 	public static final String USE_CMD_TOP5				= "!top5";
 	public static final String USE_CMD_MATCH			= "!match <id>";
@@ -101,7 +105,7 @@ public class Config {
 	//public static final String USE_CMD_REPORTLIST		= "!reportlist";
 	
 	public static final String USE_CMD_ADDBAN			= "!ban <urtauth> <reason> <duration> (duration=1y1M1w1d1h1m1s)";
-	//public static final String USE_CMD_REMOVEBAN		= "!unban <urtauth>";
+	public static final String USE_CMD_REMOVEBAN		= "!unban <urtauth>";
 	
 	public static final String USE_CMD_BANINFO			= "!baninfo </@DiscordUser|urtauth/>";
 
@@ -169,6 +173,8 @@ public class Config {
 	public static final String pkup_surrender_time		= "You cannot surrender this early. You still have to wait for .time..";
 			 
 	public static final String is_banned				= ".user. (.urtauth.) is suspended for .reason. and cannot participate for .time.";
+	public static final String is_unbanned				= ".user. (.urtauth.) is unbanned and can add for a match";
+	public static final String is_notbanned				= ".user. (.urtauth.) is not banned";
 	public static final String not_banned				= "No active bans found for .user. (.urtauth.)";
 	public static final String map_not_found			= "Map not found.";
 	public static final String map_not_unique			= "Mapstring not unique.";
@@ -177,6 +183,7 @@ public class Config {
 
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
+	public static final String region_added		    	= "Your region has been set";
 
 	public static final String auth_taken_urtauth		= "This urtauth is already registered.";
 	public static final String auth_taken_user			= "You have already registered an account.";

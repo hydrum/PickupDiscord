@@ -47,7 +47,18 @@ public class DiscordGateway implements MessageHandler {
 			
 			// Parse to packet
 			int op = jsonObj.getInt("op");
-			JSONObject d = jsonObj.isNull("d") ? null : jsonObj.getString("d");
+			
+			JSONObject d;
+			
+			if (jsonObj.isNull("d"))
+			{
+				d = null;
+			}
+			else
+			{
+				d = jsonObj.getJSONObject("d");
+			}
+			   
 			int s = jsonObj.isNull("s") ? -1 : jsonObj.getInt("s") ;
 			String t = jsonObj.isNull("t") ? null : jsonObj.getString("t");
 			DiscordPacket incPak = new DiscordPacket(DiscordGatewayOpcode.values()[op], d, s, t);

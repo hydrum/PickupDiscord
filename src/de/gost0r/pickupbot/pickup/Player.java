@@ -27,6 +27,8 @@ public class Player {
 	private long lastMessage = -1L;
 	private boolean afkReminderSent = false;
 	
+	private Region region = Region.WORLD;
+
 	public Player(DiscordUser user, String urtauth) {
 		this.user = user;
 		this.setUrtauth(urtauth);
@@ -127,6 +129,14 @@ public class Player {
 		bans.add(ban);
 	}
 	
+	public void forgiveBan() {
+		for (PlayerBan ban : bans) {
+			ban.forgiven = true;
+		}
+		
+		db.forgiveBan(this);
+	}
+	
 	public PlayerBan getLatestBan() {
 		PlayerBan current = null;
 		for (PlayerBan ban : bans) {
@@ -134,7 +144,7 @@ public class Player {
 				current = ban;
 				continue;
 			}
-			if (ban.startTime > current.startTime) {
+			if ((ban.startTime > current.startTime) && !ban.forgiven) {
 				current = ban;
 			}
 		}
@@ -153,7 +163,7 @@ public class Player {
 
 	public boolean isBanned() {
 		for (PlayerBan ban : bans) {
-			if (ban.endTime > System.currentTimeMillis()) {
+			if (!ban.forgiven && ban.endTime > System.currentTimeMillis()) {
 				return true;
 			}
 		}
@@ -226,6 +236,14 @@ public class Player {
 	@Override
 	public String toString() {
 		return this.urtauth;
+	}
+	
+	public Region getRegion() {
+		return region;
+	}
+
+	public void setRegion(Region region) {
+		this.region = region;
 	}
 
 	public static void remove(Player player) {
