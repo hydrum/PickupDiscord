@@ -760,14 +760,42 @@ public class PickupLogic {
 	}
 
 	private void checkServer() {
-		for (Server server : serverList) {
-			if (server.active && !server.isTaken() && !awaitingServer.isEmpty()) {
-				Match m = awaitingServer.poll();
-				if (m != null && m.getMatchState() == MatchState.AwaitingServer) {
-					m.launch(server);
+		if(!awaitingServer.isEmpty())
+		{
+			Match m = awaitingServer.poll();
+			
+			if(m != null)
+			{
+				Server bs = getBestServer(m.getPreferredServerRegion());
+				
+				if(bs != null && bs.active && !bs.isTaken() && m.getMatchState() == MatchState.AwaitingServer)
+				{
+					m.launch(bs);
+				}
+				else
+				{
+					for (Server server : serverList) {
+						if (server.active && !server.isTaken() && m.getMatchState() == MatchState.AwaitingServer) {	
+								m.launch(server);
+						}
+					}
 				}
 			}
 		}
+	}
+	
+	private Server getBestServer(Region r)
+	{
+		Server bestServer = null;
+		
+		for (Server server : serverList) {
+			if (server.region == r) {	
+				bestServer = server;
+				break;
+			}
+		}
+		
+		return bestServer;
 	}
 	
 	

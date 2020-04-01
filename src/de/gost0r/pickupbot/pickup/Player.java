@@ -94,7 +94,7 @@ public class Player {
 	}
 
 	public void setElo(int elo) {
-		if (elo < 0) {
+		if (elo <= 0) {
 			this.elo = 1000;
 		} else {
 			this.elo = elo;

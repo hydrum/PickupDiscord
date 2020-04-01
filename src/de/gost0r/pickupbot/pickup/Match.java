@@ -199,6 +199,8 @@ public class Match implements Runnable {
 		if (playerStats.keySet().size() == gametype.getTeamSize() * 2) {
 			state = MatchState.AwaitingServer;
 			logic.cmdStatus(this, null, true);
+			
+			// Compute region majority
 			logic.requestServer(this);
 		} else {
 			logic.cmdStatus(this, player, true);
@@ -706,6 +708,68 @@ public class Match implements Runnable {
 		msg = msg.replace(".ingame.", getIngameInfo());
 		
 		return msg;
+	}
+	
+	public Region getPreferredServerRegion() {
+		Map<Region, Float> playerRegionPercentage= new HashMap<Region, Float>();
+		
+		// Init all region percentage to 0
+		for(Region r : Region.values()) {
+			playerRegionPercentage.put(r, 0.0F);
+		}
+		
+		Float percentPlayer = (float) (100/playerStats.keySet().size());
+		
+		// Update all regions percentages
+		for(Player p : playerStats.keySet()) {
+			Region PlayerRegion = p.getRegion();
+			Float RegionPercent = playerRegionPercentage.get(PlayerRegion);
+			playerRegionPercentage.put(p.getRegion(), RegionPercent + percentPlayer);
+		}
+		
+		Float bestRegionPercentage = 0.0F;
+		Region RegionMajoritary = Region.NA;
+		// Memorize which region has the most player occurrence
+		for(Region r : Region.values()) {
+			if(playerRegionPercentage.get(r) >= bestRegionPercentage) {
+				bestRegionPercentage = playerRegionPercentage.get(r);
+				RegionMajoritary = r;
+			}
+		}
+		
+		// If region percentage has more than 70% players, it is the majoritary region
+		if(bestRegionPercentage >= 70.0)
+		{
+			return RegionMajoritary;
+		}
+		// Case when it is NA team vs EU team with more EU players and without exotic players
+		else if (playerRegionPercentage.get(Region.EU) >= 60.0 && playerRegionPercentage.get(Region.NA) >= 40.0 )
+		{
+			return Region.EU;
+		}
+		// If there are the same number of NA and EU players
+		else if (playerRegionPercentage.get(Region.EU) >= 50.0 && playerRegionPercentage.get(Region.NA) >= 50.0 )
+		{
+			// Random between EU and NA
+			Random rd = new Random();
+			if(rd.nextBoolean()) {
+				return Region.EU;
+			}
+			else {
+				return Region.NA;
+			}
+		}
+		// Case when it is NA team vs EU team with more EU players and with at least one exotic player
+		else if (playerRegionPercentage.get(Region.EU) >= 60.0 && ( (playerRegionPercentage.get(Region.SA) >= percentPlayer)   ||
+																	(playerRegionPercentage.get(Region.AU) >= percentPlayer)   ||
+																	(playerRegionPercentage.get(Region.ASIA) >= percentPlayer) ||
+																	(playerRegionPercentage.get(Region.AFRICA) >= percentPlayer))) {
+			return Region.NA;
+		}
+		else
+		{
+			return Region.NA;
+		}
 	}
 	
 	@Override
