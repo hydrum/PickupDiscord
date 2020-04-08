@@ -56,7 +56,7 @@ public class Database {
 													+ "elo INTEGER DEFAULT 1000,"
 													+ "elochange INTEGER DEFAULT 0,"
 													+ "active TEXT,"
-													+ "region TEXT,"
+													+ "country TEXT,"
 													+ "PRIMARY KEY (userid, urtauth) )";
 			stmt.executeUpdate(sql);
 			
@@ -182,14 +182,14 @@ public class Database {
 			pstmt.setString(2, player.getUrtauth());
 			ResultSet rs = pstmt.executeQuery();
 			if (!rs.next()) {				
-				sql = "INSERT INTO player (userid, urtauth, elo, elochange, active, region) VALUES (?, ?, ?, ?, ?, ?)";
+				sql = "INSERT INTO player (userid, urtauth, elo, elochange, active, country) VALUES (?, ?, ?, ?, ?, ?)";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setString(1, player.getDiscordUser().id);
 				pstmt.setString(2, player.getUrtauth());
 				pstmt.setInt(3,  player.getElo());
 				pstmt.setInt(4,  player.getEloChange());
 				pstmt.setString(5, String.valueOf(true));
-				pstmt.setString(6, player.getRegion().toString());
+				pstmt.setString(6, player.getCountry());
 				pstmt.executeUpdate();
 			} else {
 				sql = "UPDATE player SET active=? WHERE userid=? AND urtauth=?";
@@ -581,7 +581,7 @@ public class Database {
 	public Player loadPlayer(DiscordUser user, String urtauth, boolean onlyActive) {
 		Player player = null;
 		try {
-			String sql = "SELECT userid, urtauth, elo, elochange, active, region FROM player WHERE userid LIKE ? AND urtauth LIKE ? AND active LIKE ?";
+			String sql = "SELECT userid, urtauth, elo, elochange, active, country FROM player WHERE userid LIKE ? AND urtauth LIKE ? AND active LIKE ?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, user == null ? "%" : user.id);
 			pstmt.setString(2, urtauth == null ? "%" : urtauth);
@@ -592,7 +592,7 @@ public class Database {
 				player.setElo(rs.getInt("elo"));
 				player.setEloChange(rs.getInt("elochange"));
 				player.setActive(Boolean.valueOf(rs.getString("active")));
-				player.setRegion(Region.valueOf(rs.getString("region")));
+				player.setCountry(rs.getString("country"));
 
 				sql = "SELECT start, end, reason, pardon, forgiven FROM banlist WHERE player_userid=? AND player_urtauth=?";
 				PreparedStatement banstmt = c.prepareStatement(sql);
@@ -616,11 +616,11 @@ public class Database {
 		return player;
 	}
 	
-	public void updatePlayerRegion(Player player, Region region) {
+	public void updatePlayerCountry(Player player, String country) {
 		try {
-			String sql = "UPDATE player SET region=? WHERE userid=?";
+			String sql = "UPDATE player SET country=? WHERE userid=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
-			pstmt.setString(1, region.toString());
+			pstmt.setString(1, country);
 			pstmt.setString(2, player.getDiscordUser().id);
 			pstmt.executeUpdate();
 			pstmt.close();
@@ -855,6 +855,26 @@ public class Database {
 			while (rs.next()) {
 				Player p = Player.get(rs.getString("urtauth"));
 				list.add(p);
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return list;
+	}
+	
+	public ArrayList<CountryRank> getTopCountries(int number) {
+		ArrayList<CountryRank> list = new ArrayList<CountryRank>();
+		try {
+			String sql = "SELECT AVG(elo) as Average_Elo, country FROM player WHERE active=? GROUP BY country ORDER BY Average_Elo DESC LIMIT ?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, String.valueOf(true));
+			pstmt.setInt(2, number);
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				if(!rs.getString("country").equalsIgnoreCase("NOT_DEFINED"))
+				{
+					list.add(new CountryRank(rs.getString("country"), rs.getFloat("Average_Elo")));
+				}
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);

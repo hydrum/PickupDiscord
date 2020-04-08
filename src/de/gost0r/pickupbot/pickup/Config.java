@@ -28,9 +28,11 @@ public class Config {
 	public static final String CMD_LISTGAMECONFIG		= "!showgameconfig";
 	
 	public static final String CMD_REGISTER				= "!register";
-	public static final String CMD_REGION	    	    = "!region";
+	public static final String CMD_COUNTRY	    	    = "!region";
 	public static final String CMD_GETELO				= "!elo";
-	public static final String CMD_TOP5					= "!top5";
+	public static final String CMD_TOP_PLAYERS	    	= "!top10";
+	public static final String CMD_TOP_COUNTRY			= "!topcountry";
+	
 	public static final String CMD_MATCH				= "!match";
 	
 	//public static final String CMD_REPORT				= "!report";
@@ -59,7 +61,7 @@ public class Config {
 	public static final String CMD_REMOVEROLE			= "!removerole";
 
 	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_LIVE + " " + CMD_MATCH + " "
-	+ CMD_MAP + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP5 + " " + CMD_SURRENDER
+	+ CMD_MAP + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS + " " + CMD_SURRENDER
 	+ " " + CMD_BANINFO;
 	
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " "
@@ -95,9 +97,10 @@ public class Config {
 	public static final String USE_CMD_LISTGAMECONFIG	= "!showgameconfig <gametype>";
 	
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
-	public static final String USE_CMD_REGION		= "!region <EU|NA|SA|AU|ASIA|AFRICA>";
+	public static final String USE_CMD_REGION		    = "!region <YOUR COUNTRY CODE> See: https://datahub.io/core/country-list/r/0.html";
+	public static final String USE_CMD_CHANGE_REGION	= "!region <DiscordUser> <YOUR COUNTRY CODE> See: https://datahub.io/core/country-list/r/0.html";
 	public static final String USE_CMD_GETELO			= "!elo </@DiscordUser|urtauth/>";
-	public static final String USE_CMD_TOP5				= "!top5";
+	public static final String USE_CMD_TOP10			= "!top10";
 	public static final String USE_CMD_MATCH			= "!match <id>";
 	
 	//public static final String USE_CMD_REPORT			= "!report <qauth> <reason>";
@@ -166,8 +169,10 @@ public class Config {
 
 	public static final String pkup_config_list 		= "Gameconfig for .gametype.\n.configlist.";
 	
-	public static final String pkup_getelo				= "#.position.\t **.rank.**\t **.urtauth.**\t .elo.\t .wdl.%";
-	public static final String pkup_top5_header			= "**Top5:**";
+	public static final String pkup_getelo				= "#.position.\t **.rank.**\t **.urtauth.**\t .elo.\t .wdl.% \t .country.";
+	public static final String pkup_getelo_country		= "#.position.\t .country.\t .elo.";
+	public static final String pkup_top10_header		= "**Top10 Players:**";
+	public static final String pkup_top5_header		    = "**Top5 Countries:**";
 	
 	public static final String pkup_surrender_cast		= "You have voted to surrender. **.num.** more teammate.s. needed.";
 	public static final String pkup_surrender_time		= "You cannot surrender this early. You still have to wait for .time..";
@@ -183,7 +188,7 @@ public class Config {
 
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
-	public static final String region_added		    	= "Your region has been set";
+	public static final String country_added	    	= "Your country has been set";
 
 	public static final String auth_taken_urtauth		= "This urtauth is already registered.";
 	public static final String auth_taken_user			= "You have already registered an account.";
@@ -228,4 +233,5 @@ public class Config {
 	
 	public static final String admin_cmd_successful		= "Successful: ";
 	public static final String admin_cmd_unsuccessful	= "Unsuccessful: ";
+	public static final String wait_testing_server      = "Testing server list. This could take a while...";
 }

@@ -748,7 +748,7 @@ public class Match implements Runnable {
 			return Region.EU;
 		}
 		// If there are the same number of NA and EU players
-		else if (playerRegionPercentage.get(Region.EU) >= 50.0 && playerRegionPercentage.get(Region.NA) >= 50.0 )
+		else if (playerRegionPercentage.get(Region.EU) == 50.0 && playerRegionPercentage.get(Region.NA) == 50.0 )
 		{
 			// Random between EU and NA
 			Random rd = new Random();
@@ -760,10 +760,11 @@ public class Match implements Runnable {
 			}
 		}
 		// Case when it is NA team vs EU team with more EU players and with at least one exotic player
-		else if (playerRegionPercentage.get(Region.EU) >= 60.0 && ( (playerRegionPercentage.get(Region.SA) >= percentPlayer)   ||
-																	(playerRegionPercentage.get(Region.AU) >= percentPlayer)   ||
-																	(playerRegionPercentage.get(Region.ASIA) >= percentPlayer) ||
-																	(playerRegionPercentage.get(Region.AFRICA) >= percentPlayer))) {
+		else if (playerRegionPercentage.get(Region.EU) >= 60.0 && ( (playerRegionPercentage.get(Region.SA) >= percentPlayer) ||
+																	(playerRegionPercentage.get(Region.OC) >= percentPlayer) ||
+																	(playerRegionPercentage.get(Region.AS) >= percentPlayer) ||
+																	(playerRegionPercentage.get(Region.AN) >= percentPlayer) ||
+																	(playerRegionPercentage.get(Region.AF) >= percentPlayer))) {
 			return Region.NA;
 		}
 		else

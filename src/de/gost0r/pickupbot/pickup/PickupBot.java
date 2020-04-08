@@ -24,18 +24,57 @@ public class PickupBot extends DiscordBot {
 	public void init() {
 		super.init();
 		
-//		pubchan = DiscordChannel.findChannel("143233743107129344"); // pickup_dev
+//		pubchan = DiscordChannel.findChannel("691794344960589835"); // bot-test
 //		pubchan = DiscordChannel.findChannel("402541587164561419"); // urtpickup
 		
 		logic = new PickupLogic(this);
 //		logic.cmdEnableGametype("TEST", "1");
 		
 		// TEST
-//		Player p = Player.get("v3nd3tta");
-//		Gametype gt = logic.getGametypeByString("test");
-//		List<Gametype> list = new ArrayList<Gametype>();
-//		list.add(gt);
-//		logic.cmdAddPlayer(p, list);
+		//Player p0 = Player.get("asloon");
+		
+		
+		/*
+		Player p1 = new Player(new DiscordUser("FakeUser1_EU", "FakeDiscordUser1", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer1");
+		p1.setRegion(Region.EU);
+		
+		Player p2 = new Player(new DiscordUser("FakeUser2_EU", "FakeDiscordUser2", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer2");
+		p2.setRegion(Region.EU);
+		
+		Player p3 = new Player(new DiscordUser("FakeUser3_EU", "FakeDiscordUser3", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer3");
+		p3.setRegion(Region.EU);
+		
+		Player p4 = new Player(new DiscordUser("FakeUser4_EU", "FakeDiscordUser4", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer4");
+		p4.setRegion(Region.EU);
+		
+		Player p5 = new Player(new DiscordUser("FakeUser5_EU", "FakeDiscordUser5", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer5");
+		p5.setRegion(Region.EU);
+		
+		Player p6 = new Player(new DiscordUser("FakeUser6_EU", "FakeDiscordUser6", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer6");
+		p6.setRegion(Region.EU);
+		
+		Player p7 = new Player(new DiscordUser("FakeUser7_WORLD", "FakeDiscordUser7", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer7");
+		p7.setRegion(Region.WORLD);
+		
+		Player p8 = new Player(new DiscordUser("FakeUser8_NA", "FakeDiscordUser8", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer8");
+		p8.setRegion(Region.NA);
+		
+		Player p9 = new Player(new DiscordUser("FakeUser9_NA", "FakeDiscordUser9", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer9");
+		p9.setRegion(Region.NA);
+		
+		Gametype gt = logic.getGametypeByString("TEST");
+		List<Gametype> list = new ArrayList<Gametype>();
+		list.add(gt);
+		logic.cmdAddPlayer(p1, list);
+		logic.cmdAddPlayer(p2, list);
+		logic.cmdAddPlayer(p3, list);
+		logic.cmdAddPlayer(p4, list);
+		logic.cmdAddPlayer(p5, list);
+		logic.cmdAddPlayer(p6, list);
+		logic.cmdAddPlayer(p7, list);
+		logic.cmdAddPlayer(p8, list);
+		logic.cmdAddPlayer(p9, list);
+		logic.cmdAddPlayer(p0, list); */
 	}
 	
 	@Override
@@ -289,17 +328,31 @@ public class PickupBot extends DiscordBot {
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
 					
-				case Config.CMD_TOP5: 
+				case Config.CMD_TOP_PLAYERS: 
 					if (p != null)
 					{
 						if (data.length == 1)
 						{
-							logic.cmdTopElo(5);
+							logic.cmdTopElo(10);
 						}
-						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_TOP5));
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_TOP10));
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
+					
+				case Config.CMD_TOP_COUNTRY: 
+					if (p != null)
+					{
+						if (data.length == 1)
+						{
+							logic.cmdTopCountries(5);
+						}
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_TOP10));
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+					
+					
 
 				case Config.CMD_REGISTER:
 					if (data.length == 2)
@@ -309,10 +362,10 @@ public class PickupBot extends DiscordBot {
 					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_REGISTER));
 					break;
 					
-				case Config.CMD_REGION:
+				case Config.CMD_COUNTRY:
 					if (data.length == 2)
 					{
-						logic.cmdSetPlayerRegion(msg.user, data[1].toUpperCase());
+						logic.cmdSetPlayerCountry(msg.user, data[1].toUpperCase());
 					}
 					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_REGION));
 					break;
@@ -526,6 +579,7 @@ public class PickupBot extends DiscordBot {
 					case Config.CMD_SHOWSERVERS:
 						if (data.length == 1)
 						{
+							super.sendMsg(msg.channel, Config.wait_testing_server);
 							logic.cmdServerList(msg.channel);
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_SHOWSERVERS));
@@ -628,6 +682,30 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADDBAN));
 						break;
+						
+					case Config.CMD_COUNTRY:
+						if (data.length == 3)
+						{
+							Player p = null;
+							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
+							if (u != null)
+							{
+								p = Player.get(u);
+							}
+							else
+							{
+								p = Player.get(data[1].toLowerCase());
+							}
+							
+							if (p != null)
+							{
+								logic.cmdChangePlayerCountry(p, data[2].toUpperCase());
+							}
+							else sendMsg(msg.channel, Config.player_not_found);
+							
+						}
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_CHANGE_REGION));
+						break;
 				}
 			}
 		}
@@ -658,7 +736,7 @@ public class PickupBot extends DiscordBot {
 						case Config.CMD_RCON: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_RCON)); break;
 						case Config.CMD_REGISTER: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REGISTER)); break;
 						case Config.CMD_GETELO: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETELO)); break;
-						case Config.CMD_TOP5: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP5)); break;
+						case Config.CMD_TOP_PLAYERS: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP10)); break;
 						case Config.CMD_MATCH: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_MATCH)); break;
 						case Config.CMD_SURRENDER: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SURRENDER)); break;
 						case Config.CMD_LIVE: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LIVE)); break;

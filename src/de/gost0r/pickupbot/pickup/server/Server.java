@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -150,7 +152,41 @@ public class Server {
 	
 	@Override
 	public String toString() {
-		return "#" + id + " " + IP + ":" + port + " - active: " + active;
+		String isActive = this.active ? "active" : "inactive";
+		return "#" + id + " " + IP + ":" + port + " " + isActive + " " + region + " " + isReachable() ;
+	}
+	
+	public String isReachable() {
+		String status = ":red_circle: (Host Timeout)";
+		
+		try {
+			InetAddress.getByName(IP).isReachable(1000);
+		} catch (UnknownHostException e) {
+			return status;
+		} catch (IOException e) {
+			return status;
+		}
+		
+		String rconStatusAck = sendRcon("status");
+		
+		if(rconStatusAck.contains("num score ping name"))
+		{
+			//rcon is correct and server is up
+			status = ":green_circle:";
+		}
+		else if (rconStatusAck.contains("Bad rconpassword"))
+		{
+			// server is up bud rcon is wrong
+			status = ":yellow_circle: (Bad Rcon password)";
+		}
+		else
+		{
+			// urban terror server is down
+			status = ":red_circle: (Urban Terror Server is down)";
+		}
+		
+		return status;
+	    
 	}
 
 	public String getAddress() {

@@ -178,31 +178,28 @@ public class PickupLogic {
 		return true;
 	}
 	
-	public void cmdSetPlayerRegion(DiscordUser user, String str_region) {
+	public void cmdSetPlayerCountry(DiscordUser user, String str_country) {
 		
 			// check if user is already registered
 			if (Player.get(user) != null) {
 				Player p = db.loadPlayer(user);
 				
-				if(p.getRegion() == Region.WORLD || user.hasAdminRights()) {
-					try {
-						Region region = Region.valueOf(str_region);
-						
-						if(region != null) {
-							db.updatePlayerRegion(p, region);
-							p.setRegion(region);
-							bot.sendNotice(user, Config.region_added);
-						}
-						else {
-							// Nothing to do, catch will notice the user that the region is invalid
-						}
-					} catch (IllegalArgumentException e) {
-						bot.sendNotice(user, "Unknown region. Region must be EU|NA|SA|AU|ASIA|AFRICA");
-			        }
+				if(p.getCountry().equalsIgnoreCase("NOT_DEFINED") || user.hasAdminRights()) {
+					
+					if(Country.isValid(str_country))
+					{
+						db.updatePlayerCountry(p, str_country);
+						Player.get(user).setCountry(str_country);
+						bot.sendNotice(user, Config.country_added);
+					}
+					else
+					{
+						bot.sendNotice(user, "Unknown county code. Look your corresponding two letter country code here : https://datahub.io/core/country-list/r/0.html");
+					}
 				}
 				else {
 					// Region has been set by user, need an admin 
-					bot.sendNotice(user, "Your region is already set to " + p.getRegion().toString());
+					bot.sendNotice(user, "Your country code is already set to " + p.getRegion().toString());
 				}
 			} 
 			else {
@@ -212,8 +209,22 @@ public class PickupLogic {
 		
 	}
 
+	public void cmdChangePlayerCountry(Player p, String str_country) {
+		
+		if(Country.isValid(str_country))
+		{
+			db.updatePlayerCountry(p, str_country);
+			p.setCountry(str_country);
+			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), "Country code updated to " + str_country);
+		}
+		else
+		{
+			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), "Unknown county code. Look your corresponding two letter country code here : https://datahub.io/core/country-list/r/0.html");
+		}	
+}
+	
 	public void cmdTopElo(int number) {
-		String msg = Config.pkup_top5_header;
+		String msg = Config.pkup_top10_header;
 		
 		List<Player> players = db.getTopPlayers(number);
 		if (players.isEmpty()) {
@@ -240,10 +251,40 @@ public class PickupLogic {
 		msg = msg.replace(".wdl.", String.valueOf(Math.round(db.getWDLForPlayer(p).calcWinRatio() * 100d)));
 		msg = msg.replace(".position.", String.valueOf(db.getRankForPlayer(p)));
 		msg = msg.replace(".rank.", p.getRank().getEmoji());
+		
+		if( p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+			msg = msg.replace(".country.", "");
+		}
+		else {
+			msg = msg.replace(".country.", ":flag_" + p.getCountry().toLowerCase() + ":");
+		}
+		
 		if (sendMsg) {
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 		}
 		return msg;
+	}
+	
+	public void cmdTopCountries(int number) {
+		String msg = Config.pkup_top5_header;
+		
+		ArrayList<CountryRank> countries = db.getTopCountries(number);
+		if (countries.isEmpty()) {
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg + "  None");
+		} else {
+			
+			for(int i = 0; i < countries.size(); i++) {
+				String ranking = Config.pkup_getelo_country;
+				
+				ranking = ranking.replace(".position.", Integer.toString(i));
+				ranking = ranking.replace(".country.", Country.getCountryFlag(countries.get(i).country));
+				ranking = ranking.replace(".elo.", countries.get(i).elo.toString());
+				
+				msg = msg + "\n" + ranking;
+			}
+			
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+		}
 	}
 	
 	public void cmdGetMaps() {

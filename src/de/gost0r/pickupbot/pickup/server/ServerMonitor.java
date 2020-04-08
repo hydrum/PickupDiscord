@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.pickup.Match;
-import de.gost0r.pickupbot.pickup.MatchState;
 import de.gost0r.pickupbot.pickup.MatchStats;
 import de.gost0r.pickupbot.pickup.MatchStats.Status;
 import de.gost0r.pickupbot.pickup.PickupChannelType;

@@ -19,6 +19,7 @@ import org.json.JSONObject;
 
 import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.DiscordChannel;
+import de.gost0r.pickupbot.pickup.Country;
 import de.gost0r.pickupbot.pickup.PickupBot;
 
 public class PickupBotDiscordMain {
@@ -30,6 +31,8 @@ public class PickupBotDiscordMain {
 		try {
 		
 			setupLogger();
+			
+			Country.initCountryCodes();
 
 			String config = new String(Files.readAllBytes(Paths.get("config.json")));
 			JSONObject cfg = new JSONObject(config);
@@ -151,5 +154,4 @@ public class PickupBotDiscordMain {
 			e.printStackTrace();
 		}
 	}
-
 }

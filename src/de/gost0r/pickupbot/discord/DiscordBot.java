@@ -103,7 +103,7 @@ public class DiscordBot  {
 	}
 	
 	public void sendMsg(DiscordUser user, String msg) {
-		sendMsg(user.getDMChannel(), msg);
+			sendMsg(user.getDMChannel(), msg);
 	}
 
 	public static String getToken() {

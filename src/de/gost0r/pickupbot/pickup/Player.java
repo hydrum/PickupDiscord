@@ -27,7 +27,7 @@ public class Player {
 	private long lastMessage = -1L;
 	private boolean afkReminderSent = false;
 	
-	private Region region = Region.WORLD;
+	private String country = "NOT_DEFINED";
 
 	public Player(DiscordUser user, String urtauth) {
 		this.user = user;
@@ -239,11 +239,23 @@ public class Player {
 	}
 	
 	public Region getRegion() {
-		return region;
+		if(this.country.equalsIgnoreCase("NOT_DEFINED")) {
+			return Region.WORLD;
+		}
+		else {
+			String continent = Country.getContinent(this.country);
+			
+			return Region.valueOf(continent);
+		}
 	}
+	
+	public String getCountry() {
+		return this.country;
+	}
+	
 
-	public void setRegion(Region region) {
-		this.region = region;
+	public void setCountry(String country) {
+		this.country = country;
 	}
 
 	public static void remove(Player player) {
