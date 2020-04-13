@@ -1,4 +1,15 @@
 TODO:
+URGENT:
+///
+- !pro
+- !1v1/2v2
+- gtv (needs !enablegtv/!disablegtv option)
+- add on "match state = ready" -> startserverdemo and on match end -> uploadserverdemo.
+- !ringer function
+- !game ID -> match details.
+\\\
+
+- gtv (needs !enablegtv/!disablegtv option)
 
 ( ) rework match abort/cancel/end behaviour to be more consistent
 ( ) !showmatch starttime
