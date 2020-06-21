@@ -150,18 +150,18 @@ public class Config {
 	public static final String pkup_match_print_abandon	= "**[** Pickup Game #.gamenumber. **][** Abandon **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 	public static final String pkup_match_print_sur		= "**[** Pickup Game #.gamenumber. **][** Surrender **][** Score: .score. **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 
-	public static final String pkup_match_print_info	= "**.gametype.**: #.gamenumber. **][** .map. **][** .ingame. **][** `.redteam.` **][** `.blueteam.`";
+	public static final String pkup_match_print_info	= "#.gamenumber. - **.gametype.**: .map. **[** .ingame. **]** `.redteam.` **VS** `.blueteam.`";
 	
 	public static final String pkup_go_admin			= "[ Pickup Game #.gamenumber. ][ Password: .password. ][ .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
 	public static final String pkup_go_player			= "UrTPickup starts now! Connect to the server, choose positions and ready up! [ /connect .server. ; password .password. ]";
-	public static final String pkup_go_pub_head			= "**.gametype.**: UrTPickup #.gamenumber. (avg ELO: .elo.) is about to start!";
-	public static final String pkup_go_pub_team			= "**.gametype.**: .team. team: .playerlist.";
-	public static final String pkup_go_pub_map			= "**.gametype.**: Map: .map.";
-	public static final String pkup_go_pub_calm			= "**.gametype.**: You will receive the connection info via DM.";
+	public static final String pkup_go_pub_head			= "**.gametype.**: Game #.gamenumber. (avg ELO: .elo.) is about to start!";
+	public static final String pkup_go_pub_team			= ".team. team: .playerlist.";
+	public static final String pkup_go_pub_map			= "Map: .map.";
+	public static final String pkup_go_pub_calm			= "You will receive the connection info in DM.";
 	public static final String pkup_go_pub_sent			= "**.gametype.**: All connection info has been sent. Enjoy the match!";
 
 	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber. (.map.):";
-	public static final String pkup_aftermath_result	= ".team. team .result. (.score.) -";
+	public static final String pkup_aftermath_result	= ".team. .result. (.score.) -";
 	public static final String pkup_aftermath_player	= ".player. (.elochange.)";
 	public static final String pkup_aftermath_rank		= ".player. was ranked .updown. to **.rank.**";
 	public static final String pkup_aftermath_abandon_1	= "Match was abandoned due to **.reason.**.";
