@@ -753,6 +753,7 @@ public class PickupBot extends DiscordBot {
 						case Config.CMD_REGISTER: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REGISTER)); break;
 						case Config.CMD_GETELO: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETELO)); break;
 						case Config.CMD_TOP_PLAYERS: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP10)); break;
+						case Config.CMD_TOP_COUNTRIES: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP_COUNTRIES)); break;
 						case Config.CMD_MATCH: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_MATCH)); break;
 						case Config.CMD_SURRENDER: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SURRENDER)); break;
 						case Config.CMD_LIVE: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LIVE)); break;
@@ -770,9 +771,11 @@ public class PickupBot extends DiscordBot {
 						case Config.CMD_ENABLEGAMETYPE: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ENABLEGAMETYPE)); break;
 						case Config.CMD_DISABLEGAMETYPE: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DISABLEGAMETYPE)); break;
 						case Config.CMD_SHOWMATCHES: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SHOWMATCHES)); break;
-						case Config.CMD_ADDGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDGAMECONFIG)); break;
-						case Config.CMD_REMOVEGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVEGAMECONFIG)); break;
-						case Config.CMD_LISTGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LISTGAMECONFIG)); break;
+						//case Config.CMD_ADDGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDGAMECONFIG)); break;
+						//case Config.CMD_REMOVEGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVEGAMECONFIG)); break;
+						case Config.CMD_LISTGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LISTGAMECONFIG)); break
+						case Config.CMD_COUNTRY: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_COUNTRY)); break;
+						
 						default: super.sendMsg(msg.channel, Config.help_unknown); break;
 					}
 				}
