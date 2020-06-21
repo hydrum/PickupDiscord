@@ -1,14 +1,14 @@
 TODO:
 URGENT:
 ///
-- !1v1/2v2
-- add on "match state = ready" -> startserverdemo and on match end -> uploadserverdemo.
 - !ringer function
 - !game ID -> match details.
 \\\
 
 - gtv (needs !enablegtv/!disablegtv option)
 - !pro
+- Enhanced 2v2 with mate !2v2 @gost0r to play your 2v2 with him.
+
 
 ( ) rework match abort/cancel/end behaviour to be more consistent
 ( ) !showmatch starttime
@@ -94,13 +94,13 @@ approach:
 Remaining issue: e.g.: TeamSize=4, 1x 3p, 2x 2p : solution: 2 2 vs 3 1 = algo: 3 vs 2 1 => break up 3rd team  
 
 
-REPORT SYSTEM:
-!report auth leave/noshow/insult/troll
-to defend yourself: !excuse <reason>
-if 3 games a report
-msg to admins to review case !review <number>
-!accept !decline
-suspended for 1d, 3d, 1w, 2w, 1m, 3m, perm
-show bans and time !banlist
-ability to ban ppl as admin !permban <auth> ? if temp bans wished: !ban <auth> <1d> ex.?
-end bans: !pardon <auth>
+//REPORT SYSTEM:
+//!report auth leave/noshow/insult/troll
+//to defend yourself: !excuse <reason>
+//if 3 games a report
+//msg to admins to review case !review <number>
+//!accept !decline
+//suspended for 1d, 3d, 1w, 2w, 1m, 3m, perm
+//show bans and time !banlist
+//ability to ban ppl as admin !permban <auth> ? if temp bans wished: !ban <auth> <1d> ex.?
+//end bans: !pardon <auth>
