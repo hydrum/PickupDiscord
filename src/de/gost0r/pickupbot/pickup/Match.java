@@ -506,7 +506,8 @@ public class Match implements Runnable {
 
 		// set server data
 		for (String s : this.gametype.getConfig()) {
-			server.sendRcon(s);
+			// server.sendRcon(s);
+			server.pushRcon(s);
 		}
 		server.sendRcon("g_password " + server.password);
 		server.sendRcon("map " + this.map.name);

@@ -169,7 +169,7 @@ public class Config {
 
 	public static final String pkup_config_list 		= "Gameconfig for .gametype.\n.configlist.";
 	
-	public static final String pkup_getelo				= "#.position.\t **.rank.**\t **.urtauth.**\t .elo.\t .wdl.% \t .country.";
+	public static final String pkup_getelo				= "#.position.\t **.rank.**\t .country.   **.urtauth.**\t .elo.\t .wdl.%";
 	public static final String pkup_getelo_country		= "#.position.\t .country.\t .elo.";
 	public static final String pkup_top10_header		= "**Top10 Players:**";
 	public static final String pkup_top5_header		    = "**Top5 Countries:**";

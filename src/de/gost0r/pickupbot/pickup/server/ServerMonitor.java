@@ -66,7 +66,7 @@ public class ServerMonitor implements Runnable {
 
 	@Override
 	public void run() {
-		LOGGER.info("run() started");
+		LOGGER.info("run() started on " + this.server.IP + ":" + this.server.port);
 		try {
 			while (!stopped) {
 				observe();
@@ -621,6 +621,7 @@ public class ServerMonitor implements Runnable {
 	private void endGame() throws Exception {
 		calcStats();
 		match.end();
+		match.getServer().sendRcon("uploadserverdemo now");
 		stop();
 	}
 	

@@ -527,7 +527,6 @@ public class PickupLogic {
 			Gametype gt = getGametypeByString(gametype);
 			if (gt == null) {
 				gt = new Gametype(gametype.toUpperCase(), i_teamSize, true);
-				db.loadGameConfig(gt);
 			}
 			gt.setTeamSize(i_teamSize);
 			gt.setActive(true);
@@ -561,11 +560,9 @@ public class PickupLogic {
 		if (gt == null) return false;
 		
 		gt.addConfig(command);
-		
-		db.updateGametype(gt);
+
 		return true;
 	}
-	
 	public boolean cmdRemoveGameConfig(String gametype, String command) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
@@ -575,7 +572,6 @@ public class PickupLogic {
 		db.updateGametype(gt);
 		return true;
 	}
-	
 	public boolean cmdListGameConfig(DiscordChannel channel, String gametype) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;

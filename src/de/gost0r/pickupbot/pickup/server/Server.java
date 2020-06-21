@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -99,15 +97,41 @@ public class Server {
 
 	        string = string.replace("" + (char) 0, "");
 	        
-	        Thread.sleep(100);
+	        // Thread.sleep(100);
 	        return string;
 		} catch (IOException e) {
-			LOGGER.log(Level.WARNING, "Exception: ", e);
-		} catch (InterruptedException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
         return null;
 	}
+	
+	
+	public synchronized String pushRcon(String rconString) {
+		try {
+			if (this.socket.isClosed()) {
+				LOGGER.severe("SOCKET IS CLOSED");
+				connect();
+			}
+			String rcon = "xxxxrcon " + rconpassword + " " + rconString;
+			
+			byte[] sendBuffer = rcon.getBytes();
+			
+			sendBuffer[0] = (byte) 0xff;
+			sendBuffer[1] = (byte) 0xff;
+			sendBuffer[2] = (byte) 0xff;
+			sendBuffer[3] = (byte) 0xff;
+
+			LOGGER.fine(rcon);
+
+			DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, getInetIP(), port);
+			this.socket.send(sendPacket);
+
+		} catch (IOException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+        return null;
+	}
+	
 	
 	public void startMonitoring(Match match) {
 		if (this.monitor == null) {
@@ -179,6 +203,11 @@ public class Server {
 			// server is up bud rcon is wrong
 			status = ":yellow_circle: (Bad Rcon password)";
 		}
+		else if (rconStatusAck.contains("No rconpassword set on the server."))
+		{
+			// server is up bud rcon is wrong
+			status = ":yellow_circle: (No rconpassword set on the server)";
+		}
 		else
 		{
 			// urban terror server is down
@@ -186,7 +215,6 @@ public class Server {
 		}
 		
 		return status;
-	    
 	}
 
 	public String getAddress() {

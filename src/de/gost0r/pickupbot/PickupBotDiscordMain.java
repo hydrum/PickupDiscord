@@ -1,5 +1,6 @@
 package de.gost0r.pickupbot;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -42,7 +43,7 @@ public class PickupBotDiscordMain {
 			bot.init();
 			
 			// TEST: make admin chan to pub chan.
-			DiscordChannel targetChannel = DiscordChannel.findChannel("687958620755066938");
+		//	DiscordChannel targetChannel = DiscordChannel.findChannel("687958620755066938");
 		//	bot.sendMsg(targetChannel, "test");
 			
 //			if (!bot.logic.getChannelByType(PickupChannelType.PUBLIC).contains(targetChannel)) 

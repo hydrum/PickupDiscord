@@ -61,14 +61,8 @@ public class Database {
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS gametype ( gametype TEXT PRIMARY KEY,"
-													+ "config TEXT,"
 													+ "teamsize INTEGER, "
 													+ "active TEXT )";
-			stmt.executeUpdate(sql);
-			
-			sql = "CREATE TABLE IF NOT EXISTS gameconfig ( gametype TEXT,"
-													+ "config TEXT,"
-													+ "PRIMARY KEY (gametype, config) )";
 			stmt.executeUpdate(sql);
 			
 			sql = "CREATE TABLE IF NOT EXISTS map ( map TEXT,"
@@ -410,7 +404,6 @@ public class Database {
 			while (rs.next()) {
 				Gametype gametype = new Gametype(rs.getString("gametype"), rs.getInt("teamsize"), Boolean.valueOf(rs.getString("active")));
 				LOGGER.config(gametype.getName() + " active=" + gametype.getActive());
-				loadGameConfig(gametype);
 				gametypeList.add(gametype);
 			}
 		} catch (SQLException e) {
@@ -418,23 +411,8 @@ public class Database {
 		}
 		return gametypeList;
 	}
+
 	
-
-
-	public void loadGameConfig(Gametype gametype) {
-		try {
-			String sql = "SELECT config FROM gameconfig WHERE gametype=?";
-			PreparedStatement pstmt = c.prepareStatement(sql);
-			pstmt.setString(1, gametype.getName());
-			ResultSet rs = pstmt.executeQuery();
-			while (rs.next()) {
-				gametype.addConfig(rs.getString("config"));
-			}
-			LOGGER.config(gametype.getName() + " count=" + gametype.getConfig().size());
-		} catch (SQLException e) {
-			LOGGER.log(Level.WARNING, "Exception: ", e);
-		}
-	}
 
 	public List<GameMap> loadMaps() {
 		List<GameMap> maplist = new ArrayList<GameMap>();
@@ -788,7 +766,6 @@ public class Database {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 	}
-
 	
 	// need to check whether this is newly created or not
 	public void updateGametype(Gametype gt) {
@@ -809,25 +786,11 @@ public class Database {
 			pstmt.setString(2, String.valueOf(gt.getActive()));
 			pstmt.setString(3, gt.getName());
 			pstmt.executeUpdate();
-			sql = "DELETE FROM gameconfig WHERE gametype=?";
-			pstmt = c.prepareStatement(sql);
-			pstmt.setString(1, gt.getName());
-			pstmt.executeUpdate();
-			for (String config : gt.getConfig()) {
-				sql = "INSERT INTO gameconfig (gametype, config) VALUES (?, ?)";
-				pstmt = c.prepareStatement(sql);
-				pstmt.setString(1, gt.getName());
-				pstmt.setString(2, config);
-				pstmt.executeUpdate();
-			}
 			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}	
 	}
-	
-
-
 
 	public void removePlayer(Player player) {
 		try {

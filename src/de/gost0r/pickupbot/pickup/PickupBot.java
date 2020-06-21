@@ -32,8 +32,16 @@ public class PickupBot extends DiscordBot {
 		
 		// TEST
 		//Player p0 = Player.get("asloon");
+		/*
+		Player p1 = new Player(new DiscordUser("FakeUser1_OC", "FakeDiscordUser1", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer1");
+		p1.setCountry("NZ");
 		
+		Player p2 = new Player(new DiscordUser("FakeUser2_EU", "FakeDiscordUser1", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer1");
+		p2.setCountry("BE");
 		
+		Player p3 = new Player(new DiscordUser("FakeUser3_EU", "FakeDiscordUser1", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer1");
+		p3.setCountry("PL");
+		*/
 		/*
 		Player p1 = new Player(new DiscordUser("FakeUser1_EU", "FakeDiscordUser1", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer1");
 		p1.setRegion(Region.EU);
@@ -75,6 +83,14 @@ public class PickupBot extends DiscordBot {
 		logic.cmdAddPlayer(p8, list);
 		logic.cmdAddPlayer(p9, list);
 		logic.cmdAddPlayer(p0, list); */
+		
+		Gametype gt = logic.getGametypeByString("CTF");
+		List<Gametype> list = new ArrayList<Gametype>();
+		list.add(gt);
+	//	logic.cmdAddPlayer(p1, list);
+	//	logic.cmdAddPlayer(p2, list);
+	//	logic.cmdAddPlayer(p3, list);
+		
 	}
 	
 	@Override
