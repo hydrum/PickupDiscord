@@ -23,8 +23,8 @@ public class Config {
 	public static final String CMD_ENABLEGAMETYPE		= "!enablegametype";
 	public static final String CMD_DISABLEGAMETYPE		= "!disablegametype";
 
-	public static final String CMD_ADDGAMECONFIG		= "!addgameconfig";
-	public static final String CMD_REMOVEGAMECONFIG		= "!delgameconfig";
+	//public static final String CMD_ADDGAMECONFIG		= "!addgameconfig";
+	//public static final String CMD_REMOVEGAMECONFIG		= "!delgameconfig";
 	public static final String CMD_LISTGAMECONFIG		= "!showgameconfig";
 	
 	public static final String CMD_REGISTER				= "!register";
@@ -83,7 +83,7 @@ public class Config {
 	
 	public static final String USE_CMD_LOCK				= "!lock to prevent commands from PUBLIC channel";
 	public static final String USE_CMD_UNLOCK			= "!unlock";
-	public static final String USE_CMD_RESET			= "!reset <all/cur/id>";
+	public static final String USE_CMD_RESET			= "!reset <all/cur/type/id>";
 	public static final String USE_CMD_GETDATA			= "!getdata <id>";
 	public static final String USE_CMD_ENABLEMAP		= "!enablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_DISABLEMAP		= "!disablemap <ut4_map> <gametype>";
@@ -92,8 +92,8 @@ public class Config {
 	public static final String USE_CMD_ENABLEGAMETYPE	= "!enablegametype <name> <teamsize>";
 	public static final String USE_CMD_DISABLEGAMETYPE	= "!disablegametype <name>";
 	
-	public static final String USE_CMD_ADDGAMECONFIG	= "!addgameconfig <gametype> <string>";
-	public static final String USE_CMD_REMOVEGAMECONFIG	= "!delgameconfig <gametype> <string>";
+	//public static final String USE_CMD_ADDGAMECONFIG	= "!addgameconfig <gametype> <string>";
+	//public static final String USE_CMD_REMOVEGAMECONFIG	= "!delgameconfig <gametype> <string>";
 	public static final String USE_CMD_LISTGAMECONFIG	= "!showgameconfig <gametype>";
 	
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
@@ -130,7 +130,7 @@ public class Config {
 
 	//------------------------------------------------------------------------------------//
 
-	public static final String pkup_lock				= "This game is currently locked";
+	public static final String pkup_lock				= "Pickup games are currently locked";
 	public static final String pkup_map					= "You voted for .map..";
 	public static final String pkup_map_list			= "**.gametype.**: .maplist.";
 //	public static final String pkup_signup				= "You can sign up again!";
@@ -142,8 +142,8 @@ public class Config {
 //	public static final String pkup_started				= "**.gametype.**: Game has already started. .status. - .time. minutes in.";
 
 	public static final String pkup_reset_all 			= "*All matches have been reset.*";
-	public static final String pkup_reset_cur 			= "*The current matches have been reset.*";
-	public static final String pkup_reset_type 			= "*.gametype. has been reset.*";
+	public static final String pkup_reset_cur 			= "*The LIVE matches have been reset.*";
+	public static final String pkup_reset_type 			= "*.gametype. queue and matches have been reset.*";
 	public static final String pkup_reset_id 			= "*The match .id. has been reset.*";
 	
 	public static final String pkup_match_print_live	= "**[** Pickup Game #.gamenumber. **][** Live **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
@@ -181,7 +181,7 @@ public class Config {
 	public static final String pkup_surrender_cast		= "You have voted to surrender. **.num.** more teammate.s. needed.";
 	public static final String pkup_surrender_time		= "You cannot surrender this early. You still have to wait for .time..";
 			 
-	public static final String is_banned				= ".user. (.urtauth.) is suspended for .reason. and cannot participate for .time.";
+	public static final String is_banned				= ".user. (.urtauth.) is suspended .time. for .reason.";
 	public static final String is_unbanned				= ".user. (.urtauth.) is unbanned and can add for a match";
 	public static final String is_notbanned				= ".user. (.urtauth.) is not banned";
 	public static final String not_banned				= "No active bans found for .user. (.urtauth.)";
