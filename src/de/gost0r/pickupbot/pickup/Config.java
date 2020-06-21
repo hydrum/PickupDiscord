@@ -28,10 +28,10 @@ public class Config {
 	public static final String CMD_LISTGAMECONFIG		= "!showgameconfig";
 	
 	public static final String CMD_REGISTER				= "!register";
-	public static final String CMD_COUNTRY	    	    = "!region";
+	public static final String CMD_COUNTRY	    	    = "!country";
 	public static final String CMD_GETELO				= "!elo";
 	public static final String CMD_TOP_PLAYERS	    	= "!top10";
-	public static final String CMD_TOP_COUNTRY			= "!topcountry";
+	public static final String CMD_TOP_COUNTRIES			= "!topcountries";
 	
 	public static final String CMD_MATCH				= "!match";
 	
@@ -61,27 +61,27 @@ public class Config {
 	public static final String CMD_REMOVEROLE			= "!removerole";
 
 	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_LIVE + " " + CMD_MATCH + " "
-	+ CMD_MAP + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS + " " + CMD_SURRENDER
-	+ " " + CMD_BANINFO;
+	+ CMD_MAP + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS + " " + CMD_TOP_COUNTRIES
+	+ " " + CMD_BANINFO + " " + CMD_COUNTRY + " " + CMD_SURRENDER;
 	
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " "
 	+ CMD_ENABLEMAP + " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE
 	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_ADDBAN + " " + CMD_SHOWMATCHES
-	+ " " + CMD_UNREGISTER + " " + CMD_ADDGAMECONFIG + " " + CMD_REMOVEGAMECONFIG + " " + CMD_LISTGAMECONFIG;
+	+ " " + CMD_UNREGISTER  + " " + CMD_LISTGAMECONFIG + " " + CMD_UPDATESERVER + " " + CMD_ADDROLE + " " + CMD_REMOVEROLE + " " + CMD_ADDCHANNEL;
 		
 //------------------------------------------------------------------------------------//
 	
 
 	public static final String USE_CMD_ADD				= "!add <gametype>";
 	public static final String USE_CMD_REMOVE			= "!remove <gametype>";
-	public static final String USE_CMD_MAPS				= "!maps";
+	public static final String USE_CMD_MAPS				= "!maps displays the map list for each gametype";
 	public static final String USE_CMD_MAP				= "!map <gametype> <mapname>";
-	public static final String USE_CMD_STATUS			= "!status";
+	public static final String USE_CMD_STATUS			= "Type !status to get information on the queues";
 	public static final String USE_CMD_HELP				= "!help <command>";
-	public static final String USE_CMD_SURRENDER		= "!surrender";
-	public static final String USE_CMD_LIVE				= "!live";
+	public static final String USE_CMD_SURRENDER		= "Type !surrender to abandon your match.";
+	public static final String USE_CMD_LIVE				= "!live sends info on the live matches";
 	
-	public static final String USE_CMD_LOCK				= "!lock";
+	public static final String USE_CMD_LOCK				= "!lock to prevent commands from PUBLIC channel";
 	public static final String USE_CMD_UNLOCK			= "!unlock";
 	public static final String USE_CMD_RESET			= "!reset <all/cur/id>";
 	public static final String USE_CMD_GETDATA			= "!getdata <id>";
@@ -97,10 +97,11 @@ public class Config {
 	public static final String USE_CMD_LISTGAMECONFIG	= "!showgameconfig <gametype>";
 	
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
-	public static final String USE_CMD_REGION		    = "!region <YOUR COUNTRY CODE> See: https://datahub.io/core/country-list/r/0.html";
-	public static final String USE_CMD_CHANGE_REGION	= "!region <DiscordUser> <YOUR COUNTRY CODE> See: https://datahub.io/core/country-list/r/0.html";
+	public static final String USE_CMD_COUNTRY		    = "!country <COUNTRY CODE> See: https://datahub.io/core/country-list/r/0.html";
+	public static final String USE_CMD_CHANGE_COUNTRY	= "!country <DiscordUser> <COUNTRY CODE> See: https://datahub.io/core/country-list/r/0.html";
 	public static final String USE_CMD_GETELO			= "!elo </@DiscordUser|urtauth/>";
 	public static final String USE_CMD_TOP10			= "!top10";
+	public static final String USE_CMD_TOP_COUNTRIES			= "!topcountries";
 	public static final String USE_CMD_MATCH			= "!match <id>";
 	
 	//public static final String USE_CMD_REPORT			= "!report <qauth> <reason>";
@@ -109,12 +110,10 @@ public class Config {
 	
 	public static final String USE_CMD_ADDBAN			= "!ban <urtauth> <reason> <duration> (duration=1y1M1w1d1h1m1s)";
 	public static final String USE_CMD_REMOVEBAN		= "!unban <urtauth>";
-	
 	public static final String USE_CMD_BANINFO			= "!baninfo </@DiscordUser|urtauth/>";
 
 	public static final String USE_CMD_SHOWSERVERS		= "!showservers";
 	public static final String USE_CMD_ADDSERVER		= "!addserver <ip:port> <rcon>";
-	
 	public static final String USE_CMD_ENABLESERVER		= "!enableserver <id>";
 	public static final String USE_CMD_DISABLESERVER	= "!disableserver <id>";
 	public static final String USE_CMD_UPDATESERVER		= "!updateserver <id> <rcon>";
@@ -122,6 +121,11 @@ public class Config {
 	public static final String USE_CMD_SHOWMATCHES		= "!showmatches";
 	
 	public static final String USE_CMD_UNREGISTER		= "!unregister <urtauth>";
+	public static final String USE_CMD_ADDCHANNEL			= "!addchannel <#name> <public/admin>";
+	public static final String USE_CMD_REMOVECHANNEL		= "!removechannel <#name> <public/admin>";
+
+	public static final String USE_CMD_ADDROLE				= "!addrole <@role> <admin/superadmin>";
+	public static final String USE_CMD_REMOVEROLE			= "!removerole <@role> <admin/superadmin>";
 	
 
 	//------------------------------------------------------------------------------------//
