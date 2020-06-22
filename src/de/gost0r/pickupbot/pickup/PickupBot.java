@@ -356,7 +356,7 @@ public class PickupBot extends DiscordBot {
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
 					
-				case Config.CMD_TOP_COUNTRY: 
+				case Config.CMD_TOP_COUNTRIES: 
 					if (p != null)
 					{
 						if (data.length == 1)
@@ -383,7 +383,7 @@ public class PickupBot extends DiscordBot {
 					{
 						logic.cmdSetPlayerCountry(msg.user, data[1].toUpperCase());
 					}
-					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_REGION));
+					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_COUNTRY));
 					break;
 					
 				case Config.CMD_LIVE:
@@ -506,30 +506,6 @@ public class PickupBot extends DiscordBot {
 							else super.sendMsg(msg.channel, Config.admin_cmd_unsuccessful + msg.content);
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ENABLEGAMETYPE));
-						break;
-						
-					case Config.CMD_ADDGAMECONFIG:
-						if (data.length >= 3)
-						{
-							if (logic.cmdAddGameConfig(data[1], msg.content.substring(Config.CMD_ADDGAMECONFIG.length() + data[1].length() + 2)))
-							{
-								super.sendMsg(msg.channel, Config.admin_cmd_successful + msg.content);
-							}
-							else super.sendMsg(msg.channel, Config.admin_cmd_unsuccessful + msg.content);
-						}
-						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADDGAMECONFIG));
-						break;
-						
-					case Config.CMD_REMOVEGAMECONFIG:
-						if (data.length >= 3)
-						{
-							if (logic.cmdRemoveGameConfig(data[1], msg.content.substring(Config.CMD_REMOVEGAMECONFIG.length() + data[1].length() + 2)))
-							{
-								super.sendMsg(msg.channel, Config.admin_cmd_successful + msg.content);
-							}
-							else super.sendMsg(msg.channel, Config.admin_cmd_unsuccessful + msg.content);
-						}
-						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_REMOVEGAMECONFIG));
 						break;
 						
 					case Config.CMD_LISTGAMECONFIG:
@@ -720,7 +696,7 @@ public class PickupBot extends DiscordBot {
 							else sendMsg(msg.channel, Config.player_not_found);
 							
 						}
-						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_CHANGE_REGION));
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_CHANGE_COUNTRY));
 						break;
 				}
 			}
@@ -773,7 +749,7 @@ public class PickupBot extends DiscordBot {
 						case Config.CMD_SHOWMATCHES: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SHOWMATCHES)); break;
 						//case Config.CMD_ADDGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDGAMECONFIG)); break;
 						//case Config.CMD_REMOVEGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVEGAMECONFIG)); break;
-						case Config.CMD_LISTGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LISTGAMECONFIG)); break
+						case Config.CMD_LISTGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LISTGAMECONFIG)); break;
 						case Config.CMD_COUNTRY: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_COUNTRY)); break;
 						
 						default: super.sendMsg(msg.channel, Config.help_unknown); break;
