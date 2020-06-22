@@ -141,10 +141,10 @@ public class Config {
 //	public static final String pkup_status_players		= "**.gametype.**: Players [.playernumber./10]: .playerlist.";
 //	public static final String pkup_started				= "**.gametype.**: Game has already started. .status. - .time. minutes in.";
 
-	public static final String pkup_reset_all 			= "*All matches have been reset.*";
-	public static final String pkup_reset_cur 			= "*The LIVE matches have been reset.*";
-	public static final String pkup_reset_type 			= "*.gametype. queue and matches have been reset.*";
-	public static final String pkup_reset_id 			= "*The match .id. has been reset.*";
+	public static final String pkup_reset_all 			= "*All matches and queues have been reset.*";
+	public static final String pkup_reset_cur 			= "*All queues have been reset.*";
+	public static final String pkup_reset_type 			= "*.gametype. queue has been reset.*";
+	public static final String pkup_reset_id 			= "*Match #.id. has been reset.*";
 	
 	public static final String pkup_match_print_live	= "**[** Pickup Game #.gamenumber. **][** Live **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 	public static final String pkup_match_print_signup	= "**[** Pickup Game #--- **][** Signup **][** Gametype: .gametype. **][** .playernumber./.maxplayer. **][** Players: .playerlist. **]**";
@@ -154,7 +154,7 @@ public class Config {
 	public static final String pkup_match_print_abandon	= "**[** Pickup Game #.gamenumber. **][** Abandon **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 	public static final String pkup_match_print_sur		= "**[** Pickup Game #.gamenumber. **][** Surrender **][** Score: .score. **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 
-	public static final String pkup_match_print_info	= "#.gamenumber. - **.gametype.**: .map. **[** .ingame. **]** `.redteam.` **VS** `.blueteam.`";
+	public static final String pkup_match_print_info	= "**.gametype. #.gamenumber.**: **[**.map.**] [**.ingame.**] [**.redteam.**]** VS **[**.blueteam.**]**";
 	
 	public static final String pkup_go_admin			= "[ Pickup Game #.gamenumber. ][ Password: .password. ][ .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
 	public static final String pkup_go_player			= "UrTPickup starts now! Connect to the server, choose positions and ready up! [ /connect .server. ; password .password. ]";
@@ -162,7 +162,7 @@ public class Config {
 	public static final String pkup_go_pub_team			= ".team. team: .playerlist.";
 	public static final String pkup_go_pub_map			= "Map: .map.";
 	public static final String pkup_go_pub_calm			= "You will receive the connection info in DM.";
-	public static final String pkup_go_pub_sent			= "**.gametype.**: All connection info has been sent. Enjoy the match!";
+	public static final String pkup_go_pub_sent			= "**.gametype.**: All messages have been sent. Enjoy the match!";
 
 	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber. (.map.):";
 	public static final String pkup_aftermath_result	= ".team. .result. (.score.) -";
@@ -175,10 +175,10 @@ public class Config {
 	
 	public static final String pkup_getelo				= "#.position.\t **.rank.**\t .country.   **.urtauth.**\t .elo.\t .wdl.%";
 	public static final String pkup_getelo_country		= "#.position.\t .country.\t .elo.";
-	public static final String pkup_top10_header		= "**Top10 Players:**";
-	public static final String pkup_top5_header		    = "**Top5 Countries:**";
+	public static final String pkup_top10_header		= "**Top players:**";
+	public static final String pkup_top5_header		    = "**Top countries:**";
 	
-	public static final String pkup_surrender_cast		= "You have voted to surrender. **.num.** more teammate.s. needed.";
+	public static final String pkup_surrender_cast		= "You voted to surrender. **.num.** more teammate.s. needed.";
 	public static final String pkup_surrender_time		= "You cannot surrender this early. You still have to wait for .time..";
 			 
 	public static final String is_banned				= ".user. (.urtauth.) is suspended .time. for .reason.";
@@ -221,7 +221,7 @@ public class Config {
 
 	public static final String wrong_argument_amount	= "Wrong amount of arguments: `.cmd.`";
 	public static final String help_prefix				= "How to use the command: `.cmd.`";
-	public static final String help_cmd_avi				= "These commands are available (use `" + USE_CMD_HELP + "` for more info):\n`.cmds.`";
+	public static final String help_cmd_avi				= "Here is the command list (use `" + USE_CMD_HELP + "` for more info):\n`.cmds.`";
 	
 	public static final String help_unknown				= "I do not know that command.";
 
@@ -230,10 +230,10 @@ public class Config {
 
 	public static final String pkup_match_unavi 		= "Match is not available right now.";
 	public static final String pkup_match_invalid_gt	= "No match for that gametype is available right now.";
-	public static final String no_gt_found				= "Unable to find a matching gametype.";
+	public static final String no_gt_found				= "Unable to find a matching gametype. Try `!add ctf`";
 	
-	public static final String banreason_not_found		= "Banreason not found in .banreasons.";	
-	public static final String banduration_invalid		= "Ban duration invalid.";
+	public static final String banreason_not_found		= "Ban reason not found in .banreasons.";	
+	public static final String banduration_invalid		= "Invalid ban duration.";
 	
 	public static final String admin_cmd_successful		= "Successful: ";
 	public static final String admin_cmd_unsuccessful	= "Unsuccessful: ";
