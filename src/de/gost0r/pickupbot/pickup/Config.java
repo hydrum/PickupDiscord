@@ -97,8 +97,8 @@ public class Config {
 	public static final String USE_CMD_LISTGAMECONFIG	= "!showgameconfig <gametype>";
 	
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
-	public static final String USE_CMD_COUNTRY		    = "!country <COUNTRY CODE> See: https://datahub.io/core/country-list/r/0.html";
-	public static final String USE_CMD_CHANGE_COUNTRY	= "!country <DiscordUser> <COUNTRY CODE> See: https://datahub.io/core/country-list/r/0.html";
+	public static final String USE_CMD_COUNTRY		    = "!country <COUNTRY CODE> See:` <https://datahub.io/core/country-list/r/0.html>";
+	public static final String USE_CMD_CHANGE_COUNTRY	= "!country <DiscordUser> <COUNTRY CODE> See:` <https://datahub.io/core/country-list/r/0.html>";
 	public static final String USE_CMD_GETELO			= "!elo </@DiscordUser|urtauth/>";
 	public static final String USE_CMD_TOP10			= "!top10";
 	public static final String USE_CMD_TOP_COUNTRIES			= "!topcountries";
@@ -130,7 +130,7 @@ public class Config {
 
 	//------------------------------------------------------------------------------------//
 
-	public static final String pkup_lock				= "Pickup games are currently locked";
+	public static final String pkup_lock				= "Pickup games are now locked";
 	public static final String pkup_map					= "You voted for .map..";
 	public static final String pkup_map_list			= "**.gametype.**: .maplist.";
 //	public static final String pkup_signup				= "You can sign up again!";
@@ -184,7 +184,7 @@ public class Config {
 	public static final String is_banned				= ".user. (.urtauth.) is suspended .time. for .reason.";
 	public static final String is_unbanned				= ".user. (.urtauth.) is unbanned and can add for a match";
 	public static final String is_notbanned				= ".user. (.urtauth.) is not banned";
-	public static final String not_banned				= "No active bans found for .user. (.urtauth.)";
+	public static final String not_banned				= "No active bans found for .urtauth.";
 	public static final String map_not_found			= "Map not found.";
 	public static final String map_not_unique			= "Mapstring not unique.";
 	public static final String map_cannot_vote			= "You cannot vote right now.";
