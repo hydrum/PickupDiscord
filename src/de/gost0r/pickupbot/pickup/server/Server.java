@@ -201,17 +201,17 @@ public class Server {
 		else if (rconStatusAck.contains("Bad rconpassword"))
 		{
 			// server is up bud rcon is wrong
-			status = ":yellow_circle: (Bad Rcon password)";
+			status = ":yellow_circle: (bad rconpassword)";
 		}
 		else if (rconStatusAck.contains("No rconpassword set on the server."))
 		{
 			// server is up bud rcon is wrong
-			status = ":yellow_circle: (No rconpassword set on the server)";
+			status = ":yellow_circle: (no rconpassword set on the server)";
 		}
 		else
 		{
 			// urban terror server is down
-			status = ":red_circle: (Urban Terror Server is down)";
+			status = ":red_circle: (server down)";
 		}
 		
 		return status;
