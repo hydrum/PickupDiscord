@@ -194,7 +194,7 @@ public class PickupLogic {
 					}
 					else
 					{
-						bot.sendNotice(user, "Unknown county code. Look your corresponding two letter country code here : https://datahub.io/core/country-list/r/0.html");
+						bot.sendNotice(user, "Unknown county code. Look up your country code here: <https://datahub.io/core/country-list/r/0.html>");
 					}
 				}
 				else {
@@ -219,7 +219,7 @@ public class PickupLogic {
 		}
 		else
 		{
-			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), "Unknown county code. Look your corresponding two letter country code here : https://datahub.io/core/country-list/r/0.html");
+			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), "Unknown county code. Look up your country code here: <https://datahub.io/core/country-list/r/0.html>");
 		}	
 }
 	
