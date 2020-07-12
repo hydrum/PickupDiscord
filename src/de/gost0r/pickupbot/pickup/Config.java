@@ -157,11 +157,11 @@ public class Config {
 	public static final String pkup_match_print_info	= "**.gametype. #.gamenumber.**: **[**.map.**] [**.ingame.**] [**.redteam.**]** VS **[**.blueteam.**]**";
 	
 	public static final String pkup_go_admin			= "[ Pickup Game #.gamenumber. ][ Password: .password. ][ .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
-	public static final String pkup_go_player			= "UrTPickup starts now! Connect to the server, choose positions and ready up! [ /connect .server. ; password .password. ]";
+	public static final String pkup_go_player			= "Pickup starts now! Connect, choose positions and ready up! **[ /connect .server. ; password .password. ]**";
 	public static final String pkup_go_pub_head			= "**.gametype.**: Game #.gamenumber. (avg ELO: .elo.) is about to start!";
 	public static final String pkup_go_pub_team			= ".team. team: .playerlist.";
 	public static final String pkup_go_pub_map			= "Map: .map.";
-	public static final String pkup_go_pub_calm			= "You will receive the connection info in DM.";
+	public static final String pkup_go_pub_calm			= "You will receive the connection info by DM.";
 	public static final String pkup_go_pub_sent			= "**.gametype.**: All messages have been sent. Enjoy the match!";
 
 	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber. (.map.):";
@@ -179,25 +179,25 @@ public class Config {
 	public static final String pkup_top5_header		    = "**Top countries:**";
 	
 	public static final String pkup_surrender_cast		= "You voted to surrender. **.num.** more teammate.s. needed.";
-	public static final String pkup_surrender_time		= "You cannot surrender this early. You still have to wait for .time..";
+	public static final String pkup_surrender_time		= "You cannot surrender this early. Please wait .time..";
 			 
 	public static final String is_banned				= ".user. (.urtauth.) is suspended .time. for .reason.";
 	public static final String is_unbanned				= ".user. (.urtauth.) is unbanned and can add for a match";
-	public static final String is_notbanned				= ".user. (.urtauth.) is not banned";
+	public static final String is_notbanned				= ".urtauth. is not banned";
 	public static final String not_banned				= "No active bans found for .urtauth.";
 	public static final String map_not_found			= "Map not found.";
 	public static final String map_not_unique			= "Mapstring not unique.";
 	public static final String map_cannot_vote			= "You cannot vote right now.";
-	public static final String map_specify_gametype		= "You need to specify a gametype.";
+	public static final String map_specify_gametype		= "You need to specify a **gametype**.";
 
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
 	public static final String country_added	    	= "Your country has been set";
 
-	public static final String auth_taken_urtauth		= "This urtauth is already registered.";
+	public static final String auth_taken_urtauth		= "This **urtauth** is already registered.";
 	public static final String auth_taken_user			= "You have already registered an account.";
-	public static final String auth_invalid				= "Your urtauth seems to be invalid.";
-	public static final String auth_success				= "Your auth has been successfully linked to your account.";
+	public static final String auth_invalid				= "Your **urtauth** seems to be invalid.";
+	public static final String auth_success				= "Your **urtauth** has been linked to your account.";
 	public static final String auth_sent_key			= "You have to register your auth name and not your auth key!!!";
 
 	public static final String player_already_added		= "You are already added to a pickup game.";
@@ -237,5 +237,5 @@ public class Config {
 	
 	public static final String admin_cmd_successful		= "Successful: ";
 	public static final String admin_cmd_unsuccessful	= "Unsuccessful: ";
-	public static final String wait_testing_server      = "Testing server list. This could take a while...";
+	public static final String wait_testing_server      = "Testing server list. This can take a while...";
 }
