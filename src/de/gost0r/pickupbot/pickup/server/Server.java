@@ -200,7 +200,7 @@ public class Server {
 		}
 		else if (rconStatusAck.contains("Bad rconpassword"))
 		{
-			// server is up bud rcon is wrong
+			// server is up but rcon is wrong
 			status = ":yellow_circle: (bad rconpassword)";
 		}
 		else if (rconStatusAck.contains("No rconpassword set on the server."))

@@ -67,8 +67,8 @@ public class PickupLogic {
 		createCurrentMatches();
 		
 		banDuration = new HashMap<BanReason, String[]>();
-		banDuration.put(BanReason.NOSHOW, new String[] {"10m", "2h", "12h", "1d", "3d", "1w", "2w", "1M", "3M", "1y"});
-		banDuration.put(BanReason.RAGEQUIT, new String[] {"12h", "1d", "3d", "1w", "2w", "1M", "3M", "1y"});
+		banDuration.put(BanReason.NOSHOW, new String[] {"10m", "1h", "2h", "6h", "12h", "3d", "1w", "2w", "1M", "3M"});
+		banDuration.put(BanReason.RAGEQUIT, new String[] {"1h", "2h", "6h", "12h", "3d", "1w", "2w", "1M", "3M", "1y"});
 		
 		awaitingServer = new LinkedList<Match>();
 	}
@@ -194,12 +194,12 @@ public class PickupLogic {
 					}
 					else
 					{
-						bot.sendNotice(user, "Unknown county code. Look up your country code here: <https://datahub.io/core/country-list/r/0.html>");
+						bot.sendNotice(user, "Unknown county code. Look yours up here: <https://datahub.io/core/country-list/r/0.html>");
 					}
 				}
 				else {
 					// Region has been set by user, need an admin 
-					bot.sendNotice(user, "Your country code is already set to " + p.getRegion().toString());
+					bot.sendNotice(user, "Your country code is already set. Corresponding region: " + p.getRegion().toString());
 				}
 			} 
 			else {
@@ -219,7 +219,7 @@ public class PickupLogic {
 		}
 		else
 		{
-			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), "Unknown county code. Look up your country code here: <https://datahub.io/core/country-list/r/0.html>");
+			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), "Unknown county code. Look yours up here: <https://datahub.io/core/country-list/r/0.html>");
 		}	
 }
 	

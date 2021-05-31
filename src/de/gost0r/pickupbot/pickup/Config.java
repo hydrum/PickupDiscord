@@ -28,10 +28,10 @@ public class Config {
 	public static final String CMD_LISTGAMECONFIG		= "!showgameconfig";
 	
 	public static final String CMD_REGISTER				= "!register";
-	public static final String CMD_COUNTRY	    	    = "!country";
+	public static final String CMD_COUNTRY				= "!country";
 	public static final String CMD_GETELO				= "!elo";
-	public static final String CMD_TOP_PLAYERS	    	= "!top10";
-	public static final String CMD_TOP_COUNTRIES			= "!topcountries";
+	public static final String CMD_TOP_PLAYERS			= "!top10";
+	public static final String CMD_TOP_COUNTRIES		= "!topcountries";
 	
 	public static final String CMD_MATCH				= "!match";
 	
@@ -67,7 +67,7 @@ public class Config {
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " "
 	+ CMD_ENABLEMAP + " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE
 	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_ADDBAN + " " + CMD_SHOWMATCHES
-	+ " " + CMD_UNREGISTER  + " " + CMD_LISTGAMECONFIG + " " + CMD_UPDATESERVER + " " + CMD_ADDROLE + " " + CMD_REMOVEROLE + " " + CMD_ADDCHANNEL;
+	+ " " + CMD_UNREGISTER  + " " + CMD_UPDATESERVER + " " + CMD_ADDROLE + " " + CMD_REMOVEROLE + " " + CMD_ADDCHANNEL;
 		
 //------------------------------------------------------------------------------------//
 	
@@ -84,7 +84,7 @@ public class Config {
 	public static final String USE_CMD_LOCK				= "!lock to prevent commands from PUBLIC channel";
 	public static final String USE_CMD_UNLOCK			= "!unlock";
 	public static final String USE_CMD_RESET			= "!reset <all/cur/type/id>";
-	public static final String USE_CMD_GETDATA			= "!getdata <id>";
+	public static final String USE_CMD_GETDATA			= "!getdata <serverid>";
 	public static final String USE_CMD_ENABLEMAP		= "!enablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_DISABLEMAP		= "!disablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_RCON				= "!rcon <serverid> <rconstring>";
@@ -97,11 +97,11 @@ public class Config {
 	public static final String USE_CMD_LISTGAMECONFIG	= "!showgameconfig <gametype>";
 	
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
-	public static final String USE_CMD_COUNTRY		    = "!country <COUNTRY CODE> See:` <https://datahub.io/core/country-list/r/0.html>";
+	public static final String USE_CMD_COUNTRY			= "!country <COUNTRY CODE> See:` <https://datahub.io/core/country-list/r/0.html>";
 	public static final String USE_CMD_CHANGE_COUNTRY	= "!country <DiscordUser> <COUNTRY CODE> See:` <https://datahub.io/core/country-list/r/0.html>";
 	public static final String USE_CMD_GETELO			= "!elo </@DiscordUser|urtauth/>";
 	public static final String USE_CMD_TOP10			= "!top10";
-	public static final String USE_CMD_TOP_COUNTRIES			= "!topcountries";
+	public static final String USE_CMD_TOP_COUNTRIES	= "!topcountries";
 	public static final String USE_CMD_MATCH			= "!match <id>";
 	
 	//public static final String USE_CMD_REPORT			= "!report <qauth> <reason>";
@@ -113,7 +113,7 @@ public class Config {
 	public static final String USE_CMD_BANINFO			= "!baninfo </@DiscordUser|urtauth/>";
 
 	public static final String USE_CMD_SHOWSERVERS		= "!showservers";
-	public static final String USE_CMD_ADDSERVER		= "!addserver <ip:port> <rcon>";
+	public static final String USE_CMD_ADDSERVER		= "!addserver <ip:port> <rcon> <region>";
 	public static final String USE_CMD_ENABLESERVER		= "!enableserver <id>";
 	public static final String USE_CMD_DISABLESERVER	= "!disableserver <id>";
 	public static final String USE_CMD_UPDATESERVER		= "!updateserver <id> <rcon>";
@@ -141,7 +141,7 @@ public class Config {
 //	public static final String pkup_status_players		= "**.gametype.**: Players [.playernumber./10]: .playerlist.";
 //	public static final String pkup_started				= "**.gametype.**: Game has already started. .status. - .time. minutes in.";
 
-	public static final String pkup_reset_all 			= "*All matches and queues have been reset.*";
+	public static final String pkup_reset_all 			= "*All live matches and queues have been reset.*";
 	public static final String pkup_reset_cur 			= "*All queues have been reset.*";
 	public static final String pkup_reset_type 			= "*.gametype. queue has been reset.*";
 	public static final String pkup_reset_id 			= "*Match #.id. has been reset.*";
@@ -176,7 +176,7 @@ public class Config {
 	public static final String pkup_getelo				= "#.position.\t **.rank.**\t .country.   **.urtauth.**\t .elo.\t .wdl.%";
 	public static final String pkup_getelo_country		= "#.position.\t .country.\t .elo.";
 	public static final String pkup_top10_header		= "**Top players:**";
-	public static final String pkup_top5_header		    = "**Top countries:**";
+	public static final String pkup_top5_header			= "**Top countries:**";
 	
 	public static final String pkup_surrender_cast		= "You voted to surrender. **.num.** more teammate.s. needed.";
 	public static final String pkup_surrender_time		= "You cannot surrender this early. Please wait .time..";
@@ -192,7 +192,7 @@ public class Config {
 
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
-	public static final String country_added	    	= "Your country has been set";
+	public static final String country_added			= "Your country has been set";
 
 	public static final String auth_taken_urtauth		= "This **urtauth** is already registered.";
 	public static final String auth_taken_user			= "You have already registered an account.";
@@ -204,7 +204,7 @@ public class Config {
 	public static final String player_already_removed	= "You are not added to any pickup game.";
 	public static final String player_cannot_add		= "You cannot add right now.";
 	public static final String player_cannot_remove		= "You cannot remove.";
-	public static final String player_not_in_match		= "You are currently not in a match.";
+	public static final String player_not_in_match		= "You are not added to any queue.";
 	public static final String player_already_match		= "You are already in a match.";
 
 	public static final String player_already_surrender	= "You have already surrendered.";
@@ -225,7 +225,7 @@ public class Config {
 	
 	public static final String help_unknown				= "I do not know that command.";
 
-	public static final String lock_enable				= "*Game is LOCKED.*";
+	public static final String lock_enable				= "*Game is LOCKED.* :lock:";
 	public static final String lock_disable				= "*Game is now unlocked.*";
 
 	public static final String pkup_match_unavi 		= "Match is not available right now.";
@@ -235,7 +235,7 @@ public class Config {
 	public static final String banreason_not_found		= "Ban reason not found in .banreasons.";	
 	public static final String banduration_invalid		= "Invalid ban duration.";
 	
-	public static final String admin_cmd_successful		= "Successful: ";
-	public static final String admin_cmd_unsuccessful	= "Unsuccessful: ";
-	public static final String wait_testing_server      = "Testing server list. This can take a while...";
+	public static final String admin_cmd_successful		= ":white_check_mark: Successful: ";
+	public static final String admin_cmd_unsuccessful	= ":x: Unsuccessful: ";
+	public static final String wait_testing_server		= "Testing server list. This can take a while...";
 }
