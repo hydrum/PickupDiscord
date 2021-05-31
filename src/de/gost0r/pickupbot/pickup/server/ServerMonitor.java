@@ -142,7 +142,6 @@ public class ServerMonitor implements Runnable {
 				if (state == ServerState.WARMUP || state == ServerState.LIVE) {
 					server.sendRcon("restart"); // restart map
 					server.sendRcon("startserverdemo all");
-
 				}
 			} else if (timeleft < -300000L) { // if noshow timer ran out twice
 				// we're way over time to accurately log a noshow, therefore simply abandon
@@ -189,7 +188,6 @@ public class ServerMonitor implements Runnable {
 				timeleft = (earliestLeaver + 300000L) - System.currentTimeMillis(); // 5min
 				server.sendRcon("restart"); // restart map
 				server.sendRcon("startserverdemo all");
-
 			} else if (state == ServerState.LIVE) {
 				if (getRemainingSeconds() < 90 && isLastHalf()) {
 					LOGGER.warning(getRemainingSeconds() + "s remaining, don't report.");
