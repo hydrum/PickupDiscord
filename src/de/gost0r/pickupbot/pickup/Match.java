@@ -15,8 +15,8 @@ import de.gost0r.pickupbot.pickup.server.Server;
 import de.gost0r.pickupbot.pickup.server.ServerMonitor.ServerState;
 
 public class Match implements Runnable {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-	
+	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
 	private Gametype gametype;
 	private MatchState state;
 	private int id;
@@ -24,25 +24,25 @@ public class Match implements Runnable {
 	private Map<String, List<Player>> teamList;
 	private Map<GameMap, Integer> mapVotes;
 	private Map<Player, MatchStats> playerStats = new HashMap<Player, MatchStats>();
-	
+
 	private Server server;
 	private GameMap map;
 	private int[] elo = new int[2];	
 	private int[] score = new int[2];
-	
+
 	private int[] surrender;
-	
+
 	private long startTime;
-	
+
 	private PickupLogic logic;
-	
+
 	private Match() {
 		teamList = new HashMap<String, List<Player>>();
 		teamList.put("red", new ArrayList<Player>());
 		teamList.put("blue", new ArrayList<Player>());
 		mapVotes = new HashMap<GameMap, Integer>();
 	}
-	
+
 	public Match(PickupLogic logic, Gametype gametype, List<GameMap> maplist) {
 		this();
 		this.logic = logic;
@@ -148,7 +148,7 @@ public class Match implements Runnable {
 			logic.bot.sendNotice(player.getDiscordUser(), Config.map_cannot_vote);
 		}
 	}
-	
+
 	public void voteSurrender(Player player) {
 		long timeUntilSurrender = (startTime + 600000L) - System.currentTimeMillis(); // 10min in milliseconds
 		if (timeUntilSurrender < 0) {
@@ -177,7 +177,7 @@ public class Match implements Runnable {
 			logic.bot.sendNotice(player.getDiscordUser(), msg);
 		}
 	}
-	
+
 	public void checkSurrender() {
 		for (int i = 0; i < 2; ++i) {
 			if (surrender[i] <= 0) {
@@ -194,7 +194,7 @@ public class Match implements Runnable {
 			}
 		}
 	}
-	
+
 	public void checkReadyState(Player player) {
 		if (playerStats.keySet().size() == gametype.getTeamSize() * 2) {
 			state = MatchState.AwaitingServer;
@@ -206,7 +206,7 @@ public class Match implements Runnable {
 			logic.cmdStatus(this, player, true);
 		}
 	}
-	
+
 	public void checkServerState() {
 		if (state == MatchState.AwaitingServer && playerStats.keySet().size() != gametype.getTeamSize() * 2) {
 			state = MatchState.Signup;
@@ -242,7 +242,7 @@ public class Match implements Runnable {
 		logic.matchStarted(this);
 		logic.matchRemove(this);
 	}
-	
+
 	private void cleanUp() {
 		for(Player p : playerStats.keySet()) {
 			p.resetVotes();
@@ -251,7 +251,7 @@ public class Match implements Runnable {
 
 		logic.matchEnded(this);
 	}
-	
+
 	private void sendAftermath() {
 		String fullmsg = Config.pkup_aftermath_head;
 		fullmsg = fullmsg.replace(".gametype.", gametype.getName());
@@ -293,7 +293,7 @@ public class Match implements Runnable {
 		
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg);
 	}
-	
+
 	private void sendAftermath(Status status, List<Player> involvedPlayers) {
 		String fullmsg = Config.pkup_aftermath_head;
 		fullmsg = fullmsg.replace(".gametype.", gametype.getName());
@@ -322,7 +322,7 @@ public class Match implements Runnable {
 		
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg);
 	}
-	
+
 	public void launch(Server server) {
 
 		if (!isOver() && state != MatchState.Live) {
@@ -402,11 +402,11 @@ public class Match implements Runnable {
 			teamList.get("blue").add(sortPlayers.get(i*2+1));
 			teamList.get("blue").add(sortPlayers.get(((gametype.getTeamSize()*2)-1)-i*2-1));
 		}
-		
+
 		if ((gametype.getTeamSize() % 2) == 1) {
 			int better = gametype.getTeamSize() - 1;
 			int worse = gametype.getTeamSize();
-			
+
 			// compute avg elo up till now
 			elo = new int[] {0, 0};
 			for (Player p : teamList.get("red")) elo[0] += p.getElo();
@@ -422,7 +422,7 @@ public class Match implements Runnable {
 				teamList.get("blue").add(sortPlayers.get(worse));
 			}
 		}
-		
+
 		// avg elo
 		elo = new int[] {0, 0};
 		for (Player p : teamList.get("red")) elo[0] += p.getElo();
@@ -432,27 +432,27 @@ public class Match implements Runnable {
 
 		LOGGER.info("Team Red: " + elo[0] + " " + Arrays.toString(teamList.get("red").toArray()));
 		LOGGER.info("Team Blue: " + elo[1] + " " + Arrays.toString(teamList.get("blue").toArray()));
-		
+
 		id = logic.db.createMatch(this);
-		
+
 		// MESSAGE HYPE
-		
-		
+
+
 //			String msg = Config.pkup_go_admin.replace(".elored.", String.valueOf(elo[0]));
 //			msg = msg.replace(".eloblue.", String.valueOf(elo[1]));
 //			msg = msg.replace(".gamenumber.", String.valueOf(id));
 //			msg = msg.replace(".password.", server.password);
 //			msg = msg.replace(".map.", this.map.name);
 //			logic.bot.sendMsg(logic.bot.adminchan, msg);
-		
+
 		String fullmsg = "";
-		
+
 		String msg = Config.pkup_go_pub_head;
 		msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
 		msg = msg.replace(".gamenumber.", String.valueOf(id));
 		msg = msg.replace(".gametype.", gametype.getName());
 		fullmsg = msg;
-		
+
 		msg = Config.pkup_map_list;
 		msg = msg.replace(".gametype.", gametype.getName());			
 		if (getMostMapVotes().size() == mapVotes.keySet().size()) {
@@ -462,7 +462,7 @@ public class Match implements Runnable {
 			msg = msg.replace(".maplist.", getMapVotes(true));
 		}
 		fullmsg += "\n" + msg;
-		
+
 		String[] teamname = {"Red", "Blue"};
 		for (String team : teamname) {
 			String playernames = "";
@@ -478,7 +478,7 @@ public class Match implements Runnable {
 			msg = msg.replace(".playerlist.", playernames);
 			fullmsg += "\n" + msg;
 		}
-		
+
 		msg = Config.pkup_go_pub_map;
 		msg = msg.replace(".map.", this.map.name);
 		msg = msg.replace(".gametype.", gametype.getName());
@@ -487,7 +487,7 @@ public class Match implements Runnable {
 		msg = Config.pkup_go_pub_calm;
 		msg = msg.replace(".gametype.", gametype.getName());
 		fullmsg += "\n" + msg;
-		
+
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg);
 
 		msg = Config.pkup_go_player;
@@ -499,7 +499,7 @@ public class Match implements Runnable {
 				logic.bot.sendMsg(player.getDiscordUser(), msg_t);
 			}
 		}
-		
+
 		msg = Config.pkup_go_pub_sent;
 		msg = msg.replace(".gametype.", gametype.getName());
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), msg);
@@ -515,7 +515,7 @@ public class Match implements Runnable {
 		
 		server.startMonitoring(this);;
 	}
-	
+
 	List<GameMap> getMostMapVotes() {
 		List<GameMap> mapList = new ArrayList<GameMap>();
 		int currentVotes = -1;
@@ -536,7 +536,7 @@ public class Match implements Runnable {
 		}
 		return mapList;
 	}
-	
+
 	public String getMapVotes(boolean skipNull) {
 		
 		List<GameMap> mostMapVotes = getMostMapVotes();
@@ -556,19 +556,19 @@ public class Match implements Runnable {
 		}
 		return msg;
 	}
-	
+
 	public boolean isOver() {
 		return state == MatchState.Done || state == MatchState.Abort || state == MatchState.Abandon || state == MatchState.Surrender;
 	}
-	
+
 	public MatchState getMatchState() {
 		return state;
 	}
-	
+
 	public Gametype getGametype() {
 		return gametype;
 	}
-	
+
 	public boolean isInMatch(Player player) {
 		return playerStats.containsKey(player);
 	}
@@ -584,7 +584,7 @@ public class Match implements Runnable {
 	public void setID(int id) {
 		this.id = id;
 	}
-	
+
 	public void setLogic(PickupLogic logic) {
 		this.logic = logic;
 	}
@@ -604,7 +604,7 @@ public class Match implements Runnable {
 	public GameMap getMap() {
 		return map;
 	}
-	
+
 	public int[] getElo() {
 		return elo;
 	}
@@ -616,7 +616,7 @@ public class Match implements Runnable {
 	public int getEloBlue() {
 		return elo[1];
 	}
-	
+
 	public void setScore(int[] score) {
 		this.score = score;
 	}
@@ -649,7 +649,7 @@ public class Match implements Runnable {
 	public int getScoreRed() {
 		return score[0];
 	}
-	
+
 	public int getScoreBlue() {
 		return score[1];
 	}
@@ -661,7 +661,7 @@ public class Match implements Runnable {
 	public int getPlayerCount() {
 		return playerStats.keySet().size();
 	}
-	
+
 	public String getIngameInfo() {
 		String info;
 		if (state == MatchState.Live) {
@@ -678,7 +678,7 @@ public class Match implements Runnable {
 		}
 		return info;
 	}
-	
+
 	public String getMatchInfo() {
 		
 		String redplayers = "None";
@@ -704,13 +704,13 @@ public class Match implements Runnable {
 		msg = msg.replace(".map.", map != null ? map.name : "null");
 		msg = msg.replace(".redteam.", redplayers);
 		msg = msg.replace(".blueteam.", blueplayers);
-		
+
 
 		msg = msg.replace(".ingame.", getIngameInfo());
-		
+
 		return msg;
 	}
-	
+
 	public Region getPreferredServerRegion() {
 		Map<Region, Float> playerRegionPercentage= new HashMap<Region, Float>();
 		
@@ -738,7 +738,7 @@ public class Match implements Runnable {
 			}
 		}
 		
-		// If region percentage has more than 70% players, it is the majoritary region
+		// If region percentage has more than 60% players, it is the majoritary region
 		if(bestRegionPercentage >= 70.0)
 		{
 			return RegionMajoritary;
@@ -748,17 +748,17 @@ public class Match implements Runnable {
 		{
 			return Region.EU;
 		}
-		// If there are 50% EU players
-		else if (playerRegionPercentage.get(Region.EU) == 50.0 )
-		{
-			return Region.NA;
-		}
-		// Case when it is NA team vs EU team with more EU players and with at least one exotic player
-		else if (playerRegionPercentage.get(Region.EU) >= 60.0 && ( (playerRegionPercentage.get(Region.SA) >= percentPlayer) ||
-																	(playerRegionPercentage.get(Region.OC) >= percentPlayer) ||
-																	(playerRegionPercentage.get(Region.AS) >= percentPlayer) ||
+		// If there are 50% EU players and at least one exotic player
+		else if (playerRegionPercentage.get(Region.EU) == 50.0 && ( (playerRegionPercentage.get(Region.AF) >= percentPlayer) ||
 																	(playerRegionPercentage.get(Region.AN) >= percentPlayer) ||
-																	(playerRegionPercentage.get(Region.AF) >= percentPlayer))) {
+																	(playerRegionPercentage.get(Region.AS) >= percentPlayer)))
+		{
+			return Region.EU;
+		}
+		// If there are 50% EU players and at least one Oceanic or Latino player
+		else if (playerRegionPercentage.get(Region.EU) >= 60.0 && ( (playerRegionPercentage.get(Region.SA) >= percentPlayer) ||
+																	(playerRegionPercentage.get(Region.OC) >= percentPlayer)))
+		{
 			return Region.NA;
 		}
 		else

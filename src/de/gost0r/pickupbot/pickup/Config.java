@@ -60,9 +60,9 @@ public class Config {
 	public static final String CMD_ADDROLE				= "!addrole";
 	public static final String CMD_REMOVEROLE			= "!removerole";
 
-	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_LIVE + " " + CMD_MATCH + " "
-	+ CMD_MAP + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS + " " + CMD_TOP_COUNTRIES
-	+ " " + CMD_BANINFO + " " + CMD_COUNTRY + " " + CMD_SURRENDER;
+	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_MAP + " " + CMD_MATCH + " "
+	+ CMD_LIVE + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS + " " + CMD_TOP_COUNTRIES
+	+ " " + CMD_BANINFO + " " + CMD_COUNTRY + " " + CMD_SURRENDER + " " + CMD_BANINFO;
 	
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " "
 	+ CMD_ENABLEMAP + " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE
@@ -84,7 +84,7 @@ public class Config {
 	public static final String USE_CMD_LOCK				= "!lock to prevent commands from PUBLIC channel";
 	public static final String USE_CMD_UNLOCK			= "!unlock";
 	public static final String USE_CMD_RESET			= "!reset <all/cur/type/id>";
-	public static final String USE_CMD_GETDATA			= "!getdata <serverid>";
+	public static final String USE_CMD_GETDATA			= "!getdata <match id>";
 	public static final String USE_CMD_ENABLEMAP		= "!enablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_DISABLEMAP		= "!disablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_RCON				= "!rcon <serverid> <rconstring>";
@@ -121,11 +121,11 @@ public class Config {
 	public static final String USE_CMD_SHOWMATCHES		= "!showmatches";
 	
 	public static final String USE_CMD_UNREGISTER		= "!unregister <urtauth>";
-	public static final String USE_CMD_ADDCHANNEL			= "!addchannel <#name> <public/admin>";
-	public static final String USE_CMD_REMOVECHANNEL		= "!removechannel <#name> <public/admin>";
+	public static final String USE_CMD_ADDCHANNEL		= "!addchannel <#name> <public/admin>";
+	public static final String USE_CMD_REMOVECHANNEL	= "!removechannel <#name> <public/admin>";
 
-	public static final String USE_CMD_ADDROLE				= "!addrole <@role> <admin/superadmin>";
-	public static final String USE_CMD_REMOVEROLE			= "!removerole <@role> <admin/superadmin>";
+	public static final String USE_CMD_ADDROLE			= "!addrole <@role> <admin/superadmin>";
+	public static final String USE_CMD_REMOVEROLE		= "!removerole <@role> <admin/superadmin>";
 	
 
 	//------------------------------------------------------------------------------------//
@@ -135,13 +135,13 @@ public class Config {
 	public static final String pkup_map_list			= "**.gametype.**: .maplist.";
 //	public static final String pkup_signup				= "You can sign up again!";
 	public static final String pkup_pw					= "[ /connect .server. ; password .password. ]";
-	public static final String pkup_status_noone		= "**.gametype.**: Nobody has signed up. Type `" + USE_CMD_ADD + "` to play.";
+	public static final String pkup_status_noone		= "**.gametype.**: Nobody signed up. Type `" + USE_CMD_ADD + "` to play.";
 	public static final String pkup_status_signup		= "**.gametype.**: Sign up: [.playernumber./.maxplayer.] .playerlist.";
 	public static final String pkup_status_server		= "**.gametype.**: Awaiting available server.";
 //	public static final String pkup_status_players		= "**.gametype.**: Players [.playernumber./10]: .playerlist.";
 //	public static final String pkup_started				= "**.gametype.**: Game has already started. .status. - .time. minutes in.";
 
-	public static final String pkup_reset_all 			= "*All live matches and queues have been reset.*";
+	public static final String pkup_reset_all 			= "*All matches and queues have been reset.*";
 	public static final String pkup_reset_cur 			= "*All queues have been reset.*";
 	public static final String pkup_reset_type 			= "*.gametype. queue has been reset.*";
 	public static final String pkup_reset_id 			= "*Match #.id. has been reset.*";
@@ -182,13 +182,13 @@ public class Config {
 	public static final String pkup_surrender_time		= "You cannot surrender this early. Please wait .time..";
 			 
 	public static final String is_banned				= ".user. (.urtauth.) is suspended .time. for .reason.";
-	public static final String is_unbanned				= ".user. (.urtauth.) is unbanned and can add for a match";
-	public static final String is_notbanned				= ".urtauth. is not banned";
+	public static final String is_unbanned				= ".user. (.urtauth.) is unbanned.";
+	public static final String is_notbanned				= ".urtauth. is not banned (yet)";
 	public static final String not_banned				= "No active bans found for .urtauth.";
 	public static final String map_not_found			= "Map not found.";
 	public static final String map_not_unique			= "Mapstring not unique.";
 	public static final String map_cannot_vote			= "You cannot vote right now.";
-	public static final String map_specify_gametype		= "You need to specify a **gametype**.";
+	public static final String map_specify_gametype		= "Please use: **!map <gametype> <map>**.";
 
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
@@ -209,7 +209,7 @@ public class Config {
 
 	public static final String player_already_surrender	= "You have already surrendered.";
 	
-	public static final String afk_reminder				= "[*AFK CHECK*] .user. will be removed in 5 minutes.";
+	public static final String afk_reminder				= "[*AFK*] .user. will be removed in 5 minutes.";
 
 //	public static final String report_wrong_arg			= "Your report reason is invalid, check !reportlist to check the possible reasons.";
 //	public static final String report_invalid_urtauth	= "No player could be found with this urtauth.";
@@ -232,8 +232,8 @@ public class Config {
 	public static final String pkup_match_invalid_gt	= "No match for that gametype is available right now.";
 	public static final String no_gt_found				= "Unable to find a matching gametype. Try `!add ctf`";
 	
-	public static final String banreason_not_found		= "Ban reason not found in .banreasons.";	
-	public static final String banduration_invalid		= "Invalid ban duration.";
+	public static final String banreason_not_found		= "Please use one of the following ban reasons: .banreasons.";	
+	public static final String banduration_invalid		= "Invalid ban duration. (duration=1y1M1w1d1h1m1s)";
 	
 	public static final String admin_cmd_successful		= ":white_check_mark: Successful: ";
 	public static final String admin_cmd_unsuccessful	= ":x: Unsuccessful: ";
