@@ -626,7 +626,7 @@ public class ServerMonitor implements Runnable {
 	private void endGame() throws Exception {
 		calcStats();
 		match.end();
-		match.getServer().sendRcon("uploadserverdemo now");
+		match.getServer().sendRcon("uploadserverdemo now"); //tarquas google demo upload (prolly needs to be reworked)
 		stop();
 	}
 	
