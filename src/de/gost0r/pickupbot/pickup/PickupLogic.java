@@ -889,13 +889,15 @@ public class PickupLogic {
 		}
 		
 		for (Player p : playerList) {
-			long latestAFKmsg = p.getDiscordUser().statusChangeTime > p.getLastMessage() ? p.getDiscordUser().statusChangeTime : p.getLastMessage();
-			long afkKickTime = latestAFKmsg + 30 * 60 * 1000;
-			long afkReminderTime = latestAFKmsg + 25 * 60 * 1000;
-			if (afkKickTime < System.currentTimeMillis() && isPlayerStatusAFK(p)) {
+			//long latestAFKmsg = p.getDiscordUser().statusChangeTime > p.getLastMessage() ? p.getDiscordUser().statusChangeTime : p.getLastMessage();
+			long latestAFKmsg = p.getLastMessage();
+			long afkKickTime = latestAFKmsg + 20 * 60 * 1000;
+			long afkReminderTime = latestAFKmsg + 17 * 60 * 1000;
+			
+			if (afkKickTime < System.currentTimeMillis()) {
 				LOGGER.info("AFK: REMOVE - " + p.getUrtauth() + ": " + afkKickTime + " > " + System.currentTimeMillis());
 				cmdRemovePlayer(p, null);
-			} else if (afkReminderTime < System.currentTimeMillis() && !p.getAfkReminderSent() && isPlayerStatusAFK(p)) {
+			} else if (afkReminderTime < System.currentTimeMillis() && !p.getAfkReminderSent()) {
 				p.setAfkReminderSent(true);
 				LOGGER.info("AFK: REMINDER - " + p.getUrtauth() + ": " + afkKickTime + " > " + System.currentTimeMillis());
 				String msg = Config.afk_reminder;
@@ -906,9 +908,6 @@ public class PickupLogic {
 		}
 	}
 	
-	private boolean isPlayerStatusAFK(Player player) {
-		return player.getDiscordUser().status != DiscordUserStatus.online;
-	}
 	
 	public void autoBanPlayer(Player player, BanReason reason) {
 		String[] durationString = banDuration.get(reason);

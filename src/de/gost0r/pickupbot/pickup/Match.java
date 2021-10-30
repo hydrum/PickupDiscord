@@ -341,7 +341,7 @@ public class Match implements Runnable {
 			
 			logic.matchStarted(this);
 			
-			logic.cmdStatus();
+			//logic.cmdStatus();
 			
 			// do important changes that affect possibly other matches/servers/playerlists outside the thread!
 			

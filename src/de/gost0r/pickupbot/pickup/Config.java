@@ -209,7 +209,7 @@ public class Config {
 
 	public static final String player_already_surrender	= "You have already surrendered.";
 	
-	public static final String afk_reminder				= "[*AFK CHECK*] .user. will be removed in 5 minutes.";
+	public static final String afk_reminder				= "[*AFK CHECK*] .user. will be removed in 3 minutes. Write something in the channel to stay in queue.";
 
 //	public static final String report_wrong_arg			= "Your report reason is invalid, check !reportlist to check the possible reasons.";
 //	public static final String report_invalid_urtauth	= "No player could be found with this urtauth.";
