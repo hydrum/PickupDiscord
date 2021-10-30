@@ -15,19 +15,19 @@ import de.gost0r.pickupbot.pickup.Region;
 
 public class Server {
 	
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-	public int id;
-	
-	public String IP;
-	public int port;
-	public String rconpassword;
-	public String password;
-	public boolean active;
-	public Region region;
-		
+	public int		id;
+
+	public String	IP;
+	public int		port;
+	public String	rconpassword;
+	public String	password;
+	public boolean	active;
+	public Region	region;
+
 	private boolean taken = false;
-	
+
 	private DatagramSocket socket;
 	
 	private ServerMonitor monitor;
@@ -63,10 +63,10 @@ public class Server {
 				connect();
 			}
 			String rcon = "xxxxrcon " + rconpassword + " " + rconString;
-			
+
 			byte[] recvBuffer = new byte[2048];
 			byte[] sendBuffer = rcon.getBytes();
-			
+
 			sendBuffer[0] = (byte) 0xff;
 			sendBuffer[1] = (byte) 0xff;
 			sendBuffer[2] = (byte) 0xff;
@@ -79,33 +79,33 @@ public class Server {
 			this.socket.send(sendPacket);
 			
 			String string = "";
-	        while (true) {
-	        	try {
-	        		this.socket.receive(recvPacket);
-	        		String newString = new String(recvPacket.getData());
-	        		
-	        		newString = newString.substring(4); // remove the goddamn first 4 chars
-	        		
-	        		string += newString;
+			while (true) {
+				try {
+					this.socket.receive(recvPacket);
+					String newString = new String(recvPacket.getData());
+					
+					newString = newString.substring(4); // remove the goddamn first 4 chars
+					
+					string += newString;
 
-	    			recvBuffer = new byte[2048]; // empty buffer
-	        		recvPacket = new DatagramPacket(recvBuffer, recvBuffer.length);
-	        	} catch (SocketTimeoutException e) {
-	        		break;
-	        	}       
-	        }
+					recvBuffer = new byte[2048]; // empty buffer
+					recvPacket = new DatagramPacket(recvBuffer, recvBuffer.length);
+				} catch (SocketTimeoutException e) {
+					break;
+				}
+			}
 
-	        string = string.replace("" + (char) 0, "");
-	        
-	        // Thread.sleep(100);
-	        return string;
+			string = string.replace("" + (char) 0, "");
+
+			// Thread.sleep(100);
+			return string;
 		} catch (IOException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
-        return null;
+		return null;
 	}
-	
-	
+
+
 	public synchronized String pushRcon(String rconString) {
 		try {
 			if (this.socket.isClosed()) {
@@ -129,7 +129,7 @@ public class Server {
 		} catch (IOException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
-        return null;
+		return null;
 	}
 	
 	
@@ -176,8 +176,8 @@ public class Server {
 	
 	@Override
 	public String toString() {
-		String isActive = this.active ? "active" : "inactive";
-		return "#" + id + " " + IP + ":" + port + " " + isActive + " " + region + " " + isReachable() ;
+		String isActive = this.active ? "" : "(inactive)";
+		return "#" + id + " " + IP + ":" + port + " " + region + " " + isReachable() + " " + isActive ;
 	}
 	
 	public String isReachable() {
@@ -195,22 +195,22 @@ public class Server {
 		
 		if(rconStatusAck.contains("num score ping name"))
 		{
-			//rcon is correct and server is up
+			// rcon is correct and server is up
 			status = ":green_circle:";
 		}
 		else if (rconStatusAck.contains("Bad rconpassword"))
 		{
 			// server is up but rcon is wrong
-			status = ":yellow_circle: (bad rconpassword)";
+			status = ":orange_circle: (bad rcon)";
 		}
 		else if (rconStatusAck.contains("No rconpassword set on the server."))
 		{
-			// server is up bud rcon is wrong
-			status = ":yellow_circle: (no rconpassword set on the server)";
+			// server is up but rcon not defined in server CVARs
+			status = ":orange_circle: (no rcon set on server)";
 		}
 		else
 		{
-			// urban terror server is down
+			// server is down
 			status = ":red_circle: (server down)";
 		}
 		
