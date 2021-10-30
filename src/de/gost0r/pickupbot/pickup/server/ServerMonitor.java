@@ -196,7 +196,6 @@ public class ServerMonitor implements Runnable {
 					if (hasPaused && isPauseDetected) {
 						if (state == ServerState.LIVE) {
 							server.sendRcon("pause");
-							server.sendRcon("startserverdemo all");
 						}
 						hasPaused = false;
 					}
