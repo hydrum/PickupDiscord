@@ -74,14 +74,14 @@ public class Config {
 
 	public static final String USE_CMD_ADD				= "!add <gametype>";
 	public static final String USE_CMD_REMOVE			= "!remove <gametype>";
-	public static final String USE_CMD_MAPS				= "!maps displays the map list for each gametype";
+	public static final String USE_CMD_MAPS				= "!maps displays the map list for each gametype.";
 	public static final String USE_CMD_MAP				= "!map <gametype> <mapname>";
-	public static final String USE_CMD_STATUS			= "Type !status to get information on the queues";
+	public static final String USE_CMD_STATUS			= "Type !status to get information on the queues.";
 	public static final String USE_CMD_HELP				= "!help <command>";
 	public static final String USE_CMD_SURRENDER		= "Type !surrender to abandon your match.";
-	public static final String USE_CMD_LIVE				= "!live sends info on the live matches";
+	public static final String USE_CMD_LIVE				= "!live sends info on the live matches.";
 	
-	public static final String USE_CMD_LOCK				= "!lock to prevent commands from PUBLIC channel";
+	public static final String USE_CMD_LOCK				= "!lock to prevent commands from PUBLIC channel.";
 	public static final String USE_CMD_UNLOCK			= "!unlock";
 	public static final String USE_CMD_RESET			= "!reset <all/cur/type/id>";
 	public static final String USE_CMD_GETDATA			= "!getdata <match id>";
@@ -130,7 +130,7 @@ public class Config {
 
 	//------------------------------------------------------------------------------------//
 
-	public static final String pkup_lock				= "Pickup games are now locked";
+	public static final String pkup_lock				= "Pickup games are now locked.";
 	public static final String pkup_map					= "You voted for .map..";
 	public static final String pkup_map_list			= "**.gametype.**: .maplist.";
 //	public static final String pkup_signup				= "You can sign up again!";
@@ -161,8 +161,8 @@ public class Config {
 	public static final String pkup_go_pub_head			= "**.gametype.**: Game #.gamenumber. (avg ELO: .elo.) is about to start!";
 	public static final String pkup_go_pub_team			= ".team. team: .playerlist.";
 	public static final String pkup_go_pub_map			= "Map: .map.";
-	public static final String pkup_go_pub_calm			= "You will receive the connection info by DM.";
-	public static final String pkup_go_pub_sent			= "**.gametype.**: All messages have been sent. Enjoy the match!";
+	public static final String pkup_go_pub_calm			= ":urt:";
+	public static final String pkup_go_pub_sent			= "**.gametype.**: Server info has been sent. If you didn't get a DM try **!lostpass**.";
 
 	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber. (.map.):";
 	public static final String pkup_aftermath_result	= ".team. .result. (.score.) -";
@@ -183,7 +183,7 @@ public class Config {
 			 
 	public static final String is_banned				= ".user. (.urtauth.) is suspended .time. for .reason.";
 	public static final String is_unbanned				= ".user. (.urtauth.) is unbanned.";
-	public static final String is_notbanned				= ".urtauth. is not banned (yet)";
+	public static final String is_notbanned				= ".urtauth. is not banned (yet).";
 	public static final String not_banned				= "No active bans found for .urtauth.";
 	public static final String map_not_found			= "Map not found.";
 	public static final String map_not_unique			= "Mapstring not unique.";
@@ -192,7 +192,7 @@ public class Config {
 
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
-	public static final String country_added			= "Your country has been set";
+	public static final String country_added			= "Your country has been set.";
 
 	public static final String auth_taken_urtauth		= "This **urtauth** is already registered.";
 	public static final String auth_taken_user			= "You have already registered an account.";
@@ -207,9 +207,9 @@ public class Config {
 	public static final String player_not_in_match		= "You are not added to any queue.";
 	public static final String player_already_match		= "You are already in a match.";
 
-	public static final String player_already_surrender	= "You have already surrendered.";
+	public static final String player_already_surrender	= "You already surrendered.";
 	
-	public static final String afk_reminder				= "[*AFK*] .user. will be removed in 3 minutes. Write something in the channel to stay in queue.";
+	public static final String afk_reminder				= "**[AFK]** .user. will be removed in 3 minutes. Write something in the channel to stay in queue.";
 
 //	public static final String report_wrong_arg			= "Your report reason is invalid, check !reportlist to check the possible reasons.";
 //	public static final String report_invalid_urtauth	= "No player could be found with this urtauth.";
@@ -223,7 +223,7 @@ public class Config {
 	public static final String help_prefix				= "How to use the command: `.cmd.`";
 	public static final String help_cmd_avi				= "Here is the command list (use `" + USE_CMD_HELP + "` for more info):\n`.cmds.`";
 	
-	public static final String help_unknown				= "I do not know that command.";
+	public static final String help_unknown				= "I do not know that command :(";
 
 	public static final String lock_enable				= "*Game is LOCKED.* :lock:";
 	public static final String lock_disable				= "*Game is now unlocked.*";
@@ -232,8 +232,8 @@ public class Config {
 	public static final String pkup_match_invalid_gt	= "No match for that gametype is available right now.";
 	public static final String no_gt_found				= "Unable to find a matching gametype. Try `!add ctf`";
 	
-	public static final String banreason_not_found		= "Please use one of the following ban reasons: .banreasons.";	
-	public static final String banduration_invalid		= "Invalid ban duration. (duration=1y1M1w1d1h1m1s)";
+	public static final String banreason_not_found		= "Use one of the following ban reasons: .banreasons.";	
+	public static final String banduration_invalid		= "Invalid ban duration. Try 1m,1h,1d,1w,1M.";
 	
 	public static final String admin_cmd_successful		= ":white_check_mark: Successful: ";
 	public static final String admin_cmd_unsuccessful	= ":x: Unsuccessful: ";
