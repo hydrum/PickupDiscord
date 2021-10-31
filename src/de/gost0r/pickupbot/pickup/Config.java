@@ -139,29 +139,29 @@ public class Config {
 	public static final String pkup_status_signup		= "**.gametype.**: Sign up: [.playernumber./.maxplayer.] .playerlist.";
 	public static final String pkup_status_server		= "**.gametype.**: Awaiting available server.";
 //	public static final String pkup_status_players		= "**.gametype.**: Players [.playernumber./10]: .playerlist.";
-//	public static final String pkup_started				= "**.gametype.**: Game has already started. .status. - .time. minutes in.";
+//	public static final String pkup_started				= "**.gametype.**: Match has already started. .status. - .time. minutes in.";
 
 	public static final String pkup_reset_all 			= "*All matches and queues have been reset.*";
 	public static final String pkup_reset_cur 			= "*All queues have been reset.*";
 	public static final String pkup_reset_type 			= "*.gametype. queue has been reset.*";
 	public static final String pkup_reset_id 			= "*Match #.id. has been reset.*";
 	
-	public static final String pkup_match_print_live	= "**[** Pickup Game #.gamenumber. **][** Live **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
-	public static final String pkup_match_print_signup	= "**[** Pickup Game #--- **][** Signup **][** Gametype: .gametype. **][** .playernumber./.maxplayer. **][** Players: .playerlist. **]**";
-	public static final String pkup_match_print_server	= "**[** Pickup Game #--- **][** AwaitingServer **][** Gametype: .gametype. **][** Players: .playerlist. **]**";
-	public static final String pkup_match_print_done	= "**[** Pickup Game #.gamenumber. **][** Done **][** Score: .score. **][** Gametype: .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
-	public static final String pkup_match_print_abort	= "**[** Pickup Game #.gamenumber. **][** Abort **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
-	public static final String pkup_match_print_abandon	= "**[** Pickup Game #.gamenumber. **][** Abandon **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
-	public static final String pkup_match_print_sur		= "**[** Pickup Game #.gamenumber. **][** Surrender **][** Score: .score. **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_live	= "**[** Match #.gamenumber. **][** Live **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_signup	= "**[** Match #--- **][** Signup **][** Gametype: .gametype. **][** .playernumber./.maxplayer. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_server	= "**[** Match #--- **][** AwaitingServer **][** Gametype: .gametype. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_done	= "**[** Match #.gamenumber. **][** Done **][** Score: .score. **][** Gametype: .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_abort	= "**[** Match #.gamenumber. **][** Abort **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_abandon	= "**[** Match #.gamenumber. **][** Abandon **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
+	public static final String pkup_match_print_sur		= "**[** Match #.gamenumber. **][** Surrender **][** Score: .score. **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 
 	public static final String pkup_match_print_info	= "**.gametype. #.gamenumber.**: **[**.map.**] [**.ingame.**] [**.redteam.**]** VS **[**.blueteam.**]**";
 	
-	public static final String pkup_go_admin			= "[ Pickup Game #.gamenumber. ][ Password: .password. ][ .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
+	public static final String pkup_go_admin			= "[ Match #.gamenumber. ][ Password: .password. ][ .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
 	public static final String pkup_go_player			= "Pickup starts now! Connect, choose positions and ready up! **[ /connect .server. ; password .password. ]**";
-	public static final String pkup_go_pub_head			= "**.gametype.**: Game #.gamenumber. (avg ELO: .elo.) is about to start!";
+	public static final String pkup_go_pub_head			= "**.gametype.**: Match **#.gamenumber.** is about to start!";
 	public static final String pkup_go_pub_team			= ".team. team: .playerlist.";
 	public static final String pkup_go_pub_map			= "Map: .map.";
-	public static final String pkup_go_pub_calm			= ":urt:";
+	public static final String pkup_go_pub_calm			= "Average ELO: .elo.";
 	public static final String pkup_go_pub_sent			= "**.gametype.**: Server info has been sent. If you didn't get a DM try **!lostpass**.";
 
 	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber. (.map.):";
