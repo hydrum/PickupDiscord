@@ -4,6 +4,8 @@ public class Config {
 	public static final String CMD_ADD					= "!add";
 	public static final String CMD_TS					= "!ts";
 	public static final String CMD_CTF					= "!ctf";
+	public static final String CMD_1v1					= "!1v1";
+	public static final String CMD_2v2					= "!2v2";
 	public static final String CMD_REMOVE				= "!remove";
 	public static final String CMD_MAPS					= "!maps";
 	public static final String CMD_MAP					= "!map";
