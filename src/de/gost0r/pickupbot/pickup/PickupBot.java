@@ -14,7 +14,7 @@ import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 
 public class PickupBot extends DiscordBot {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	private DiscordChannel latestMessageChannel;
 	
@@ -807,7 +807,7 @@ public class PickupBot extends DiscordBot {
 			}
 			else if (data[0].toLowerCase().equals(Config.CMD_ADDCHANNEL))
 			{
-				if (msg.user.hasAdminRights())
+				if (msg.user.hasSuperAdminRights())
 				{
 					if (data.length == 3)
 					{
@@ -834,10 +834,11 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, "invalid options");
 				}
+				else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
 			}
 			else if (data[0].toLowerCase().equals(Config.CMD_REMOVECHANNEL))
 			{
-				if (msg.user.hasAdminRights())
+				if (msg.user.hasSuperAdminRights())
 				{
 					if (data.length == 3)
 					{
@@ -866,6 +867,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, "invalid options");
 				}
+				else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
 			}
 			else if (data[0].toLowerCase().equals(Config.CMD_ADDROLE))
 			{
@@ -898,6 +900,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, "invalid options");
 				}
+				else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
 			}
 			else if (data[0].toLowerCase().equals(Config.CMD_REMOVEROLE))
 			{
@@ -929,8 +932,8 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, "invalid options");
 				}
-			}
-				
+				else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
+			}				
 		}
 		
 		if (data[0].toLowerCase().equals("!showroles"))
@@ -991,6 +994,7 @@ public class PickupBot extends DiscordBot {
 					}
 				}
 			}
+			else sendNotice(msg.user, "A DiscordRole is already set as SUPERADMIN, check the DB.");
 		}
 		
 		if (data[0].toLowerCase().equals("!banme")) {

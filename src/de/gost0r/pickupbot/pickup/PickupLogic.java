@@ -67,8 +67,8 @@ public class PickupLogic {
 		createCurrentMatches();
 		
 		banDuration = new HashMap<BanReason, String[]>();
-		banDuration.put(BanReason.NOSHOW, new String[] {"10m", "1h", "2h", "6h", "12h", "3d", "1w", "2w", "1M", "3M"});
-		banDuration.put(BanReason.RAGEQUIT, new String[] {"1h", "2h", "6h", "12h", "3d", "1w", "2w", "1M", "3M", "1y"});
+		banDuration.put(BanReason.NOSHOW, new String[] {"10m", "30m", "1h", "2h", "6h", "12h", "3d", "1w", "2w", "1M"});
+		banDuration.put(BanReason.RAGEQUIT, new String[] {"30m", "1h", "2h", "6h", "12h", "3d", "1w", "2w", "1M", "3M"});
 		
 		awaitingServer = new LinkedList<Match>();
 	}
@@ -253,7 +253,7 @@ public class PickupLogic {
 		msg = msg.replace(".rank.", p.getRank().getEmoji());
 		
 		if( p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
-			msg = msg.replace(".country.", "");
+			msg = msg.replace(".country.", ":puma:");
 		}
 		else {
 			msg = msg.replace(".country.", ":flag_" + p.getCountry().toLowerCase() + ":");

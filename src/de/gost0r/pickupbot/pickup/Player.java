@@ -34,15 +34,15 @@ public class Player {
 		this.setUrtauth(urtauth);
 		playerList.add(this);
 	}
-	
+
 	public void voteMap(Gametype gametype, GameMap map) {
 		votedMap.put(gametype, map);
 	}
-	
+
 	public void voteSurrender() {
 		surrender = true;
 	}
-	
+
 	public void resetVotes() {
 		for (Gametype gt : votedMap.keySet()) {
 			votedMap.put(gt, null);
@@ -56,31 +56,31 @@ public class Player {
 		
 		// db update done by servermonitor
 	}
-	
+
 	public void afkCheck() {
 		lastMessage = System.currentTimeMillis();
 		afkReminderSent = false;
 	}
-	
+
 	public long getLastMessage() {
 		return lastMessage;
 	}
-	
+
 	public boolean getAfkReminderSent() {
 		return afkReminderSent;
 	}
-	
+
 	public void setAfkReminderSent(boolean value) {
 		afkReminderSent = value;
 	}
-	
+
 	public GameMap getVotedMap(Gametype gametype) {
 		if (votedMap.containsKey(gametype)) {
 			return votedMap.get(gametype);
 		}
 		return null;
 	}
-	
+
 	public boolean hasVotedSurrender() {
 		return surrender;
 	}
@@ -108,7 +108,7 @@ public class Player {
 	public void setEloChange(int eloChange) {
 		this.eloChange = eloChange;
 	}
-	
+
 	public String getUrtauth() {
 		return urtauth;
 	}
@@ -116,7 +116,7 @@ public class Player {
 	public void setUrtauth(String urtauth) {
 		this.urtauth = urtauth;
 	}
-	
+
 	public boolean getActive() {
 		return active;
 	}
@@ -124,11 +124,11 @@ public class Player {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-	
+
 	public void addBan(PlayerBan ban) {
 		bans.add(ban);
 	}
-	
+
 	public void forgiveBan() {
 		for (PlayerBan ban : bans) {
 			ban.forgiven = true;
@@ -136,7 +136,7 @@ public class Player {
 		
 		db.forgiveBan(this);
 	}
-	
+
 	public PlayerBan getLatestBan() {
 		PlayerBan current = null;
 		for (PlayerBan ban : bans) {
@@ -150,7 +150,7 @@ public class Player {
 		}
 		return current;
 	}
-	
+
 	public int getPlayerBanCountSince(long time) {
 		int i = 0;
 		for (PlayerBan ban : bans) {
@@ -169,15 +169,15 @@ public class Player {
 		}
 		return false;
 	}
-	
+
 	public PlayerRank getRank() {
 		return getRank(elo);
 	}
-	
+
 	private PlayerRank getRank(int elo) {
-		if (elo > 1300) {
+		if (elo > 1500) {
 			return PlayerRank.DIAMOND;
-		} else if (elo > 1150) {
+		} else if (elo > 1300) {
 			return PlayerRank.PLATINUM;
 		} else if (elo > 1000) {
 			return PlayerRank.GOLD;
@@ -189,7 +189,7 @@ public class Player {
 			return PlayerRank.WOOD;
 		}
 	}
-	
+
 	public boolean didChangeRank() {
 		PlayerRank currentRank = getRank(elo);
 		PlayerRank previousRank = getRank(elo-eloChange);
@@ -232,12 +232,12 @@ public class Player {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public String toString() {
 		return this.urtauth;
 	}
-	
+
 	public Region getRegion() {
 		if(this.country.equalsIgnoreCase("NOT_DEFINED")) {
 			return Region.WORLD;
@@ -248,11 +248,10 @@ public class Player {
 			return Region.valueOf(continent);
 		}
 	}
-	
+
 	public String getCountry() {
 		return this.country;
 	}
-	
 
 	public void setCountry(String country) {
 		this.country = country;
