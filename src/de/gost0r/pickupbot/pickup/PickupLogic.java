@@ -276,7 +276,7 @@ public class PickupLogic {
 			for(int i = 0; i < countries.size(); i++) {
 				String ranking = Config.pkup_getelo_country;
 				
-				ranking = ranking.replace(".position.", Integer.toString(i));
+				ranking = ranking.replace(".position.", Integer.toString(i + 1));
 				ranking = ranking.replace(".country.", Country.getCountryFlag(countries.get(i).country));
 				ranking = ranking.replace(".elo.", countries.get(i).elo.toString());
 				

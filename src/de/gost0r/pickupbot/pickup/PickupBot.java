@@ -197,6 +197,44 @@ public class PickupBot extends DiscordBot {
 					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADD));
 					break;
 					
+				case Config.CMD_1v1:
+					if (p != null)
+					{
+						List<Gametype> gametypes = new ArrayList<Gametype>();
+					
+						Gametype gt = logic.getGametypeByString("1v1");
+						if (gt != null) {
+							gametypes.add(gt);
+						}
+					
+						if (gametypes.size() > 0) {
+							logic.cmdAddPlayer(p, gametypes);
+						} else {
+							sendNotice(msg.user, Config.no_gt_found);
+						}
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+					
+				case Config.CMD_2v2:
+					if (p != null)
+					{
+						List<Gametype> gametypes = new ArrayList<Gametype>();
+					
+						Gametype gt = logic.getGametypeByString("2v2");
+						if (gt != null) {
+							gametypes.add(gt);
+						}
+					
+						if (gametypes.size() > 0) {
+							logic.cmdAddPlayer(p, gametypes);
+						} else {
+							sendNotice(msg.user, Config.no_gt_found);
+						}
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+					
 				case Config.CMD_REMOVE:
 					Player player = p;
 					int startindex = 1;
