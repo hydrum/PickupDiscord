@@ -587,6 +587,16 @@ public class Database {
 					ban.forgiven = banSet.getBoolean("forgiven");
 					player.addBan(ban);
 				}
+				
+				sql = "SELECT SUM(kills) as sumkills, SUM(deaths) as sumdeaths, SUM(assists) as sumassists FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim WHERE player_userid=? AND player_urtauth=?;";
+				PreparedStatement kdrstmt = c.prepareStatement(sql);
+				kdrstmt.setString(1, player.getDiscordUser().id);
+				kdrstmt.setString(2, player.getUrtauth());
+				ResultSet kdrSet = kdrstmt.executeQuery();
+				if (kdrSet.next()) {
+					float kdr = ((float) kdrSet.getInt("sumkills") + (float) kdrSet.getInt("sumassists") / 2) / (float) kdrSet.getInt("sumdeaths");
+					player.setKdr(kdr);
+				}
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);

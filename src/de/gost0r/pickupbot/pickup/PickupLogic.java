@@ -251,6 +251,7 @@ public class PickupLogic {
 		msg = msg.replace(".wdl.", String.valueOf(Math.round(db.getWDLForPlayer(p).calcWinRatio() * 100d)));
 		msg = msg.replace(".position.", String.valueOf(db.getRankForPlayer(p)));
 		msg = msg.replace(".rank.", p.getRank().getEmoji());
+		msg = msg.replace(".kdr.", String.format("%.02f", p.getKdr()));
 		
 		if( p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
 			msg = msg.replace(".country.", ":puma:");

@@ -18,6 +18,8 @@ public class Player {
 	private int elo = 1000;
 	private int eloChange = 0;
 	
+	private float kdr = 0.0f;
+	
 	private List<PlayerBan> bans = new ArrayList<PlayerBan>();
 		
 	private boolean active = true;
@@ -99,6 +101,14 @@ public class Player {
 		} else {
 			this.elo = elo;
 		}
+	}
+	
+	public float getKdr() {
+		return kdr;
+	}
+
+	public void setKdr(float kdr) {
+		this.kdr = kdr;
 	}
 
 	public int getEloChange() {
