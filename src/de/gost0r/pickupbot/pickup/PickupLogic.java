@@ -88,7 +88,7 @@ public class PickupLogic {
 			return;
 		}
 
-		String defmsg = "Unable to sign up for:";
+		String defmsg = "You are already in queue for:";
 		String msg = defmsg;
 		for (Gametype gt : modes) {
 			if (gt != null && curMatch.keySet().contains(gt)) {

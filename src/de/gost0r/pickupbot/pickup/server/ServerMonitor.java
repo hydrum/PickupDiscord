@@ -46,6 +46,8 @@ public class ServerMonitor implements Runnable {
 	private long lastServerMessage = 0L;
 	private long lastDiscordMessage = System.currentTimeMillis();
 	
+	private boolean noMercyIssued;
+	
 	private RconPlayersParsed prevRPP = new RconPlayersParsed();
 
 	public ServerMonitor(Server server, Match match) {
@@ -59,6 +61,8 @@ public class ServerMonitor implements Runnable {
 		
 		hasPaused = false;
 		isPauseDetected = false;
+		
+		noMercyIssued = false;
 		
 		players = new ArrayList<ServerPlayer>();
 		leavers = new ArrayList<ServerPlayer>();
@@ -107,6 +111,7 @@ public class ServerMonitor implements Runnable {
 		}
 		else if (state == ServerState.LIVE)
 		{
+			checkNoMercy(rpp);
 			
 		}
 		else if (state == ServerState.SCORE)
@@ -115,6 +120,17 @@ public class ServerMonitor implements Runnable {
 		}
 		checkNoshow();
 		checkRagequit();
+		
+	}
+	private void checkNoMercy(RconPlayersParsed rpp) {
+		if (Math.abs(rpp.scores[0] - rpp.scores[1]) >= 10 & !noMercyIssued){
+			server.sendRcon("timelimit 1");
+			server.sendRcon("bigtext \"No mercy! Ending game in 1min\"");
+			server.sendRcon("say \"No mercy! Ending game in 1min\"");
+			noMercyIssued = true;
+			LOGGER.info("No mercy, game will end in 1min");
+			sendDiscordMsg("**[NO MERCY]** The match #" + String.valueOf(match.getID()) + " is a massacre and will end in 1min.");
+		}	
 	}
 
 	private void checkNoshow() throws Exception {

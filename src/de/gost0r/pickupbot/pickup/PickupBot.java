@@ -152,49 +152,48 @@ public class PickupBot extends DiscordBot {
 					break;
 					
 				case Config.CMD_TS:
-					if (data.length == 1)
+					if (p != null)
 					{
-						if (p != null)
-						{
-							List<Gametype> gametypes = new ArrayList<Gametype>();
-						
-							Gametype gt = logic.getGametypeByString("TS");
-							if (gt != null) {
-								gametypes.add(gt);
-							}
-						
-							if (gametypes.size() > 0) {
-								logic.cmdAddPlayer(p, gametypes);
-							} else {
-								sendNotice(msg.user, Config.no_gt_found);
-							}
+						List<Gametype> gametypes = new ArrayList<Gametype>();
+					
+						Gametype gt = logic.getGametypeByString("TS");
+						if (gt != null) {
+							gametypes.add(gt);
 						}
-						else sendNotice(msg.user, Config.user_not_registered);
+					
+						if (gametypes.size() > 0) {
+							logic.cmdAddPlayer(p, gametypes);
+							
+							if (data.length > 1) {
+								logic.cmdMapVote(p, gt, data[1]);
+							}
+						} else {
+							sendNotice(msg.user, Config.no_gt_found);
+						}
 					}
-					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADD));
+					else sendNotice(msg.user, Config.user_not_registered);
 					break;
 					
 				case Config.CMD_CTF:
-					if (data.length == 1)
+					if (p != null)
 					{
-						if (p != null)
-						{
-							List<Gametype> gametypes = new ArrayList<Gametype>();
-						
-							Gametype gt = logic.getGametypeByString("CTF");
-							if (gt != null) {
-								gametypes.add(gt);
-							}
-						
-							if (gametypes.size() > 0) {
-								logic.cmdAddPlayer(p, gametypes);
-							} else {
-								sendNotice(msg.user, Config.no_gt_found);
-							}
+						List<Gametype> gametypes = new ArrayList<Gametype>();
+					
+						Gametype gt = logic.getGametypeByString("CTF");
+						if (gt != null) {
+							gametypes.add(gt);
 						}
-						else sendNotice(msg.user, Config.user_not_registered);
+					
+						if (gametypes.size() > 0) {
+							logic.cmdAddPlayer(p, gametypes);
+							if (data.length > 1) {
+								logic.cmdMapVote(p, gt, data[1]);
+							}
+						} else {
+							sendNotice(msg.user, Config.no_gt_found);
+						}
 					}
-					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADD));
+					else sendNotice(msg.user, Config.user_not_registered);
 					break;
 					
 				case Config.CMD_1v1:
