@@ -447,6 +447,37 @@ public class PickupBot extends DiscordBot {
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
 					
+				case Config.CMD_LAST:
+					if (p != null)
+					{
+						if (data.length == 1)
+						{
+							logic.cmdDisplayLastMatch();
+						}
+						else if (data.length == 2)
+						{
+							Player pOther = null;
+							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
+							if (u != null)
+							{
+								pOther = Player.get(u);
+							}
+							else
+							{
+								pOther = Player.get(data[1].toLowerCase());
+							}
+							
+							if (pOther != null)
+							{
+								logic.cmdDisplayLastMatchPlayer(pOther);
+							}
+							else sendNotice(msg.user, Config.player_not_found);
+						}
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_LAST));
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+					
 				case Config.CMD_BANINFO:
 					if (p != null)
 					{
@@ -492,7 +523,7 @@ public class PickupBot extends DiscordBot {
 					case Config.CMD_GETDATA:
 						if (data.length == 2)
 						{
-							logic.cmdGetData(msg.user, data[1]);
+							logic.cmdGetData(msg.user, data[1], msg.channel);
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_GETDATA));
 						break;

@@ -546,6 +546,39 @@ public class Database {
 		}
 		return match;
 	}
+	
+	public Match loadLastMatch() {
+		Match match = null;
+		try {
+			String sql = "SELECT * FROM match ORDER BY ID DESC LIMIT 1";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				match = loadMatch(rs.getInt("ID"));
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return match;
+		
+	}
+	
+	public Match loadLastMatchPlayer(Player p) {
+		Match match = null;
+		try {
+			String sql = "SELECT matchid FROM  player_in_match  WHERE player_urtauth = ? ORDER BY ID DESC LIMIT 1;";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, p.getUrtauth());
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				match = loadMatch(rs.getInt("matchid"));
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return match;
+		
+	}
 
 	public Player loadPlayer(String urtauth) {
 		return loadPlayer(null, urtauth, true);

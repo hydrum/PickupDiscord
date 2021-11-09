@@ -36,6 +36,7 @@ public class Config {
 	public static final String CMD_TOP_COUNTRIES		= "!topcountries";
 	
 	public static final String CMD_MATCH				= "!match";
+	public static final String CMD_LAST			    	= "!last";
 	
 	//public static final String CMD_REPORT				= "!report";
 	//public static final String CMD_EXCUSE				= "!excuse";
@@ -105,6 +106,7 @@ public class Config {
 	public static final String USE_CMD_TOP10			= "!top10";
 	public static final String USE_CMD_TOP_COUNTRIES	= "!topcountries";
 	public static final String USE_CMD_MATCH			= "!match <id>";
+	public static final String USE_CMD_LAST			    = "!last </@DiscordUser|urtauth/>";
 	
 	//public static final String USE_CMD_REPORT			= "!report <qauth> <reason>";
 	//public static final String USE_CMD_EXCUSE			= "!excuse <excuse>";

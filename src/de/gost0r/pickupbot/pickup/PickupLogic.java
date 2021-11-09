@@ -465,7 +465,7 @@ public class PickupLogic {
 		return false;
 	}
 	
-	public boolean cmdGetData(DiscordUser user, String id) {
+	public boolean cmdGetData(DiscordUser user, String id, DiscordChannel channel) {
 		String msg = "Match not found.";
 		try {
 			int i_id = Integer.valueOf(id);
@@ -474,14 +474,14 @@ public class PickupLogic {
 					msg = Config.pkup_pw;
 					msg = msg.replace(".server.", match.getServer().getAddress());
 					msg = msg.replace(".password.", match.getServer().password);
-					bot.sendMsg(user, msg);
+					bot.sendMsg(channel, msg);
 					return true;
 				}
 			}
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
-		bot.sendMsg(user, msg);
+		bot.sendMsg(channel, msg);
 		return false;
 	}
 	
@@ -736,6 +736,36 @@ public class PickupLogic {
 			}
 			
 			Match match = db.loadMatch(idx); // TODO: cache?
+			if (match != null) {
+				bot.sendMsg(bot.getLatestMessageChannel(), match.getMatchInfo());
+				return true;
+			}			
+		
+		} catch (NumberFormatException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
+		return false;
+	}
+	
+	public boolean cmdDisplayLastMatch() {
+		try {
+			Match match = db.loadLastMatch(); 
+			if (match != null) {
+				bot.sendMsg(bot.getLatestMessageChannel(), match.getMatchInfo());
+				return true;
+			}			
+		
+		} catch (NumberFormatException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
+		return false;
+	}
+	
+	public boolean cmdDisplayLastMatchPlayer(Player p) {
+		try {
+			Match match = db.loadLastMatchPlayer(p); 
 			if (match != null) {
 				bot.sendMsg(bot.getLatestMessageChannel(), match.getMatchInfo());
 				return true;
