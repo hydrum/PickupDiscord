@@ -102,8 +102,17 @@ public class DiscordBot  {
 		DiscordAPI.sendMessage(channel, msg);
 	}
 	
+	public void sendMsg(DiscordChannel channel, String msg, DiscordEmbed embed) {
+		DiscordAPI.sendMessage(channel, msg, embed);
+	}
+	
+	
 	public void sendMsg(DiscordUser user, String msg) {
-			sendMsg(user.getDMChannel(), msg);
+		sendMsg(user.getDMChannel(), msg);
+	}
+	
+	public void sendMsg(DiscordUser user, String msg, DiscordEmbed embed) {
+		sendMsg(user.getDMChannel(), msg, embed);
 	}
 
 	public static String getToken() {

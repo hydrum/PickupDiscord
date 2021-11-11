@@ -8,6 +8,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +19,7 @@ import org.json.JSONObject;
 
 import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.DiscordChannel;
+import de.gost0r.pickupbot.discord.DiscordEmbed;
 
 public class DiscordAPI {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -27,6 +30,19 @@ public class DiscordAPI {
 	public static boolean sendMessage(DiscordChannel channel, String msg) {
 		try {
 			String reply = sendPostRequest("/channels/"+ channel.id + "/messages", new JSONObject().put("content", msg));
+			JSONObject obj = new JSONObject(reply);
+			return obj != null && !obj.has("code");
+		} catch (JSONException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return false;
+	}
+	
+	public static boolean sendMessage(DiscordChannel channel, String msg, DiscordEmbed embed) {
+		try {
+			List<JSONObject> embedList = new ArrayList<JSONObject>();
+			embedList.add(embed.getJSON());
+			String reply = sendPostRequest("/channels/"+ channel.id + "/messages", new JSONObject().put("content", msg).put("embeds", embedList));
 			JSONObject obj = new JSONObject(reply);
 			return obj != null && !obj.has("code");
 		} catch (JSONException e) {

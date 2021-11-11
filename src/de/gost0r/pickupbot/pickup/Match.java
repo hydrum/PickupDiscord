@@ -448,7 +448,6 @@ public class Match implements Runnable {
 		String fullmsg = "";
 
 		String msg = Config.pkup_go_pub_head;
-		msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
 		msg = msg.replace(".gamenumber.", String.valueOf(id));
 		msg = msg.replace(".gametype.", gametype.getName());
 		fullmsg = msg;
@@ -485,7 +484,7 @@ public class Match implements Runnable {
 		fullmsg += "\n" + msg;
 
 		msg = Config.pkup_go_pub_calm;
-		msg = msg.replace(".gametype.", gametype.getName());
+		msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
 		fullmsg += "\n" + msg;
 
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg);

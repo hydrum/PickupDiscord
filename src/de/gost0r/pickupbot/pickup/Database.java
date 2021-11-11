@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -934,6 +935,41 @@ public class Database {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return wdl;
+	}
+		
+	public Map<Player, Float> getTopWDL(int number) {
+		Map<Player, Float> topwdl = new LinkedHashMap<Player, Float>();
+		try {
+			String sql = "SELECT urtauth, COUNT(urtauth) as matchcount, SUM(CASE WHEN stat.myscore > stat.oppscore THEN 1 ELSE 0 END) as win, SUM(CASE WHEN stat.myscore = stat.oppscore THEN 1 ELSE 0 END) as draw, SUM(CASE WHEN stat.myscore < stat.oppscore THEN 1 ELSE 0 END) loss , (CAST(SUM(CASE WHEN stat.myscore > stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)+ CAST(SUM(CASE WHEN stat.myscore = stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)/2)/(CAST(SUM(CASE WHEN stat.myscore > stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)+ CAST(SUM(CASE WHEN stat.myscore = stat.oppscore THEN 1 ELSE 0 END) AS FLOAT) + CAST(SUM(CASE WHEN stat.myscore < stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)) as winrate FROM (SELECT pim.player_urtauth AS urtauth, (CASE WHEN pim.team = 'red' THEN m.score_red ELSE m.score_blue END) AS myscore, (CASE WHEN pim.team = 'blue' THEN m.score_red ELSE m.score_blue END) AS oppscore FROM 'player_in_match' AS pim JOIN 'match' AS m ON m.id = pim.matchid JOIN 'player' AS p ON pim.player_urtauth=p.urtauth AND pim.player_userid=p.userid AND p.active='true'   WHERE (m.state = 'Done' OR m.state = 'Surrender')) AS stat GROUP BY urtauth HAVING COUNT(urtauth) > 10 ORDER BY winrate DESC LIMIT ?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setInt(1, number);
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				Player p = Player.get(rs.getString("urtauth"));
+				topwdl.put(p, rs.getFloat("winrate"));
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return topwdl;
+	}
+	
+	public Map<Player, Float> getTopKDR(int number) {
+		Map<Player, Float> topkdr = new LinkedHashMap<Player, Float>();
+		try {
+			String sql = "SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) AS kdr FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid  WHERE player.active = \"true\" GROUP BY player_in_match.player_urtauth HAVING matchcount > 10 ORDER BY kdr DESC LIMIT ?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setInt(1, number);
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				Player p = Player.get(rs.getString("auth"));
+				LOGGER.info(p.getUrtauth());
+				topkdr.put(p, rs.getFloat("kdr"));
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return topkdr;
 	}
 	
 	public int getAvgElo() {

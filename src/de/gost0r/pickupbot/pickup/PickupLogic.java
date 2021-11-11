@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.discord.DiscordChannel;
+import de.gost0r.pickupbot.discord.DiscordEmbed;
 import de.gost0r.pickupbot.discord.DiscordRole;
 import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.discord.DiscordUserStatus;
@@ -224,16 +225,109 @@ public class PickupLogic {
 }
 	
 	public void cmdTopElo(int number) {
-		String msg = Config.pkup_top10_header;
+		// String msg = Config.pkup_top10_header;
+		String embed_rank = "";
+		String embed_player = "";
+		String embed_elo = "";
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Top 10 players";
+		embed.color = 7056881;
+		int rank = 1;
 		
 		List<Player> players = db.getTopPlayers(number);
 		if (players.isEmpty()) {
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg + "  None");
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), "None");
 		} else {
 			for (Player p : players) {
-				msg += "\n" + cmdGetElo(p, false);
+				// msg += "\n" + cmdGetElo(p, false);
+				String country = "";
+				if( p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+					country =  ":puma:";
+				}
+				else {
+					country = ":flag_" + p.getCountry().toLowerCase() + ":";
+				}
+				embed_rank += "**" + String.valueOf(rank) + "**\n";
+				embed_player += country + " \u200b \u200b  " +  p.getUrtauth() + '\n';
+				embed_elo += p.getRank().getEmoji() + " \u200b \u200b  " + String.valueOf(p.getElo()) + "\n";
+				rank++;
 			}
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+			// bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+			embed.addField("\u200b", embed_rank, true);
+			embed.addField("Player", embed_player, true);
+			embed.addField("Elo", embed_elo, true);
+			
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), null, embed);
+		}
+	}
+	
+	public void cmdTopWDL(int number) {
+		String embed_rank = "";
+		String embed_player = "";
+		String embed_wdl = "";
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Top 10 win rate";
+		embed.color = 7056881;
+		
+		
+		Map<Player, Float> topwdl = db.getTopWDL(number);
+		if (topwdl.isEmpty()) {
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), "None");
+		} else {
+			int rank = 1;
+			for (Map.Entry<Player, Float> entry : topwdl.entrySet()) {
+				String country = "";
+				if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+					country =  ":puma:";
+				}
+				else {
+					country = ":flag_" + entry.getKey().getCountry().toLowerCase() + ":";
+				}
+				embed_rank += "**" + String.valueOf(rank) + "**\n";
+				embed_player += country + " \u200b \u200b  " +  entry.getKey().getUrtauth() + '\n';
+				embed_wdl += String.valueOf(Math.round(entry.getValue() * 100d)) + " %\n";
+				rank++;
+			}
+			embed.addField("\u200b", embed_rank, true);
+			embed.addField("Player", embed_player, true);
+			embed.addField("Win rate", embed_wdl, true);
+			
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), null, embed);
+		}
+	}
+	
+	public void cmdTopKDR(int number) {
+		String embed_rank = "";
+		String embed_player = "";
+		String embed_wdl = "";
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Top 10 kill death ratio";
+		embed.color = 7056881;
+		
+		
+		Map<Player, Float> topkdr = db.getTopKDR(number);
+		if (topkdr.isEmpty()) {
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), "None");
+		} else {
+			int rank = 1;
+			for (Map.Entry<Player, Float> entry : topkdr.entrySet()) {
+				String country = "";
+				if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+					country =  ":puma:";
+				}
+				else {
+					country = ":flag_" + entry.getKey().getCountry().toLowerCase() + ":";
+				}
+				embed_rank += "**" + String.valueOf(rank) + "**\n";
+				embed_player += country + " \u200b \u200b  " +  entry.getKey().getUrtauth() + '\n';
+				embed_wdl += String.valueOf(String.format("%.02f", entry.getValue())) + "\n";
+				rank++;
+			}
+			embed.addField("\u200b", embed_rank, true);
+			embed.addField("Player", embed_player, true);
+			embed.addField("KDR", embed_wdl, true);
+			
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), null, embed);
 		}
 	}
 

@@ -34,6 +34,8 @@ public class Config {
 	public static final String CMD_GETELO				= "!elo";
 	public static final String CMD_TOP_PLAYERS			= "!top10";
 	public static final String CMD_TOP_COUNTRIES		= "!topcountries";
+	public static final String CMD_TOP_WDL				= "!topwin";
+	public static final String CMD_TOP_KDR				= "!topkdr";
 	
 	public static final String CMD_MATCH				= "!match";
 	public static final String CMD_LAST			    	= "!last";

@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordChannelType;
+import de.gost0r.pickupbot.discord.DiscordEmbed;
 import de.gost0r.pickupbot.discord.DiscordMessage;
 import de.gost0r.pickupbot.discord.DiscordRole;
 import de.gost0r.pickupbot.discord.DiscordUser;
@@ -405,7 +406,21 @@ public class PickupBot extends DiscordBot {
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
 					
+				case Config.CMD_TOP_WDL: 
+					if (p != null)
+					{
+						logic.cmdTopWDL(10);
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
 					
+				case Config.CMD_TOP_KDR: 
+					if (p != null)
+					{
+						logic.cmdTopKDR(10);
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;	
 
 				case Config.CMD_REGISTER:
 					if (data.length == 2)
@@ -1046,6 +1061,12 @@ public class PickupBot extends DiscordBot {
 	public void sendMsg(List<DiscordChannel> channelList, String msg) {
 		for (DiscordChannel channel : channelList) {
 			sendMsg(channel, msg);
+		}
+	}
+	
+	public void sendMsg(List<DiscordChannel> channelList, String msg, DiscordEmbed embed) {
+		for (DiscordChannel channel : channelList) {
+			sendMsg(channel, msg, embed);
 		}
 	}
 	
