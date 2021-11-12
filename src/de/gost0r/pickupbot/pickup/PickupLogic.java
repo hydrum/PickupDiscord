@@ -242,7 +242,7 @@ public class PickupLogic {
 				// msg += "\n" + cmdGetElo(p, false);
 				String country = "";
 				if( p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
-					country =  ":puma:";
+					country =  "<:puma:849287183474884628>";
 				}
 				else {
 					country = ":flag_" + p.getCountry().toLowerCase() + ":";
@@ -313,7 +313,7 @@ public class PickupLogic {
 			for (Map.Entry<Player, Float> entry : topkdr.entrySet()) {
 				String country = "";
 				if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
-					country =  ":puma:";
+					country =  "<:puma:849287183474884628>";
 				}
 				else {
 					country = ":flag_" + entry.getKey().getCountry().toLowerCase() + ":";
@@ -348,7 +348,7 @@ public class PickupLogic {
 		msg = msg.replace(".kdr.", String.format("%.02f", p.getKdr()));
 		
 		if( p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
-			msg = msg.replace(".country.", ":puma:");
+			msg = msg.replace(".country.", "<:puma:849287183474884628>");
 		}
 		else {
 			msg = msg.replace(".country.", ":flag_" + p.getCountry().toLowerCase() + ":");
@@ -831,7 +831,7 @@ public class PickupLogic {
 			
 			Match match = db.loadMatch(idx); // TODO: cache?
 			if (match != null) {
-				bot.sendMsg(bot.getLatestMessageChannel(), match.getMatchInfo());
+				bot.sendMsg(bot.getLatestMessageChannel(), null, match.getMatchEmbed());
 				return true;
 			}			
 		
@@ -846,7 +846,7 @@ public class PickupLogic {
 		try {
 			Match match = db.loadLastMatch(); 
 			if (match != null) {
-				bot.sendMsg(bot.getLatestMessageChannel(), match.getMatchInfo());
+				bot.sendMsg(bot.getLatestMessageChannel(), null, match.getMatchEmbed());
 				return true;
 			}			
 		
@@ -861,7 +861,7 @@ public class PickupLogic {
 		try {
 			Match match = db.loadLastMatchPlayer(p); 
 			if (match != null) {
-				bot.sendMsg(bot.getLatestMessageChannel(), match.getMatchInfo());
+				bot.sendMsg(bot.getLatestMessageChannel(), null, match.getMatchEmbed());
 				return true;
 			}			
 		

@@ -2,6 +2,8 @@ package de.gost0r.pickupbot.pickup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.gost0r.pickupbot.discord.DiscordEmbed;
 import de.gost0r.pickupbot.pickup.MatchStats.Status;
 import de.gost0r.pickupbot.pickup.server.Server;
 import de.gost0r.pickupbot.pickup.server.ServerMonitor.ServerState;
@@ -234,6 +237,7 @@ public class Match implements Runnable {
 		sendAftermath();
 		logic.matchRemove(this);
 		logic.db.saveMatch(this);
+		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), null, getMatchEmbed());
 	}
 
 	public void cancelStart() {
@@ -708,6 +712,54 @@ public class Match implements Runnable {
 		msg = msg.replace(".ingame.", getIngameInfo());
 
 		return msg;
+	}
+	
+	public DiscordEmbed getMatchEmbed() {
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "#" + String.valueOf(id) + " Match " + gametype.getName() + " " + state.name();
+		embed.color = 7056881;
+		embed.description = map != null ? "Map: **" + map.name + "**" : "null";
+		
+		String red_team_player_embed = "";
+		String red_team_score_embed = "";
+		String blue_team_player_embed = "";
+		String blue_team_score_embed = "";
+		
+		// Order teams scores by score
+		List<Map.Entry<Player, MatchStats>> entries = new ArrayList<Map.Entry<Player, MatchStats>>(playerStats.entrySet());
+		Collections.sort(entries,  new Comparator<Map.Entry<Player, MatchStats>>() {
+		        	public int compare(Map.Entry<Player, MatchStats> a, Map.Entry<Player, MatchStats> b) {
+		            return Integer.compare(b.getValue().score[0].score, a.getValue().score[0].score);
+		        }
+		    }
+		);
+		//Collections.reverse(entries);
+		
+		for (Map.Entry<Player, MatchStats> entry : entries) {
+			String country = "";
+			if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+				country =  "<:puma:849287183474884628>";
+			}
+			else {
+				country = ":flag_" + entry.getKey().getCountry().toLowerCase() + ":";
+			}
+			if (teamList.get("red").contains(entry.getKey())) {
+				red_team_player_embed += country + " \u200b \u200b " +  entry.getKey().getUrtauth() + "\n";
+				red_team_score_embed += String.valueOf(entry.getValue().score[0].score) +  "/" + String.valueOf(entry.getValue().score[0].deaths) + "/" + String.valueOf(entry.getValue().score[0].assists) + "\n";
+			}
+			else if (teamList.get("blue").contains(entry.getKey())) {
+				blue_team_player_embed += country + " \u200b \u200b " +  entry.getKey().getUrtauth() + "\n";
+				blue_team_score_embed += String.valueOf(entry.getValue().score[0].score) +  "/" + String.valueOf(entry.getValue().score[0].deaths) + "/" + String.valueOf(entry.getValue().score[0].assists) + "\n";
+			}
+		}
+		
+		embed.addField("<:rush_red:510982162263179275> \u200b \u200b " + String.valueOf(getScoreRed()) + "\n \u200b", red_team_player_embed, true);
+		embed.addField("K/D/A" + "\n \u200b", red_team_score_embed, true);
+		embed.addField("\u200b", "\u200b", false);
+		embed.addField("<:rush_blue:510067909628788736> \u200b \u200b " + String.valueOf(getScoreBlue()) + "\n \u200b", blue_team_player_embed, true);
+		embed.addField("K/D/A" + "\n \u200b", blue_team_score_embed, true);
+		
+		return embed;
 	}
 
 	public Region getPreferredServerRegion() {
