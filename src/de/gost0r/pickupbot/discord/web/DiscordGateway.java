@@ -119,6 +119,8 @@ public class DiscordGateway implements MessageHandler {
 			presence.put("afk", false);
 			msg.put("presence", presence);
 			
+			msg.put("intents", 32365);
+			
 			DiscordPacket outP = new DiscordPacket(DiscordGatewayOpcode.Identify, msg, -1, "__null__");
 			
 			sendMessage(outP.toSend());

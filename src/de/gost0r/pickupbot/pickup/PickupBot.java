@@ -525,6 +525,34 @@ public class PickupBot extends DiscordBot {
 					break;
 			}
 		}
+		
+		if (msg.channel.isThread) {
+			Player p = Player.get(msg.user);
+			
+			// AFK CHECK CODE
+			if (p != null) {
+				p.afkCheck();
+			}
+			
+			switch (data[0].toLowerCase()) 
+			{
+				case Config.CMD_PICK:
+					if (p != null)
+					{
+						if (data.length == 2)
+						{
+							LOGGER.info(data[1]);
+							if (data[1].equals("1") || data[1].equals("2")) {
+								logic.cmdPick(p, Integer.parseInt(data[1]));
+							}
+							else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_PICK));
+						}
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_PICK));
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+			}
+		}
 
 		// use admin channel or DM for super admins
 		if (isChannel(PickupChannelType.ADMIN, msg.channel)
@@ -1068,6 +1096,14 @@ public class PickupBot extends DiscordBot {
 		for (DiscordChannel channel : channelList) {
 			sendMsg(channel, msg, embed);
 		}
+	}
+	
+	public List<DiscordChannel> createThread(List<DiscordChannel> channelList, String name) {
+		List<DiscordChannel> threadChannels = new ArrayList<DiscordChannel>();
+		for (DiscordChannel channel : channelList) {
+			threadChannels.add(createThread(channel, name));
+		}
+		return threadChannels;
 	}
 	
 	public DiscordChannel getLatestMessageChannel() {

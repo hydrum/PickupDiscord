@@ -17,13 +17,15 @@ public class DiscordChannel {
 	public DiscordChannelType type;
 	public String name;
 	public String topic;
+	public boolean isThread;
 	
 	public DiscordChannel(JSONObject channel) {
 		try {
 			this.id = channel.getString("id");
-			this.type = DiscordChannelType.values()[channel.getInt("type")];
+			this.type = channel.getInt("type") == 11 ? DiscordChannelType.THREAD_CHANNEL : DiscordChannelType.values()[channel.getInt("type")];
 			this.name = channel.isNull("name") ? null : channel.getString("name") ;
 			this.topic = channel.isNull("topic") ? null : channel.getString("topic");
+			this.isThread = channel.isNull("thread_metadata") ? false : true;
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -66,5 +68,11 @@ public class DiscordChannel {
 	@Override
 	public String toString() {
 		return id;
+	}
+	
+	public void archive() {
+		if (isThread) {
+			DiscordAPI.archiveThread(this);
+		}
 	}
 }

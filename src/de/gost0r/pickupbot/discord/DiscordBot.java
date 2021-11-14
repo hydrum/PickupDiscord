@@ -36,7 +36,7 @@ public class DiscordBot  {
 	public void reconnect() {
 		try {
 			if (endpoint == null) {
-				endpoint = new WsClientEndPoint(this, new URI("wss://gateway.discord.gg/?encoding=json&v=6"));
+				endpoint = new WsClientEndPoint(this, new URI("wss://gateway.discord.gg/?encoding=json&v=9"));
 			} else {
 				endpoint.reconnect();
 			}
@@ -113,6 +113,10 @@ public class DiscordBot  {
 	
 	public void sendMsg(DiscordUser user, String msg, DiscordEmbed embed) {
 		sendMsg(user.getDMChannel(), msg, embed);
+	}
+	
+	public DiscordChannel createThread(DiscordChannel channel, String name) {
+		return DiscordAPI.createThread(channel, name);
 	}
 
 	public static String getToken() {

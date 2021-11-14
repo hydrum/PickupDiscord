@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordEmbed;
 import de.gost0r.pickupbot.pickup.MatchStats.Status;
 import de.gost0r.pickupbot.pickup.server.Server;
@@ -27,11 +28,17 @@ public class Match implements Runnable {
 	private Map<String, List<Player>> teamList;
 	private Map<GameMap, Integer> mapVotes;
 	private Map<Player, MatchStats> playerStats = new HashMap<Player, MatchStats>();
+	private List<Player> sortPlayers;
+	
+	private DiscordChannel threadChannel;
 
 	private Server server;
 	private GameMap map;
 	private int[] elo = new int[2];	
 	private int[] score = new int[2];
+	
+	private Player[] captains = new Player[2];
+	private int captainTurn;
 
 	private int[] surrender;
 
@@ -44,6 +51,8 @@ public class Match implements Runnable {
 		teamList.put("red", new ArrayList<Player>());
 		teamList.put("blue", new ArrayList<Player>());
 		mapVotes = new HashMap<GameMap, Integer>();
+		sortPlayers = new ArrayList<Player>();
+		captainTurn = 1;
 	}
 
 	public Match(PickupLogic logic, Gametype gametype, List<GameMap> maplist) {
@@ -334,8 +343,6 @@ public class Match implements Runnable {
 			this.server = server;
 			server.take();
 			
-			state = MatchState.Live;
-			
 			for (Player player : getPlayerList()) {				
 				for (Match m : logic.playerInMatch(player)) {
 					if (m == this) continue;
@@ -343,15 +350,142 @@ public class Match implements Runnable {
 				}
 			}
 			
-			logic.matchStarted(this);
+			String threadTitle = Config.pkup_go_pub_threadtitle;
+			threadTitle = threadTitle.replace(".ID.", String.valueOf(logic.db.getLastMatchID() + 1));
+			threadTitle = threadTitle.replace(".gametype.", gametype.getName());
+			threadChannel = logic.bot.createThread(logic.getChannelByType(PickupChannelType.PUBLIC).get(0), threadTitle); // Assuming we only have 1 public channel
 			
-			//logic.cmdStatus();
+			logic.matchStarted(this);
+			sortPlayers();
+		}
+	}
+	
+	public void sortPlayers() {
+		// Sort players by elo
+		List<Player> playerList = new ArrayList<Player>();
+		for (Player p : playerStats.keySet()) {
+			playerList.add(p);
+		}
+		
+		sortPlayers.add(playerList.get(0));
+		for (Player player : playerList) {
+			for (Player sortplayer : sortPlayers) {
+				if (player.equals(sortplayer)) continue;
+				else if (player.getElo() >= sortplayer.getElo()) {
+					sortPlayers.add(sortPlayers.indexOf(sortplayer), player);
+					break;
+				}
+			}
+			if (!sortPlayers.contains(player)) {
+				sortPlayers.add(player);
+			}
+		}
+		
+		captains[0] = sortPlayers.get(0);
+		teamList.get("red").add(captains[0]);
+		
+		captains[1] = sortPlayers.get(1);
+		teamList.get("blue").add(captains[1]);
+		
+		sortPlayers.remove(0);
+		sortPlayers.remove(0);
+		
+		String captainAnnouncement = Config.pkup_go_pub_captains;
+		captainAnnouncement = captainAnnouncement.replace(".captain1.", captains[0].getDiscordUser().getMentionString());
+		captainAnnouncement = captainAnnouncement.replace(".captain2.", captains[1].getDiscordUser().getMentionString());
+		logic.bot.sendMsg(threadChannel, captainAnnouncement);
+		
+		checkTeams();
+		/*
+		
+		if (true) { // WIP
+			// 5: i=0,1 => red: (0, 9) (2, 7) -> blue: (1, 8) (3, 6)   if cond: (4, 5)
+			// 4: i=0,1 => red: (0, 7) (2, 5) -> blue: (1, 7) (3, 4)   if cond: none
+			// 3: i=0   => red: (0, 5)        -> blue: (1, 4)          if cond: (2, 3)
+			// 2: i=0   => red: (0, 3)        -> blue: (1, 2)          if cond: none
+			// 1: i=-   => red: none          -> blue: none            if cond: (0, 1)
+			for (int i = 0; i < Math.floor(gametype.getTeamSize() / 2); ++i) {
+				teamList.get("red").add(sortPlayers.get(i*2));
+				teamList.get("red").add(sortPlayers.get(((gametype.getTeamSize()*2)-1)-i*2));
+
+				teamList.get("blue").add(sortPlayers.get(i*2+1));
+				teamList.get("blue").add(sortPlayers.get(((gametype.getTeamSize()*2)-1)-i*2-1));
+			}
+
+			if ((gametype.getTeamSize() % 2) == 1) {
+				int better = gametype.getTeamSize() - 1;
+				int worse = gametype.getTeamSize();
+
+				// compute avg elo up till now
+				elo = new int[] {0, 0};
+				for (Player p : teamList.get("red")) elo[0] += p.getElo();
+				for (Player p : teamList.get("blue")) elo[1] += p.getElo();
+				elo[0] /= Math.max(1, gametype.getTeamSize() - 1);
+				elo[1] /= Math.max(1, gametype.getTeamSize() - 1);
+
+				if (elo[0] > elo[1]) {
+					teamList.get("red").add(sortPlayers.get(worse));
+					teamList.get("blue").add(sortPlayers.get(better));
+				} else {
+					teamList.get("red").add(sortPlayers.get(better));
+					teamList.get("blue").add(sortPlayers.get(worse));
+				}
+			}
+			
+			logic.matchStarted(this);
 			
 			// do important changes that affect possibly other matches/servers/playerlists outside the thread!
 			
 			new Thread(this).start();
 			
 		}
+		*/
+	}
+	
+	public void checkTeams() {
+		if (sortPlayers.isEmpty() && state == MatchState.AwaitingServer) {
+			state = MatchState.Live;
+			new Thread(this).start(); // do important changes that affect possibly other matches/servers/playerlists outside the thread!
+		}
+		else {
+			String pickPromptMsg = Config.pkup_go_pub_pick;
+			pickPromptMsg = pickPromptMsg.replace(".captain.", captains[captainTurn].getDiscordUser().getMentionString());
+			pickPromptMsg = pickPromptMsg.replace(".pick1.", sortPlayers.get(0).getUrtauth());
+			pickPromptMsg = pickPromptMsg.replace(".pick2.", sortPlayers.get(1).getUrtauth());
+			logic.bot.sendMsg(threadChannel, pickPromptMsg);
+		}
+	}
+	
+	public boolean isCaptainTurn(Player player) {
+		return captains[captainTurn].getUrtauth() == player.getUrtauth();
+	}
+	
+	public void pick(Player captain, int pick) {
+		String pickMsg = Config.pkup_go_pub_pickjoin;
+		
+		if (captain.getUrtauth() == captains[0].getUrtauth()) {
+			teamList.get("red").add(sortPlayers.get(pick));
+			teamList.get("blue").add(sortPlayers.get(1 - pick));
+			
+			pickMsg = pickMsg.replace(".pickred.", sortPlayers.get(pick).getDiscordUser().getMentionString());
+			pickMsg = pickMsg.replace(".pickblue.", sortPlayers.get(1 - pick).getDiscordUser().getMentionString());
+		}
+		else {
+			teamList.get("red").add(sortPlayers.get(1 - pick));
+			teamList.get("blue").add(sortPlayers.get(pick));
+			
+			pickMsg = pickMsg.replace(".pickred.", sortPlayers.get(1 - pick).getDiscordUser().getMentionString());
+			pickMsg = pickMsg.replace(".pickblue.", sortPlayers.get(pick).getDiscordUser().getMentionString());
+		}
+		
+		sortPlayers.remove(0);
+		sortPlayers.remove(0);
+		
+		logic.bot.sendMsg(threadChannel, pickMsg);
+		
+		captainTurn = 1 - captainTurn;
+		
+		checkTeams();
 	}
 	
 
@@ -374,58 +508,7 @@ public class Match implements Runnable {
 		this.map = mapList.size() == 1 ? mapList.get(0) : mapList.get(rand.nextInt(mapList.size()-1));
 		LOGGER.info("Map: " + this.map.name);
 
-		// Sort players by elo
-		List<Player> playerList = new ArrayList<Player>();
-		for (Player p : playerStats.keySet()) {
-			playerList.add(p);
-		}
-		List<Player> sortPlayers = new ArrayList<Player>();
-		sortPlayers.add(playerList.get(0));
-		for (Player player : playerList) {
-			for (Player sortplayer : sortPlayers) {
-				if (player.equals(sortplayer)) continue;
-				else if (player.getElo() >= sortplayer.getElo()) {
-					sortPlayers.add(sortPlayers.indexOf(sortplayer), player);
-					break;
-				}
-			}
-			if (!sortPlayers.contains(player)) {
-				sortPlayers.add(player);
-			}
-		}
-
-		// 5: i=0,1 => red: (0, 9) (2, 7) -> blue: (1, 8) (3, 6)   if cond: (4, 5)
-		// 4: i=0,1 => red: (0, 7) (2, 5) -> blue: (1, 7) (3, 4)   if cond: none
-		// 3: i=0   => red: (0, 5)        -> blue: (1, 4)          if cond: (2, 3)
-		// 2: i=0   => red: (0, 3)        -> blue: (1, 2)          if cond: none
-		// 1: i=-   => red: none          -> blue: none            if cond: (0, 1)
-		for (int i = 0; i < Math.floor(gametype.getTeamSize() / 2); ++i) {
-			teamList.get("red").add(sortPlayers.get(i*2));
-			teamList.get("red").add(sortPlayers.get(((gametype.getTeamSize()*2)-1)-i*2));
-
-			teamList.get("blue").add(sortPlayers.get(i*2+1));
-			teamList.get("blue").add(sortPlayers.get(((gametype.getTeamSize()*2)-1)-i*2-1));
-		}
-
-		if ((gametype.getTeamSize() % 2) == 1) {
-			int better = gametype.getTeamSize() - 1;
-			int worse = gametype.getTeamSize();
-
-			// compute avg elo up till now
-			elo = new int[] {0, 0};
-			for (Player p : teamList.get("red")) elo[0] += p.getElo();
-			for (Player p : teamList.get("blue")) elo[1] += p.getElo();
-			elo[0] /= Math.max(1, gametype.getTeamSize() - 1);
-			elo[1] /= Math.max(1, gametype.getTeamSize() - 1);
-
-			if (elo[0] > elo[1]) {
-				teamList.get("red").add(sortPlayers.get(worse));
-				teamList.get("blue").add(sortPlayers.get(better));
-			} else {
-				teamList.get("red").add(sortPlayers.get(better));
-				teamList.get("blue").add(sortPlayers.get(worse));
-			}
-		}
+		
 
 		// avg elo
 		elo = new int[] {0, 0};
@@ -663,6 +746,10 @@ public class Match implements Runnable {
 
 	public int getPlayerCount() {
 		return playerStats.keySet().size();
+	}
+	
+	public DiscordChannel getThreadChannel() {
+		return threadChannel;
 	}
 
 	public String getIngameInfo() {

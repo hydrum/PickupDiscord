@@ -25,7 +25,7 @@ public class DiscordAPI {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	public static final String api_url = "https://discordapp.com/api/";
-	public static final String api_version = "v6";
+	public static final String api_version = "v9";
 	
 	public static boolean sendMessage(DiscordChannel channel, String msg) {
 		try {
@@ -70,6 +70,29 @@ public class DiscordAPI {
 		return false;
 	}
 	
+	public static DiscordChannel createThread(DiscordChannel channel, String name) {
+		try {
+			String reply = sendPostRequest("/channels/"+ channel.id + "/threads", new JSONObject().put("name", name).put("type", 11));
+			JSONObject obj = new JSONObject(reply);
+			DiscordChannel threadChannel = new DiscordChannel(obj);
+			return threadChannel;
+		} catch (JSONException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return null;
+	}
+	
+	public static boolean archiveThread(DiscordChannel channel) {
+		try {
+			String reply = sendPatchRequest("/channels/"+ channel.id, new JSONObject().put("archived", true));
+			JSONObject obj = new JSONObject(reply);
+			return obj != null && !obj.has("code");
+		} catch (JSONException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return false;
+	}
+	
 	private static synchronized String sendPostRequest(String request, JSONObject content) {
 //		Thread.dumpStack();
 		try {
@@ -90,7 +113,66 @@ public class DiscordAPI {
 				wr.write(postData);
 			}
 			
-			if (c.getResponseCode() != 200) {
+			if (c.getResponseCode() != 200 && c.getResponseCode() != 201) {
+				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
+				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
+					try {
+						Thread.sleep(1000);
+						return sendPostRequest(request, content);
+					} catch (InterruptedException e) {
+						LOGGER.log(Level.WARNING, "Exception: ", e);
+					}
+				}
+				return null;
+			}
+			
+			BufferedReader br = new BufferedReader(new InputStreamReader((c.getInputStream())));
+			String fullmsg = "";
+			String output = "";
+			while ((output = br.readLine()) != null) {
+				try {
+					fullmsg += output;
+				} catch (ClassCastException e) {
+					LOGGER.log(Level.WARNING, "Exception: ", e);
+				} catch (NullPointerException e) {
+					LOGGER.log(Level.WARNING, "Exception: ", e);
+				}
+			}
+			c.disconnect();
+			
+			LOGGER.fine("API call complete for " + request + ": " + fullmsg);
+			return fullmsg;
+			
+		} catch (MalformedURLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		} catch (IOException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return null;
+	}
+	
+	private static synchronized String sendPatchRequest(String request, JSONObject content) {
+//		Thread.dumpStack();
+		try {
+			byte[] postData       = content.toString().getBytes( StandardCharsets.UTF_8 );
+			int    postDataLength = postData.length;
+			
+			URL url = new URL(api_url + api_version + request);
+			HttpURLConnection c = (HttpURLConnection) url.openConnection();
+			c.setRequestProperty("X-HTTP-Method-Override", "PATCH");
+			c.setRequestMethod("POST");
+			c.setRequestProperty("Authorization", "Bot " + DiscordBot.getToken());
+			c.setRequestProperty("charset", "utf-8");
+			c.setRequestProperty("Content-Type", "application/json"); 
+			c.setRequestProperty("User-Agent", "Bot");
+			c.setDoOutput(true);
+			c.setUseCaches(false);
+			c.setRequestProperty("Content-Length", Integer.toString(postDataLength));	
+			try (DataOutputStream wr = new DataOutputStream( c.getOutputStream())) {
+				wr.write(postData);
+			}
+			
+			if (c.getResponseCode() != 200 && c.getResponseCode() != 201) {
 				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
 				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {

@@ -13,6 +13,7 @@ public class Config {
 	public static final String CMD_HELP					= "!help";
 	public static final String CMD_SURRENDER			= "!surrender";
 	public static final String CMD_LIVE					= "!live";
+	public static final String CMD_PICK					= "!pick";
 	
 	public static final String CMD_LOCK					= "!lock";
 	public static final String CMD_UNLOCK				= "!unlock";
@@ -79,6 +80,7 @@ public class Config {
 
 	public static final String USE_CMD_ADD				= "!add <gametype>";
 	public static final String USE_CMD_REMOVE			= "!remove <gametype>";
+	public static final String USE_CMD_PICK				= "!pick <1/2>";
 	public static final String USE_CMD_MAPS				= "!maps displays the map list for each gametype.";
 	public static final String USE_CMD_MAP				= "!map <gametype> <mapname>";
 	public static final String USE_CMD_STATUS			= "Type !status to get information on the queues.";
@@ -169,6 +171,10 @@ public class Config {
 	public static final String pkup_go_pub_map			= "Map: .map.";
 	public static final String pkup_go_pub_calm			= "Average ELO: .elo.";
 	public static final String pkup_go_pub_sent			= "**.gametype.**: Server info has been sent. If you didn't get a DM try **!lostpass**.";
+	public static final String pkup_go_pub_threadtitle	= "#.ID. Match .gametype. Captain Picks";
+	public static final String pkup_go_pub_captains 	= "The two captains are .captain1. (**red**) and .captain2. (**blue**) as they have the highest elo.";
+	public static final String pkup_go_pub_pick 	    = ".captain. pick between **.pick1.** (``!pick 1``) and **.pick2.** (``!pick 2``)";
+	public static final String pkup_go_pub_pickjoin	    = ".pickred. joins the **red** team and .pickblue. the **blue** team.";
 
 	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber. (.map.):";
 	public static final String pkup_aftermath_result	= ".team. .result. (.score.) -";
@@ -212,6 +218,8 @@ public class Config {
 	public static final String player_cannot_remove		= "You cannot remove.";
 	public static final String player_not_in_match		= "You are not added to any queue.";
 	public static final String player_already_match		= "You are already in a match.";
+	
+	public static final String player_not_captain		= "You can't pick a player. You are not captain for a game or it is not your turn to pick.";
 
 	public static final String player_already_surrender	= "You already surrendered.";
 	

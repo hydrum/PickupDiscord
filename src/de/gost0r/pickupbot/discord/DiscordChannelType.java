@@ -5,5 +5,6 @@ public enum DiscordChannelType {
 	DM,
 	GUILD_VOICE,
 	GROUP_DM,
-	GUILD_CATEGORY
+	GUILD_CATEGORY,
+	THREAD_CHANNEL
 }

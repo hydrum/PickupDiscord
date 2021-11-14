@@ -132,6 +132,16 @@ public class PickupLogic {
 		}
 	}
 	
+	public void cmdPick(Player player, int pick) {
+		for (Match match : ongoingMatches) {
+			if (match.isCaptainTurn(player)) {
+				match.pick(player, pick - 1);
+				return;
+			}
+		}
+		bot.sendNotice(player.getDiscordUser(), Config.player_not_captain);
+	}
+	
 	public boolean cmdLock() {
 		locked = true;
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.lock_enable);
@@ -356,6 +366,8 @@ public class PickupLogic {
 		
 		if (sendMsg) {
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+			//DiscordChannel thread = bot.createThread(getChannelByType(PickupChannelType.PUBLIC).get(0), "test");
+			//thread.archive(); Temporary for testing purposes
 		}
 		return msg;
 	}
@@ -951,7 +963,7 @@ public class PickupLogic {
 		Server bestServer = null;
 		
 		for (Server server : serverList) {
-			if (server.region == r) {	
+			if (server.region == r && server.active && !server.isTaken()) {	
 				bestServer = server;
 				break;
 			}

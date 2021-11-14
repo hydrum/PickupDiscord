@@ -318,6 +318,21 @@ public class Database {
 		return -1;
 	}
 	
+	public int getLastMatchID() {
+		try {
+			Statement stmt = c.createStatement();
+			String sql = "SELECT ID FROM match ORDER BY ID DESC";
+			ResultSet rs = stmt.executeQuery(sql);
+			rs.next();
+			int mid = rs.getInt("id");
+			
+			return mid;
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return -1;
+	}
+	
 	
 	// LOADING
 	
