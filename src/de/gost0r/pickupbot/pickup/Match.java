@@ -537,6 +537,7 @@ public class Match implements Runnable {
 		String msg = Config.pkup_go_pub_head;
 		msg = msg.replace(".gamenumber.", String.valueOf(id));
 		msg = msg.replace(".gametype.", gametype.getName());
+		msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
 		fullmsg = msg;
 
 		msg = Config.pkup_map_list;
@@ -571,7 +572,7 @@ public class Match implements Runnable {
 		fullmsg += "\n" + msg;
 
 		msg = Config.pkup_go_pub_calm;
-		msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
+		//msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
 		fullmsg += "\n" + msg;
 
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg);
@@ -803,9 +804,9 @@ public class Match implements Runnable {
 	
 	public DiscordEmbed getMatchEmbed() {
 		DiscordEmbed embed = new DiscordEmbed();
-		embed.title = "#" + String.valueOf(id) + " Match " + gametype.getName() + " " + state.name();
+		embed.title = "Match " "#" + String.valueOf(id) + " (" + state.name() + ")";
 		embed.color = 7056881;
-		embed.description = map != null ? "Map: **" + map.name + "**" : "null";
+		embed.description = map != null ? "**" + gametype.getName() + "** - *" + map.name + "*" : "null";
 		
 		String red_team_player_embed = "";
 		String red_team_score_embed = "";
