@@ -818,14 +818,18 @@ public class PickupLogic {
 	
 	public boolean cmdLive() {
 		String msg = "No live matches found.";
+		DiscordEmbed scoreBoardLink = new DiscordEmbed();
 		for (Match match : ongoingMatches) {
-			if (msg.equals("No live matches found.")) {
-				msg = match.getMatchInfo();
-			} else {
-				msg += "\n" + match.getMatchInfo();
-			}
+			msg = match.getMatchInfo();
+			scoreBoardLink.description = "[Live scoreboard](https://discord.com/channels/117622053061787657/" + match.threadChannel.id + "/" + match.liveScoreMsg.id + ")";
+			scoreBoardLink.color = 7056881;
+			bot.sendMsg(bot.getLatestMessageChannel(), msg, scoreBoardLink);
 		}
-		bot.sendMsg(bot.getLatestMessageChannel(), msg);
+		
+		if (msg.equals("No live matches found.")) {
+			bot.sendMsg(bot.getLatestMessageChannel(), msg);
+		}
+
 		return true;
 	}
 	

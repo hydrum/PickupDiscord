@@ -391,6 +391,8 @@ public class ServerMonitor implements Runnable {
 				state = ServerState.SCORE;
 				LOGGER.info("SWITCHED LIVE -> SCORE");
 			}
+			saveStats(rpp.scores);
+			match.updateScoreEmbed();
 		}
 		else if (state == ServerState.SCORE)
 		{
@@ -767,6 +769,24 @@ public class ServerMonitor implements Runnable {
 		}
 		
 		return String.valueOf(total[0]) + "-" + String.valueOf(total[1]);
+	}
+	
+	public int[] getScoreArray() {
+		
+		int[] total = new int[] { 0, 0 };
+		if (!firstHalf) {
+			total[0] = score[0][0];
+			total[1] = score[0][1];
+		}
+		
+		if (state == ServerState.LIVE || state == ServerState.SCORE) {
+			int team1 = firstHalf ? 0 : 1;
+			int team2 = firstHalf ? 1 : 0;
+			total[0] += prevRPP.scores[team1];
+			total[1] += prevRPP.scores[team2];
+		}
+		
+		return total;
 	}
 	
 	private String getTimeString(long time) throws Exception {

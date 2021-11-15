@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordEmbed;
+import de.gost0r.pickupbot.discord.DiscordMessage;
 import de.gost0r.pickupbot.pickup.MatchStats.Status;
 import de.gost0r.pickupbot.pickup.server.Server;
 import de.gost0r.pickupbot.pickup.server.ServerMonitor.ServerState;
@@ -30,7 +31,8 @@ public class Match implements Runnable {
 	private Map<Player, MatchStats> playerStats = new HashMap<Player, MatchStats>();
 	private List<Player> sortPlayers;
 	
-	private DiscordChannel threadChannel;
+	public DiscordChannel threadChannel;
+	public DiscordMessage liveScoreMsg;
 
 	private Server server;
 	private GameMap map;
@@ -230,6 +232,7 @@ public class Match implements Runnable {
 		state = MatchState.Abort;
 		cleanUp();
 		logic.db.saveMatch(this);
+		threadChannel.archive();
 	}
 
 	public void abandon(Status status, List<Player> involvedPlayers) {
@@ -238,6 +241,7 @@ public class Match implements Runnable {
 		sendAftermath(status, involvedPlayers);
 		logic.matchRemove(this);
 		logic.db.saveMatch(this);
+		threadChannel.archive();
 	}
 
 	public void end() {
@@ -247,6 +251,7 @@ public class Match implements Runnable {
 		logic.matchRemove(this);
 		logic.db.saveMatch(this);
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), null, getMatchEmbed());
+		threadChannel.archive();
 	}
 
 	public void cancelStart() {
@@ -444,7 +449,6 @@ public class Match implements Runnable {
 	public void checkTeams() {
 		if (sortPlayers.isEmpty() && state == MatchState.AwaitingServer) {
 			state = MatchState.Live;
-			threadChannel.archive();
 			new Thread(this).start(); // do important changes that affect possibly other matches/servers/playerlists outside the thread!
 		}
 		else {
@@ -600,7 +604,9 @@ public class Match implements Runnable {
 		server.sendRcon("map " + this.map.name);
 		server.sendRcon("g_warmup 10");
 		
-		server.startMonitoring(this);;
+		server.startMonitoring(this);
+		
+		liveScoreMsg = logic.bot.sendMsgToEdit(threadChannel, null, getMatchEmbed());
 	}
 
 	List<GameMap> getMostMapVotes() {
@@ -804,7 +810,7 @@ public class Match implements Runnable {
 	
 	public DiscordEmbed getMatchEmbed() {
 		DiscordEmbed embed = new DiscordEmbed();
-		embed.title = "Match " "#" + String.valueOf(id) + " (" + state.name() + ")";
+		embed.title = "Match #" + String.valueOf(id) + " (" + state.name() + ")";
 		embed.color = 7056881;
 		embed.description = map != null ? "**" + gametype.getName() + "** - *" + map.name + "*" : "null";
 		
@@ -939,5 +945,14 @@ public class Match implements Runnable {
 		msg = msg.replace(".playerlist.", playernames);
 		msg = msg.replace(".score.", String.valueOf(score[0]) + " " + String.valueOf(score[1]));
 		return msg;
+	}
+	
+	public void updateScoreEmbed() {
+		if (state == MatchState.Live) {
+			score = server.getServerMonitor().getScoreArray();
+		}
+		if (liveScoreMsg != null) {
+			liveScoreMsg.edit(null, getMatchEmbed());
+		}
 	}
 }

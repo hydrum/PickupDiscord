@@ -115,6 +115,10 @@ public class DiscordBot  {
 		sendMsg(user.getDMChannel(), msg, embed);
 	}
 	
+	public DiscordMessage sendMsgToEdit(DiscordChannel channel, String msg, DiscordEmbed embed) {
+		return DiscordAPI.sendMessageToEdit(channel, msg, embed);
+	}
+	
 	public DiscordChannel createThread(DiscordChannel channel, String name) {
 		return DiscordAPI.createThread(channel, name);
 	}

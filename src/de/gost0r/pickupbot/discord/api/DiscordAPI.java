@@ -23,6 +23,7 @@ import org.json.JSONObject;
 import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordEmbed;
+import de.gost0r.pickupbot.discord.DiscordMessage;
 
 public class DiscordAPI {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -54,6 +55,21 @@ public class DiscordAPI {
 		return false;
 	}
 	
+	public static DiscordMessage sendMessageToEdit(DiscordChannel channel, String msg, DiscordEmbed embed) {
+		try {
+			List<JSONObject> embedList = new ArrayList<JSONObject>();
+			embedList.add(embed.getJSON());
+			String reply = sendPostRequest("/channels/"+ channel.id + "/messages", new JSONObject().put("content", msg).put("embeds", embedList));
+			JSONObject obj = new JSONObject(reply);
+			
+			DiscordMessage message = new DiscordMessage(obj.getString("id"), null, channel, msg);
+			return message;
+		} catch (JSONException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return null;
+	}
+	
 	public static boolean deleteMessage(DiscordChannel channel, String msgid) {
 		try {
 			String reply = sendDeleteRequest("/channels/"+ channel.id + "/messages/" + msgid);
@@ -67,6 +83,19 @@ public class DiscordAPI {
 				obj = new JSONObject(reply);
 			}
 			return obj != null && !obj.has("code");
+		} catch (JSONException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return false;
+	}
+	
+	public static boolean editMessage(DiscordMessage msg, String content, DiscordEmbed embed) {
+		try {
+			List<JSONObject> embedList = new ArrayList<JSONObject>();
+			embedList.add(embed.getJSON());
+			String reply = sendPatchRequest("/channels/"+ msg.channel.id + "/messages/" + msg.id, new JSONObject().put("content", content).put("embeds", embedList));
+			//JSONObject obj = new JSONObject(reply);
+			return true;
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
