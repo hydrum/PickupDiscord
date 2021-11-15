@@ -6,12 +6,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.net.http.*;
+import java.net.http.HttpRequest.Builder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -85,8 +88,8 @@ public class DiscordAPI {
 	public static boolean archiveThread(DiscordChannel channel) {
 		try {
 			String reply = sendPatchRequest("/channels/"+ channel.id, new JSONObject().put("archived", true));
-			JSONObject obj = new JSONObject(reply);
-			return obj != null && !obj.has("code");
+			//JSONObject obj = new JSONObject(reply);
+			return true;
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -154,57 +157,32 @@ public class DiscordAPI {
 	private static synchronized String sendPatchRequest(String request, JSONObject content) {
 //		Thread.dumpStack();
 		try {
-			byte[] postData       = content.toString().getBytes( StandardCharsets.UTF_8 );
-			int    postDataLength = postData.length;
 			
 			URL url = new URL(api_url + api_version + request);
 			HttpURLConnection c = (HttpURLConnection) url.openConnection();
-			c.setRequestProperty("X-HTTP-Method-Override", "PATCH");
-			c.setRequestMethod("POST");
-			c.setRequestProperty("Authorization", "Bot " + DiscordBot.getToken());
-			c.setRequestProperty("charset", "utf-8");
-			c.setRequestProperty("Content-Type", "application/json"); 
-			c.setRequestProperty("User-Agent", "Bot");
-			c.setDoOutput(true);
-			c.setUseCaches(false);
-			c.setRequestProperty("Content-Length", Integer.toString(postDataLength));	
-			try (DataOutputStream wr = new DataOutputStream( c.getOutputStream())) {
-				wr.write(postData);
-			}
 			
-			if (c.getResponseCode() != 200 && c.getResponseCode() != 201) {
-				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
-				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
-					try {
-						Thread.sleep(1000);
-						return sendPostRequest(request, content);
-					} catch (InterruptedException e) {
-						LOGGER.log(Level.WARNING, "Exception: ", e);
-					}
-				}
-				return null;
-			}
+			HttpClient httpClient = HttpClient.newBuilder()
+                    .version(HttpClient.Version.HTTP_2)
+                    .build();
 			
-			BufferedReader br = new BufferedReader(new InputStreamReader((c.getInputStream())));
-			String fullmsg = "";
-			String output = "";
-			while ((output = br.readLine()) != null) {
-				try {
-					fullmsg += output;
-				} catch (ClassCastException e) {
-					LOGGER.log(Level.WARNING, "Exception: ", e);
-				} catch (NullPointerException e) {
-					LOGGER.log(Level.WARNING, "Exception: ", e);
-				}
-			}
-			c.disconnect();
+			HttpRequest patchRequest = HttpRequest.newBuilder()
+					.uri(URI.create(api_url + api_version + request))
+					.method("PATCH", HttpRequest.BodyPublishers.ofString(content.toString()))
+					.header("User-Agent", "Bot")
+					.header("Authorization", "Bot " + DiscordBot.getToken())
+					.header("Content-Type", "application/json")
+					.build();
 			
-			LOGGER.fine("API call complete for " + request + ": " + fullmsg);
-			return fullmsg;
+			HttpResponse response = httpClient.send(patchRequest,HttpResponse.BodyHandlers.ofString());
+			
+			return response.toString();
 			
 		} catch (MalformedURLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		} catch (IOException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		 catch (InterruptedException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return null;

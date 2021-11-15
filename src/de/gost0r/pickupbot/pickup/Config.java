@@ -171,7 +171,7 @@ public class Config {
 	public static final String pkup_go_pub_map			= "Map: .map.";
 	public static final String pkup_go_pub_calm			= "Average ELO: .elo.";
 	public static final String pkup_go_pub_sent			= "**.gametype.**: Server info has been sent. If you didn't get a DM try **!lostpass**.";
-	public static final String pkup_go_pub_threadtitle	= "#.ID. Match .gametype. Captain Picks";
+	public static final String pkup_go_pub_threadtitle	= "Match .ID.";
 	public static final String pkup_go_pub_captains 	= "The two captains are .captain1. (**red**) and .captain2. (**blue**) as they have the highest elo.";
 	public static final String pkup_go_pub_pick 	    = ".captain. pick between **.pick1.** (``!pick 1``) and **.pick2.** (``!pick 2``)";
 	public static final String pkup_go_pub_pickjoin	    = ".pickred. joins the **red** team and .pickblue. the **blue** team.";

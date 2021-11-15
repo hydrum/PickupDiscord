@@ -366,8 +366,6 @@ public class PickupLogic {
 		
 		if (sendMsg) {
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
-			//DiscordChannel thread = bot.createThread(getChannelByType(PickupChannelType.PUBLIC).get(0), "test");
-			//thread.archive(); Temporary for testing purposes
 		}
 		return msg;
 	}

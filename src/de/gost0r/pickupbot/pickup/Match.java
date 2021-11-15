@@ -352,7 +352,6 @@ public class Match implements Runnable {
 			
 			String threadTitle = Config.pkup_go_pub_threadtitle;
 			threadTitle = threadTitle.replace(".ID.", String.valueOf(logic.db.getLastMatchID() + 1));
-			threadTitle = threadTitle.replace(".gametype.", gametype.getName());
 			threadChannel = logic.bot.createThread(logic.getChannelByType(PickupChannelType.PUBLIC).get(0), threadTitle); // Assuming we only have 1 public channel
 			
 			logic.matchStarted(this);
@@ -445,6 +444,7 @@ public class Match implements Runnable {
 	public void checkTeams() {
 		if (sortPlayers.isEmpty() && state == MatchState.AwaitingServer) {
 			state = MatchState.Live;
+			threadChannel.archive();
 			new Thread(this).start(); // do important changes that affect possibly other matches/servers/playerlists outside the thread!
 		}
 		else {
