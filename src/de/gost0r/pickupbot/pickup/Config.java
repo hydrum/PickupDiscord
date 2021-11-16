@@ -14,6 +14,7 @@ public class Config {
 	public static final String CMD_SURRENDER			= "!surrender";
 	public static final String CMD_LIVE					= "!live";
 	public static final String CMD_PICK					= "!pick";
+	public static final String CMD_VOTES				= "!votes";
 
 	public static final String CMD_LOCK					= "!lock";
 	public static final String CMD_UNLOCK				= "!unlock";
@@ -89,6 +90,7 @@ public class Config {
 	public static final String USE_CMD_SURRENDER		= "Type !surrender to abandon your match.";
 	public static final String USE_CMD_LIVE				= "!live sends info on the live matches.";
 	public static final String USE_CMD_PICK				= "!pick <1/2>";
+	public static final String USE_CMD_VOTES			= "Type !votes to get the current votes.";
 
 	public static final String USE_CMD_LOCK				= "!lock to prevent commands from PUBLIC channel.";
 	public static final String USE_CMD_UNLOCK			= "!unlock";
@@ -259,4 +261,6 @@ public class Config {
 	public static final String admin_cmd_successful		= ":white_check_mark: Successful: ";
 	public static final String admin_cmd_unsuccessful	= ":x: Unsuccessful: ";
 	public static final String wait_testing_server		= "Testing server list. This can take a while...";
+	
+	public static final String bot_online				= "The bot is back online!";
 }

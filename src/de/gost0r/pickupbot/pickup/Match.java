@@ -362,6 +362,7 @@ public class Match implements Runnable {
 			threadChannel = logic.bot.createThread(logic.getChannelByType(PickupChannelType.PUBLIC).get(0), threadTitle); // Assuming we only have 1 public channel
 			
 			logic.matchStarted(this);
+			timeLastPick = System.currentTimeMillis();
 			sortPlayers();
 		}
 	}
@@ -664,17 +665,24 @@ public class Match implements Runnable {
 		List<GameMap> mostMapVotes = getMostMapVotes();
 		String msg = "None";
 		for (GameMap map : mapVotes.keySet()) {
-			if (skipNull && mapVotes.get(map) == 0) continue;
+			if (skipNull && mapVotes.get(map) == 0 && !logic.getLastMapPlayed(gametype).name.equals(map.name)) continue;
 			if (msg.equals("None")) {
 				msg = "";				
 			} else {
 				msg += " - ";
 			}
-			String mapString = map.name + ": " + String.valueOf(mapVotes.get(map));
-			if (mostMapVotes.size() < mapVotes.keySet().size() && mostMapVotes.contains(map)) {
-				mapString = "**" + mapString + "**";
+			LOGGER.info(logic.getLastMapPlayed(gametype).name + " " + map.name);
+			if (logic.getLastMapPlayed(gametype).name.equals(map.name)) {
+				String mapString = "~~" + map.name + "~~";
+				msg += mapString;
 			}
-			msg += mapString;
+			else {
+				String mapString = map.name + ": " + String.valueOf(mapVotes.get(map));
+				if (mostMapVotes.size() < mapVotes.keySet().size() && mostMapVotes.contains(map)) {
+					mapString = "**" + mapString + "**";
+				}
+				msg += mapString;
+			}
 		}
 		return msg;
 	}

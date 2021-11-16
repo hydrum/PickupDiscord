@@ -76,10 +76,10 @@ public class PickupLogic {
 		awaitingServer = new LinkedList<Match>();
 		
 		lastMapPlayed = new HashMap<Gametype, GameMap>();
-		lastMapPlayed.put(getGametypeByString("TS"), null);
-		lastMapPlayed.put(getGametypeByString("CTF"), null);
-		lastMapPlayed.put(getGametypeByString("1v1"), null);
-		lastMapPlayed.put(getGametypeByString("2v2"), null);
+		lastMapPlayed.put(getGametypeByString("TS"), new GameMap("null"));
+		lastMapPlayed.put(getGametypeByString("CTF"), new GameMap("null"));
+		lastMapPlayed.put(getGametypeByString("1v1"), new GameMap("null"));
+		lastMapPlayed.put(getGametypeByString("2v2"), new GameMap("null"));
 	}
 	
 	public void cmdAddPlayer(Player player, List<Gametype> modes) {
@@ -400,7 +400,7 @@ public class PickupLogic {
 		}
 	}
 	
-	public void cmdGetMaps() {
+	public void cmdGetMaps(boolean showZeroVote) {
 		String msg = "None";
 		for (Gametype gametype : curMatch.keySet()) {
 			if (msg.equals("None")) {
@@ -410,7 +410,7 @@ public class PickupLogic {
 			}
 			String mapString = Config.pkup_map_list;
 			mapString = mapString.replace(".gametype.", gametype.getName());
-			mapString = mapString.replace(".maplist.", curMatch.get(gametype).getMapVotes(false));
+			mapString = mapString.replace(".maplist.", curMatch.get(gametype).getMapVotes(!showZeroVote));
 			msg += mapString;
 		}
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
@@ -445,7 +445,7 @@ public class PickupLogic {
 					bot.sendNotice(player.getDiscordUser(), Config.map_not_unique);
 				} else if (counter == 0) {
 					bot.sendNotice(player.getDiscordUser(), Config.map_not_found);
-				} else if (lastMapPlayed.get(gametype) == map) {
+				} else if (lastMapPlayed.get(gametype).name.equals(map.name)) {
 					bot.sendNotice(player.getDiscordUser(), Config.map_played_last_game);
 				} else {
 					m.voteMap(player, map); // handles sending a msg itself
@@ -1362,5 +1362,8 @@ public class PickupLogic {
 		lastMapPlayed.remove(gt);
 		lastMapPlayed.put(gt, map);
 	}
-
+	
+	public GameMap getLastMapPlayed(Gametype gt) {
+		return lastMapPlayed.get(gt);
+	}
 }

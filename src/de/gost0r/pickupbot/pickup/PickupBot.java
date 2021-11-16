@@ -92,6 +92,8 @@ public class PickupBot extends DiscordBot {
 	//	logic.cmdAddPlayer(p2, list);
 	//	logic.cmdAddPlayer(p3, list);
 		
+		sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), Config.bot_online);
+		
 	}
 	
 	@Override
@@ -279,7 +281,7 @@ public class PickupBot extends DiscordBot {
 					{
 						if (data.length == 1)
 						{
-							logic.cmdGetMaps();
+							logic.cmdGetMaps(true);
 						}
 						else if (data.length == 2)
 						{
@@ -301,6 +303,14 @@ public class PickupBot extends DiscordBot {
 						logic.cmdStatus();
 					}
 					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_STATUS));
+					break;
+					
+				case Config.CMD_VOTES:
+					if (data.length == 1)
+					{
+						logic.cmdGetMaps(false);
+					}
+					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_VOTES));
 					break;
 					
 				case Config.CMD_SURRENDER:

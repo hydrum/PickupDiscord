@@ -446,7 +446,7 @@ public class ServerMonitor implements Runnable {
 		
 		for (ServerPlayer player : rpp.players) {
 			
-			if (player.state == ServerPlayerState.Connecting) continue; // ignore connecting players
+			if (player.state == ServerPlayerState.Connecting || player.name == "GTV") continue; // ignore connecting players
 			
 			if (player.auth.equals("---")) {
 				requestAuth(player);
