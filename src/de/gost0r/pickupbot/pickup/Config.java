@@ -170,7 +170,7 @@ public class Config {
 
 	public static final String pkup_go_admin			= "[ Match #.gamenumber. ][ Password: .password. ][ .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
 	public static final String pkup_go_player			= "Pickup starts now! Connect, choose positions and ready up! **[ /connect .server. ; password .password. ]**";
-	public static final String pkup_go_pub_head			= "**.gametype.: Match #.gamenumber.** (avg ELO: .elo.)";
+	public static final String pkup_go_pub_head			= "**.gametype.: Match #.gamenumber.** .region. (avg ELO: .elo.)";
 	public static final String pkup_go_pub_team			= ".team. team: .playerlist.";
 	public static final String pkup_go_pub_map			= "Map: .map.";
 	public static final String pkup_go_pub_calm			= "Stream: <http://tv.pwnz.pro/tv/>";
@@ -205,6 +205,7 @@ public class Config {
 	public static final String map_not_unique			= "Mapstring not unique.";
 	public static final String map_cannot_vote			= "You cannot vote right now.";
 	public static final String map_specify_gametype		= "Please use: **!map <gametype> <map>**.";
+	public static final String map_played_last_game		= "This map was played last game, please vote for a different map.";
 
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
@@ -228,6 +229,8 @@ public class Config {
 	public static final String player_already_surrender	= "You already surrendered.";
 	
 	public static final String afk_reminder				= "**[AFK]** .user. will be removed in 3 minutes. Write something in the channel to stay in queue.";
+	public static final String pick_reminder			= "**[CAPTAIN PICK]** .user. you have 1 min to pick a player in the game thread channel.";
+	public static final String pick_reset				= "**[CAPTAIN PICK]** The match **.matchid.** has been reset. .user. did not pick a player in time and was punished accordingly.";
 
 //	public static final String report_wrong_arg			= "Your report reason is invalid, check !reportlist to check the possible reasons.";
 //	public static final String report_invalid_urtauth	= "No player could be found with this urtauth.";

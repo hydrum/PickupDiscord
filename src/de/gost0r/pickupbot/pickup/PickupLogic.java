@@ -43,6 +43,8 @@ public class PickupLogic {
 	
 	private Map<BanReason, String[]> banDuration;
 	
+	private Map<Gametype, GameMap> lastMapPlayed;
+	
 	public PickupLogic(PickupBot bot) {
 		this.bot = bot;
 		
@@ -72,6 +74,12 @@ public class PickupLogic {
 		banDuration.put(BanReason.RAGEQUIT, new String[] {"30m", "1h", "2h", "6h", "12h", "3d", "1w", "2w", "1M", "3M"});
 		
 		awaitingServer = new LinkedList<Match>();
+		
+		lastMapPlayed = new HashMap<Gametype, GameMap>();
+		lastMapPlayed.put(getGametypeByString("TS"), null);
+		lastMapPlayed.put(getGametypeByString("CTF"), null);
+		lastMapPlayed.put(getGametypeByString("1v1"), null);
+		lastMapPlayed.put(getGametypeByString("2v2"), null);
 	}
 	
 	public void cmdAddPlayer(Player player, List<Gametype> modes) {
@@ -437,6 +445,8 @@ public class PickupLogic {
 					bot.sendNotice(player.getDiscordUser(), Config.map_not_unique);
 				} else if (counter == 0) {
 					bot.sendNotice(player.getDiscordUser(), Config.map_not_found);
+				} else if (lastMapPlayed.get(gametype) == map) {
+					bot.sendNotice(player.getDiscordUser(), Config.map_played_last_game);
 				} else {
 					m.voteMap(player, map); // handles sending a msg itself
 				}
@@ -1042,7 +1052,31 @@ public class PickupLogic {
 				String msg = Config.afk_reminder;
 				msg = msg.replace(".user.", p.getDiscordUser().getMentionString());
 				bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
-				
+			}
+		}
+		
+		for (Match m :ongoingMatches) {
+			if (m.getMatchState() != MatchState.AwaitingServer) {
+				continue;
+			}
+			
+			long lastPickTime = m.getTimeLastPick();
+			long pickKickTime = lastPickTime + 3 * 60 * 1000;
+			long pickReminderTime = lastPickTime + 2 * 60 * 1000;
+			
+			if (pickKickTime < System.currentTimeMillis()) {
+				String msg = Config.pick_reset;
+				msg = msg.replace(".matchid.", String.valueOf(db.getLastMatchID() + 1));
+				msg = msg.replace(".user.", m.getCaptainsTurn().getDiscordUser().getMentionString());
+				bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+				autoBanPlayer(m.getCaptainsTurn(), BanReason.NOSHOW);
+				m.reset();
+			} else if (pickReminderTime < System.currentTimeMillis() && !m.getPickReminderSent()) {
+				m.setPickReminderSent(true);
+				LOGGER.info("PICK: REMINDER - " + m.getCaptainsTurn().getUrtauth() + ": " + pickKickTime + " > " + System.currentTimeMillis());
+				String msg = Config.pick_reminder;
+				msg = msg.replace(".user.", m.getCaptainsTurn().getDiscordUser().getMentionString());
+				bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 			}
 		}
 	}
@@ -1322,6 +1356,11 @@ public class PickupLogic {
 			}
 		}
 		return null;
+	}
+	
+	public void setLastMapPlayed(Gametype gt, GameMap map) {
+		lastMapPlayed.remove(gt);
+		lastMapPlayed.put(gt, map);
 	}
 
 }

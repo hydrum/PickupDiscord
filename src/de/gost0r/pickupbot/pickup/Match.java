@@ -45,6 +45,8 @@ public class Match implements Runnable {
 	private int[] surrender;
 
 	private long startTime;
+	private long timeLastPick;
+	private boolean pickReminderSent;
 
 	private PickupLogic logic;
 
@@ -464,6 +466,10 @@ public class Match implements Runnable {
 		return captains[captainTurn].getUrtauth() == player.getUrtauth();
 	}
 	
+	public Player getCaptainsTurn() {
+		return captains[captainTurn];
+	}
+	
 	public void pick(Player captain, int pick) {
 		String pickMsg = Config.pkup_go_pub_pickjoin;
 		
@@ -489,12 +495,28 @@ public class Match implements Runnable {
 		
 		captainTurn = 1 - captainTurn;
 		
+		timeLastPick = System.currentTimeMillis();
+		
 		checkTeams();
+	}
+	
+	public long getTimeLastPick() {
+		return timeLastPick;
+	}
+	
+	public boolean getPickReminderSent() {
+		return pickReminderSent;
+	}
+	
+	public void setPickReminderSent(boolean reminderSent) {
+		pickReminderSent = reminderSent;
 	}
 	
 
 	// DONT CALL THIS OUTSIDE OF launch() !!!
-	public void run() {			
+	public void run() {	
+		logic.setLastMapPlayed(gametype, map);
+		
 		startTime = System.currentTimeMillis();
 		
 		Random rand = new Random();
@@ -542,6 +564,13 @@ public class Match implements Runnable {
 		msg = msg.replace(".gamenumber.", String.valueOf(id));
 		msg = msg.replace(".gametype.", gametype.getName());
 		msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
+		if (server.region == Region.NA) {
+			msg = msg.replace(".region.", ":flag_us:");
+		} else if (server.region == Region.EU) {
+			msg = msg.replace(".region.", ":flag_eu:");
+		} else {
+			msg = msg.replace(".region.", server.region.name());
+		}
 		fullmsg = msg;
 
 		msg = Config.pkup_map_list;
