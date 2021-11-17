@@ -35,6 +35,7 @@ public class Match implements Runnable {
 	public DiscordMessage liveScoreMsg;
 
 	private Server server;
+	private Server gtvServer;
 	private GameMap map;
 	private int[] elo = new int[2];	
 	private int[] score = new int[2];
@@ -149,7 +150,7 @@ public class Match implements Runnable {
 	}
 
 	public void voteMap(Player player, GameMap map) {
-		if ((state == MatchState.Signup || state == MatchState.AwaitingServer) && isInMatch(player)) {
+		if ((state == MatchState.Signup || state == MatchState.AwaitingServer) && (isInMatch(player) || sortPlayers.contains(player))) {
 			GameMap oldMap = player.getVotedMap(gametype);
 			if (oldMap != null) {
 				mapVotes.put(oldMap, mapVotes.get(oldMap).intValue() - 1);
@@ -235,6 +236,11 @@ public class Match implements Runnable {
 		cleanUp();
 		logic.db.saveMatch(this);
 		threadChannel.archive();
+		
+		if (gtvServer != null) {
+			gtvServer.free();
+			gtvServer.sendRcon("gtv_disconnect 1");
+		}
 	}
 
 	public void abandon(Status status, List<Player> involvedPlayers) {
@@ -244,6 +250,11 @@ public class Match implements Runnable {
 		logic.matchRemove(this);
 		logic.db.saveMatch(this);
 		threadChannel.archive();
+		
+		if (gtvServer != null) {
+			gtvServer.free();
+			gtvServer.sendRcon("gtv_disconnect 1");
+		}
 	}
 
 	public void end() {
@@ -254,6 +265,11 @@ public class Match implements Runnable {
 		logic.db.saveMatch(this);
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), null, getMatchEmbed());
 		threadChannel.archive();
+		
+		if (gtvServer != null) {
+			gtvServer.free();
+			gtvServer.sendRcon("gtv_disconnect 1");
+		}
 	}
 
 	public void cancelStart() {
@@ -516,9 +532,9 @@ public class Match implements Runnable {
 
 	// DONT CALL THIS OUTSIDE OF launch() !!!
 	public void run() {	
-		logic.setLastMapPlayed(gametype, map);
-		
 		startTime = System.currentTimeMillis();
+		
+		gtvServer = logic.setupGTV(this);
 		
 		Random rand = new Random();
 		int password = rand.nextInt((999999-100000) + 1) + 100000;
@@ -534,8 +550,6 @@ public class Match implements Runnable {
 		}
 		this.map = mapList.size() == 1 ? mapList.get(0) : mapList.get(rand.nextInt(mapList.size()-1));
 		LOGGER.info("Map: " + this.map.name);
-
-		
 
 		// avg elo
 		elo = new int[] {0, 0};
@@ -605,7 +619,11 @@ public class Match implements Runnable {
 		msg = msg.replace(".gametype.", gametype.getName());
 		fullmsg += "\n" + msg;
 
+		
 		msg = Config.pkup_go_pub_calm;
+		if (gtvServer == null) {
+			msg = Config.pkup_go_pub_calm_notavi;
+		}
 		//msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
 		fullmsg += "\n" + msg;
 
@@ -624,15 +642,21 @@ public class Match implements Runnable {
 		msg = Config.pkup_go_pub_sent;
 		msg = msg.replace(".gametype.", gametype.getName());
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), msg);
+		
+		logic.setLastMapPlayed(gametype, map);
 
 		// set server data
+		server.sendRcon("g_password " + server.password);
 		for (String s : this.gametype.getConfig()) {
 			server.sendRcon(s);
 			//server.pushRcon(s);
 		}
-		server.sendRcon("g_password " + server.password);
 		server.sendRcon("map " + this.map.name);
 		server.sendRcon("g_warmup 10");
+		
+		if (gtvServer != null) {
+			gtvServer.sendRcon("gtv_connect " + server.getAddress() + "  " + server.password);
+		}
 		
 		server.startMonitoring(this);
 		
@@ -846,8 +870,31 @@ public class Match implements Runnable {
 	}
 	
 	public DiscordEmbed getMatchEmbed() {
+		ServerState serverState = null;
+		if (server.isTaken()) {
+			serverState = server.getServerMonitor().getState();
+		}
+		
 		DiscordEmbed embed = new DiscordEmbed();
-		embed.title = "Match #" + String.valueOf(id) + " (" + state.name() + ")";
+		
+		String region_flag;
+		if (server == null || server.region == null) {
+			region_flag = "";
+		} else if (server.region == Region.NA) {
+			region_flag =  ":flag_us:";
+		} else if (server.region == Region.EU) {
+			region_flag = ":flag_eu:";
+		} else {
+			region_flag = server.region.name();
+		}
+		
+		if (serverState == ServerState.LIVE) {
+			embed.title  = region_flag + " Match #" + String.valueOf(id) + " (" + state.name() + " - " + server.getServerMonitor().getGameTime() + ")";
+		}
+		else {
+			embed.title = region_flag + " Match #" + String.valueOf(id) + " (" + state.name() + ")";
+		}
+		
 		embed.color = 7056881;
 		embed.description = map != null ? "**" + gametype.getName() + "** - *" + map.name + "*" : "null";
 		

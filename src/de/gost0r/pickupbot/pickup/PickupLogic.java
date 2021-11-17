@@ -28,6 +28,7 @@ public class PickupLogic {
 	public Database db;
 	
 	private List<Server> serverList;
+	private List<Server> gtvServerList;
 	private List<GameMap> mapList;
 
 	private Map<PickupRoleType, List<DiscordRole>> roles;
@@ -80,6 +81,10 @@ public class PickupLogic {
 		lastMapPlayed.put(getGametypeByString("CTF"), new GameMap("null"));
 		lastMapPlayed.put(getGametypeByString("1v1"), new GameMap("null"));
 		lastMapPlayed.put(getGametypeByString("2v2"), new GameMap("null"));
+		
+		Server testGTV = new Server(0, "gtv.b00bs-clan.com", 709, "arkon4bmn", "SevenAndJehar", true, null);
+		gtvServerList = new ArrayList<Server>();
+		gtvServerList.add(testGTV);
 	}
 	
 	public void cmdAddPlayer(Player player, List<Gametype> modes) {
@@ -831,9 +836,14 @@ public class PickupLogic {
 		DiscordEmbed scoreBoardLink = new DiscordEmbed();
 		for (Match match : ongoingMatches) {
 			msg = match.getMatchInfo();
-			scoreBoardLink.description = "[Live scoreboard](https://discord.com/channels/117622053061787657/" + match.threadChannel.id + "/" + match.liveScoreMsg.id + ")";
-			scoreBoardLink.color = 7056881;
-			bot.sendMsg(bot.getLatestMessageChannel(), msg, scoreBoardLink);
+			if (match.getMatchState() == MatchState.AwaitingServer || match.liveScoreMsg == null) {
+				bot.sendMsg(bot.getLatestMessageChannel(), msg);
+			} 
+			else {
+				scoreBoardLink.description = "[Live scoreboard](https://discord.com/channels/117622053061787657/" + match.threadChannel.id + "/" + match.liveScoreMsg.id + ")";
+				scoreBoardLink.color = 7056881;
+				bot.sendMsg(bot.getLatestMessageChannel(), msg, scoreBoardLink);
+			}
 		}
 		
 		if (msg.equals("No live matches found.")) {
@@ -1365,5 +1375,15 @@ public class PickupLogic {
 	
 	public GameMap getLastMapPlayed(Gametype gt) {
 		return lastMapPlayed.get(gt);
+	}
+	
+	public Server setupGTV(Match match) {
+		for (Server gtv : gtvServerList) {
+			if (!gtv.isTaken()) {
+				gtv.take();
+				return gtv;
+			}
+		}
+		return null;
 	}
 }
