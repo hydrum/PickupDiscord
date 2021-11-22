@@ -1,5 +1,8 @@
 package de.gost0r.pickupbot.pickup;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,8 +15,13 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.gost0r.pickupbot.PickupBotDiscordMain;
+import de.gost0r.pickupbot.discord.DiscordButton;
+import de.gost0r.pickupbot.discord.DiscordButtonStyle;
 import de.gost0r.pickupbot.discord.DiscordChannel;
+import de.gost0r.pickupbot.discord.DiscordComponent;
 import de.gost0r.pickupbot.discord.DiscordEmbed;
+import de.gost0r.pickupbot.discord.DiscordInteraction;
 import de.gost0r.pickupbot.discord.DiscordRole;
 import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.discord.DiscordUserStatus;
@@ -87,19 +95,22 @@ public class PickupLogic {
 		gtvServerList.add(testGTV);
 	}
 	
-	public void cmdAddPlayer(Player player, List<Gametype> modes) {
+	public void cmdAddPlayer(Player player, List<Gametype> modes, boolean forced) {
 
-		if (locked) {
+		if (locked && !forced) {
 			bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
 			return;
 		}
-		if (player.isBanned()) {
+		if (player.isBanned() && !forced) {
 			bot.sendMsg(bot.getLatestMessageChannel(), printBanInfo(player));
 			return;
 		}
 		if (playerInActiveMatch(player) != null) {
 			bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
 			return;
+		}
+		if (forced) {
+			player.setLastMessage(System.currentTimeMillis());
 		}
 
 		String defmsg = "You are already in queue for:";
@@ -145,14 +156,16 @@ public class PickupLogic {
 		}
 	}
 	
-	public void cmdPick(Player player, int pick) {
+	public void cmdPick(DiscordInteraction interaction, Player player, int pick) {
 		for (Match match : ongoingMatches) {
 			if (match.isCaptainTurn(player)) {
-				match.pick(player, pick - 1);
+				match.pick(player, pick);
+				interaction.respond(null);
+				interaction.message.delete();
 				return;
 			}
 		}
-		bot.sendNotice(player.getDiscordUser(), Config.player_not_captain);
+		interaction.respond(Config.player_not_captain);
 	}
 	
 	public boolean cmdLock() {
@@ -842,6 +855,11 @@ public class PickupLogic {
 			else {
 				scoreBoardLink.description = "[Live scoreboard](https://discord.com/channels/117622053061787657/" + match.threadChannel.id + "/" + match.liveScoreMsg.id + ")";
 				scoreBoardLink.color = 7056881;
+				
+				if (match.getGtvServer() != null) {
+					scoreBoardLink.description += "\n" + Config.pkup_go_pub_calm;
+				}
+				
 				bot.sendMsg(bot.getLatestMessageChannel(), msg, scoreBoardLink);
 			}
 		}
@@ -1385,5 +1403,25 @@ public class PickupLogic {
 			}
 		}
 		return null;
+	}
+	
+	public void restartApplication() throws URISyntaxException, IOException
+	{
+	  final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+	  final File currentJar = new File(PickupBotDiscordMain.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+
+	  /* is it a jar file? */
+	  if(!currentJar.getName().endsWith(".jar"))
+	    return;
+
+	  /* Build command: java -jar application.jar */
+	  final ArrayList<String> command = new ArrayList<String>();
+	  command.add(javaBin);
+	  command.add("-jar");
+	  command.add(currentJar.getPath());
+
+	  final ProcessBuilder builder = new ProcessBuilder(command);
+	  builder.start();
+	  System.exit(0);
 	}
 }

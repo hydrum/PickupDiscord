@@ -20,4 +20,8 @@ public class DiscordMessage {
 		DiscordAPI.editMessage(this, content, embed);
 		this.content = content;
 	}
+	
+	public void delete() {
+		DiscordAPI.deleteMessage(channel, id);
+	}
 }

@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.DiscordChannel;
+import de.gost0r.pickupbot.discord.DiscordComponent;
 import de.gost0r.pickupbot.discord.DiscordEmbed;
 import de.gost0r.pickupbot.discord.DiscordMessage;
 
@@ -34,6 +35,11 @@ public class DiscordAPI {
 	public static boolean sendMessage(DiscordChannel channel, String msg) {
 		try {
 			String reply = sendPostRequest("/channels/"+ channel.id + "/messages", new JSONObject().put("content", msg));
+			
+			if (reply == null) {
+				return false;
+			}
+			
 			JSONObject obj = new JSONObject(reply);
 			return obj != null && !obj.has("code");
 		} catch (JSONException e) {
@@ -55,11 +61,35 @@ public class DiscordAPI {
 		return false;
 	}
 	
-	public static DiscordMessage sendMessageToEdit(DiscordChannel channel, String msg, DiscordEmbed embed) {
+	public static DiscordMessage sendMessageToEdit(DiscordChannel channel, String msg, DiscordEmbed embed, List<DiscordComponent> components) {
 		try {
 			List<JSONObject> embedList = new ArrayList<JSONObject>();
-			embedList.add(embed.getJSON());
-			String reply = sendPostRequest("/channels/"+ channel.id + "/messages", new JSONObject().put("content", msg).put("embeds", embedList));
+			if (embed != null) {
+				embedList.add(embed.getJSON());
+			}
+			
+			List<JSONObject> componentList = new ArrayList<JSONObject>();
+			if(components != null) {
+				for (DiscordComponent component : components) {
+					componentList.add(component.getJSON());
+				}
+			}
+			
+			JSONObject content =  new JSONObject().put("content", msg);
+			
+			if (!embedList.isEmpty()) {
+				content.put("embeds", embedList);
+			}
+			if(!componentList.isEmpty()) {
+				List<JSONObject> componentObjList = new ArrayList<JSONObject>();
+				JSONObject componentObj = new JSONObject();
+				componentObj.put("type", 1);
+				componentObj.put("components", componentList);
+				componentObjList.add(componentObj);
+				content.put("components", componentObjList);
+			}
+					
+			String reply = sendPostRequest("/channels/"+ channel.id + "/messages", content);
 			JSONObject obj = new JSONObject(reply);
 			
 			DiscordMessage message = new DiscordMessage(obj.getString("id"), null, channel, msg);
@@ -123,6 +153,18 @@ public class DiscordAPI {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return false;
+	}
+	
+	public static void interactionRespond(String interaction_id, String interaction_token, String content) {
+		if (content == null) {
+			sendPostRequest("/interactions/"+ interaction_id + "/" + interaction_token + "/callback", new JSONObject().put("type", 6));
+		}
+		else {
+			JSONObject data = new JSONObject();
+			data.put("content", content);
+			data.put("flags", 64);
+			sendPostRequest("/interactions/"+ interaction_id + "/" + interaction_token + "/callback", new JSONObject().put("type", 4).put("data", data));
+		}
 	}
 	
 	private static synchronized String sendPostRequest(String request, JSONObject content) {

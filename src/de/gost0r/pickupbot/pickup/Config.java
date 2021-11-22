@@ -23,6 +23,8 @@ public class Config {
 	public static final String CMD_ENABLEMAP			= "!enablemap";
 	public static final String CMD_DISABLEMAP			= "!disablemap";
 	public static final String CMD_RCON					= "!rcon";
+	public static final String CMD_FORCEADD				= "!forceadd";
+	public static final String CMD_REBOOT				= "!reboot";
 
 	public static final String CMD_ENABLEGAMETYPE		= "!enablegametype";
 	public static final String CMD_DISABLEGAMETYPE		= "!disablegametype";
@@ -99,6 +101,7 @@ public class Config {
 	public static final String USE_CMD_ENABLEMAP		= "!enablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_DISABLEMAP		= "!disablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_RCON				= "!rcon <serverid> <rconstring>";
+	public static final String USE_CMD_FORCEADD			= "!forceadd <gamemode> </@DiscordUser|urtauth/>";
 
 	public static final String USE_CMD_ENABLEGAMETYPE	= "!enablegametype <name> <teamsize>";
 	public static final String USE_CMD_DISABLEGAMETYPE	= "!disablegametype <name>";
@@ -143,6 +146,10 @@ public class Config {
 	public static final String USE_CMD_REMOVEROLE		= "!removerole <@role> <admin/superadmin>";
 
 	//------------------------------------------------------------------------------------//
+	
+	public static final String INT_PICK					= "pick";
+	
+	//------------------------------------------------------------------------------------//
 
 	public static final String pkup_lock				= "Pickup games are now locked.";
 	public static final String pkup_map					= "You voted for .map..";
@@ -175,13 +182,13 @@ public class Config {
 	public static final String pkup_go_pub_head			= "**.gametype.: Match #.gamenumber.** .region. (avg ELO: .elo.)";
 	public static final String pkup_go_pub_team			= ".team. team: .playerlist.";
 	public static final String pkup_go_pub_map			= "Map: .map.";
-	public static final String pkup_go_pub_calm			= "GTV: connect gtv.b00bs-clan.com:709; password SevenAndJehar"; // temporarily hard coded
+	public static final String pkup_go_pub_calm			= "**GTV**: connect gtv.b00bs-clan.com:709; password SevenAndJehar"; // temporarily hard coded
 	public static final String pkup_go_pub_calm_notavi	= "GTV: not available";
 	public static final String pkup_go_pub_sent			= "**.gametype.**: Server info has been sent. If you didn't get a DM try **!lostpass**.";
 	public static final String pkup_go_pub_threadtitle	= "Match .ID.";
 	public static final String pkup_go_pub_captains 	= "The captains are .captain1. (**red**) and .captain2. (**blue**) as they have the highest elo.";
-	public static final String pkup_go_pub_pick 		= ".captain. pick between **.pick1.** (``!pick 1``) and **.pick2.** (``!pick 2``)";
-	public static final String pkup_go_pub_pickjoin		= ".pickred. joins the **red** team and .pickblue. the **blue** team.";
+	public static final String pkup_go_pub_pick 		= ".captain. pick a player:";
+	public static final String pkup_go_pub_pickjoin		= ".pick. joins the **.color.** team.";
 
 	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber. (.map.):";
 	public static final String pkup_aftermath_result	= ".team. .result. (.score.) -";
@@ -212,6 +219,7 @@ public class Config {
 
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
+	public static final String other_user_not_registered= "The user .user. is not registered.";
 	public static final String country_added			= "Your country has been set.";
 
 	public static final String auth_taken_urtauth		= "This **urtauth** is already registered.";
@@ -226,6 +234,7 @@ public class Config {
 	public static final String player_cannot_remove		= "You cannot remove.";
 	public static final String player_not_in_match		= "You are not added to any queue.";
 	public static final String player_already_match		= "You are already in a match.";
+	public static final String player_not_admin			= "You must be an admin to use this command.";
 
 	public static final String player_not_captain		= "You can't pick a player. You are not captain or it is not your turn to pick.";
 

@@ -12,7 +12,10 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.gost0r.pickupbot.discord.DiscordButton;
+import de.gost0r.pickupbot.discord.DiscordButtonStyle;
 import de.gost0r.pickupbot.discord.DiscordChannel;
+import de.gost0r.pickupbot.discord.DiscordComponent;
 import de.gost0r.pickupbot.discord.DiscordEmbed;
 import de.gost0r.pickupbot.discord.DiscordMessage;
 import de.gost0r.pickupbot.pickup.MatchStats.Status;
@@ -380,6 +383,7 @@ public class Match implements Runnable {
 			logic.matchStarted(this);
 			timeLastPick = System.currentTimeMillis();
 			sortPlayers();
+			
 		}
 	}
 	
@@ -471,11 +475,21 @@ public class Match implements Runnable {
 			new Thread(this).start(); // do important changes that affect possibly other matches/servers/playerlists outside the thread!
 		}
 		else {
+			List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
+			int choiceNumber = 3;
+			if (sortPlayers.size() < choiceNumber) {
+				choiceNumber = sortPlayers.size();
+			}
+			for (int i = 0; i < choiceNumber; i++) {
+				DiscordButton button = new DiscordButton(DiscordButtonStyle.BLURPLE);
+				button.custom_id = Config.INT_PICK + "_" + String.valueOf(i);
+				button.label = sortPlayers.get(i).getUrtauth();
+				buttons.add(button);
+			}
+			
 			String pickPromptMsg = Config.pkup_go_pub_pick;
 			pickPromptMsg = pickPromptMsg.replace(".captain.", captains[captainTurn].getDiscordUser().getMentionString());
-			pickPromptMsg = pickPromptMsg.replace(".pick1.", sortPlayers.get(0).getUrtauth());
-			pickPromptMsg = pickPromptMsg.replace(".pick2.", sortPlayers.get(1).getUrtauth());
-			logic.bot.sendMsg(threadChannel, pickPromptMsg);
+			DiscordMessage promptMsg = logic.bot.sendMsgToEdit(threadChannel, pickPromptMsg, null, buttons);
 		}
 	}
 	
@@ -489,31 +503,26 @@ public class Match implements Runnable {
 	
 	public void pick(Player captain, int pick) {
 		String pickMsg = Config.pkup_go_pub_pickjoin;
+		pickMsg = pickMsg.replace(".pick.", sortPlayers.get(pick).getDiscordUser().getMentionString());
 		
-		if (captain.getUrtauth() == captains[0].getUrtauth()) {
+		if (captain.getUrtauth().equals(captains[0].getUrtauth())) {
 			teamList.get("red").add(sortPlayers.get(pick));
-			teamList.get("blue").add(sortPlayers.get(1 - pick));
-			
-			pickMsg = pickMsg.replace(".pickred.", sortPlayers.get(pick).getDiscordUser().getMentionString());
-			pickMsg = pickMsg.replace(".pickblue.", sortPlayers.get(1 - pick).getDiscordUser().getMentionString());
+			pickMsg = pickMsg.replace(".color.", "red");
 		}
 		else {
-			teamList.get("red").add(sortPlayers.get(1 - pick));
 			teamList.get("blue").add(sortPlayers.get(pick));
-			
-			pickMsg = pickMsg.replace(".pickred.", sortPlayers.get(1 - pick).getDiscordUser().getMentionString());
-			pickMsg = pickMsg.replace(".pickblue.", sortPlayers.get(pick).getDiscordUser().getMentionString());
+			pickMsg = pickMsg.replace(".color.", "blue");
 		}
 		
-		sortPlayers.remove(0);
-		sortPlayers.remove(0);
-		
+		sortPlayers.remove(pick);
 		logic.bot.sendMsg(threadChannel, pickMsg);
-		
 		captainTurn = 1 - captainTurn;
-		
 		timeLastPick = System.currentTimeMillis();
 		
+		if (sortPlayers.size() == 1) {
+			pick(captains[captainTurn], 0);
+			return;
+		}
 		checkTeams();
 	}
 	
@@ -642,8 +651,6 @@ public class Match implements Runnable {
 		msg = Config.pkup_go_pub_sent;
 		msg = msg.replace(".gametype.", gametype.getName());
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), msg);
-		
-		logic.setLastMapPlayed(gametype, map);
 
 		// set server data
 		server.sendRcon("g_password " + server.password);
@@ -654,13 +661,15 @@ public class Match implements Runnable {
 		server.sendRcon("map " + this.map.name);
 		server.sendRcon("g_warmup 10");
 		
+		logic.setLastMapPlayed(gametype, map);
+		
 		if (gtvServer != null) {
 			gtvServer.sendRcon("gtv_connect " + server.getAddress() + "  " + server.password);
 		}
 		
 		server.startMonitoring(this);
 		
-		liveScoreMsg = logic.bot.sendMsgToEdit(threadChannel, null, getMatchEmbed());
+		liveScoreMsg = logic.bot.sendMsgToEdit(threadChannel, null, getMatchEmbed(), null);
 	}
 
 	List<GameMap> getMostMapVotes() {
@@ -888,7 +897,7 @@ public class Match implements Runnable {
 			region_flag = server.region.name();
 		}
 		
-		if (serverState == ServerState.LIVE) {
+		if (serverState == ServerState.LIVE && state == MatchState.Live) {
 			embed.title  = region_flag + " Match #" + String.valueOf(id) + " (" + state.name() + " - " + server.getServerMonitor().getGameTime() + ")";
 		}
 		else {
@@ -1038,5 +1047,9 @@ public class Match implements Runnable {
 		if (liveScoreMsg != null) {
 			liveScoreMsg.edit(null, getMatchEmbed());
 		}
+	}
+	
+	public Server getGtvServer() {
+		return gtvServer;
 	}
 }

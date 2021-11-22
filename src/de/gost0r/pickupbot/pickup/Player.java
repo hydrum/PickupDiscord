@@ -67,6 +67,10 @@ public class Player {
 	public long getLastMessage() {
 		return lastMessage;
 	}
+	
+	public void setLastMessage(long lastMessage) {
+		this.lastMessage = lastMessage;
+	}
 
 	public boolean getAfkReminderSent() {
 		return afkReminderSent;

@@ -1,5 +1,7 @@
 package de.gost0r.pickupbot.pickup;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,6 +11,7 @@ import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordChannelType;
 import de.gost0r.pickupbot.discord.DiscordEmbed;
+import de.gost0r.pickupbot.discord.DiscordInteraction;
 import de.gost0r.pickupbot.discord.DiscordMessage;
 import de.gost0r.pickupbot.discord.DiscordRole;
 import de.gost0r.pickupbot.discord.DiscordUser;
@@ -144,7 +147,7 @@ public class PickupBot extends DiscordBot {
 								}
 							}
 							if (gametypes.size() > 0) {
-								logic.cmdAddPlayer(p, gametypes);
+								logic.cmdAddPlayer(p, gametypes, false);
 							} else {
 								sendNotice(msg.user, Config.no_gt_found);
 							}
@@ -165,7 +168,7 @@ public class PickupBot extends DiscordBot {
 						}
 					
 						if (gametypes.size() > 0) {
-							logic.cmdAddPlayer(p, gametypes);
+							logic.cmdAddPlayer(p, gametypes, false);
 							
 							if (data.length > 1) {
 								logic.cmdMapVote(p, gt, data[1]);
@@ -188,7 +191,7 @@ public class PickupBot extends DiscordBot {
 						}
 					
 						if (gametypes.size() > 0) {
-							logic.cmdAddPlayer(p, gametypes);
+							logic.cmdAddPlayer(p, gametypes, false);
 							if (data.length > 1) {
 								logic.cmdMapVote(p, gt, data[1]);
 							}
@@ -210,7 +213,7 @@ public class PickupBot extends DiscordBot {
 						}
 					
 						if (gametypes.size() > 0) {
-							logic.cmdAddPlayer(p, gametypes);
+							logic.cmdAddPlayer(p, gametypes, false);
 						} else {
 							sendNotice(msg.user, Config.no_gt_found);
 						}
@@ -229,7 +232,7 @@ public class PickupBot extends DiscordBot {
 						}
 					
 						if (gametypes.size() > 0) {
-							logic.cmdAddPlayer(p, gametypes);
+							logic.cmdAddPlayer(p, gametypes, false);
 						} else {
 							sendNotice(msg.user, Config.no_gt_found);
 						}
@@ -273,6 +276,48 @@ public class PickupBot extends DiscordBot {
 						}
 					}
 					logic.cmdRemovePlayer(player, gametypes);
+					break;
+					
+				case Config.CMD_FORCEADD:
+					if (!msg.user.hasAdminRights())
+					{
+						sendNotice(msg.user, Config.player_not_admin);
+						return;
+					}
+					if (data.length >= 3)
+					{
+						for (int i = 2; i < data.length; i ++) {
+							if (data[i].trim().length() == 0) {
+								continue;
+							}
+							
+							DiscordUser u = DiscordUser.getUser(data[i].replaceAll("[^\\d.]", ""));
+							Player playerToAdd = null;
+							if (u != null)
+							{
+								playerToAdd = Player.get(u);
+							}
+							
+							if (playerToAdd != null)
+							{
+								gametypes = new ArrayList<Gametype>();
+								String[] modes = Arrays.copyOfRange(data, 1, data.length);
+								for (String mode : modes) {
+									Gametype gt = logic.getGametypeByString(mode);
+									if (gt != null) {
+										gametypes.add(gt);
+									}
+								}
+								if (gametypes.size() > 0) {
+									logic.cmdAddPlayer(playerToAdd, gametypes, true);
+								} else {
+									sendNotice(msg.user, Config.no_gt_found);
+								}
+							}
+							else sendNotice(msg.user, Config.other_user_not_registered.replace(".user.", data[i]));
+						}
+					}
+					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_FORCEADD));
 					break;
 					
 				case Config.CMD_MAPS:
@@ -543,7 +588,7 @@ public class PickupBot extends DiscordBot {
 			if (p != null) {
 				p.afkCheck();
 			}
-			
+			/*
 			switch (data[0].toLowerCase()) 
 			{
 				case Config.CMD_PICK:
@@ -561,7 +606,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-			}
+			}*/
 		}
 
 		// use admin channel or DM for super admins
@@ -573,6 +618,16 @@ public class PickupBot extends DiscordBot {
 				// Execute code according to cmd
 				switch (data[0].toLowerCase())
 				{
+					case Config.CMD_REBOOT:
+						try {
+							super.sendMsg(msg.channel, Config.admin_cmd_successful + msg.content);
+							logic.restartApplication();
+						} catch (URISyntaxException | IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						break;
+						
 					case Config.CMD_GETDATA:
 						if (data.length == 2)
 						{
@@ -1083,6 +1138,22 @@ public class PickupBot extends DiscordBot {
 		if (data[0].toLowerCase().equals("!banme")) {
 			//Player p = Player.get(msg.user);
 			//logic.banPlayer(p, BanReason.NOSHOW);
+		}
+	}
+	
+	@Override
+	protected void recvInteraction(DiscordInteraction interaction) {
+		LOGGER.info("RECV #" + ((interaction.message.channel == null || interaction.message.channel.name == null) ?  "null" : interaction.message.channel.name) + " " + interaction.user.username + ": " + interaction.custom_id);
+		
+		Player p = Player.get(interaction.user);
+		
+		String[] data = interaction.custom_id.split("_");
+
+		switch (data[0].toLowerCase()) 
+		{
+		case Config.INT_PICK:
+			logic.cmdPick(interaction, p, Integer.parseInt(data[1]));
+			break;
 		}
 	}
 	

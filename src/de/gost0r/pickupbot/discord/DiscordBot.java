@@ -2,6 +2,7 @@ package de.gost0r.pickupbot.discord;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,6 +68,20 @@ public class DiscordBot  {
 								obj.getString("content"));
 				recvMessage(msg);
 				break;
+			case INTERACTION_CREATE:
+				DiscordMessage message = new DiscordMessage(obj.getJSONObject("message").getString("id"),
+									DiscordUser.getUser(obj.getJSONObject("message").getJSONObject("author")),
+									DiscordChannel.findChannel(obj.getJSONObject("message").getString("channel_id")),
+									obj.getJSONObject("message").getString("content"));
+				
+				DiscordInteraction interaction = new DiscordInteraction(obj.getString("id"), 
+												obj.getString("token"), 
+												obj.getJSONObject("data").getString("custom_id"),
+												DiscordUser.getUser(obj.getJSONObject("member").getJSONObject("user")),
+												message);
+				
+				recvInteraction(interaction);
+				break;
 			case GUILD_MEMBER_UPDATE:
 				user = DiscordUser.findUser(obj.getJSONObject("user").getString("id"));
 				if (user != null) {
@@ -98,6 +113,10 @@ public class DiscordBot  {
 		
 	}
 	
+	protected void recvInteraction(DiscordInteraction interaction) {
+		
+	}
+	
 	public void sendMsg(DiscordChannel channel, String msg) {
 		DiscordAPI.sendMessage(channel, msg);
 	}
@@ -115,8 +134,8 @@ public class DiscordBot  {
 		sendMsg(user.getDMChannel(), msg, embed);
 	}
 	
-	public DiscordMessage sendMsgToEdit(DiscordChannel channel, String msg, DiscordEmbed embed) {
-		return DiscordAPI.sendMessageToEdit(channel, msg, embed);
+	public DiscordMessage sendMsgToEdit(DiscordChannel channel, String msg, DiscordEmbed embed, List<DiscordComponent> components) {
+		return DiscordAPI.sendMessageToEdit(channel, msg, embed, components);
 	}
 	
 	public DiscordChannel createThread(DiscordChannel channel, String name) {
