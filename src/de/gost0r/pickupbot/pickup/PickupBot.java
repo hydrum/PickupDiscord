@@ -437,6 +437,37 @@ public class PickupBot extends DiscordBot {
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
 					
+				case Config.CMD_GETSTATS:
+					if (p != null)
+					{
+						if (data.length == 1)
+						{
+							logic.cmdGetStats(p);
+						}
+						else if (data.length == 2)
+						{
+							Player pOther = null;
+							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
+							if (u != null)
+							{
+								pOther = Player.get(u);
+							}
+							else
+							{
+								pOther = Player.get(data[1].toLowerCase());
+							}
+							
+							if (pOther != null)
+							{
+								logic.cmdGetStats(pOther);
+							}
+							else sendNotice(msg.user, Config.player_not_found);
+						}
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_GETSTATS));	
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+					
 				case Config.CMD_TOP_PLAYERS: 
 					if (p != null)
 					{
@@ -904,6 +935,7 @@ public class PickupBot extends DiscordBot {
 						case Config.CMD_RCON: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_RCON)); break;
 						case Config.CMD_REGISTER: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REGISTER)); break;
 						case Config.CMD_GETELO: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETELO)); break;
+						case Config.CMD_GETSTATS: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETSTATS)); break;
 						case Config.CMD_TOP_PLAYERS: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP10)); break;
 						case Config.CMD_TOP_COUNTRIES: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP_COUNTRIES)); break;
 						case Config.CMD_MATCH: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_MATCH)); break;

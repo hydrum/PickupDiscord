@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.JSONObject;
+
 import de.gost0r.pickupbot.PickupBotDiscordMain;
 import de.gost0r.pickupbot.discord.DiscordButton;
 import de.gost0r.pickupbot.discord.DiscordButtonStyle;
@@ -22,12 +24,14 @@ import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordComponent;
 import de.gost0r.pickupbot.discord.DiscordEmbed;
 import de.gost0r.pickupbot.discord.DiscordInteraction;
+import de.gost0r.pickupbot.discord.DiscordMessage;
 import de.gost0r.pickupbot.discord.DiscordRole;
 import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.discord.DiscordUserStatus;
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
+import de.gost0r.pickupbot.pickup.server.ServerMonitor.ServerState;
 
 public class PickupLogic {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -132,10 +136,7 @@ public class PickupLogic {
 	}
 	
 	public void cmdRemovePlayer(Player player, List<Gametype> modes) {
-		if (locked) {
-			bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
-			return;
-		}
+
 		if (playerInActiveMatch(player) != null) {
 			bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
 			return;
@@ -396,6 +397,45 @@ public class PickupLogic {
 		return msg;
 	}
 	
+	public void cmdGetStats(Player p) {
+		if (p == null) {
+			return;
+		}
+		
+		p.stats = db.getPlayerStats(p);
+		
+		String country = "<:puma:849287183474884628>";
+		if(!p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+			country = ":flag_" + p.getCountry().toLowerCase() + ":";
+		}
+			
+		DiscordEmbed statsEmbed = new DiscordEmbed();
+		statsEmbed.color = 7056881;
+		statsEmbed.title = country + " \u200b \u200b  " +  p.getUrtauth();
+		statsEmbed.thumbnail = p.getDiscordUser().getAvatarUrl();
+		statsEmbed.description = p.getRank().getEmoji() + " \u200b \u200b  **" + String.valueOf(p.getElo()) + "**  #" + String.valueOf(db.getRankForPlayer(p));
+		
+		statsEmbed.addField("Kills / Assists", String.valueOf(p.stats.kills) + "/" + String.valueOf(p.stats.assists), true);
+		statsEmbed.addField("Deaths", String.valueOf(p.stats.deaths), true);
+		if (p.stats.kdrRank == -1) {
+			statsEmbed.addField("KDR", String.format("%.02f", p.getKdr()), true);
+			
+		} else {
+			statsEmbed.addField("KDR", String.format("%.02f", p.getKdr()) + " (#" +  String.valueOf(p.stats.kdrRank) + ")", true);
+		}
+		
+		statsEmbed.addField("Wins / Draws", String.valueOf(p.stats.wins) + "/" + String.valueOf(p.stats.draws), true);
+		statsEmbed.addField("Defeats", String.valueOf(p.stats.losses), true);
+		if (p.stats.wdlRank == -1) {
+			statsEmbed.addField("Win rate", String.valueOf(Math.round(db.getWDLForPlayer(p).calcWinRatio() * 100d)) + "%", true);
+			
+		} else {
+			statsEmbed.addField("Win rate", String.valueOf(Math.round(db.getWDLForPlayer(p).calcWinRatio() * 100d)) + "% (#" +  String.valueOf(p.stats.wdlRank) + ")", true);
+		}
+		
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), null, statsEmbed);
+	}
+	
 	public void cmdTopCountries(int number) {
 		String msg = Config.pkup_top5_header;
 		
@@ -436,7 +476,15 @@ public class PickupLogic {
 
 
 	public void cmdMapVote(Player player, Gametype gametype, String mapname) {
-		if (gametype == null) {
+		Match activeMatch = playerInActiveMatch(player);
+		Match m = null;
+		
+		if (activeMatch != null) {
+			m = activeMatch;
+			gametype = m.getGametype();
+		}
+		
+		else if (gametype == null) {
 			List<Match> matches = playerInMatch(player);
 			if (matches.size() == 1) {
 				gametype = matches.get(0).getGametype();
@@ -448,8 +496,11 @@ public class PickupLogic {
 				return;
 			}
 		}
-		if (curMatch.containsKey(gametype)) {
-			Match m = curMatch.get(gametype);
+		if (curMatch.containsKey(gametype) || m != null) {
+			if (m == null) {
+				m = curMatch.get(gametype);
+			}
+			
 			if (m.getMatchState() == MatchState.Signup || m.getMatchState() == MatchState.AwaitingServer) {
 				int counter = 0;
 				GameMap map = null;
@@ -496,7 +547,7 @@ public class PickupLogic {
 			msg = Config.pkup_status_noone;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 			msg = msg.replace("<gametype>", match.getGametype().getName().toLowerCase());
-		} else if (match.getMatchState() == MatchState.Signup){
+		} else if (match.getMatchState() == MatchState.Signup || match.getMatchState() == MatchState.AwaitingServer){
 			msg = Config.pkup_status_signup;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 			msg = msg.replace(".playernumber.", String.valueOf(playerCount));
@@ -518,11 +569,15 @@ public class PickupLogic {
 			
 			msg = msg.replace(".playerlist.", playernames);
 			
-		} else if (match.getMatchState() == MatchState.AwaitingServer){
+		} 
+		if (shouldSend) {
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+		}
+		if (match.getMatchState() == MatchState.AwaitingServer && shouldSend){
 			msg = Config.pkup_status_server;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
-		}
-		if (shouldSend) {
+			msg = msg.replace(".votes.", match.getMapVotes(true));
+			
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 		}
 		return msg;
@@ -849,7 +904,7 @@ public class PickupLogic {
 		DiscordEmbed scoreBoardLink = new DiscordEmbed();
 		for (Match match : ongoingMatches) {
 			msg = match.getMatchInfo();
-			if (match.getMatchState() == MatchState.AwaitingServer || match.liveScoreMsg == null) {
+			if (match.getMatchState() == MatchState.AwaitingServer || match.getServer().getServerMonitor() == null || match.liveScoreMsg == null) {
 				bot.sendMsg(bot.getLatestMessageChannel(), msg);
 			} 
 			else {

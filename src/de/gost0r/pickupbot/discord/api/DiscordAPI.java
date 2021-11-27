@@ -68,10 +68,20 @@ public class DiscordAPI {
 				embedList.add(embed.getJSON());
 			}
 			
+			List<List<JSONObject>> componentListGlob = new ArrayList<List<JSONObject>>();
 			List<JSONObject> componentList = new ArrayList<JSONObject>();
 			if(components != null) {
 				for (DiscordComponent component : components) {
 					componentList.add(component.getJSON());
+					
+					if (componentList.size() == 5) {
+						componentListGlob.add(new ArrayList<JSONObject>(componentList));
+						componentList.clear();
+					}
+				}
+				
+				if (!componentList.isEmpty()) {
+					componentListGlob.add(componentList);
 				}
 			}
 			
@@ -80,12 +90,14 @@ public class DiscordAPI {
 			if (!embedList.isEmpty()) {
 				content.put("embeds", embedList);
 			}
-			if(!componentList.isEmpty()) {
+			if(!componentListGlob.isEmpty()) {
 				List<JSONObject> componentObjList = new ArrayList<JSONObject>();
-				JSONObject componentObj = new JSONObject();
-				componentObj.put("type", 1);
-				componentObj.put("components", componentList);
-				componentObjList.add(componentObj);
+				for (List<JSONObject> componentListElem : componentListGlob) {
+					JSONObject componentObj = new JSONObject();
+					componentObj.put("type", 1);
+					componentObj.put("components", componentListElem);
+					componentObjList.add(componentObj);
+				}
 				content.put("components", componentObjList);
 			}
 					

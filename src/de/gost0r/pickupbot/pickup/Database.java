@@ -333,6 +333,22 @@ public class Database {
 		return -1;
 	}
 	
+	public int getNumberOfGames(Player player) {
+		try {
+			String sql = "SELECT COUNT(player_urtauth) as count FROM player_in_match WHERE player_urtauth = ?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, player.getUrtauth());
+			ResultSet rs = pstmt.executeQuery();
+			rs.next();
+			int count = rs.getInt("count");
+			
+			return count;
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return -1;
+	}
+	
 	
 	// LOADING
 	
@@ -637,15 +653,7 @@ public class Database {
 					player.addBan(ban);
 				}
 				
-				sql = "SELECT SUM(kills) as sumkills, SUM(deaths) as sumdeaths, SUM(assists) as sumassists FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim WHERE player_userid=? AND player_urtauth=?;";
-				PreparedStatement kdrstmt = c.prepareStatement(sql);
-				kdrstmt.setString(1, player.getDiscordUser().id);
-				kdrstmt.setString(2, player.getUrtauth());
-				ResultSet kdrSet = kdrstmt.executeQuery();
-				if (kdrSet.next()) {
-					float kdr = ((float) kdrSet.getInt("sumkills") + (float) kdrSet.getInt("sumassists") / 2) / (float) kdrSet.getInt("sumdeaths");
-					player.setKdr(kdr);
-				}
+				player.stats = getPlayerStats(player);
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
@@ -951,6 +959,39 @@ public class Database {
 		}
 		return wdl;
 	}
+	
+	public int getWDLRankForPlayer(Player player) {
+		int rank = -1;
+		try {
+			String sql = "WITH tablewdl (urtauth, matchcount, winrate) AS (SELECT urtauth, COUNT(urtauth) as matchcount, (CAST(SUM(CASE WHEN stat.myscore > stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)+ CAST(SUM(CASE WHEN stat.myscore = stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)/2)/(CAST(SUM(CASE WHEN stat.myscore > stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)+ CAST(SUM(CASE WHEN stat.myscore = stat.oppscore THEN 1 ELSE 0 END) AS FLOAT) + CAST(SUM(CASE WHEN stat.myscore < stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)) as winrate FROM (SELECT pim.player_urtauth AS urtauth, (CASE WHEN pim.team = 'red' THEN m.score_red ELSE m.score_blue END) AS myscore, (CASE WHEN pim.team = 'blue' THEN m.score_red ELSE m.score_blue END) AS oppscore FROM 'player_in_match' AS pim JOIN 'match' AS m ON m.id = pim.matchid JOIN 'player' AS p ON pim.player_urtauth=p.urtauth AND pim.player_userid=p.userid AND p.active='true'   WHERE (m.state = 'Done' OR m.state = 'Surrender')) AS stat GROUP BY urtauth HAVING COUNT(urtauth) > 10 ORDER BY winrate DESC) SELECT ( SELECT COUNT(*) + 1  FROM tablewdl  WHERE winrate > t.winrate) as rowIndex FROM tablewdl t WHERE urtauth = ?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, player.getUrtauth());
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				rank = rs.getInt("rowIndex");
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return rank;
+	}
+	
+	public int getKDRRankForPlayer(Player player) {
+		int rank = -1;
+		try {
+			String sql = "WITH tablekdr (auth, matchcount, kdr) AS (SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) AS kdr FROM (score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid)  WHERE player.active = 'true' GROUP BY player_in_match.player_urtauth HAVING matchcount > 10 ORDER BY kdr DESC) SELECT ( SELECT COUNT(*) + 1  FROM tablekdr  WHERE kdr > t.kdr) as rowIndex FROM tablekdr t WHERE auth = ?";
+			//String sql = "SELECT rank FROM (SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) AS kdr, ROW_NUMBER() OVER (ORDER BY (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) DESC) as rank FROM (score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid)  WHERE player.active = 'true' GROUP BY player_in_match.player_urtauth HAVING matchcount > 10 ) WHERE auth = ?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, player.getUrtauth());
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				rank = rs.getInt("rowIndex");
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return rank;
+	}
 		
 	public Map<Player, Float> getTopWDL(int number) {
 		Map<Player, Float> topwdl = new LinkedHashMap<Player, Float>();
@@ -1024,6 +1065,39 @@ public class Database {
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
+	}
+	
+	public PlayerStats getPlayerStats(Player player) {
+		PlayerStats stats = new PlayerStats();
+		 
+		stats.kdrRank = getKDRRankForPlayer(player);
+		stats.wdlRank = getWDLRankForPlayer(player);
+		
+		WinDrawLoss wdl = getWDLForPlayer(player);
+		stats.wins = wdl.win;
+		stats.draws = wdl.draw;
+		stats.losses = wdl.loss;
+		
+		try {
+			// TODO: maybe move this somewhere
+			String sql = "SELECT SUM(kills) as sumkills, SUM(deaths) as sumdeaths, SUM(assists) as sumassists FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim WHERE player_userid=? AND player_urtauth=?;";
+			PreparedStatement stmt = c.prepareStatement(sql);
+			stmt.setString(1, player.getDiscordUser().id);
+			stmt.setString(2, player.getUrtauth());
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				float kdr = ((float) rs.getInt("sumkills") + (float) rs.getInt("sumassists") / 2) / (float) rs.getInt("sumdeaths");
+				player.setKdr(kdr);
+				stats.kdr = kdr;
+				stats.kills = rs.getInt("sumkills");
+				stats.assists = rs.getInt("sumassists");
+				stats.deaths = rs.getInt("sumdeaths");
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		
+		return stats;
 	}
 
 }

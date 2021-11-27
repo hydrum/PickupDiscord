@@ -20,6 +20,8 @@ public class Player {
 	
 	private float kdr = 0.0f;
 	
+	public PlayerStats stats;
+	
 	private List<PlayerBan> bans = new ArrayList<PlayerBan>();
 		
 	private boolean active = true;

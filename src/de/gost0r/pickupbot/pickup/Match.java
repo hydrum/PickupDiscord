@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.json.JSONObject;
+
 import de.gost0r.pickupbot.discord.DiscordButton;
 import de.gost0r.pickupbot.discord.DiscordButtonStyle;
 import de.gost0r.pickupbot.discord.DiscordChannel;
@@ -218,7 +220,7 @@ public class Match implements Runnable {
 	public void checkReadyState(Player player) {
 		if (playerStats.keySet().size() == gametype.getTeamSize() * 2) {
 			state = MatchState.AwaitingServer;
-			logic.cmdStatus(this, null, true);
+			logic.cmdStatus(this, player, true);
 			
 			// Compute region majority
 			logic.requestServer(this);
@@ -484,7 +486,22 @@ public class Match implements Runnable {
 				DiscordButton button = new DiscordButton(DiscordButtonStyle.BLURPLE);
 				button.custom_id = Config.INT_PICK + "_" + String.valueOf(i);
 				button.label = sortPlayers.get(i).getUrtauth();
+				button.emoji = sortPlayers.get(i).getRank().getEmojiJSON();
 				buttons.add(button);
+			}
+			
+			// Include in the choices players that played less than 10 games to allow for new players skill uncertainty
+			if (choiceNumber < sortPlayers.size()) { 
+				for (int i = choiceNumber; i < sortPlayers.size(); i++) {
+					int matchPlayed = logic.db.getNumberOfGames(sortPlayers.get(i));
+					if (matchPlayed < 10) {
+						DiscordButton button = new DiscordButton(DiscordButtonStyle.GREY);
+						button.custom_id = Config.INT_PICK + "_" + String.valueOf(i);
+						button.label = sortPlayers.get(i).getUrtauth();
+						button.emoji = new JSONObject().put("name", "\u2753");
+						buttons.add(button);
+					}
+				}
 			}
 			
 			String pickPromptMsg = Config.pkup_go_pub_pick;
@@ -831,7 +848,9 @@ public class Match implements Runnable {
 
 	public String getIngameInfo() {
 		String info;
-		if (state == MatchState.Live) {
+		if (state == MatchState.AwaitingServer || server.getServerMonitor() == null) {
+			info = "Captains's pick";
+		} else if (state == MatchState.Live) {
 			ServerState serverState = server.getServerMonitor().getState();
 			info = serverState.name();
 			if (serverState == ServerState.LIVE) {
@@ -866,9 +885,9 @@ public class Match implements Runnable {
 		}
 
 		String msg = Config.pkup_match_print_info;
-		msg = msg.replace(".gamenumber.", String.valueOf(id));
+		msg = msg.replace(".gamenumber.", id == 0 ? String.valueOf(logic.db.getLastMatchID() + 1) : String.valueOf(id));
 		msg = msg.replace(".gametype.", gametype.getName());
-		msg = msg.replace(".map.", map != null ? map.name : "null");
+		msg = msg.replace(".map.", map != null ? map.name : "ut4_?");
 		msg = msg.replace(".redteam.", redplayers);
 		msg = msg.replace(".blueteam.", blueplayers);
 

@@ -177,5 +177,9 @@ public class DiscordUser {
 		}
 		return false;
 	}
+	
+	public String getAvatarUrl() {
+		return "https://cdn.discordapp.com/avatars/" + id + "/" + avatar + ".png";
+	}
 
 }

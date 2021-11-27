@@ -36,6 +36,7 @@ public class Config {
 	public static final String CMD_REGISTER				= "!register";
 	public static final String CMD_COUNTRY				= "!country";
 	public static final String CMD_GETELO				= "!elo";
+	public static final String CMD_GETSTATS				= "!stats";
 	public static final String CMD_TOP_PLAYERS			= "!top10";
 	public static final String CMD_TOP_COUNTRIES		= "!topcountries";
 	public static final String CMD_TOP_WDL				= "!topwin";
@@ -114,6 +115,7 @@ public class Config {
 	public static final String USE_CMD_COUNTRY			= "!country <COUNTRY CODE> See:` <https://datahub.io/core/country-list/r/0.html>";
 	public static final String USE_CMD_CHANGE_COUNTRY	= "!country <urtauth> <COUNTRY CODE> See:` <https://datahub.io/core/country-list/r/0.html>";
 	public static final String USE_CMD_GETELO			= "!elo </@DiscordUser|urtauth/>";
+	public static final String USE_CMD_GETSTATS			= "!stats </@DiscordUser|urtauth/>";
 	public static final String USE_CMD_TOP10			= "!top10 displays the top 10 players";
 	public static final String USE_CMD_TOP_COUNTRIES	= "!topcountries ordered by average ELO";
 	public static final String USE_CMD_TOP_WDL			= "!topwin: players with the best win ratio";
@@ -158,7 +160,7 @@ public class Config {
 	public static final String pkup_pw					= "[ /connect .server. ; password .password. ]";
 	public static final String pkup_status_noone		= "**.gametype.**: Nobody signed up. Type `" + USE_CMD_ADD + "` to play.";
 	public static final String pkup_status_signup		= "**.gametype.**: Sign up: [.playernumber./.maxplayer.] .playerlist.";
-	public static final String pkup_status_server		= "**.gametype.**: Awaiting available server.";
+	public static final String pkup_status_server		= "**.gametype.**: The match is about to start, while captains are picking players, you can continue to vote for a map with ``!map <map>``. \nCurrent votes: .votes.";
 //	public static final String pkup_status_players		= "**.gametype.**: Players [.playernumber./10]: .playerlist.";
 //	public static final String pkup_started				= "**.gametype.**: Match has already started. .status. - .time. minutes in.";
 
