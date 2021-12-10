@@ -485,16 +485,16 @@ public class Match implements Runnable {
 			for (int i = 0; i < choiceNumber; i++) {
 				DiscordButton button = new DiscordButton(DiscordButtonStyle.BLURPLE);
 				button.custom_id = Config.INT_PICK + "_" + String.valueOf(i);
-				button.label = sortPlayers.get(i).getUrtauth();
+				button.label = sortPlayers.get(i).getUrtauth() + " (" + String.valueOf(sortPlayers.get(i).getElo()) + ")";
 				button.emoji = sortPlayers.get(i).getRank().getEmojiJSON();
 				buttons.add(button);
 			}
 			
-			// Include in the choices players that played less than 10 games to allow for new players skill uncertainty
+			// Include in the choices players that played less than 10 games to allow for new player skill uncertainty
 			if (choiceNumber < sortPlayers.size()) { 
 				for (int i = choiceNumber; i < sortPlayers.size(); i++) {
 					int matchPlayed = logic.db.getNumberOfGames(sortPlayers.get(i));
-					if (matchPlayed < 10) {
+					if (matchPlayed < 30) {
 						DiscordButton button = new DiscordButton(DiscordButtonStyle.GREY);
 						button.custom_id = Config.INT_PICK + "_" + String.valueOf(i);
 						button.label = sortPlayers.get(i).getUrtauth();

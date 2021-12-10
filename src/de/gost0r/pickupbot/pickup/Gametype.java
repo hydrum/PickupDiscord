@@ -29,7 +29,7 @@ public class Gametype {
 		this.setActive(active);
 		this.setTeamSize(teamSize);
 		
-		config = new ArrayList<String>();
+		config = new ArrayList<>();
 		this.loadGameConfig();
 	}
 
@@ -75,7 +75,7 @@ public class Gametype {
 	public boolean equals(Object o) {
 		if (o instanceof Gametype) {
 			Gametype gt = (Gametype) o;
-			return gt.name == this.name;
+			return gt.name.equals(this.name);
 		}
 		return false;
 	}
@@ -83,7 +83,7 @@ public class Gametype {
 	public void loadGameConfig() {
 		// Read file gametype.cfg 
 		File[] contents = CONFIGS_DIRECTORY.listFiles();
-		Boolean config_found = false;
+		boolean config_found = false;
 		
 		try {
 			for ( File f : contents ) {
@@ -95,14 +95,10 @@ public class Gametype {
 					while(line != null) {
 						// Avoid commentary and empty lines
 						if(line.isEmpty() || line.charAt(0) == '/' && line.charAt(1) == '/') {
-							if(line.contains("rconpassword")) {
-								// DO NOT REDEFINE RCONPASSWORD
-								continue;
-							}
-							else {
+							if(!line.contains("rconpassword")) {
 								line = br.readLine();
-								continue;
 							}
+							continue;
 						}
 							
 						String ParameterWithoutCommentary = StringUtils.substringBefore(line, "//");

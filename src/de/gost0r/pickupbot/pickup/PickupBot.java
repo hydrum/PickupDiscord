@@ -28,75 +28,8 @@ public class PickupBot extends DiscordBot {
 	public void init() {
 		super.init();
 		
-//		pubchan = DiscordChannel.findChannel("691794344960589835"); // bot-test
-//		pubchan = DiscordChannel.findChannel("402541587164561419"); // urtpickup
-		
 		logic = new PickupLogic(this);
-//		logic.cmdEnableGametype("TEST", "1");
-		
-		// TEST
-		//Player p0 = Player.get("asloon");
-		/*
-		Player p1 = new Player(new DiscordUser("FakeUser1_OC", "FakeDiscordUser1", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer1");
-		p1.setCountry("NZ");
-		
-		Player p2 = new Player(new DiscordUser("FakeUser2_EU", "FakeDiscordUser1", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer1");
-		p2.setCountry("BE");
-		
-		Player p3 = new Player(new DiscordUser("FakeUser3_EU", "FakeDiscordUser1", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer1");
-		p3.setCountry("PL");
-		*/
-		/*
-		Player p1 = new Player(new DiscordUser("FakeUser1_EU", "FakeDiscordUser1", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer1");
-		p1.setRegion(Region.EU);
-		
-		Player p2 = new Player(new DiscordUser("FakeUser2_EU", "FakeDiscordUser2", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer2");
-		p2.setRegion(Region.EU);
-		
-		Player p3 = new Player(new DiscordUser("FakeUser3_EU", "FakeDiscordUser3", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer3");
-		p3.setRegion(Region.EU);
-		
-		Player p4 = new Player(new DiscordUser("FakeUser4_EU", "FakeDiscordUser4", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer4");
-		p4.setRegion(Region.EU);
-		
-		Player p5 = new Player(new DiscordUser("FakeUser5_EU", "FakeDiscordUser5", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer5");
-		p5.setRegion(Region.EU);
-		
-		Player p6 = new Player(new DiscordUser("FakeUser6_EU", "FakeDiscordUser6", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer6");
-		p6.setRegion(Region.EU);
-		
-		Player p7 = new Player(new DiscordUser("FakeUser7_WORLD", "FakeDiscordUser7", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer7");
-		p7.setRegion(Region.WORLD);
-		
-		Player p8 = new Player(new DiscordUser("FakeUser8_NA", "FakeDiscordUser8", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer8");
-		p8.setRegion(Region.NA);
-		
-		Player p9 = new Player(new DiscordUser("FakeUser9_NA", "FakeDiscordUser9", "FakeDiscrim", "FakeAvatar"), "FakeUrtAuthPlayer9");
-		p9.setRegion(Region.NA);
-		
-		Gametype gt = logic.getGametypeByString("TEST");
-		List<Gametype> list = new ArrayList<Gametype>();
-		list.add(gt);
-		logic.cmdAddPlayer(p1, list);
-		logic.cmdAddPlayer(p2, list);
-		logic.cmdAddPlayer(p3, list);
-		logic.cmdAddPlayer(p4, list);
-		logic.cmdAddPlayer(p5, list);
-		logic.cmdAddPlayer(p6, list);
-		logic.cmdAddPlayer(p7, list);
-		logic.cmdAddPlayer(p8, list);
-		logic.cmdAddPlayer(p9, list);
-		logic.cmdAddPlayer(p0, list); */
-		
-		Gametype gt = logic.getGametypeByString("CTF");
-		List<Gametype> list = new ArrayList<Gametype>();
-		list.add(gt);
-	//	logic.cmdAddPlayer(p1, list);
-	//	logic.cmdAddPlayer(p2, list);
-	//	logic.cmdAddPlayer(p3, list);
-		
 		sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), Config.bot_online);
-		
 	}
 	
 	@Override
@@ -115,7 +48,6 @@ public class PickupBot extends DiscordBot {
 		this.latestMessageChannel = msg.channel;
 		
 		if (msg.user.equals(self)) {
-//			System.out.println("Msg from self, ignore.");
 			return;
 		}
 		
@@ -138,7 +70,7 @@ public class PickupBot extends DiscordBot {
 					{
 						if (p != null)
 						{
-							List<Gametype> gametypes = new ArrayList<Gametype>();
+							List<Gametype> gametypes = new ArrayList<>();
 							String[] modes = Arrays.copyOfRange(data, 1, data.length);
 							for (String mode : modes) {
 								Gametype gt = logic.getGametypeByString(mode);
@@ -160,7 +92,7 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_TS:
 					if (p != null)
 					{
-						List<Gametype> gametypes = new ArrayList<Gametype>();
+						List<Gametype> gametypes = new ArrayList<>();
 					
 						Gametype gt = logic.getGametypeByString("TS");
 						if (gt != null) {
@@ -183,7 +115,7 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_CTF:
 					if (p != null)
 					{
-						List<Gametype> gametypes = new ArrayList<Gametype>();
+						List<Gametype> gametypes = new ArrayList<>();
 					
 						Gametype gt = logic.getGametypeByString("CTF");
 						if (gt != null) {
@@ -205,7 +137,7 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_1v1:
 					if (p != null)
 					{
-						List<Gametype> gametypes = new ArrayList<Gametype>();
+						List<Gametype> gametypes = new ArrayList<>();
 					
 						Gametype gt = logic.getGametypeByString("1v1");
 						if (gt != null) {
@@ -224,7 +156,7 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_2v2:
 					if (p != null)
 					{
-						List<Gametype> gametypes = new ArrayList<Gametype>();
+						List<Gametype> gametypes = new ArrayList<>();
 					
 						Gametype gt = logic.getGametypeByString("2v2");
 						if (gt != null) {
@@ -260,7 +192,7 @@ public class PickupBot extends DiscordBot {
 						}
 					}
 
-					List<Gametype> gametypes = new ArrayList<Gametype>();
+					List<Gametype> gametypes = new ArrayList<>();
 					if (data.length == 1 || startindex == -1) 
 					{
 						gametypes = null;
@@ -300,7 +232,7 @@ public class PickupBot extends DiscordBot {
 							
 							if (playerToAdd != null)
 							{
-								gametypes = new ArrayList<Gametype>();
+								gametypes = new ArrayList<>();
 								String[] modes = Arrays.copyOfRange(data, 1, data.length);
 								for (String mode : modes) {
 									Gametype gt = logic.getGametypeByString(mode);
@@ -415,7 +347,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else if (data.length == 2)
 						{
-							Player pOther = null;
+							Player pOther;
 							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
 							if (u != null)
 							{
@@ -446,7 +378,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else if (data.length == 2)
 						{
-							Player pOther = null;
+							Player pOther;
 							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
 							if (u != null)
 							{
@@ -557,7 +489,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else if (data.length == 2)
 						{
-							Player pOther = null;
+							Player pOther;
 							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
 							if (u != null)
 							{
@@ -588,7 +520,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else if (data.length == 2)
 						{
-							Player pOther = null;
+							Player pOther;
 							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
 							if (u != null)
 							{
@@ -619,25 +551,6 @@ public class PickupBot extends DiscordBot {
 			if (p != null) {
 				p.afkCheck();
 			}
-			/*
-			switch (data[0].toLowerCase()) 
-			{
-				case Config.CMD_PICK:
-					if (p != null)
-					{
-						if (data.length == 2)
-						{
-							LOGGER.info(data[1]);
-							if (data[1].equals("1") || data[1].equals("2")) {
-								logic.cmdPick(p, Integer.parseInt(data[1]));
-							}
-							else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_PICK));
-						}
-						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_PICK));
-					}
-					else sendNotice(msg.user, Config.user_not_registered);
-					break;
-			}*/
 		}
 
 		// use admin channel or DM for super admins
@@ -718,11 +631,10 @@ public class PickupBot extends DiscordBot {
 					case Config.CMD_LISTGAMECONFIG:
 						if (data.length == 2)
 						{
-							if (logic.cmdListGameConfig(msg.channel, data[1]))
+							if (!logic.cmdListGameConfig(msg.channel, data[1]))
 							{
-								// if successful it will print the info
+								super.sendMsg(msg.channel, Config.admin_cmd_unsuccessful + msg.content);
 							}
-							else super.sendMsg(msg.channel, Config.admin_cmd_unsuccessful + msg.content);
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_LISTGAMECONFIG));
 						break;
@@ -824,7 +736,7 @@ public class PickupBot extends DiscordBot {
 					case Config.CMD_ADDBAN:
 						if (data.length == 4)
 						{
-							Player p = null;							
+							Player p;
 							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
 							if (u != null)
 							{
@@ -862,7 +774,7 @@ public class PickupBot extends DiscordBot {
 					case Config.CMD_REMOVEBAN:
 						if (data.length == 2)
 						{
-							Player p = null;
+							Player p;
 							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
 							if (u != null)
 							{
@@ -885,7 +797,7 @@ public class PickupBot extends DiscordBot {
 					case Config.CMD_COUNTRY:
 						if (data.length == 3)
 						{
-							Player p = null;
+							Player p;
 							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
 							if (u != null)
 							{
@@ -913,200 +825,213 @@ public class PickupBot extends DiscordBot {
 				|| isChannel(PickupChannelType.ADMIN, msg.channel)
 				|| msg.channel.type == DiscordChannelType.DM)
 		{
-			if (data[0].toLowerCase().equals(Config.CMD_HELP))
-			{
-				if (data.length == 2)
-				{
-					String cmd = (!data[1].startsWith("!") ? "!" : "") + data[1];
-					switch (cmd)
-					{
-						case Config.CMD_ADD: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADD)); break;
-						case Config.CMD_REMOVE: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVE)); break;
-						case Config.CMD_MAPS: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_MAPS)); break;
-						case Config.CMD_MAP: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_MAP)); break;
-						case Config.CMD_STATUS: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_STATUS)); break;
-						case Config.CMD_HELP: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_HELP)); break;
-						case Config.CMD_LOCK: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LOCK)); break;
-						case Config.CMD_UNLOCK: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_UNLOCK)); break;
-						case Config.CMD_RESET: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_RESET)); break;
-						case Config.CMD_GETDATA: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETDATA)); break;
-						case Config.CMD_ENABLEMAP: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ENABLEMAP)); break;
-						case Config.CMD_DISABLEMAP: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DISABLEMAP)); break;
-						case Config.CMD_RCON: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_RCON)); break;
-						case Config.CMD_REGISTER: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REGISTER)); break;
-						case Config.CMD_GETELO: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETELO)); break;
-						case Config.CMD_GETSTATS: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETSTATS)); break;
-						case Config.CMD_TOP_PLAYERS: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP10)); break;
-						case Config.CMD_TOP_COUNTRIES: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP_COUNTRIES)); break;
-						case Config.CMD_MATCH: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_MATCH)); break;
-						case Config.CMD_SURRENDER: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SURRENDER)); break;
-						case Config.CMD_LIVE: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LIVE)); break;
-						//case Config.CMD_REPORT: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REPORT)); break;
-						//case Config.CMD_EXCUSE: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_EXCUSE)); break;
-						//case Config.CMD_REPORTLIST: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REPORTLIST)); break;
-						case Config.CMD_ADDBAN: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDBAN)); break;
-						case Config.CMD_REMOVEBAN: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVEBAN)); break;
-						case Config.CMD_BANINFO: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_BANINFO)); break;
-						case Config.CMD_SHOWSERVERS: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SHOWSERVERS)); break;
-						case Config.CMD_ADDSERVER: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDSERVER)); break;
-						case Config.CMD_ENABLESERVER: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ENABLESERVER)); break;
-						case Config.CMD_DISABLESERVER: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DISABLESERVER)); break;
-						case Config.CMD_UPDATESERVER: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_UPDATESERVER)); break;
-						case Config.CMD_ENABLEGAMETYPE: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ENABLEGAMETYPE)); break;
-						case Config.CMD_DISABLEGAMETYPE: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DISABLEGAMETYPE)); break;
-						case Config.CMD_SHOWMATCHES: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SHOWMATCHES)); break;
-						//case Config.CMD_ADDGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDGAMECONFIG)); break;
-						//case Config.CMD_REMOVEGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVEGAMECONFIG)); break;
-						case Config.CMD_LISTGAMECONFIG: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LISTGAMECONFIG)); break;
-						case Config.CMD_COUNTRY: super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_COUNTRY)); break;
-						
-						default: super.sendMsg(msg.channel, Config.help_unknown); break;
-					}
-				}
-				else
-				{
-					if (isChannel(PickupChannelType.PUBLIC, msg.channel))
-					{
-						super.sendMsg(msg.channel, Config.help_cmd_avi.replace(".cmds.", Config.PUB_LIST));
-					}
-					if (msg.user.hasAdminRights() && (isChannel(PickupChannelType.ADMIN, msg.channel) || msg.channel.type == DiscordChannelType.DM))
-					{
-						super.sendMsg(msg.channel, Config.help_cmd_avi.replace(".cmds.", Config.ADMIN_LIST));
-					}
-				}
-			}
-			else if (data[0].toLowerCase().equals(Config.CMD_ADDCHANNEL))
-			{
-				if (msg.user.hasSuperAdminRights())
-				{
-					if (data.length == 3)
-					{
-						DiscordChannel targetChannel = DiscordChannel.findChannel(data[1].replaceAll("[^\\d.]", ""));
-						if (targetChannel != null)
-						{
-							try {
-								PickupChannelType type = PickupChannelType.valueOf(data[2].toUpperCase());
-								if (!logic.getChannelByType(type).contains(targetChannel)) 
-								{
-									if (logic.addChannel(type, targetChannel))
-									{
-										sendNotice(msg.user, "successfully added the channel");
-									}
-									else sendNotice(msg.user, "unsuccessfully added the channel");
-								}
-					        }
-							catch (IllegalArgumentException e)
-							{
-								sendNotice(msg.user, "unknown channel type");
-					        }
-						}
-						else sendNotice(msg.user, "invalid channel");
-					}
-					else sendNotice(msg.user, "invalid options");
-				}
-				else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
-			}
-			else if (data[0].toLowerCase().equals(Config.CMD_REMOVECHANNEL))
-			{
-				if (msg.user.hasSuperAdminRights())
-				{
-					if (data.length == 3)
-					{
-						DiscordChannel targetChannel = DiscordChannel.findChannel(data[1].replaceAll("[^\\d.]", ""));
-						if (targetChannel != null)
-						{
-							try
-							{
-								PickupChannelType type = PickupChannelType.valueOf(data[2].toUpperCase());
-								if (logic.getChannelByType(type).contains(targetChannel))
-								{
-									if (logic.removeChannel(type, targetChannel))
-									{
-										sendNotice(msg.user, "successfully removed the channel.");
-									}
-									else sendNotice(msg.user, "unsuccessfully removed the channel.");
-								}
+			switch (data[0].toLowerCase()) {
+				case Config.CMD_HELP:
+					if (data.length == 2) {
+						String cmd = (!data[1].startsWith("!") ? "!" : "") + data[1];
+						switch (cmd) {
+							case Config.CMD_ADD:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADD));
+								break;
+							case Config.CMD_REMOVE:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVE));
+								break;
+							case Config.CMD_MAPS:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_MAPS));
+								break;
+							case Config.CMD_MAP:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_MAP));
+								break;
+							case Config.CMD_STATUS:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_STATUS));
+								break;
+							case Config.CMD_HELP:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_HELP));
+								break;
+							case Config.CMD_LOCK:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LOCK));
+								break;
+							case Config.CMD_UNLOCK:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_UNLOCK));
+								break;
+							case Config.CMD_RESET:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_RESET));
+								break;
+							case Config.CMD_GETDATA:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETDATA));
+								break;
+							case Config.CMD_ENABLEMAP:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ENABLEMAP));
+								break;
+							case Config.CMD_DISABLEMAP:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DISABLEMAP));
+								break;
+							case Config.CMD_RCON:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_RCON));
+								break;
+							case Config.CMD_REGISTER:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REGISTER));
+								break;
+							case Config.CMD_GETELO:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETELO));
+								break;
+							case Config.CMD_GETSTATS:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_GETSTATS));
+								break;
+							case Config.CMD_TOP_PLAYERS:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP10));
+								break;
+							case Config.CMD_TOP_COUNTRIES:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP_COUNTRIES));
+								break;
+							case Config.CMD_MATCH:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_MATCH));
+								break;
+							case Config.CMD_SURRENDER:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SURRENDER));
+								break;
+							case Config.CMD_LIVE:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LIVE));
+								break;
+							case Config.CMD_ADDBAN:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDBAN));
+								break;
+							case Config.CMD_REMOVEBAN:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVEBAN));
+								break;
+							case Config.CMD_BANINFO:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_BANINFO));
+								break;
+							case Config.CMD_SHOWSERVERS:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SHOWSERVERS));
+								break;
+							case Config.CMD_ADDSERVER:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDSERVER));
+								break;
+							case Config.CMD_ENABLESERVER:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ENABLESERVER));
+								break;
+							case Config.CMD_DISABLESERVER:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DISABLESERVER));
+								break;
+							case Config.CMD_UPDATESERVER:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_UPDATESERVER));
+								break;
+							case Config.CMD_ENABLEGAMETYPE:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ENABLEGAMETYPE));
+								break;
+							case Config.CMD_DISABLEGAMETYPE:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DISABLEGAMETYPE));
+								break;
+							case Config.CMD_SHOWMATCHES:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SHOWMATCHES));
+								break;
+							case Config.CMD_LISTGAMECONFIG:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LISTGAMECONFIG));
+								break;
+							case Config.CMD_COUNTRY:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_COUNTRY));
+								break;
 
-					        }
-							catch (IllegalArgumentException e)
-							{
-								sendNotice(msg.user, "unknown role type");
-					        }
+							default:
+								super.sendMsg(msg.channel, Config.help_unknown);
+								break;
 						}
-						else sendNotice(msg.user, "invalid channel");
+					} else {
+						if (isChannel(PickupChannelType.PUBLIC, msg.channel)) {
+							super.sendMsg(msg.channel, Config.help_cmd_avi.replace(".cmds.", Config.PUB_LIST));
+						}
+						if (msg.user.hasAdminRights() && (isChannel(PickupChannelType.ADMIN, msg.channel) || msg.channel.type == DiscordChannelType.DM)) {
+							super.sendMsg(msg.channel, Config.help_cmd_avi.replace(".cmds.", Config.ADMIN_LIST));
+						}
 					}
-					else sendNotice(msg.user, "invalid options");
-				}
-				else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
-			}
-			else if (data[0].toLowerCase().equals(Config.CMD_ADDROLE))
-			{
-				if (msg.user.hasSuperAdminRights())
-				{
-					if (data.length == 3)
-					{
-						DiscordRole targetRole = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
-						if (targetRole != null)
-						{
-							try
-							{
-								PickupRoleType type = PickupRoleType.valueOf(data[2].toUpperCase());
-								if (!logic.getRoleByType(type).contains(targetRole)) 
-								{
-									if (logic.addRole(type, targetRole))
-									{
-										sendNotice(msg.user, "successfully added the role.");
-									}
-									else sendNotice(msg.user, "unsuccessfully removed the role.");
-								}
+					break;
 
-					        }
-							catch (IllegalArgumentException e)
-							{
-								sendNotice(msg.user, "unknown role type");
-					        }
-						}
-						else sendNotice(msg.user, "invalid channel");
-					}
-					else sendNotice(msg.user, "invalid options");
-				}
-				else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
-			}
-			else if (data[0].toLowerCase().equals(Config.CMD_REMOVEROLE))
-			{
-				if (msg.user.hasSuperAdminRights())
-				{
-					if (data.length == 3)
-					{
-						DiscordRole targetRole = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
-						if (targetRole != null)
-						{
-							try
-							{
-								PickupRoleType type = PickupRoleType.valueOf(data[2].toUpperCase());
-								if (logic.getRoleByType(type).contains(targetRole)) 
-								{
-									if (logic.removeRole(type, targetRole))
-									{
-										sendNotice(msg.user, "successfully removed the role.");
+				case Config.CMD_ADDCHANNEL:
+					if (msg.user.hasSuperAdminRights()) {
+						if (data.length == 3) {
+							DiscordChannel targetChannel = DiscordChannel.findChannel(data[1].replaceAll("[^\\d.]", ""));
+							if (targetChannel != null) {
+								try {
+									PickupChannelType type = PickupChannelType.valueOf(data[2].toUpperCase());
+									if (!logic.getChannelByType(type).contains(targetChannel)) {
+										if (logic.addChannel(type, targetChannel)) {
+											sendNotice(msg.user, "successfully added the channel");
+										} else sendNotice(msg.user, "unsuccessfully added the channel");
 									}
-									else sendNotice(msg.user, "unsuccessfully removed the role.");
+								} catch (IllegalArgumentException e) {
+									sendNotice(msg.user, "unknown channel type");
 								}
-							}
-							catch (IllegalArgumentException e)
-							{
-								sendNotice(msg.user, "unknown role type");
-					        }
-						}
-						else sendNotice(msg.user, "invalid role");
-					}
-					else sendNotice(msg.user, "invalid options");
-				}
-				else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
-			}				
+							} else sendNotice(msg.user, "invalid channel");
+						} else sendNotice(msg.user, "invalid options");
+					} else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
+					break;
+
+				case Config.CMD_REMOVECHANNEL:
+					if (msg.user.hasSuperAdminRights()) {
+						if (data.length == 3) {
+							DiscordChannel targetChannel = DiscordChannel.findChannel(data[1].replaceAll("[^\\d.]", ""));
+							if (targetChannel != null) {
+								try {
+									PickupChannelType type = PickupChannelType.valueOf(data[2].toUpperCase());
+									if (logic.getChannelByType(type).contains(targetChannel)) {
+										if (logic.removeChannel(type, targetChannel)) {
+											sendNotice(msg.user, "successfully removed the channel.");
+										} else sendNotice(msg.user, "unsuccessfully removed the channel.");
+									}
+
+								} catch (IllegalArgumentException e) {
+									sendNotice(msg.user, "unknown role type");
+								}
+							} else sendNotice(msg.user, "invalid channel");
+						} else sendNotice(msg.user, "invalid options");
+					} else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
+					break;
+
+				case Config.CMD_ADDROLE:
+					if (msg.user.hasSuperAdminRights()) {
+						if (data.length == 3) {
+							DiscordRole targetRole = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
+							if (targetRole != null) {
+								try {
+									PickupRoleType type = PickupRoleType.valueOf(data[2].toUpperCase());
+									if (!logic.getRoleByType(type).contains(targetRole)) {
+										if (logic.addRole(type, targetRole)) {
+											sendNotice(msg.user, "successfully added the role.");
+										} else sendNotice(msg.user, "unsuccessfully removed the role.");
+									}
+
+								} catch (IllegalArgumentException e) {
+									sendNotice(msg.user, "unknown role type");
+								}
+							} else sendNotice(msg.user, "invalid channel");
+						} else sendNotice(msg.user, "invalid options");
+					} else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
+					break;
+
+				case Config.CMD_REMOVEROLE:
+					if (msg.user.hasSuperAdminRights()) {
+						if (data.length == 3) {
+							DiscordRole targetRole = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
+							if (targetRole != null) {
+								try {
+									PickupRoleType type = PickupRoleType.valueOf(data[2].toUpperCase());
+									if (logic.getRoleByType(type).contains(targetRole)) {
+										if (logic.removeRole(type, targetRole)) {
+											sendNotice(msg.user, "successfully removed the role.");
+										} else sendNotice(msg.user, "unsuccessfully removed the role.");
+									}
+								} catch (IllegalArgumentException e) {
+									sendNotice(msg.user, "unknown role type");
+								}
+							} else sendNotice(msg.user, "invalid role");
+						} else sendNotice(msg.user, "invalid options");
+					} else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
+					break;
+			}
 		}
 		
-		if (data[0].toLowerCase().equals("!showroles"))
+		if (data[0].equalsIgnoreCase("!showroles"))
 		{
 			DiscordUser u = msg.user;
 			if (data.length == 2)
@@ -1118,43 +1043,43 @@ public class PickupBot extends DiscordBot {
 				}
 			}
 			List<DiscordRole> list = u.getRoles(DiscordBot.getGuild());
-			String message = "";
+			StringBuilder message = new StringBuilder();
 			for (DiscordRole role : list)
 			{
-				message += role.getMentionString() + " ";
+				message.append(role.getMentionString()).append(" ");
 			}
-			sendNotice(u, message);
+			sendNotice(u, message.toString());
 		}
 		
-		if (data[0].toLowerCase().equals("!showknownroles"))
+		if (data[0].equalsIgnoreCase("!showknownroles"))
 		{
-			String message = "Roles: ";
+			StringBuilder message = new StringBuilder("Roles: ");
 			for (PickupRoleType type : logic.getRoleTypes()) {
-				message += "\n**" + type.name() + "**:";
+				message.append("\n**").append(type.name()).append("**:");
 
 				for (DiscordRole role : logic.getRoleByType(type))
 				{
-					message += " " + role.getMentionString() + " ";
+					message.append(" ").append(role.getMentionString()).append(" ");
 				}
 			}
-			sendMsg(msg.channel, message);
+			sendMsg(msg.channel, message.toString());
 		}
 		
-		if (data[0].toLowerCase().equals("!showknownchannels"))
+		if (data[0].equalsIgnoreCase("!showknownchannels"))
 		{
-			String message = "Channels: ";
+			StringBuilder message = new StringBuilder("Channels: ");
 			for (PickupChannelType type : logic.getChannelTypes()) {
-				message += "\n**" + type.name() + "**:";
+				message.append("\n**").append(type.name()).append("**:");
 
 				for (DiscordChannel channel : logic.getChannelByType(type))
 				{
-					message += " " + channel.getMentionString() + " ";
+					message.append(" ").append(channel.getMentionString()).append(" ");
 				}
 			}
-			sendMsg(msg.channel, message);
+			sendMsg(msg.channel, message.toString());
 		}
 		
-		if (data[0].toLowerCase().equals("!godrole")) {
+		if (data[0].equalsIgnoreCase("!godrole")) {
 			if (logic.getRoleByType(PickupRoleType.SUPERADMIN).size() == 0) {
 				if (data.length == 2) {
 					DiscordRole role = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
@@ -1165,11 +1090,6 @@ public class PickupBot extends DiscordBot {
 				}
 			}
 			else sendNotice(msg.user, "A DiscordRole is already set as SUPERADMIN, check the DB.");
-		}
-		
-		if (data[0].toLowerCase().equals("!banme")) {
-			//Player p = Player.get(msg.user);
-			//logic.banPlayer(p, BanReason.NOSHOW);
 		}
 	}
 	
@@ -1212,7 +1132,7 @@ public class PickupBot extends DiscordBot {
 	}
 	
 	public List<DiscordChannel> createThread(List<DiscordChannel> channelList, String name) {
-		List<DiscordChannel> threadChannels = new ArrayList<DiscordChannel>();
+		List<DiscordChannel> threadChannels = new ArrayList<>();
 		for (DiscordChannel channel : channelList) {
 			threadChannels.add(createThread(channel, name));
 		}
