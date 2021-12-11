@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.discord.DiscordBot;
@@ -224,7 +225,6 @@ public class PickupBot extends DiscordBot {
 							if (data[i].trim().length() == 0) {
 								continue;
 							}
-							
 							DiscordUser u = DiscordUser.getUser(data[i].replaceAll("[^\\d.]", ""));
 							Player playerToAdd = null;
 							if (u != null)

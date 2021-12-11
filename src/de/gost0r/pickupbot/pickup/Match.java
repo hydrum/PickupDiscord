@@ -30,9 +30,9 @@ public class Match implements Runnable {
 	private int id;
 
 	private Map<String, List<Player>> teamList;
-	private final Map<GameMap, Integer> mapVotes;
+	private Map<GameMap, Integer> mapVotes;
 	private Map<Player, MatchStats> playerStats;
-	private final List<Player> sortPlayers;
+	private List<Player> sortPlayers;
 	
 	public DiscordChannel threadChannel;
 	public DiscordMessage liveScoreMsg;
@@ -43,7 +43,7 @@ public class Match implements Runnable {
 	private int[] elo = new int[2];	
 	private int[] score = new int[2];
 	
-	private final Player[] captains = new Player[2];
+	private Player[] captains = new Player[2];
 	private int captainTurn;
 
 	private int[] surrender;
@@ -388,7 +388,7 @@ public class Match implements Runnable {
 		sortPlayers.add(playerList.get(0));
 		for (Player player : playerList) {
 			for (Player sortplayer : sortPlayers) {
-				if (player.getElo() >= sortplayer.getElo()) {
+				if (player.getElo() >= sortplayer.getElo() && !player.equals(sortplayer)) {
 					sortPlayers.add(sortPlayers.indexOf(sortplayer), player);
 					break;
 				}
@@ -397,6 +397,9 @@ public class Match implements Runnable {
 				sortPlayers.add(player);
 			}
 		}
+
+		LOGGER.warning(String.valueOf(playerList.size()));
+		LOGGER.warning(String.valueOf(sortPlayers.size()));
 		
 		captains[0] = sortPlayers.get(0);
 		teamList.get("red").add(captains[0]);

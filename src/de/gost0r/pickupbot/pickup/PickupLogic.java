@@ -30,24 +30,24 @@ public class PickupLogic {
 	public PickupBot bot;
 	public Database db;
 	
-	private final List<Server> serverList;
-	private final List<Server> gtvServerList;
-	private final List<GameMap> mapList;
+	private List<Server> serverList;
+	private List<Server> gtvServerList;
+	private List<GameMap> mapList;
 
-	private final Map<PickupRoleType, List<DiscordRole>> roles;
-	private final Map<PickupChannelType, List<DiscordChannel>> channels;
+	private Map<PickupRoleType, List<DiscordRole>> roles;
+	private Map<PickupChannelType, List<DiscordChannel>> channels;
 	
-	private final List<Match> ongoingMatches; // ongoing matches (live)
+	private List<Match> ongoingMatches; // ongoing matches (live)
 	
-	private final Queue<Match> awaitingServer;
+	private Queue<Match> awaitingServer;
 	
-	private final Map<Gametype, Match> curMatch;
+	private Map<Gametype, Match> curMatch;
 	
 	private boolean locked;
 	
-	private final Map<BanReason, String[]> banDuration;
+	private Map<BanReason, String[]> banDuration;
 	
-	private final Map<Gametype, GameMap> lastMapPlayed;
+	private Map<Gametype, GameMap> lastMapPlayed;
 	
 	public PickupLogic(PickupBot bot) {
 		this.bot = bot;
