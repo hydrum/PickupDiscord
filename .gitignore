@@ -3,6 +3,7 @@
 
 # Log file
 *.log
+*.lck
 
 # BlueJ files
 *.ctxt
@@ -23,4 +24,15 @@ hs_err_pid*
 /bin/
 
 # config file
-config.json
+*.json
+
+# Gradle
+.gradle/
+gradle/
+
+#IntelliJ
+.idea/
+build/
+
+#Database
+*.db

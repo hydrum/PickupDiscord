@@ -199,7 +199,7 @@ public class DiscordAPI {
 				wr.write(postData);
 			}
 			
-			if (c.getResponseCode() != 200 && c.getResponseCode() != 201) {
+			if (c.getResponseCode() != 200 && c.getResponseCode() != 201 && c.getResponseCode() != 204) {
 				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
 				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {
@@ -280,7 +280,7 @@ public class DiscordAPI {
 			c.setRequestProperty("User-Agent", "Bot");
 			c.setRequestProperty("Authorization", "Bot " + DiscordBot.getToken());
 			
-			if (c.getResponseCode() != 200) {
+			if (c.getResponseCode() != 200 && c.getResponseCode() != 201 && c.getResponseCode() != 204) {
 				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
 				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {
@@ -328,7 +328,7 @@ public class DiscordAPI {
 			c.setRequestProperty("User-Agent", "Bot");
 			c.setRequestProperty("Authorization", "Bot " + DiscordBot.getToken());
 			
-			if (c.getResponseCode() != 200) {
+			if (c.getResponseCode() != 200 && c.getResponseCode() != 201 && c.getResponseCode() != 204) {
 				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
 				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {

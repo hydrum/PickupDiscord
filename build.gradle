@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+    }
+}
+
+dependencies {
+    implementation 'io.sentry:sentry:1.7.23'
+    implementation 'commons-io:commons-io:2.6'
+    implementation 'org.apache.commons:commons-lang3:3.10'
+    implementation 'javax.websocket:javax.websocket-api:1.1'
+    implementation 'org.json:json:20190722'
+    implementation 'org.xerial:sqlite-jdbc:3.8.11.2'
+    implementation 'org.glassfish.tyrus.bundles:tyrus-standalone-client:1.9'
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes 'Main-Class' : 'de.gost0r.pickupbot.PickupBotDiscordMain'
+    }
+    destinationDirectory.set(file("$rootDir/"))
+    archiveName 'PickupBot.jar'
+
+    from {
+        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
