@@ -70,7 +70,7 @@ public class PickupBot extends DiscordBot {
 					{
 						if (p != null)
 						{
-							List<Gametype> gametypes = new ArrayList<>();
+							List<Gametype> gametypes = new ArrayList<Gametype>();
 							String[] modes = Arrays.copyOfRange(data, 1, data.length);
 							for (String mode : modes) {
 								Gametype gt = logic.getGametypeByString(mode);
@@ -92,15 +92,9 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_TS:
 					if (p != null)
 					{
-						List<Gametype> gametypes = new ArrayList<>();
-					
 						Gametype gt = logic.getGametypeByString("TS");
 						if (gt != null) {
-							gametypes.add(gt);
-						}
-					
-						if (gametypes.size() > 0) {
-							logic.cmdAddPlayer(p, gametypes, false);
+							logic.cmdAddPlayer(p, gt, false);
 							
 							if (data.length > 1) {
 								logic.cmdMapVote(p, gt, data[1]);
@@ -115,15 +109,10 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_CTF:
 					if (p != null)
 					{
-						List<Gametype> gametypes = new ArrayList<>();
-					
 						Gametype gt = logic.getGametypeByString("CTF");
 						if (gt != null) {
-							gametypes.add(gt);
-						}
-					
-						if (gametypes.size() > 0) {
-							logic.cmdAddPlayer(p, gametypes, false);
+							logic.cmdAddPlayer(p, gt, false);
+
 							if (data.length > 1) {
 								logic.cmdMapVote(p, gt, data[1]);
 							}
@@ -137,15 +126,13 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_1v1:
 					if (p != null)
 					{
-						List<Gametype> gametypes = new ArrayList<>();
-					
 						Gametype gt = logic.getGametypeByString("1v1");
 						if (gt != null) {
-							gametypes.add(gt);
-						}
-					
-						if (gametypes.size() > 0) {
-							logic.cmdAddPlayer(p, gametypes, false);
+							logic.cmdAddPlayer(p, gt, false);
+
+							if (data.length > 1) {
+								logic.cmdMapVote(p, gt, data[1]);
+							}
 						} else {
 							sendNotice(msg.user, Config.no_gt_found);
 						}
@@ -156,15 +143,30 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_2v2:
 					if (p != null)
 					{
-						List<Gametype> gametypes = new ArrayList<>();
-					
 						Gametype gt = logic.getGametypeByString("2v2");
 						if (gt != null) {
-							gametypes.add(gt);
+							logic.cmdAddPlayer(p, gt, false);
+
+							if (data.length > 1) {
+								logic.cmdMapVote(p, gt, data[1]);
+							}
+						} else {
+							sendNotice(msg.user, Config.no_gt_found);
 						}
-					
-						if (gametypes.size() > 0) {
-							logic.cmdAddPlayer(p, gametypes, false);
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+
+				case Config.CMD_DIV1:
+					if (p != null)
+					{
+						Gametype gt = logic.getGametypeByString("div1");
+						if (gt != null) {
+							logic.cmdAddPlayer(p, gt, false);
+
+							if (data.length > 1) {
+								logic.cmdMapVote(p, gt, data[1]);
+							}
 						} else {
 							sendNotice(msg.user, Config.no_gt_found);
 						}
@@ -192,7 +194,7 @@ public class PickupBot extends DiscordBot {
 						}
 					}
 
-					List<Gametype> gametypes = new ArrayList<>();
+					List<Gametype> gametypes = new ArrayList<Gametype>();
 					if (data.length == 1 || startindex == -1) 
 					{
 						gametypes = null;
@@ -232,7 +234,7 @@ public class PickupBot extends DiscordBot {
 							
 							if (playerToAdd != null)
 							{
-								gametypes = new ArrayList<>();
+								gametypes = new ArrayList<Gametype>();
 								String[] modes = Arrays.copyOfRange(data, 1, data.length);
 								for (String mode : modes) {
 									Gametype gt = logic.getGametypeByString(mode);
@@ -343,7 +345,7 @@ public class PickupBot extends DiscordBot {
 					{
 						if (data.length == 1)
 						{
-							logic.cmdGetElo(p);
+							logic.cmdGetElo(p, true);
 						}
 						else if (data.length == 2)
 						{
@@ -360,7 +362,7 @@ public class PickupBot extends DiscordBot {
 							
 							if (pOther != null)
 							{
-								logic.cmdGetElo(pOther);
+								logic.cmdGetElo(pOther, true);
 							}
 							else sendNotice(msg.user, Config.player_not_found);
 						}
@@ -544,7 +546,8 @@ public class PickupBot extends DiscordBot {
 			}
 		}
 		
-		if (msg.channel.isThread) {
+		if (msg.channel.isThread)
+		{
 			Player p = Player.get(msg.user);
 			
 			// AFK CHECK CODE
@@ -575,7 +578,7 @@ public class PickupBot extends DiscordBot {
 					case Config.CMD_GETDATA:
 						if (data.length == 2)
 						{
-							logic.cmdGetData(msg.user, data[1], msg.channel);
+							logic.cmdGetData(data[1], msg.channel);
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_GETDATA));
 						break;
@@ -1030,66 +1033,70 @@ public class PickupBot extends DiscordBot {
 					break;
 			}
 		}
-		
-		if (data[0].equalsIgnoreCase("!showroles"))
-		{
-			DiscordUser u = msg.user;
-			if (data.length == 2)
-			{
-				DiscordUser testUser = super.parseMention(data[1]);
-				if (testUser != null)
-				{
-					u = testUser;
-				}
-			}
-			List<DiscordRole> list = u.getRoles(DiscordBot.getGuild());
-			StringBuilder message = new StringBuilder();
-			for (DiscordRole role : list)
-			{
-				message.append(role.getMentionString()).append(" ");
-			}
-			sendNotice(u, message.toString());
-		}
-		
-		if (data[0].equalsIgnoreCase("!showknownroles"))
-		{
-			StringBuilder message = new StringBuilder("Roles: ");
-			for (PickupRoleType type : logic.getRoleTypes()) {
-				message.append("\n**").append(type.name()).append("**:");
 
-				for (DiscordRole role : logic.getRoleByType(type))
-				{
-					message.append(" ").append(role.getMentionString()).append(" ");
-				}
-			}
-			sendMsg(msg.channel, message.toString());
-		}
-		
-		if (data[0].equalsIgnoreCase("!showknownchannels"))
+		// Any channel
+		else
 		{
-			StringBuilder message = new StringBuilder("Channels: ");
-			for (PickupChannelType type : logic.getChannelTypes()) {
-				message.append("\n**").append(type.name()).append("**:");
-
-				for (DiscordChannel channel : logic.getChannelByType(type))
+			if (data[0].equalsIgnoreCase("!showroles"))
+			{
+				DiscordUser u = msg.user;
+				if (data.length == 2)
 				{
-					message.append(" ").append(channel.getMentionString()).append(" ");
-				}
-			}
-			sendMsg(msg.channel, message.toString());
-		}
-		
-		if (data[0].equalsIgnoreCase("!godrole")) {
-			if (logic.getRoleByType(PickupRoleType.SUPERADMIN).size() == 0) {
-				if (data.length == 2) {
-					DiscordRole role = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
-					if (role != null) {
-						logic.addRole(PickupRoleType.SUPERADMIN, role);
-						sendNotice(msg.user, "*" + role.getMentionString() + " set as SUPERADMIN role*");
+					DiscordUser testUser = super.parseMention(data[1]);
+					if (testUser != null)
+					{
+						u = testUser;
 					}
 				}
+				List<DiscordRole> list = u.getRoles(DiscordBot.getGuild());
+				StringBuilder message = new StringBuilder();
+				for (DiscordRole role : list)
+				{
+					message.append(role.getMentionString()).append(" ");
+				}
+				sendNotice(u, message.toString());
 			}
-			else sendNotice(msg.user, "A DiscordRole is already set as SUPERADMIN, check the DB.");
+
+			if (data[0].equalsIgnoreCase("!showknownroles"))
+			{
+				StringBuilder message = new StringBuilder("Roles: ");
+				for (PickupRoleType type : logic.getRoleTypes()) {
+					message.append("\n**").append(type.name()).append("**:");
+
+					for (DiscordRole role : logic.getRoleByType(type))
+					{
+						message.append(" ").append(role.getMentionString()).append(" ");
+					}
+				}
+				sendMsg(msg.channel, message.toString());
+			}
+
+			if (data[0].equalsIgnoreCase("!showknownchannels"))
+			{
+				StringBuilder message = new StringBuilder("Channels: ");
+				for (PickupChannelType type : logic.getChannelTypes()) {
+					message.append("\n**").append(type.name()).append("**:");
+
+					for (DiscordChannel channel : logic.getChannelByType(type))
+					{
+						message.append(" ").append(channel.getMentionString()).append(" ");
+					}
+				}
+				sendMsg(msg.channel, message.toString());
+			}
+
+			if (data[0].equalsIgnoreCase("!godrole")) {
+				if (logic.getRoleByType(PickupRoleType.SUPERADMIN).size() == 0) {
+					if (data.length == 2) {
+						DiscordRole role = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
+						if (role != null) {
+							logic.addRole(PickupRoleType.SUPERADMIN, role);
+							sendNotice(msg.user, "*" + role.getMentionString() + " set as SUPERADMIN role*");
+						}
+					}
+				}
+				else sendNotice(msg.user, "A DiscordRole is already set as SUPERADMIN, check the DB.");
+			}
 		}
 	}
 	
@@ -1132,7 +1139,7 @@ public class PickupBot extends DiscordBot {
 	}
 	
 	public List<DiscordChannel> createThread(List<DiscordChannel> channelList, String name) {
-		List<DiscordChannel> threadChannels = new ArrayList<>();
+		List<DiscordChannel> threadChannels = new ArrayList<DiscordChannel>();
 		for (DiscordChannel channel : channelList) {
 			threadChannels.add(createThread(channel, name));
 		}

@@ -25,7 +25,7 @@ public class Database {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private Connection c = null;
-	private PickupLogic logic;
+	private final PickupLogic logic;
 	
 	public Database(PickupLogic logic) {
 		this.logic = logic;
@@ -324,9 +324,8 @@ public class Database {
 			String sql = "SELECT ID FROM match ORDER BY ID DESC";
 			ResultSet rs = stmt.executeQuery(sql);
 			rs.next();
-			int mid = rs.getInt("id");
-			
-			return mid;
+
+			return rs.getInt("id");
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -340,9 +339,8 @@ public class Database {
 			pstmt.setString(1, player.getUrtauth());
 			ResultSet rs = pstmt.executeQuery();
 			rs.next();
-			int count = rs.getInt("count");
-			
-			return count;
+
+			return rs.getInt("count");
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -365,6 +363,7 @@ public class Database {
 					map.put(type, new ArrayList<DiscordRole>());
 				}
 				DiscordRole role = DiscordRole.getRole(rs.getString("role"));
+				assert role != null;
 				LOGGER.config("loadRoles(): " + role.id + " type=" + type.name());
 				map.get(type).add(role);
 			}
@@ -389,6 +388,7 @@ public class Database {
 					map.put(type, new ArrayList<DiscordChannel>());
 				}
 				DiscordChannel channel = DiscordChannel.findChannel(rs.getString("channel"));
+				assert channel != null;
 				map.get(type).add(channel);
 				LOGGER.config("loadChannels(): " + channel.id + " name=" + channel.name + " type=" + type.name());
 			}
@@ -402,7 +402,7 @@ public class Database {
 	
 	
 	public List<Server> loadServers() {		
-		List<Server> serverList = new ArrayList<Server>();		
+		List<Server> serverList = new ArrayList<Server>();
 		try {
 			Statement stmt = c.createStatement();
 			String sql = "SELECT id, ip, port, rcon, password, active, region FROM server";
@@ -413,7 +413,7 @@ public class Database {
 				int port = rs.getInt("port");
 				String rcon = rs.getString("rcon");
 				String password = rs.getString("password");
-				boolean active = Boolean.valueOf(rs.getString("active"));
+				boolean active = Boolean.parseBoolean(rs.getString("active"));
 				String str_region = rs.getString("region");
 				
 				Server server = new Server(id, ip, port, rcon, password, active, Region.valueOf(str_region));
@@ -434,7 +434,7 @@ public class Database {
 			String sql = "SELECT gametype, teamsize, active FROM gametype";
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				Gametype gametype = new Gametype(rs.getString("gametype"), rs.getInt("teamsize"), Boolean.valueOf(rs.getString("active")));
+				Gametype gametype = new Gametype(rs.getString("gametype"), rs.getInt("teamsize"), Boolean.parseBoolean(rs.getString("active")));
 				LOGGER.config(gametype.getName() + " active=" + gametype.getActive());
 				gametypeList.add(gametype);
 			}
@@ -464,7 +464,7 @@ public class Database {
 					map = new GameMap(rs.getString("map"));
 					maplist.add(map);
 				}
-				map.setGametype(logic.getGametypeByString(rs.getString("gametype")), Boolean.valueOf(rs.getString("active")));
+				map.setGametype(logic.getGametypeByString(rs.getString("gametype")), Boolean.parseBoolean(rs.getString("active")));
 				LOGGER.config(map.name + " " + rs.getString("gametype") + "="+ map.isActiveForGametype(logic.getGametypeByString(rs.getString("gametype"))));
 			}
 		} catch (SQLException e) {
@@ -634,7 +634,7 @@ public class Database {
 				player = new Player(DiscordUser.getUser(rs.getString("userid")), rs.getString("urtauth"));
 				player.setElo(rs.getInt("elo"));
 				player.setEloChange(rs.getInt("elochange"));
-				player.setActive(Boolean.valueOf(rs.getString("active")));
+				player.setActive(Boolean.parseBoolean(rs.getString("active")));
 				player.setCountry(rs.getString("country"));
 
 				sql = "SELECT start, end, reason, pardon, forgiven FROM banlist WHERE player_userid=? AND player_urtauth=?";

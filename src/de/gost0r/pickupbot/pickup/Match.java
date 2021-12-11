@@ -2,8 +2,6 @@ package de.gost0r.pickupbot.pickup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +30,9 @@ public class Match implements Runnable {
 	private int id;
 
 	private Map<String, List<Player>> teamList;
-	private Map<GameMap, Integer> mapVotes;
-	private Map<Player, MatchStats> playerStats = new HashMap<Player, MatchStats>();
-	private List<Player> sortPlayers;
+	private final Map<GameMap, Integer> mapVotes;
+	private Map<Player, MatchStats> playerStats;
+	private final List<Player> sortPlayers;
 	
 	public DiscordChannel threadChannel;
 	public DiscordMessage liveScoreMsg;
@@ -45,7 +43,7 @@ public class Match implements Runnable {
 	private int[] elo = new int[2];	
 	private int[] score = new int[2];
 	
-	private Player[] captains = new Player[2];
+	private final Player[] captains = new Player[2];
 	private int captainTurn;
 
 	private int[] surrender;
@@ -57,6 +55,7 @@ public class Match implements Runnable {
 	private PickupLogic logic;
 
 	private Match() {
+		playerStats = new HashMap<Player, MatchStats>();
 		teamList = new HashMap<String, List<Player>>();
 		teamList.put("red", new ArrayList<Player>());
 		teamList.put("blue", new ArrayList<Player>());
@@ -107,8 +106,6 @@ public class Match implements Runnable {
 			resetAwaitingServer();
 		} else if (state == MatchState.Live) {
 			resetLive();
-		} else if (isOver()) {
-			// do nothing
 		}
 	}
 	
@@ -117,9 +114,7 @@ public class Match implements Runnable {
 		for(Player p : playerStats.keySet()) {
 			p.resetVotes();
 		}
-		for (GameMap m : mapVotes.keySet()) {
-			mapVotes.put(m, 0);
-		}
+		mapVotes.replaceAll((m, v) -> 0);
 		
 		playerStats.clear();
 	}
@@ -145,7 +140,7 @@ public class Match implements Runnable {
 		if ((state == MatchState.Signup || state == MatchState.AwaitingServer) && isInMatch(player)) {
 			GameMap map = player.getVotedMap(gametype);
 			if (map != null) {
-				mapVotes.put(map, mapVotes.get(map).intValue() - 1);
+				mapVotes.put(map, mapVotes.get(map) - 1);
 				player.voteMap(gametype, null);
 			}
 			playerStats.remove(player);
@@ -158,10 +153,10 @@ public class Match implements Runnable {
 		if ((state == MatchState.Signup || state == MatchState.AwaitingServer) && (isInMatch(player) || sortPlayers.contains(player))) {
 			GameMap oldMap = player.getVotedMap(gametype);
 			if (oldMap != null) {
-				mapVotes.put(oldMap, mapVotes.get(oldMap).intValue() - 1);
+				mapVotes.put(oldMap, mapVotes.get(oldMap) - 1);
 				player.voteMap(gametype, null);
 			}
-			mapVotes.put(map, mapVotes.get(map).intValue() + 1);
+			mapVotes.put(map, mapVotes.get(map) + 1);
 			player.voteMap(gametype, map);
 			String msg = Config.pkup_map;
 			msg = msg.replace(".map.", map.name);
@@ -290,37 +285,34 @@ public class Match implements Runnable {
 		}
 		server.free();
 
-		logic.matchEnded(this);
+		logic.matchEnded();
 	}
 
 	private void sendAftermath() {
-		String fullmsg = Config.pkup_aftermath_head;
-		fullmsg = fullmsg.replace(".gametype.", gametype.getName());
-		fullmsg = fullmsg.replace(".gamenumber.", String.valueOf(id));
-		fullmsg = fullmsg.replace(".map.", map.name);
+		StringBuilder fullmsg = new StringBuilder(Config.pkup_aftermath_head);
+		fullmsg = new StringBuilder(fullmsg.toString().replace(".gamenumber.", String.valueOf(id)).replace(".gametype.", gametype.getName()).replace(".map.", map.name));
 		for (int i = 0; i < 2; ++i) {
-    		int team = i;
-    		int opp = (team + 1) % 2;
-    		String teamname = (team == 0) ? "Red" : "Blue";
-			String msg = Config.pkup_aftermath_result;
-			msg = msg.replace(".team.", teamname);
-			if (score[team] > score[opp]) {
-				msg = msg.replace(".result.", "won");
-			} else if (score[team] < score[opp]) {
-				msg = msg.replace(".result.", "lost");
+			int opp = (i + 1) % 2;
+    		String teamname = (i == 0) ? "Red" : "Blue";
+			StringBuilder msg = new StringBuilder(Config.pkup_aftermath_result);
+			msg = new StringBuilder(msg.toString().replace(".team.", teamname));
+			if (score[i] > score[opp]) {
+				msg = new StringBuilder(msg.toString().replace(".result.", "won"));
+			} else if (score[i] < score[opp]) {
+				msg = new StringBuilder(msg.toString().replace(".result.", "lost"));
 			} else {
-				msg = msg.replace(".result.", "draw");
+				msg = new StringBuilder(msg.toString().replace(".result.", "draw"));
 			} 
-			msg = msg.replace(".score.", score[team] + "-" + score[opp]);
+			msg = new StringBuilder(msg.toString().replace(".score.", score[i] + "-" + score[opp]));
 			
 			for (Player p : teamList.get(teamname.toLowerCase())) {
 				String msgelo = Config.pkup_aftermath_player;
 				msgelo = msgelo.replace(".player.", p.getDiscordUser().getMentionString());
-				String elochange = ((p.getEloChange() >= 0) ? "+" : "") + String.valueOf(p.getEloChange());
+				String elochange = ((p.getEloChange() >= 0) ? "+" : "") + p.getEloChange();
 				msgelo = msgelo.replace(".elochange.", elochange);
-				msg += " " + msgelo;
+				msg.append(" ").append(msgelo);
 			}
-			fullmsg += "\n" + msg;
+			fullmsg.append("\n").append(msg);
 		}
 		for (Player player : getPlayerList()) {
 			if (player.didChangeRank()) {
@@ -328,11 +320,11 @@ public class Match implements Runnable {
 				msg = msg.replace(".player.", player.getDiscordUser().getMentionString());
 				msg = msg.replace(".updown.", player.getEloChange() > 0 ? "up" : "down");
 				msg = msg.replace(".rank.", player.getRank().getEmoji());
-				fullmsg += "\n" + msg;
+				fullmsg.append("\n").append(msg);
 			}
 		}
 		
-		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg);
+		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg.toString());
 	}
 
 	private void sendAftermath(Status status, List<Player> involvedPlayers) {
@@ -346,17 +338,17 @@ public class Match implements Runnable {
 		fullmsg += "\n" + msg;
 		
 		if (!involvedPlayers.isEmpty()) { // only if we have people who left	
-			String playerlist = "";
+			StringBuilder playerlist = new StringBuilder();
 			for (Player player : involvedPlayers) {
-				if (!playerlist.isEmpty()) {
-					playerlist += " ";
+				if (playerlist.length() > 0) {
+					playerlist.append(" ");
 				}
-				playerlist += player.getUrtauth();
+				playerlist.append(player.getUrtauth());
 			}
 			String be = involvedPlayers.size() == 1 ? "was" : "were";
 			
 			msg = Config.pkup_aftermath_abandon_2;
-			msg = msg.replace(".players.", playerlist);
+			msg = msg.replace(".players.", playerlist.toString());
 			msg = msg.replace(".be.", be);
 			fullmsg += "\n" + msg;
 		}
@@ -391,16 +383,12 @@ public class Match implements Runnable {
 	
 	public void sortPlayers() {
 		// Sort players by elo
-		List<Player> playerList = new ArrayList<Player>();
-		for (Player p : playerStats.keySet()) {
-			playerList.add(p);
-		}
+		List<Player> playerList = new ArrayList<Player>(playerStats.keySet());
 		
 		sortPlayers.add(playerList.get(0));
 		for (Player player : playerList) {
 			for (Player sortplayer : sortPlayers) {
-				if (player.equals(sortplayer)) continue;
-				else if (player.getElo() >= sortplayer.getElo()) {
+				if (player.getElo() >= sortplayer.getElo()) {
 					sortPlayers.add(sortPlayers.indexOf(sortplayer), player);
 					break;
 				}
@@ -484,8 +472,8 @@ public class Match implements Runnable {
 			}
 			for (int i = 0; i < choiceNumber; i++) {
 				DiscordButton button = new DiscordButton(DiscordButtonStyle.BLURPLE);
-				button.custom_id = Config.INT_PICK + "_" + String.valueOf(i);
-				button.label = sortPlayers.get(i).getUrtauth() + " (" + String.valueOf(sortPlayers.get(i).getElo()) + ")";
+				button.custom_id = Config.INT_PICK + "_" + i;
+				button.label = sortPlayers.get(i).getUrtauth() + " (" + sortPlayers.get(i).getElo() + ")";
 				button.emoji = sortPlayers.get(i).getRank().getEmojiJSON();
 				buttons.add(button);
 			}
@@ -496,7 +484,7 @@ public class Match implements Runnable {
 					int matchPlayed = logic.db.getNumberOfGames(sortPlayers.get(i));
 					if (matchPlayed < 30) {
 						DiscordButton button = new DiscordButton(DiscordButtonStyle.GREY);
-						button.custom_id = Config.INT_PICK + "_" + String.valueOf(i);
+						button.custom_id = Config.INT_PICK + "_" + i;
 						button.label = sortPlayers.get(i).getUrtauth();
 						button.emoji = new JSONObject().put("name", "\u2753");
 						buttons.add(button);
@@ -506,12 +494,12 @@ public class Match implements Runnable {
 			
 			String pickPromptMsg = Config.pkup_go_pub_pick;
 			pickPromptMsg = pickPromptMsg.replace(".captain.", captains[captainTurn].getDiscordUser().getMentionString());
-			DiscordMessage promptMsg = logic.bot.sendMsgToEdit(threadChannel, pickPromptMsg, null, buttons);
+			logic.bot.sendMsgToEdit(threadChannel, pickPromptMsg, null, buttons);
 		}
 	}
 	
 	public boolean isCaptainTurn(Player player) {
-		return captains[captainTurn].getUrtauth() == player.getUrtauth();
+		return captains[captainTurn].getUrtauth().equals(player.getUrtauth());
 	}
 	
 	public Player getCaptainsTurn() {
@@ -560,7 +548,7 @@ public class Match implements Runnable {
 	public void run() {	
 		startTime = System.currentTimeMillis();
 		
-		gtvServer = logic.setupGTV(this);
+		gtvServer = logic.setupGTV();
 		
 		Random rand = new Random();
 		int password = rand.nextInt((999999-100000) + 1) + 100000;
@@ -591,16 +579,6 @@ public class Match implements Runnable {
 
 		// MESSAGE HYPE
 
-
-//			String msg = Config.pkup_go_admin.replace(".elored.", String.valueOf(elo[0]));
-//			msg = msg.replace(".eloblue.", String.valueOf(elo[1]));
-//			msg = msg.replace(".gamenumber.", String.valueOf(id));
-//			msg = msg.replace(".password.", server.password);
-//			msg = msg.replace(".map.", this.map.name);
-//			logic.bot.sendMsg(logic.bot.adminchan, msg);
-
-		String fullmsg = "";
-
 		String msg = Config.pkup_go_pub_head;
 		msg = msg.replace(".gamenumber.", String.valueOf(id));
 		msg = msg.replace(".gametype.", gametype.getName());
@@ -612,7 +590,7 @@ public class Match implements Runnable {
 		} else {
 			msg = msg.replace(".region.", server.region.name());
 		}
-		fullmsg = msg;
+		StringBuilder fullmsg = new StringBuilder(msg);
 
 		msg = Config.pkup_map_list;
 		msg = msg.replace(".gametype.", gametype.getName());			
@@ -622,28 +600,28 @@ public class Match implements Runnable {
 		else {
 			msg = msg.replace(".maplist.", getMapVotes(true));
 		}
-		fullmsg += "\n" + msg;
+		fullmsg.append("\n").append(msg);
 
 		String[] teamname = {"Red", "Blue"};
 		for (String team : teamname) {
-			String playernames = "";
+			StringBuilder playernames = new StringBuilder();
 			for (Player p : teamList.get(team.toLowerCase())) {
-				if (!playernames.equals("")) {
-					playernames += " ";
+				if (!playernames.toString().equals("")) {
+					playernames.append(" ");
 				}
-				playernames += p.getDiscordUser().getMentionString();
+				playernames.append(p.getDiscordUser().getMentionString());
 			}
 			msg = Config.pkup_go_pub_team;
 			msg = msg.replace(".team.", team);
 			msg = msg.replace(".gametype.", gametype.getName());
-			msg = msg.replace(".playerlist.", playernames);
-			fullmsg += "\n" + msg;
+			msg = msg.replace(".playerlist.", playernames.toString());
+			fullmsg.append("\n").append(msg);
 		}
 
 		msg = Config.pkup_go_pub_map;
 		msg = msg.replace(".map.", this.map.name);
 		msg = msg.replace(".gametype.", gametype.getName());
-		fullmsg += "\n" + msg;
+		fullmsg.append("\n").append(msg);
 
 		
 		msg = Config.pkup_go_pub_calm;
@@ -651,9 +629,9 @@ public class Match implements Runnable {
 			msg = Config.pkup_go_pub_calm_notavi;
 		}
 		//msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
-		fullmsg += "\n" + msg;
+		fullmsg.append("\n").append(msg);
 
-		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg);
+		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg.toString());
 
 		msg = Config.pkup_go_player;
 		msg = msg.replace(".server.", server.getAddress());
@@ -673,7 +651,6 @@ public class Match implements Runnable {
 		server.sendRcon("g_password " + server.password);
 		for (String s : this.gametype.getConfig()) {
 			server.sendRcon(s);
-			//server.pushRcon(s);
 		}
 		server.sendRcon("map " + this.map.name);
 		server.sendRcon("g_warmup 10");
@@ -713,28 +690,28 @@ public class Match implements Runnable {
 	public String getMapVotes(boolean skipNull) {
 		
 		List<GameMap> mostMapVotes = getMostMapVotes();
-		String msg = "None";
+		StringBuilder msg = new StringBuilder("None");
 		for (GameMap map : mapVotes.keySet()) {
 			if (skipNull && mapVotes.get(map) == 0 && !logic.getLastMapPlayed(gametype).name.equals(map.name)) continue;
-			if (msg.equals("None")) {
-				msg = "";				
+			if (msg.toString().equals("None")) {
+				msg = new StringBuilder();
 			} else {
-				msg += " - ";
+				msg.append(" - ");
 			}
 			LOGGER.info(logic.getLastMapPlayed(gametype).name + " " + map.name);
 			if (logic.getLastMapPlayed(gametype).name.equals(map.name)) {
 				String mapString = "~~" + map.name + "~~";
-				msg += mapString;
+				msg.append(mapString);
 			}
 			else {
-				String mapString = map.name + ": " + String.valueOf(mapVotes.get(map));
+				String mapString = map.name + ": " + mapVotes.get(map);
 				if (mostMapVotes.size() < mapVotes.keySet().size() && mostMapVotes.contains(map)) {
 					mapString = "**" + mapString + "**";
 				}
-				msg += mapString;
+				msg.append(mapString);
 			}
 		}
-		return msg;
+		return msg.toString();
 	}
 
 	public boolean isOver() {
@@ -759,10 +736,6 @@ public class Match implements Runnable {
 
 	public int getID() {
 		return id;
-	}
-
-	public void setID(int id) {
-		this.id = id;
 	}
 
 	public void setLogic(PickupLogic logic) {
@@ -801,20 +774,14 @@ public class Match implements Runnable {
 		this.score = score;
 	}
 
-	public List<Player> getTeamRed() {
-		return teamList.get("red");
-	}
+	public List<Player> getTeamRed() { return teamList.get("red"); }
 
 	public List<Player> getTeamBlue() {
 		return teamList.get("blue");
 	}
 
 	public List<Player> getPlayerList() {
-		List<Player> list = new ArrayList<Player>();
-		for (Player p : playerStats.keySet()) {
-			list.add(p);
-		}
-		return list;
+		return new ArrayList<Player>(playerStats.keySet());
 	}
 
 	public String getTeam(Player player) {
@@ -841,10 +808,6 @@ public class Match implements Runnable {
 	public int getPlayerCount() {
 		return playerStats.keySet().size();
 	}
-	
-	public DiscordChannel getThreadChannel() {
-		return threadChannel;
-	}
 
 	public String getIngameInfo() {
 		String info;
@@ -867,20 +830,20 @@ public class Match implements Runnable {
 
 	public String getMatchInfo() {
 		
-		String redplayers = "None";
+		StringBuilder redplayers = new StringBuilder("None");
 		for (Player p : teamList.get("red")) {
-			if (redplayers.equals("None")) {
-				redplayers = p.getUrtauth();
+			if (redplayers.toString().equals("None")) {
+				redplayers = new StringBuilder(p.getUrtauth());
 			} else {
-				redplayers += " " + p.getUrtauth();
+				redplayers.append(" ").append(p.getUrtauth());
 			}
 		}
-		String blueplayers = "None";
+		StringBuilder blueplayers = new StringBuilder("None");
 		for (Player p : teamList.get("blue")) {
-			if (blueplayers.equals("None")) {
-				blueplayers = p.getUrtauth();
+			if (blueplayers.toString().equals("None")) {
+				blueplayers = new StringBuilder(p.getUrtauth());
 			} else {
-				blueplayers += " " + p.getUrtauth();
+				blueplayers.append(" ").append(p.getUrtauth());
 			}
 		}
 
@@ -888,8 +851,8 @@ public class Match implements Runnable {
 		msg = msg.replace(".gamenumber.", id == 0 ? String.valueOf(logic.db.getLastMatchID() + 1) : String.valueOf(id));
 		msg = msg.replace(".gametype.", gametype.getName());
 		msg = msg.replace(".map.", map != null ? map.name : "ut4_?");
-		msg = msg.replace(".redteam.", redplayers);
-		msg = msg.replace(".blueteam.", blueplayers);
+		msg = msg.replace(".redteam.", redplayers.toString());
+		msg = msg.replace(".blueteam.", blueplayers.toString());
 
 
 		msg = msg.replace(".ingame.", getIngameInfo());
@@ -916,54 +879,50 @@ public class Match implements Runnable {
 			region_flag = server.region.name();
 		}
 		
-		if (serverState == ServerState.LIVE && state == MatchState.Live) {
-			embed.title  = region_flag + " Match #" + String.valueOf(id) + " (" + state.name() + " - " + server.getServerMonitor().getGameTime() + ")";
+		if (serverState == ServerState.LIVE && state == MatchState.Live && server != null) {
+			embed.title  = region_flag + " Match #" + id + " (" + state.name() + " - " + server.getServerMonitor().getGameTime() + ")";
 		}
 		else {
-			embed.title = region_flag + " Match #" + String.valueOf(id) + " (" + state.name() + ")";
+			embed.title = region_flag + " Match #" + id + " (" + state.name() + ")";
 		}
 		
 		embed.color = 7056881;
 		embed.description = map != null ? "**" + gametype.getName() + "** - *" + map.name + "*" : "null";
 		
-		String red_team_player_embed = "";
-		String red_team_score_embed = "";
-		String blue_team_player_embed = "";
-		String blue_team_score_embed = "";
+		StringBuilder red_team_player_embed = new StringBuilder();
+		StringBuilder red_team_score_embed = new StringBuilder();
+		StringBuilder blue_team_player_embed = new StringBuilder();
+		StringBuilder blue_team_score_embed = new StringBuilder();
 		
 		// Order teams scores by score
 		List<Map.Entry<Player, MatchStats>> entries = new ArrayList<Map.Entry<Player, MatchStats>>(playerStats.entrySet());
-		Collections.sort(entries,  new Comparator<Map.Entry<Player, MatchStats>>() {
-		        	public int compare(Map.Entry<Player, MatchStats> a, Map.Entry<Player, MatchStats> b) {
-		            return Integer.compare(b.getValue().score[0].score, a.getValue().score[0].score);
-		        }
-		    }
-		);
-		//Collections.reverse(entries);
+		entries.sort((a, b) -> Integer.compare(b.getValue().score[0].score, a.getValue().score[0].score));
 		
 		for (Map.Entry<Player, MatchStats> entry : entries) {
-			String country = "";
+			String country;
 			if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
 				country =  "<:puma:849287183474884628>";
 			}
 			else {
 				country = ":flag_" + entry.getKey().getCountry().toLowerCase() + ":";
 			}
+			String player_row = country + " \u200b \u200b " +  entry.getKey().getUrtauth() + "\n";
+			String score_row = entry.getValue().score[0].score +  "/" + entry.getValue().score[0].deaths + "/" + entry.getValue().score[0].assists + "\n";
 			if (teamList.get("red").contains(entry.getKey())) {
-				red_team_player_embed += country + " \u200b \u200b " +  entry.getKey().getUrtauth() + "\n";
-				red_team_score_embed += String.valueOf(entry.getValue().score[0].score) +  "/" + String.valueOf(entry.getValue().score[0].deaths) + "/" + String.valueOf(entry.getValue().score[0].assists) + "\n";
+				red_team_player_embed.append(player_row);
+				red_team_score_embed.append(score_row);
 			}
 			else if (teamList.get("blue").contains(entry.getKey())) {
-				blue_team_player_embed += country + " \u200b \u200b " +  entry.getKey().getUrtauth() + "\n";
-				blue_team_score_embed += String.valueOf(entry.getValue().score[0].score) +  "/" + String.valueOf(entry.getValue().score[0].deaths) + "/" + String.valueOf(entry.getValue().score[0].assists) + "\n";
+				blue_team_player_embed.append(player_row);
+				blue_team_score_embed.append(score_row);
 			}
 		}
 		
-		embed.addField("<:rush_red:510982162263179275> \u200b \u200b " + String.valueOf(getScoreRed()) + "\n \u200b", red_team_player_embed, true);
-		embed.addField("K/D/A" + "\n \u200b", red_team_score_embed, true);
+		embed.addField("<:rush_red:510982162263179275> \u200b \u200b " + getScoreRed() + "\n \u200b", red_team_player_embed.toString(), true);
+		embed.addField("K/D/A" + "\n \u200b", red_team_score_embed.toString(), true);
 		embed.addField("\u200b", "\u200b", false);
-		embed.addField("<:rush_blue:510067909628788736> \u200b \u200b " + String.valueOf(getScoreBlue()) + "\n \u200b", blue_team_player_embed, true);
-		embed.addField("K/D/A" + "\n \u200b", blue_team_score_embed, true);
+		embed.addField("<:rush_blue:510067909628788736> \u200b \u200b " + getScoreBlue() + "\n \u200b", blue_team_player_embed.toString(), true);
+		embed.addField("K/D/A" + "\n \u200b", blue_team_score_embed.toString(), true);
 		
 		return embed;
 	}
@@ -1038,12 +997,12 @@ public class Match implements Runnable {
 		default: break;
 		}
 		
-		String playernames = "None";
+		StringBuilder playernames = new StringBuilder("None");
 		for (Player p : playerStats.keySet()) {
-			if (playernames.equals("None")) {
-				playernames = p.getDiscordUser().getMentionString();
+			if (playernames.toString().equals("None")) {
+				playernames = new StringBuilder(p.getDiscordUser().getMentionString());
 			} else {
-				playernames += " " + p.getDiscordUser().getMentionString();
+				playernames.append(" ").append(p.getDiscordUser().getMentionString());
 			}
 		}
 		
@@ -1054,8 +1013,8 @@ public class Match implements Runnable {
 		msg = msg.replace(".eloblue.", String.valueOf(elo[1]));
 		msg = msg.replace(".playernumber.", String.valueOf(getPlayerCount()));
 		msg = msg.replace(".maxplayer.", String.valueOf(gametype.getTeamSize() * 2));
-		msg = msg.replace(".playerlist.", playernames);
-		msg = msg.replace(".score.", String.valueOf(score[0]) + " " + String.valueOf(score[1]));
+		msg = msg.replace(".playerlist.", playernames.toString());
+		msg = msg.replace(".score.", score[0] + " " + score[1]);
 		return msg;
 	}
 	

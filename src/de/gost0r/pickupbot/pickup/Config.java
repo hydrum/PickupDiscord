@@ -6,6 +6,7 @@ public class Config {
 	public static final String CMD_TS					= "!ts";
 	public static final String CMD_1v1					= "!1v1";
 	public static final String CMD_2v2					= "!2v2";
+	public static final String CMD_DIV1					= "!div1";
 	public static final String CMD_REMOVE				= "!remove";
 	public static final String CMD_MAPS					= "!maps";
 	public static final String CMD_MAP					= "!map";
@@ -13,7 +14,6 @@ public class Config {
 	public static final String CMD_HELP					= "!help";
 	public static final String CMD_SURRENDER			= "!surrender";
 	public static final String CMD_LIVE					= "!live";
-	public static final String CMD_PICK					= "!pick";
 	public static final String CMD_VOTES				= "!votes";
 
 	public static final String CMD_LOCK					= "!lock";
@@ -80,19 +80,19 @@ public class Config {
 //------------------------------------------------------------------------------------//
 
 
-	public static final String USE_CMD_ADD				= "!add <gametype>";
+	public static final String USE_CMD_ADD				= "!<gametype>";
 	public static final String USE_CMD_REMOVE			= "!remove <gametype>";
 	public static final String USE_CMD_CTF				= "!ctf <map>";
 	public static final String USE_CMD_TS				= "!ts <map>";
 	public static final String USE_CMD_1v1				= "!1v1 <map>";
 	public static final String USE_CMD_2v2				= "!2v2 <map>";
+	public static final String USE_CMD_DIV1				= "!div1 <map>";
 	public static final String USE_CMD_MAPS				= "!maps displays the map list for each gametype.";
 	public static final String USE_CMD_MAP				= "!map <gametype> <mapname>";
 	public static final String USE_CMD_STATUS			= "Type !status to get information on the queues.";
 	public static final String USE_CMD_HELP				= "!help <command>";
 	public static final String USE_CMD_SURRENDER		= "Type !surrender to abandon your match.";
 	public static final String USE_CMD_LIVE				= "!live sends info on the live matches.";
-	public static final String USE_CMD_PICK				= "!pick <1/2>";
 	public static final String USE_CMD_VOTES			= "Type !votes to get the current votes.";
 
 	public static final String USE_CMD_LOCK				= "!lock to prevent commands from PUBLIC channel.";
@@ -179,7 +179,6 @@ public class Config {
 
 	public static final String pkup_match_print_info	= "**.gametype. #.gamenumber.**: **[**.map.**] [**.ingame.**] [**.redteam.**]** VS **[**.blueteam.**]**";
 
-	public static final String pkup_go_admin			= "[ Match #.gamenumber. ][ Password: .password. ][ .map. ][ ELO red: .elored. ELO blue: .eloblue. ]";
 	public static final String pkup_go_player			= "Pickup starts now! Connect, choose positions and ready up! **[ /connect .server. ; password .password. ]**";
 	public static final String pkup_go_pub_head			= "**.gametype.: Match #.gamenumber.** .region. (avg ELO: .elo.)";
 	public static final String pkup_go_pub_team			= ".team. team: .playerlist.";
@@ -203,7 +202,6 @@ public class Config {
 
 	public static final String pkup_getelo				= "#.position.\t **.rank.**\t .country.   **.urtauth.**\t .elo.\t .wdl.%\t .kdr.";
 	public static final String pkup_getelo_country		= "#.position.\t .country.\t .elo.";
-	public static final String pkup_top10_header		= "**Top players:** (elo, win rate, kdr)";
 	public static final String pkup_top5_header			= "**Top countries:**";
 
 	public static final String pkup_surrender_cast		= "You voted to surrender. **.num.** more teammate.s. needed.";
@@ -237,6 +235,7 @@ public class Config {
 	public static final String player_not_in_match		= "You are not added to any queue.";
 	public static final String player_already_match		= "You are already in a match.";
 	public static final String player_not_admin			= "You must be an admin to use this command.";
+	public static final String player_notdiv1			= "You need to have an elo higher than ``.minelo.`` to add to the **div1** queue.";
 
 	public static final String player_not_captain		= "You can't pick a player. You are not captain or it is not your turn to pick.";
 

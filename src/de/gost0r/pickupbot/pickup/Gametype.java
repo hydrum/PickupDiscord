@@ -29,7 +29,7 @@ public class Gametype {
 		this.setActive(active);
 		this.setTeamSize(teamSize);
 		
-		config = new ArrayList<>();
+		config = new ArrayList<String>();
 		this.loadGameConfig();
 	}
 
