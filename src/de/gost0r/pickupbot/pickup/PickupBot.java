@@ -22,21 +22,21 @@ public class PickupBot extends DiscordBot {
 	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	private DiscordChannel latestMessageChannel;
-	
+
 	public static PickupLogic logic;
-	
+
 	@Override
 	public void init() {
 		super.init();
-		
+	
 		logic = new PickupLogic(this);
 		sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), Config.bot_online);
 	}
-	
+
 	@Override
 	protected void tick() {
 		super.tick();
-		
+
 		if (logic != null) {
 			logic.afkCheck();
 		}
@@ -45,24 +45,24 @@ public class PickupBot extends DiscordBot {
 	@Override
 	protected void recvMessage(DiscordMessage msg) {
 		LOGGER.info("RECV #" + ((msg.channel == null || msg.channel.name == null) ?  "null" : msg.channel.name) + " " + msg.user.username + ": " + msg.content);
-		
+
 		this.latestMessageChannel = msg.channel;
-		
+
 		if (msg.user.equals(self)) {
 			return;
 		}
-		
+
 		String[] data = msg.content.split(" ");
 
 		if (isChannel(PickupChannelType.PUBLIC, msg.channel))
 		{
 			Player p = Player.get(msg.user);
-			
+
 			// AFK CHECK CODE
 			if (p != null) {
 				p.afkCheck();
 			}
-			
+
 			// Execute code according to cmd
 			switch (data[0].toLowerCase()) 
 			{
@@ -89,7 +89,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADD));
 					break;
-					
+
 				case Config.CMD_TS:
 					if (p != null)
 					{
@@ -106,7 +106,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
 				case Config.CMD_CTF:
 					if (p != null)
 					{
@@ -123,7 +123,24 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
+				case Config.CMD_BM:
+					if (p != null)
+					{
+						Gametype gt = logic.getGametypeByString("BM");
+						if (gt != null) {
+							logic.cmdAddPlayer(p, gt, false);
+
+							if (data.length > 1) {
+								logic.cmdMapVote(p, gt, data[1]);
+							}
+						} else {
+							sendNotice(msg.user, Config.no_gt_found);
+						}
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+
 				case Config.CMD_1v1:
 					if (p != null)
 					{
@@ -140,7 +157,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
 				case Config.CMD_2v2:
 					if (p != null)
 					{
@@ -174,7 +191,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
 				case Config.CMD_REMOVE:
 					Player player = p;
 					int startindex = 1;
@@ -212,7 +229,7 @@ public class PickupBot extends DiscordBot {
 					}
 					logic.cmdRemovePlayer(player, gametypes);
 					break;
-					
+
 				case Config.CMD_FORCEADD:
 					if (!msg.user.hasAdminRights())
 					{
@@ -231,7 +248,6 @@ public class PickupBot extends DiscordBot {
 							{
 								playerToAdd = Player.get(u);
 							}
-							
 							if (playerToAdd != null)
 							{
 								gametypes = new ArrayList<Gametype>();
@@ -253,7 +269,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_FORCEADD));
 					break;
-					
+
 				case Config.CMD_MAPS:
 				case Config.CMD_MAP:
 					if (p != null)
@@ -275,7 +291,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
 				case Config.CMD_STATUS:
 					if (data.length == 1)
 					{
@@ -283,7 +299,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_STATUS));
 					break;
-					
+
 				case Config.CMD_VOTES:
 					if (data.length == 1)
 					{
@@ -291,7 +307,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_VOTES));
 					break;
-					
+
 				case Config.CMD_SURRENDER:
 					if (data.length == 1)
 					{
@@ -302,7 +318,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_SURRENDER));
 					break;
-					
+
 				case Config.CMD_RESET:
 					if (msg.user.hasAdminRights())
 					{
@@ -317,7 +333,7 @@ public class PickupBot extends DiscordBot {
 						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_RESET));
 					}
 					break;
-				
+
 				case Config.CMD_LOCK:
 					if (msg.user.hasAdminRights())
 					{
@@ -328,7 +344,7 @@ public class PickupBot extends DiscordBot {
 						else super.sendMsg(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_LOCK));
 					}
 					break;
-					
+
 				case Config.CMD_UNLOCK:
 					if (msg.user.hasAdminRights())
 					{
@@ -339,7 +355,7 @@ public class PickupBot extends DiscordBot {
 						else super.sendMsg(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_UNLOCK));
 					}
 					break;
-					
+
 				case Config.CMD_GETELO:
 					if (p != null)
 					{
@@ -370,7 +386,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
 				case Config.CMD_GETSTATS:
 					if (p != null)
 					{
@@ -390,7 +406,6 @@ public class PickupBot extends DiscordBot {
 							{
 								pOther = Player.get(data[1].toLowerCase());
 							}
-							
 							if (pOther != null)
 							{
 								logic.cmdGetStats(pOther);
@@ -401,7 +416,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
 				case Config.CMD_TOP_PLAYERS: 
 					if (p != null)
 					{
@@ -413,7 +428,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
 				case Config.CMD_TOP_COUNTRIES: 
 					if (p != null)
 					{
@@ -425,7 +440,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
 				case Config.CMD_TOP_WDL: 
 					if (p != null)
 					{
@@ -433,7 +448,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
 				case Config.CMD_TOP_KDR: 
 					if (p != null)
 					{
@@ -449,7 +464,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_REGISTER));
 					break;
-					
+
 				case Config.CMD_COUNTRY:
 					if (data.length == 2)
 					{
@@ -457,7 +472,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_COUNTRY));
 					break;
-					
+
 				case Config.CMD_LIVE:
 					if (p != null)
 					{
@@ -469,7 +484,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
 				case Config.CMD_MATCH:
 					if (p != null)
 					{
@@ -481,7 +496,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
 				case Config.CMD_LAST:
 					if (p != null)
 					{
@@ -512,7 +527,7 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-					
+
 				case Config.CMD_BANINFO:
 					if (p != null)
 					{
@@ -545,11 +560,11 @@ public class PickupBot extends DiscordBot {
 					break;
 			}
 		}
-		
+
 		if (msg.channel.isThread)
 		{
 			Player p = Player.get(msg.user);
-			
+
 			// AFK CHECK CODE
 			if (p != null) {
 				p.afkCheck();
@@ -574,7 +589,7 @@ public class PickupBot extends DiscordBot {
 							e.printStackTrace();
 						}
 						break;
-						
+
 					case Config.CMD_GETDATA:
 						if (data.length == 2)
 						{
@@ -582,7 +597,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_GETDATA));
 						break;
-						
+
 					case Config.CMD_ENABLEMAP:
 						if (data.length == 3)
 						{
@@ -594,7 +609,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ENABLEMAP));
 						break;
-						
+
 					case Config.CMD_DISABLEMAP:
 						if (data.length == 3)
 						{
@@ -606,7 +621,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_DISABLEMAP));
 						break;
-						
+
 					case Config.CMD_ENABLEGAMETYPE:
 						if (data.length == 3)
 						{
@@ -618,7 +633,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ENABLEGAMETYPE));	
 						break;
-						
+
 					case Config.CMD_DISABLEGAMETYPE:
 						if (data.length == 2)
 						{
@@ -630,7 +645,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ENABLEGAMETYPE));
 						break;
-						
+
 					case Config.CMD_LISTGAMECONFIG:
 						if (data.length == 2)
 						{
@@ -641,7 +656,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_LISTGAMECONFIG));
 						break;
-						
+
 					case Config.CMD_ADDSERVER:
 						if (data.length == 4)
 						{
@@ -653,7 +668,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADDSERVER));
 						break;
-						
+
 					case Config.CMD_ENABLESERVER:
 						if (data.length == 2)
 						{
@@ -665,7 +680,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ENABLESERVER));
 						break;
-						
+
 					case Config.CMD_DISABLESERVER:
 						if (data.length == 2)
 						{
@@ -677,7 +692,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_DISABLESERVER));
 						break;
-						
+
 					case Config.CMD_UPDATESERVER:
 						if (data.length == 3)
 						{
@@ -689,7 +704,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_UPDATESERVER));
 						break;
-						
+
 					case Config.CMD_SHOWSERVERS:
 						if (data.length == 1)
 						{
@@ -698,7 +713,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_SHOWSERVERS));
 						break;
-					
+
 					case Config.CMD_RCON:
 						if (data.length > 2)
 						{
@@ -710,7 +725,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_RCON));
 						break;
-						
+
 					case Config.CMD_SHOWMATCHES:
 						if (data.length == 1)
 						{
@@ -718,7 +733,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_SHOWMATCHES));
 						break;
-						
+
 					case Config.CMD_UNREGISTER:
 						if (data.length == 2)
 						{
@@ -735,7 +750,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_UNREGISTER));
 						break;
-						
+
 					case Config.CMD_ADDBAN:
 						if (data.length == 4)
 						{
@@ -773,7 +788,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADDBAN));
 						break;
-						
+
 					case Config.CMD_REMOVEBAN:
 						if (data.length == 2)
 						{
@@ -796,7 +811,7 @@ public class PickupBot extends DiscordBot {
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADDBAN));
 						break;
-						
+
 					case Config.CMD_COUNTRY:
 						if (data.length == 3)
 						{
@@ -823,7 +838,7 @@ public class PickupBot extends DiscordBot {
 				}
 			}
 		}
-		
+
 		if (isChannel(PickupChannelType.PUBLIC, msg.channel)
 				|| isChannel(PickupChannelType.ADMIN, msg.channel)
 				|| msg.channel.type == DiscordChannelType.DM)
@@ -1099,13 +1114,13 @@ public class PickupBot extends DiscordBot {
 			}
 		}
 	}
-	
+
 	@Override
 	protected void recvInteraction(DiscordInteraction interaction) {
 		LOGGER.info("RECV #" + ((interaction.message.channel == null || interaction.message.channel.name == null) ?  "null" : interaction.message.channel.name) + " " + interaction.user.username + ": " + interaction.custom_id);
-		
+
 		Player p = Player.get(interaction.user);
-		
+
 		String[] data = interaction.custom_id.split("_");
 
 		switch (data[0].toLowerCase()) 

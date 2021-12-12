@@ -2,6 +2,7 @@ package de.gost0r.pickupbot.pickup;
 
 public class Config {
 	public static final String CMD_ADD					= "!add";
+	public static final String CMD_BM					= "!bm";
 	public static final String CMD_CTF					= "!ctf";
 	public static final String CMD_TS					= "!ts";
 	public static final String CMD_1v1					= "!1v1";
@@ -70,18 +71,21 @@ public class Config {
 
 	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_MAP + " " + CMD_MATCH + " " 
 	+ CMD_LAST + " " + CMD_LIVE + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS 
-	+ " " + CMD_TOP_COUNTRIES + " " + CMD_TOP_KDR + " " + CMD_TOP_WDL + " " + CMD_COUNTRY + " " + CMD_SURRENDER + " " + CMD_BANINFO;
+	+ " " + CMD_TOP_COUNTRIES + " " + CMD_TOP_KDR + " " + CMD_TOP_WDL + " " + CMD_COUNTRY + " " + CMD_SURRENDER + " " + CMD_BANINFO 
+	+ " " + CMD_VOTES + " " + CMD_LAST;
 	
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " " + CMD_ENABLEMAP 
 	+ " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE + " " 
 	+ CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_ADDBAN + " " + CMD_REMOVEBAN 
-	+ " " + CMD_SHOWMATCHES + " " + CMD_UNREGISTER + " " + CMD_ADDROLE + " " + CMD_REMOVEROLE + " " + CMD_ADDCHANNEL + " " + CMD_REMOVECHANNEL;
+	+ " " + CMD_SHOWMATCHES + " " + CMD_UNREGISTER + " " + CMD_ADDROLE + " " + CMD_REMOVEROLE + " " + CMD_ADDCHANNEL + " " + CMD_REMOVECHANNEL 
+	+ " " + CMD_FORCEADD + " " + CMD_REBOOT;
 
 //------------------------------------------------------------------------------------//
 
 
 	public static final String USE_CMD_ADD				= "!<gametype>";
 	public static final String USE_CMD_REMOVE			= "!remove <gametype>";
+	public static final String USE_CMD_BM				= "!bm <map>";
 	public static final String USE_CMD_CTF				= "!ctf <map>";
 	public static final String USE_CMD_TS				= "!ts <map>";
 	public static final String USE_CMD_1v1				= "!1v1 <map>";
@@ -95,7 +99,7 @@ public class Config {
 	public static final String USE_CMD_LIVE				= "!live sends info on the live matches.";
 	public static final String USE_CMD_VOTES			= "Type !votes to get the current votes.";
 
-	public static final String USE_CMD_LOCK				= "!lock to prevent commands from PUBLIC channel.";
+	public static final String USE_CMD_LOCK				= "!lock to prevent joining the queues.";
 	public static final String USE_CMD_UNLOCK			= "!unlock";
 	public static final String USE_CMD_RESET			= "!reset <all/cur/type/id>";
 	public static final String USE_CMD_GETDATA			= "!getdata <match id>";
@@ -103,6 +107,7 @@ public class Config {
 	public static final String USE_CMD_DISABLEMAP		= "!disablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_RCON				= "!rcon <serverid> <rconstring>";
 	public static final String USE_CMD_FORCEADD			= "!forceadd <gamemode> </@DiscordUser|urtauth/>";
+	public static final String USE_CMD_REBOOT			= "Use !reboot to restart the BOT. This will reset queues and current matches.";
 
 	public static final String USE_CMD_ENABLEGAMETYPE	= "!enablegametype <name> <teamsize>";
 	public static final String USE_CMD_DISABLEGAMETYPE	= "!disablegametype <name>";

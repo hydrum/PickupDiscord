@@ -25,11 +25,11 @@ import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
 
 public class PickupLogic {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-	
+	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
 	public PickupBot bot;
 	public Database db;
-	
+
 	private List<Server> serverList;
 	private List<Server> gtvServerList;
 	private List<GameMap> mapList;
@@ -46,7 +46,6 @@ public class PickupLogic {
 	private boolean locked;
 	
 	private Map<BanReason, String[]> banDuration;
-	
 	private Map<Gametype, GameMap> lastMapPlayed;
 	
 	public PickupLogic(PickupBot bot) {
@@ -67,7 +66,7 @@ public class PickupLogic {
 		}
 		mapList = db.loadMaps(); // needs current gamemode list
 		ongoingMatches = db.loadOngoingMatches(); // need maps, servers and gamemodes
-
+		
 		createCurrentMatches();
 		
 		banDuration = new HashMap<BanReason, String[]>();
@@ -77,8 +76,9 @@ public class PickupLogic {
 		awaitingServer = new LinkedList<Match>();
 		
 		lastMapPlayed = new HashMap<Gametype, GameMap>();
-		lastMapPlayed.put(getGametypeByString("TS"), new GameMap("null"));
+		lastMapPlayed.put(getGametypeByString("BM"), new GameMap("null"));
 		lastMapPlayed.put(getGametypeByString("CTF"), new GameMap("null"));
+		lastMapPlayed.put(getGametypeByString("TS"), new GameMap("null"));
 		lastMapPlayed.put(getGametypeByString("1v1"), new GameMap("null"));
 		lastMapPlayed.put(getGametypeByString("2v2"), new GameMap("null"));
 		lastMapPlayed.put(getGametypeByString("div1"), new GameMap("null"));
@@ -95,7 +95,7 @@ public class PickupLogic {
 	}
 
 	public void cmdAddPlayer(Player player, Gametype gt, boolean forced) {
-
+		
 		if (locked && !forced) {
 			bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
 			return;
@@ -108,8 +108,8 @@ public class PickupLogic {
 			bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
 			return;
 		}
-
-		int minEloDiv1 = 1400;
+		
+		int minEloDiv1 = 1400; //=Platinum players and higher.
 		if (gt.getName().equalsIgnoreCase("div1") && player.getElo() < minEloDiv1){
 			bot.sendNotice(player.getDiscordUser(), Config.player_notdiv1.replace(".minelo.", String.valueOf(minEloDiv1)));
 			return;
@@ -117,10 +117,10 @@ public class PickupLogic {
 		if (forced) {
 			player.setLastMessage(System.currentTimeMillis());
 		}
-
+		
 		String defmsg = "You are already in queue for:";
 		StringBuilder msg = new StringBuilder(defmsg);
-
+		
 		if (curMatch.containsKey(gt)) {
 			Match m = curMatch.get(gt);
 			if (m.getMatchState() != MatchState.Signup || m.isInMatch(player) || playerInActiveMatch(player) != null) {
@@ -134,9 +134,9 @@ public class PickupLogic {
 			bot.sendNotice(player.getDiscordUser(), msg.toString());
 		}
 	}
-	
-	public void cmdRemovePlayer(Player player, List<Gametype> modes) {
 
+	public void cmdRemovePlayer(Player player, List<Gametype> modes) {
+		
 		if (playerInActiveMatch(player) != null) {
 			bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
 			return;
@@ -156,7 +156,7 @@ public class PickupLogic {
 			}
 		}
 	}
-	
+
 	public void cmdPick(DiscordInteraction interaction, Player player, int pick) {
 		for (Match match : ongoingMatches) {
 			if (match.isCaptainTurn(player)) {
@@ -168,17 +168,17 @@ public class PickupLogic {
 		}
 		interaction.respond(Config.player_not_captain);
 	}
-	
+
 	public void cmdLock() {
 		locked = true;
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.lock_enable);
 	}
-	
+
 	public void cmdUnlock() {
 		locked = false;
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.lock_disable);
 	}
-	
+
 	public void cmdRegisterPlayer(DiscordUser user, String urtauth, String msgid) {
 		// check whether the user and the urtauth aren't taken
 		if (Player.get(user) == null) {
@@ -203,7 +203,7 @@ public class PickupLogic {
 			bot.sendNotice(user, Config.auth_taken_user);
 		}
 	}
-	
+
 	public boolean cmdUnregisterPlayer(Player player) {
 		List<Match> matches = playerInMatch(player);
 		for (Match m : matches) {
@@ -213,7 +213,7 @@ public class PickupLogic {
 		Player.remove(player);
 		return true;
 	}
-	
+
 	public void cmdSetPlayerCountry(DiscordUser user, String str_country) {
 		
 			// check if user is already registered
@@ -230,7 +230,7 @@ public class PickupLogic {
 					}
 					else
 					{
-						bot.sendNotice(user, "Unknown county code. Look yours up here: <https://datahub.io/core/country-list/r/0.html>");
+						bot.sendNotice(user, "Unknown county code. Look yours up: <https://datahub.io/core/country-list/r/0.html>");
 					}
 				}
 				else {
@@ -255,10 +255,10 @@ public class PickupLogic {
 		}
 		else
 		{
-			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), "Unknown county code. Look yours up here: <https://datahub.io/core/country-list/r/0.html>");
+			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), "Unknown county code. Look yours up: <https://datahub.io/core/country-list/r/0.html>");
 		}	
-}
-	
+	}
+
 	public void cmdTopElo(int number) {
 		StringBuilder embed_rank = new StringBuilder();
 		StringBuilder embed_player = new StringBuilder();
@@ -292,7 +292,7 @@ public class PickupLogic {
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), null, embed);
 		}
 	}
-	
+
 	public void cmdTopWDL(int number) {
 		StringBuilder embed_rank = new StringBuilder();
 		StringBuilder embed_player = new StringBuilder();
@@ -327,7 +327,7 @@ public class PickupLogic {
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), null, embed);
 		}
 	}
-	
+
 	public void cmdTopKDR(int number) {
 		StringBuilder embed_rank = new StringBuilder();
 		StringBuilder embed_player = new StringBuilder();
@@ -386,7 +386,7 @@ public class PickupLogic {
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 		}
 	}
-	
+
 	public void cmdGetStats(Player p) {
 		if (p == null) {
 			return;
@@ -425,7 +425,7 @@ public class PickupLogic {
 		
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), null, statsEmbed);
 	}
-	
+
 	public void cmdTopCountries(int number) {
 		StringBuilder msg = new StringBuilder(Config.pkup_top5_header);
 		
@@ -447,7 +447,7 @@ public class PickupLogic {
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg.toString());
 		}
 	}
-	
+
 	public void cmdGetMaps(boolean showZeroVote) {
 		StringBuilder msg = new StringBuilder("None");
 		for (Gametype gametype : curMatch.keySet()) {
@@ -463,7 +463,6 @@ public class PickupLogic {
 		}
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg.toString());
 	}
-
 
 	public void cmdMapVote(Player player, Gametype gametype, String mapname) {
 		Match activeMatch = playerInActiveMatch(player);
@@ -512,7 +511,7 @@ public class PickupLogic {
 			}
 		}
 	}
-	
+
 	public void cmdStatus() {
 		if (curMatch.isEmpty()) {
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_match_unavi);
@@ -529,7 +528,7 @@ public class PickupLogic {
 		}
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg.toString());
 	}
-	
+
 	public String cmdStatus(Match match, Player player, boolean shouldSend) {
 		String msg = "";
 		int playerCount = match.getPlayerCount();
@@ -572,7 +571,7 @@ public class PickupLogic {
 		}
 		return msg;
 	}
-	
+
 	public void cmdSurrender(Player player) {
 		Match match = playerInActiveMatch(player);
 		if (match != null && match.getMatchState() == MatchState.Live) {
@@ -632,7 +631,7 @@ public class PickupLogic {
 			}
 		}
 	}
-	
+
 	public void cmdGetData(String id, DiscordChannel channel) {
 		String msg = "Match not found.";
 		try {
@@ -650,7 +649,7 @@ public class PickupLogic {
 		}
 		bot.sendMsg(channel, msg);
 	}
-	
+
 	public boolean cmdEnableMap(String mapname, String gametype) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
@@ -673,7 +672,7 @@ public class PickupLogic {
 		}
 		return true;
 	}
-	
+
 	public boolean cmdDisableMap(String mapname, String gametype) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
@@ -687,7 +686,7 @@ public class PickupLogic {
 		}
 		return false;
 	}
-	
+
 	public boolean cmdEnableGametype(String gametype, String teamSize) {
 		try {
 			int i_teamSize = Integer.parseInt(teamSize);
@@ -710,7 +709,7 @@ public class PickupLogic {
 			return false;
 		}
 	}
-	
+
 	public boolean cmdDisableGametype(String gametype) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
@@ -721,7 +720,7 @@ public class PickupLogic {
 		curMatch.remove(gt);
 		return true;
 	}
-	
+
 	public boolean cmdAddGameConfig(String gametype, String command) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
@@ -730,6 +729,7 @@ public class PickupLogic {
 
 		return true;
 	}
+
 	public boolean cmdRemoveGameConfig(String gametype, String command) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
@@ -739,6 +739,7 @@ public class PickupLogic {
 		db.updateGametype(gt);
 		return true;
 	}
+
 	public boolean cmdListGameConfig(DiscordChannel channel, String gametype) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
@@ -758,7 +759,7 @@ public class PickupLogic {
 		
 		return true;
 	}
-	
+
 	public boolean cmdAddServer(String serveraddr, String rcon, String str_region) {
 		try {
 			String ip = serveraddr;
@@ -775,7 +776,6 @@ public class PickupLogic {
 			}
 			
 			Region region = Region.valueOf(str_region);
-
 			Server server = new Server(-1, ip, port, rcon, "???", true, region);
 
 			db.createServer(server);
@@ -835,7 +835,7 @@ public class PickupLogic {
 		}
 		return false;
 	}
-	
+
 	public void cmdServerList(DiscordChannel channel) {
 		StringBuilder msg = new StringBuilder("None");
 		for (Server server : serverList) {
@@ -847,7 +847,7 @@ public class PickupLogic {
 		}
 		bot.sendMsg(channel, msg.toString());
 	}
-	
+
 	public void cmdMatchList(DiscordChannel channel) {
 		StringBuilder msg = new StringBuilder("None");
 		for (Match match : curMatch.values()) {
@@ -866,7 +866,7 @@ public class PickupLogic {
 		}
 		bot.sendMsg(channel, msg.toString());
 	}
-	
+
 	public void cmdLive() {
 		String msg = "No live matches found.";
 		DiscordEmbed scoreBoardLink = new DiscordEmbed();
@@ -893,7 +893,7 @@ public class PickupLogic {
 			bot.sendMsg(bot.getLatestMessageChannel(), msg);
 		}
 	}
-	
+
 	public void cmdDisplayMatch(String matchid) {
 		try {
 			int idx = Integer.parseInt(matchid);
@@ -915,7 +915,7 @@ public class PickupLogic {
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
 	}
-	
+
 	public void cmdDisplayLastMatch() {
 		try {
 			Match match = db.loadLastMatch(); 
@@ -929,7 +929,7 @@ public class PickupLogic {
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
 	}
-	
+
 	public void cmdDisplayLastMatchPlayer(Player p) {
 		try {
 			Match match = db.loadLastMatchPlayer(p); 
@@ -943,15 +943,15 @@ public class PickupLogic {
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
 	}
-	
+
 	// Matchcreation
-	
+
 	private void createCurrentMatches() {
 		for (Gametype gametype : curMatch.keySet()) {
 			createMatch(gametype);
 		}
 	}
-	
+
 	private void createMatch(Gametype gametype) {
 		List<GameMap> gametypeMapList = new ArrayList<GameMap>();
 		for (GameMap map : mapList) {
@@ -970,7 +970,7 @@ public class PickupLogic {
 			checkServer();
 		}
 	}
-	
+
 	public void cancelRequestServer(Match match) {
 		awaitingServer.remove(match);
 	}
@@ -1013,7 +1013,7 @@ public class PickupLogic {
 			}
 		}
 	}
-	
+
 	private Server getBestServer(Region r)
 	{
 		Server bestServer = null;
@@ -1027,10 +1027,10 @@ public class PickupLogic {
 		
 		return bestServer;
 	}
-	
-	
+
+
 	// ROLES & CHANNEL
-	
+
 	public boolean addRole(PickupRoleType type, DiscordRole role) {
 		if (!roles.containsKey(type)) {
 			roles.put(type, new ArrayList<DiscordRole>());
@@ -1042,7 +1042,7 @@ public class PickupLogic {
 		}
 		return false;
 	}
-	
+
 	public boolean removeRole(PickupRoleType type, DiscordRole role) {
 		if (roles.containsKey(type)) {
 			roles.get(type).remove(role);
@@ -1051,7 +1051,7 @@ public class PickupLogic {
 		}
 		return false;
 	}
-	
+
 	public boolean addChannel(PickupChannelType type, DiscordChannel channel) {
 		if (!channels.containsKey(type)) {
 			channels.put(type, new ArrayList<DiscordChannel>());
@@ -1063,7 +1063,7 @@ public class PickupLogic {
 		}
 		return false;
 	}
-	
+
 	public boolean removeChannel(PickupChannelType type, DiscordChannel channel) {
 		if (channels.containsKey(type)) {
 			channels.get(type).remove(channel);
@@ -1074,7 +1074,7 @@ public class PickupLogic {
 	}
 	
 	// AFK CHECK
-	
+
 	public void afkCheck() {
 		Set<Player> playerList = new HashSet<Player>();
 		for (Match m : curMatch.values()) {			
@@ -1124,8 +1124,8 @@ public class PickupLogic {
 			}
 		}
 	}
-	
-	
+
+
 	public void autoBanPlayer(Player player, BanReason reason) {
 		String[] durationString = banDuration.get(reason);
 		PlayerBan latestBan = player.getLatestBan();
@@ -1141,7 +1141,7 @@ public class PickupLogic {
 		
 		banPlayer(player, reason, duration);
 	}
-	
+
 	public void banPlayer(Player player, BanReason reason, long duration) {
 		
 		// add reminaing bantime to the new ban
@@ -1167,7 +1167,7 @@ public class PickupLogic {
 			match.removePlayer(player, true);
 		}
 	}
-	
+
 	public void UnbanPlayer(Player player) {
 			
 			if (player.isBanned()) {
@@ -1181,8 +1181,8 @@ public class PickupLogic {
 				bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), printPlayerNotBannedInfo(player));
 			}
 	}
-	
-	
+
+
 	public String printBanInfo(Player player) {
 		PlayerBan ban = player.getLatestBan();
 		
@@ -1202,14 +1202,14 @@ public class PickupLogic {
 		msg = msg.replace(".time.", time);
 		return msg;
 	}
-	
+
 	public String printUnbanInfo(Player player) {
 		String msg = Config.is_unbanned;
 		msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
 		msg = msg.replace(".urtauth.", player.getUrtauth());
 		return msg;
 	}
-	
+
 	public String printPlayerNotBannedInfo(Player player) {
 		String msg = Config.is_notbanned;
 		msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
@@ -1218,7 +1218,7 @@ public class PickupLogic {
 	}
 	
 	// HELPER
-	
+
 	public static long parseDurationFromString(String string) {
 		long total = 0;
 		
@@ -1243,7 +1243,7 @@ public class PickupLogic {
 		}
 		return total;
 	}
-	
+
 	public static String parseStringFromDuration(long duration) {
 		String string = "";
 		
@@ -1305,7 +1305,7 @@ public class PickupLogic {
 		}
 		return null;
 	}
-	
+
 	public List<Match> playerInMatch(Player player) {
 		List<Match> matchlist = new ArrayList<Match>();
 		for (Gametype gt : curMatch.keySet()) {
@@ -1316,7 +1316,7 @@ public class PickupLogic {
 		}
 		return matchlist;
 	}
-	
+
 	public Match playerInActiveMatch(Player player) {
 		for (Match m : ongoingMatches) {
 			if (m.isInMatch(player)) {
@@ -1325,7 +1325,7 @@ public class PickupLogic {
 		}
 		return null;
 	}
-	
+
 	public Match playerInMatch(Gametype gametype, Player player) {
 		if (curMatch.containsKey(gametype)) {
 			if (curMatch.get(gametype).isInMatch(player)) {
@@ -1345,7 +1345,7 @@ public class PickupLogic {
 		}
 		return list;
 	}
-	
+
 	public List<DiscordRole> getSuperAdminList() {
 		List<DiscordRole> list = new ArrayList<DiscordRole>();
 		if (roles.containsKey(PickupRoleType.SUPERADMIN)) {
@@ -1360,7 +1360,7 @@ public class PickupLogic {
 		}
 		return new ArrayList<DiscordRole>();
 	}
-	
+
 	public List<DiscordChannel> getChannelByType(PickupChannelType type) {
 		if (channels.containsKey(type)) {
 			return channels.get(type);
@@ -1393,16 +1393,16 @@ public class PickupLogic {
 		}
 		return null;
 	}
-	
+
 	public void setLastMapPlayed(Gametype gt, GameMap map) {
 		lastMapPlayed.remove(gt);
 		lastMapPlayed.put(gt, map);
 	}
-	
+
 	public GameMap getLastMapPlayed(Gametype gt) {
 		return lastMapPlayed.get(gt);
 	}
-	
+
 	public Server setupGTV() {
 		for (Server gtv : gtvServerList) {
 			if (!gtv.isTaken()) {
@@ -1412,24 +1412,24 @@ public class PickupLogic {
 		}
 		return null;
 	}
-	
+
 	public void restartApplication() throws URISyntaxException, IOException
 	{
-	  final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-	  final File currentJar = new File(PickupBotDiscordMain.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+		final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+		final File currentJar = new File(PickupBotDiscordMain.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
-	  /* is it a jar file? */
-	  if(!currentJar.getName().endsWith(".jar"))
-	    return;
+		/* is it a jar file? */
+		if(!currentJar.getName().endsWith(".jar"))
+		return;
 
-	  /* Build command: java -jar application.jar */
-	  final ArrayList<String> command = new ArrayList<String>();
-	  command.add(javaBin);
-	  command.add("-jar");
-	  command.add(currentJar.getPath());
+		/* Build command: java -jar application.jar */
+		final ArrayList<String> command = new ArrayList<String>();
+		command.add(javaBin);
+		command.add("-jar");
+		command.add(currentJar.getPath());
 
-	  final ProcessBuilder builder = new ProcessBuilder(command);
-	  builder.start();
-	  System.exit(0);
+		final ProcessBuilder builder = new ProcessBuilder(command);
+		builder.start();
+		System.exit(0);
 	}
 }
