@@ -191,15 +191,15 @@ public class Player {
 	}
 
 	private PlayerRank getRank(int elo) {
-		if (elo > 1500) {
+		if (elo >= 1600) {
 			return PlayerRank.DIAMOND;
-		} else if (elo > 1300) {
+		} else if (elo >= 1400) {
 			return PlayerRank.PLATINUM;
-		} else if (elo > 1000) {
+		} else if (elo >= 1200) {
 			return PlayerRank.GOLD;
-		} else if (elo > 850) {
+		} else if (elo >= 1000) {
 			return PlayerRank.SILVER;
-		} else if (elo > 700) {
+		} else if (elo >= 800) {
 			return PlayerRank.BRONZE;
 		} else {
 			return PlayerRank.WOOD;
