@@ -126,7 +126,7 @@ public class ServerMonitor implements Runnable {
 		if (Math.abs(rpp.scores[0] - rpp.scores[1]) >= 10 & !noMercyIssued){
 			server.sendRcon("timelimit 1");
 			server.sendRcon("bigtext \"No mercy! Ending game in 1min\"");
-			server.sendRcon("say \"No mercy! Ending game in 1min\"");
+			server.sendRcon("say \"^1[NO MERCY] ^3Ending game in 1min\"");
 			noMercyIssued = true;
 			LOGGER.info("No mercy, game will end in 1min");
 			sendDiscordMsg("**[NO MERCY]** The match #" + String.valueOf(match.getID()) + " is a massacre and will end in 1min.");
@@ -147,7 +147,7 @@ public class ServerMonitor implements Runnable {
 		}
 		
 		if (!playerlist.isEmpty()) {
-			long timeleft = (match.getStartTime() + 300000L) - System.currentTimeMillis(); // 5min
+			long timeleft = (match.getStartTime() + 240000L) - System.currentTimeMillis(); // 4min
 			if (timeleft > 0) {
 				String time = getTimeString(timeleft); 
 				String sendString = "(" + time + ") Waiting for: ^1" + playerlist;
@@ -159,7 +159,7 @@ public class ServerMonitor implements Runnable {
 					server.sendRcon("restart"); // restart map
 					server.sendRcon("startserverdemo all");
 				}
-			} else if (timeleft < -300000L) { // if noshow timer ran out twice
+			} else if (timeleft < -240000L) { // if noshow timer ran out twice
 				// we're way over time to accurately log a noshow, therefore simply abandon
 				abandonMatch(MatchStats.Status.NOSHOW, new ArrayList<Player>());
 			} else { // if the noshow time ran out
@@ -199,9 +199,9 @@ public class ServerMonitor implements Runnable {
 			boolean shouldPause = false;
 			long timeleft = 0;
 			if (state == ServerState.WELCOME) {
-				timeleft = (earliestLeaver + 300000L) - System.currentTimeMillis(); // 5min
+				timeleft = (earliestLeaver + 240000L) - System.currentTimeMillis(); // 4min
 			} else if (state == ServerState.WARMUP) {
-				timeleft = (earliestLeaver + 300000L) - System.currentTimeMillis(); // 5min
+				timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
 				server.sendRcon("restart"); // restart map
 				server.sendRcon("startserverdemo all");
 			} else if (state == ServerState.LIVE) {
@@ -682,7 +682,7 @@ public class ServerMonitor implements Runnable {
 		Score[] playerStats = match.getStats(player).score;
 		int performance = 0;
 		for (Score stats : playerStats) {
-			performance += stats.score + stats.assists;
+			performance += 2 * stats.score + stats.assists;
 		}
 		float performanceRating = 1;
 		if (elochange > 0) {
