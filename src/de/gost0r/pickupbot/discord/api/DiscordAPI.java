@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.net.http.*;
-import java.net.http.HttpRequest.Builder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,7 +40,7 @@ public class DiscordAPI {
 			}
 			
 			JSONObject obj = new JSONObject(reply);
-			return obj != null && !obj.has("code");
+			return !obj.has("code");
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -53,8 +52,13 @@ public class DiscordAPI {
 			List<JSONObject> embedList = new ArrayList<JSONObject>();
 			embedList.add(embed.getJSON());
 			String reply = sendPostRequest("/channels/"+ channel.id + "/messages", new JSONObject().put("content", msg).put("embeds", embedList));
+
+			if (reply == null) {
+				return false;
+			}
+
 			JSONObject obj = new JSONObject(reply);
-			return obj != null && !obj.has("code");
+			return !obj.has("code");
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -102,10 +106,14 @@ public class DiscordAPI {
 			}
 					
 			String reply = sendPostRequest("/channels/"+ channel.id + "/messages", content);
+
+			if (reply == null) {
+				return null;
+			}
+
 			JSONObject obj = new JSONObject(reply);
-			
-			DiscordMessage message = new DiscordMessage(obj.getString("id"), null, channel, msg);
-			return message;
+
+			return new DiscordMessage(obj.getString("id"), null, channel, msg);
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -115,11 +123,27 @@ public class DiscordAPI {
 	public static boolean deleteMessage(DiscordChannel channel, String msgid) {
 		try {
 			String reply = sendDeleteRequest("/channels/"+ channel.id + "/messages/" + msgid);
-			LOGGER.info(reply); // TODO: Remove
 			JSONObject obj = null;
 			if (reply != null) {
 				if (reply.isEmpty()) {
 					// a successful deletemsg will return a 204 error
+					return true;
+				}
+				obj = new JSONObject(reply);
+			}
+			return obj != null && !obj.has("code");
+		} catch (JSONException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return false;
+	}
+
+	public static boolean deleteChannel(DiscordChannel channel) {
+		try {
+			String reply = sendDeleteRequest("/channels/"+ channel.id);
+			JSONObject obj = null;
+			if (reply != null) {
+				if (reply.isEmpty()) {
 					return true;
 				}
 				obj = new JSONObject(reply);
@@ -136,8 +160,7 @@ public class DiscordAPI {
 			List<JSONObject> embedList = new ArrayList<JSONObject>();
 			embedList.add(embed.getJSON());
 			String reply = sendPatchRequest("/channels/"+ msg.channel.id + "/messages/" + msg.id, new JSONObject().put("content", content).put("embeds", embedList));
-			//JSONObject obj = new JSONObject(reply);
-			return true;
+			return reply != null;
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -147,9 +170,13 @@ public class DiscordAPI {
 	public static DiscordChannel createThread(DiscordChannel channel, String name) {
 		try {
 			String reply = sendPostRequest("/channels/"+ channel.id + "/threads", new JSONObject().put("name", name).put("type", 11));
+
+			if (reply == null) {
+				return null;
+			}
+
 			JSONObject obj = new JSONObject(reply);
-			DiscordChannel threadChannel = new DiscordChannel(obj);
-			return threadChannel;
+			return new DiscordChannel(obj);
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}

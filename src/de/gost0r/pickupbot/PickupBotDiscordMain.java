@@ -17,6 +17,8 @@ import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.pickup.Country;
 import de.gost0r.pickupbot.pickup.PickupBot;
 
+import io.sentry.Sentry;
+
 public class PickupBotDiscordMain {
 
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -60,6 +62,9 @@ public class PickupBotDiscordMain {
 		logfile.setLevel(Level.WARNING);
 		logger.addHandler(logfile);
 
+		Sentry.init("https://444a1a8bd3044cfa8f7d84f2703a500c@sentry.ftwgl.net/28");
+
 		LOGGER.severe("Bot started.");
+		Sentry.capture("Bot started");
 	}
 }

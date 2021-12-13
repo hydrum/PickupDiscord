@@ -75,4 +75,8 @@ public class DiscordChannel {
 			DiscordAPI.archiveThread(this);
 		}
 	}
+
+	public void delete(){
+		DiscordAPI.deleteChannel(this);
+	}
 }

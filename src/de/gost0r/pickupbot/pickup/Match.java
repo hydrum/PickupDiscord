@@ -115,6 +115,11 @@ public class Match implements Runnable {
 			p.resetVotes();
 		}
 		mapVotes.replaceAll((m, v) -> 0);
+
+		if(threadChannel != null){
+			threadChannel.delete();
+			threadChannel = null;
+		}
 		
 		playerStats.clear();
 	}
@@ -397,9 +402,6 @@ public class Match implements Runnable {
 				sortPlayers.add(player);
 			}
 		}
-
-		LOGGER.warning(String.valueOf(playerList.size()));
-		LOGGER.warning(String.valueOf(sortPlayers.size()));
 		
 		captains[0] = sortPlayers.get(0);
 		teamList.get("red").add(captains[0]);

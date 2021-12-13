@@ -35,13 +35,8 @@ public class Country {
 	
 	public static Boolean isValid(String country) {
 		Object o = CountryToContinentMap.get(country);
-		
-		if(o == null) {
-			return false;
-		}
-		else {
-			return true;
-		}
+
+		return o != null;
 	}
 	
 	public static String getCountryFlag(String country) {

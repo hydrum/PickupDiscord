@@ -60,9 +60,11 @@ public class PickupLogic {
 		channels = db.loadChannels();
 		
 		curMatch = new HashMap<Gametype, Match>();
+		lastMapPlayed = new HashMap<Gametype, GameMap>();
 		for (Gametype gt : db.loadGametypes()) {
 			if (gt.getActive()) {
 				curMatch.put(gt, null);
+				lastMapPlayed.put(getGametypeByString(gt.getName()), new GameMap("null"));
 			}
 		}
 		mapList = db.loadMaps(); // needs current gamemode list
@@ -75,13 +77,6 @@ public class PickupLogic {
 		banDuration.put(BanReason.RAGEQUIT, new String[] {"30m", "1h", "2h", "6h", "12h", "3d", "1w", "2w", "1M", "3M"});
 		
 		awaitingServer = new LinkedList<Match>();
-		
-		lastMapPlayed = new HashMap<Gametype, GameMap>();
-		lastMapPlayed.put(getGametypeByString("TS"), new GameMap("null"));
-		lastMapPlayed.put(getGametypeByString("CTF"), new GameMap("null"));
-		lastMapPlayed.put(getGametypeByString("1v1"), new GameMap("null"));
-		lastMapPlayed.put(getGametypeByString("2v2"), new GameMap("null"));
-		lastMapPlayed.put(getGametypeByString("div1"), new GameMap("null"));
 		
 		Server testGTV = new Server(0, "gtv.b00bs-clan.com", 709, "arkon4bmn", "SevenAndJehar", true, null);
 		gtvServerList = new ArrayList<Server>();
