@@ -108,7 +108,7 @@ public class Match implements Runnable {
 			resetLive();
 		}
 	}
-	
+
 	private void resetSignup() {
 		// reset mapvote
 		for(Player p : playerStats.keySet()) {
@@ -118,13 +118,13 @@ public class Match implements Runnable {
 		
 		playerStats.clear();
 	}
-	
+
 	private void resetAwaitingServer() {
 		logic.cancelRequestServer(this);
 		resetSignup();
 		state = MatchState.Signup;
 	}
-	
+
 	private void resetLive() {
 		abort();
 	}
@@ -167,7 +167,7 @@ public class Match implements Runnable {
 	}
 
 	public void voteSurrender(Player player) {
-		long timeUntilSurrender = (startTime + 600000L) - System.currentTimeMillis(); // 10min in milliseconds
+		long timeUntilSurrender = (startTime + 300000L) - System.currentTimeMillis(); // 5min in milliseconds
 		if (timeUntilSurrender < 0) {
 			if (!player.hasVotedSurrender()) {
 				player.voteSurrender();
@@ -293,7 +293,7 @@ public class Match implements Runnable {
 		fullmsg = new StringBuilder(fullmsg.toString().replace(".gamenumber.", String.valueOf(id)).replace(".gametype.", gametype.getName()).replace(".map.", map.name));
 		for (int i = 0; i < 2; ++i) {
 			int opp = (i + 1) % 2;
-    		String teamname = (i == 0) ? "Red" : "Blue";
+			String teamname = (i == 0) ? "Red" : "Blue";
 			StringBuilder msg = new StringBuilder(Config.pkup_aftermath_result);
 			msg = new StringBuilder(msg.toString().replace(".team.", teamname));
 			if (score[i] > score[opp]) {
@@ -302,7 +302,7 @@ public class Match implements Runnable {
 				msg = new StringBuilder(msg.toString().replace(".result.", "lost"));
 			} else {
 				msg = new StringBuilder(msg.toString().replace(".result.", "draw"));
-			} 
+			}
 			msg = new StringBuilder(msg.toString().replace(".score.", score[i] + "-" + score[opp]));
 			
 			for (Player p : teamList.get(teamname.toLowerCase())) {
@@ -336,7 +336,7 @@ public class Match implements Runnable {
 		String msg = Config.pkup_aftermath_abandon_1;
 		msg = msg.replace(".reason.", status.name());
 		fullmsg += "\n" + msg;
-		
+
 		if (!involvedPlayers.isEmpty()) { // only if we have people who left	
 			StringBuilder playerlist = new StringBuilder();
 			for (Player player : involvedPlayers) {
@@ -346,13 +346,13 @@ public class Match implements Runnable {
 				playerlist.append(player.getUrtauth());
 			}
 			String be = involvedPlayers.size() == 1 ? "was" : "were";
-			
+
 			msg = Config.pkup_aftermath_abandon_2;
 			msg = msg.replace(".players.", playerlist.toString());
 			msg = msg.replace(".be.", be);
 			fullmsg += "\n" + msg;
 		}
-		
+
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg);
 	}
 
@@ -362,29 +362,29 @@ public class Match implements Runnable {
 			
 			this.server = server;
 			server.take();
-			
+
 			for (Player player : getPlayerList()) {				
 				for (Match m : logic.playerInMatch(player)) {
 					if (m == this) continue;
 					m.removePlayer(player, false);
 				}
 			}
-			
+
 			String threadTitle = Config.pkup_go_pub_threadtitle;
 			threadTitle = threadTitle.replace(".ID.", String.valueOf(logic.db.getLastMatchID() + 1));
 			threadChannel = logic.bot.createThread(logic.getChannelByType(PickupChannelType.PUBLIC).get(0), threadTitle); // Assuming we only have 1 public channel
-			
+
 			logic.matchStarted(this);
 			timeLastPick = System.currentTimeMillis();
 			sortPlayers();
-			
+
 		}
 	}
-	
+
 	public void sortPlayers() {
 		// Sort players by elo
 		List<Player> playerList = new ArrayList<Player>(playerStats.keySet());
-		
+
 		sortPlayers.add(playerList.get(0));
 		for (Player player : playerList) {
 			for (Player sortplayer : sortPlayers) {
@@ -500,15 +500,15 @@ public class Match implements Runnable {
 			logic.bot.sendMsgToEdit(threadChannel, pickPromptMsg, null, buttons);
 		}
 	}
-	
+
 	public boolean isCaptainTurn(Player player) {
 		return captains[captainTurn].getUrtauth().equals(player.getUrtauth());
 	}
-	
+
 	public Player getCaptainsTurn() {
 		return captains[captainTurn];
 	}
-	
+
 	public void pick(Player captain, int pick) {
 		String pickMsg = Config.pkup_go_pub_pickjoin;
 		pickMsg = pickMsg.replace(".pick.", sortPlayers.get(pick).getDiscordUser().getMentionString());
@@ -533,19 +533,19 @@ public class Match implements Runnable {
 		}
 		checkTeams();
 	}
-	
+
 	public long getTimeLastPick() {
 		return timeLastPick;
 	}
-	
+
 	public boolean getPickReminderSent() {
 		return pickReminderSent;
 	}
-	
+
 	public void setPickReminderSent(boolean reminderSent) {
 		pickReminderSent = reminderSent;
 	}
-	
+
 
 	// DONT CALL THIS OUTSIDE OF launch() !!!
 	public void run() {	
@@ -626,7 +626,7 @@ public class Match implements Runnable {
 		msg = msg.replace(".gametype.", gametype.getName());
 		fullmsg.append("\n").append(msg);
 
-		
+
 		msg = Config.pkup_go_pub_calm;
 		if (gtvServer == null) {
 			msg = Config.pkup_go_pub_calm_notavi;
@@ -856,8 +856,6 @@ public class Match implements Runnable {
 		msg = msg.replace(".map.", map != null ? map.name : "ut4_?");
 		msg = msg.replace(".redteam.", redplayers.toString());
 		msg = msg.replace(".blueteam.", blueplayers.toString());
-
-
 		msg = msg.replace(".ingame.", getIngameInfo());
 
 		return msg;
@@ -985,7 +983,7 @@ public class Match implements Runnable {
 			return Region.NA;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		String msg = "";
