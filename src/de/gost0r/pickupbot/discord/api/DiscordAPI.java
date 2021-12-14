@@ -91,7 +91,10 @@ public class DiscordAPI {
 					componentListGlob.add(componentList);
 				}
 			}
-			
+
+//			if (msg.equals("")){
+//				msg= null;
+//			}
 			JSONObject content =  new JSONObject().put("content", msg);
 			
 			if (!embedList.isEmpty()) {

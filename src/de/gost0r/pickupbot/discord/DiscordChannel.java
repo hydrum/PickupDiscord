@@ -18,6 +18,8 @@ public class DiscordChannel {
 	public DiscordChannelType type;
 	public String name;
 	public String topic;
+	public String parent_id;
+	public String guild_id;
 	public boolean isThread;
 	
 	public DiscordChannel(JSONObject channel) {
@@ -26,7 +28,9 @@ public class DiscordChannel {
 			this.type = channel.getInt("type") == 11 ? DiscordChannelType.THREAD_CHANNEL : DiscordChannelType.values()[channel.getInt("type")];
 			this.name = channel.isNull("name") ? null : channel.getString("name") ;
 			this.topic = channel.isNull("topic") ? null : channel.getString("topic");
-			this.isThread = channel.isNull("thread_metadata") ? false : true;
+			this.parent_id = channel.isNull("parent_id") ? null : channel.getString("parent_id");
+			this.guild_id = channel.isNull("guild_id") ? null : channel.getString("guild_id");
+			this.isThread = !channel.isNull("thread_metadata");
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 			Sentry.capture(e);
@@ -61,7 +65,7 @@ public class DiscordChannel {
 	public boolean equals(Object o) {
 		if (o instanceof DiscordChannel) {
 			DiscordChannel chan = (DiscordChannel) o;
-			return chan.id == this.id;
+			return chan.id.equals(this.id);
 		}
 		return false;
 	}

@@ -35,8 +35,8 @@ public class Match implements Runnable {
 	private Map<Player, MatchStats> playerStats;
 	private List<Player> sortPlayers;
 	
-	public DiscordChannel threadChannel;
-	public DiscordMessage liveScoreMsg;
+	public List<DiscordChannel> threadChannels;
+	public List<DiscordMessage> liveScoreMsgs;
 
 	private Server server;
 	private Server gtvServer;
@@ -52,6 +52,7 @@ public class Match implements Runnable {
 	private long startTime;
 	private long timeLastPick;
 	private boolean pickReminderSent;
+	private List<DiscordMessage> pickMessages = new ArrayList<DiscordMessage>();
 
 	private PickupLogic logic;
 
@@ -63,6 +64,8 @@ public class Match implements Runnable {
 		mapVotes = new HashMap<GameMap, Integer>();
 		sortPlayers = new ArrayList<Player>();
 		captainTurn = 1;
+		threadChannels = new ArrayList<DiscordChannel>();
+		liveScoreMsgs = new ArrayList<DiscordMessage>();
 	}
 
 	public Match(PickupLogic logic, Gametype gametype, List<GameMap> maplist) {
@@ -117,9 +120,11 @@ public class Match implements Runnable {
 		}
 		mapVotes.replaceAll((m, v) -> 0);
 
-		if(threadChannel != null){
-			threadChannel.delete();
-			threadChannel = null;
+		if(!threadChannels.isEmpty()){
+			for (DiscordChannel threadChannel : threadChannels){
+				threadChannel.delete();
+			}
+			threadChannels = new ArrayList<DiscordChannel>();
 		}
 		
 		playerStats.clear();
@@ -242,8 +247,11 @@ public class Match implements Runnable {
 		state = MatchState.Abort;
 		cleanUp();
 		logic.db.saveMatch(this);
-		threadChannel.archive();
-		
+
+		for (DiscordChannel threadChannel : threadChannels){
+			threadChannel.archive();
+		}
+
 		if (gtvServer != null) {
 			gtvServer.free();
 			gtvServer.sendRcon("gtv_disconnect 1");
@@ -256,7 +264,10 @@ public class Match implements Runnable {
 		sendAftermath(status, involvedPlayers);
 		logic.matchRemove(this);
 		logic.db.saveMatch(this);
-		threadChannel.archive();
+
+		for (DiscordChannel threadChannel : threadChannels){
+			threadChannel.archive();
+		}
 		
 		if (gtvServer != null) {
 			gtvServer.free();
@@ -271,7 +282,10 @@ public class Match implements Runnable {
 		logic.matchRemove(this);
 		logic.db.saveMatch(this);
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), null, getMatchEmbed());
-		threadChannel.archive();
+
+		for (DiscordChannel threadChannel : threadChannels){
+			threadChannel.archive();
+		}
 		
 		if (gtvServer != null) {
 			gtvServer.free();
@@ -379,7 +393,10 @@ public class Match implements Runnable {
 
 			String threadTitle = Config.pkup_go_pub_threadtitle;
 			threadTitle = threadTitle.replace(".ID.", String.valueOf(logic.db.getLastMatchID() + 1));
-			threadChannel = logic.bot.createThread(logic.getChannelByType(PickupChannelType.PUBLIC).get(0), threadTitle); // Assuming we only have 1 public channel
+
+			for (DiscordChannel publicChannel : logic.getChannelByType(PickupChannelType.PUBLIC)){
+				threadChannels.add(logic.bot.createThread(publicChannel, threadTitle));
+			}
 
 			logic.matchStarted(this);
 			timeLastPick = System.currentTimeMillis();
@@ -417,7 +434,7 @@ public class Match implements Runnable {
 		String captainAnnouncement = Config.pkup_go_pub_captains;
 		captainAnnouncement = captainAnnouncement.replace(".captain1.", captains[0].getDiscordUser().getMentionString());
 		captainAnnouncement = captainAnnouncement.replace(".captain2.", captains[1].getDiscordUser().getMentionString());
-		logic.bot.sendMsg(threadChannel, captainAnnouncement);
+		logic.bot.sendMsg(threadChannels, captainAnnouncement);
 		
 		checkTeams();
 		/*
@@ -501,7 +518,7 @@ public class Match implements Runnable {
 			
 			String pickPromptMsg = Config.pkup_go_pub_pick;
 			pickPromptMsg = pickPromptMsg.replace(".captain.", captains[captainTurn].getDiscordUser().getMentionString());
-			logic.bot.sendMsgToEdit(threadChannel, pickPromptMsg, null, buttons);
+			pickMessages = logic.bot.sendMsgToEdit(threadChannels, pickPromptMsg, null, buttons);
 		}
 	}
 
@@ -527,9 +544,13 @@ public class Match implements Runnable {
 		}
 		
 		sortPlayers.remove(pick);
-		logic.bot.sendMsg(threadChannel, pickMsg);
+		logic.bot.sendMsg(threadChannels, pickMsg);
 		captainTurn = 1 - captainTurn;
 		timeLastPick = System.currentTimeMillis();
+
+		for (DiscordMessage pickMessage : pickMessages){
+			pickMessage.delete();
+		}
 		
 		if (sortPlayers.size() == 1) {
 			pick(captains[captainTurn], 0);
@@ -670,7 +691,7 @@ public class Match implements Runnable {
 		
 		server.startMonitoring(this);
 		
-		liveScoreMsg = logic.bot.sendMsgToEdit(threadChannel, null, getMatchEmbed(), null);
+		liveScoreMsgs = logic.bot.sendMsgToEdit(threadChannels, "", getMatchEmbed(), null);
 	}
 
 	List<GameMap> getMostMapVotes() {
@@ -1027,7 +1048,7 @@ public class Match implements Runnable {
 		if (state == MatchState.Live) {
 			score = server.getServerMonitor().getScoreArray();
 		}
-		if (liveScoreMsg != null) {
+		for (DiscordMessage liveScoreMsg : liveScoreMsgs) {
 			liveScoreMsg.edit(null, getMatchEmbed());
 		}
 	}
