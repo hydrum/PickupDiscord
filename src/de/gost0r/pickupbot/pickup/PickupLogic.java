@@ -23,6 +23,7 @@ import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
+import io.sentry.Sentry;
 
 public class PickupLogic {
 	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -508,7 +509,7 @@ public class PickupLogic {
 
 	public void cmdStatus() {
 		if (curMatch.isEmpty()) {
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_match_unavi);
+			bot.sendMsg(bot.getLatestMessageChannel(), Config.pkup_match_unavi);
 			return;
 		}
 		StringBuilder msg = new StringBuilder("None");
@@ -520,7 +521,7 @@ public class PickupLogic {
 			}
 			msg.append(cmdStatus(m, null, false));
 		}
-		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg.toString());
+		bot.sendMsg(bot.getLatestMessageChannel(), msg.toString());
 	}
 
 	public String cmdStatus(Match match, Player player, boolean shouldSend) {
@@ -621,6 +622,7 @@ public class PickupLogic {
 					}
 				} catch (NumberFormatException e) {
 					LOGGER.log(Level.WARNING, "Exception: ", e);
+					Sentry.capture(e);
 				}
 			}
 		}
@@ -640,6 +642,7 @@ public class PickupLogic {
 			}
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		bot.sendMsg(channel, msg);
 	}
@@ -700,6 +703,7 @@ public class PickupLogic {
 			return true;
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 			return false;
 		}
 	}
@@ -778,6 +782,7 @@ public class PickupLogic {
 			return true;
 		} catch (IllegalArgumentException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 			return false;
 		}
 	}
@@ -795,6 +800,7 @@ public class PickupLogic {
 			}
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return false;
 	}
@@ -811,6 +817,7 @@ public class PickupLogic {
 			}
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return false;
 	}
@@ -826,6 +833,7 @@ public class PickupLogic {
 			}
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return false;
 	}
@@ -906,6 +914,7 @@ public class PickupLogic {
 		
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
 	}
@@ -920,6 +929,7 @@ public class PickupLogic {
 		
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
 	}
@@ -934,6 +944,7 @@ public class PickupLogic {
 		
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
 	}

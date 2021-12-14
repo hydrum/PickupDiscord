@@ -16,6 +16,7 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 import de.gost0r.pickupbot.discord.DiscordBot;
+import io.sentry.Sentry;
 
 @ClientEndpoint
 public class WsClientEndPoint {
@@ -38,10 +39,9 @@ public class WsClientEndPoint {
         try {
     		WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 			container.connectToServer(this, endpointURI);
-		} catch (DeploymentException e) {
+		} catch (DeploymentException | IOException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
-		} catch (IOException e) {
-			LOGGER.log(Level.WARNING, "Exception: ", e);
+            Sentry.capture(e);
 		}
     }
     
@@ -53,18 +53,19 @@ public class WsClientEndPoint {
     		connect();
 		} catch (IOException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+            Sentry.capture(e);
 		}
     }
     
     @OnOpen
     public void onOpen(Session userSession) {
-		LOGGER.warning("WebSocket opened. ");
+		LOGGER.info("WebSocket opened. ");
         this.userSession = userSession;
     }
     
     @OnClose
     public void onClose(Session userSession, CloseReason reason) {
-		LOGGER.warning("WebSocket closed. " + reason.toString());
+		LOGGER.info("WebSocket closed. " + reason.toString());
         this.userSession = null;
         bot.reconnect();
     }
@@ -85,6 +86,7 @@ public class WsClientEndPoint {
     		this.userSession.getAsyncRemote().sendText(message);
     	} else {
     		LOGGER.warning("Unable to send msg, session is closed.");
+            Sentry.capture("Unable to send msg, session is closed.");
     	}
     }
     

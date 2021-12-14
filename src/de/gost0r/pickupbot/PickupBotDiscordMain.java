@@ -43,6 +43,7 @@ public class PickupBotDiscordMain {
 //			}
 		} catch (IOException | JSONException | SecurityException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 	

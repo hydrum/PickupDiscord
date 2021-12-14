@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.DiscordChannel;
@@ -58,9 +60,9 @@ public class PickupBot extends DiscordBot {
 		{
 			Player p = Player.get(msg.user);
 
-			// AFK CHECK CODE
 			if (p != null) {
 				p.afkCheck();
+				p.setLastPublicChannel(msg.channel);
 			}
 
 			// Execute code according to cmd
@@ -227,7 +229,11 @@ public class PickupBot extends DiscordBot {
 							}
 						}
 					}
-					logic.cmdRemovePlayer(player, gametypes);
+					if (player != null){
+						logic.cmdRemovePlayer(player, gametypes);
+						player.setLastPublicChannel(p.getLastPublicChannel());
+					}
+
 					break;
 
 				case Config.CMD_FORCEADD:
@@ -250,6 +256,7 @@ public class PickupBot extends DiscordBot {
 							}
 							if (playerToAdd != null)
 							{
+								playerToAdd.setLastPublicChannel(p.getLastPublicChannel());
 								gametypes = new ArrayList<Gametype>();
 								String[] modes = Arrays.copyOfRange(data, 1, data.length);
 								for (String mode : modes) {
@@ -1142,14 +1149,52 @@ public class PickupBot extends DiscordBot {
 	}
 
 	public void sendMsg(List<DiscordChannel> channelList, String msg) {
+		List<Player> mentionedPlayers = new ArrayList<Player>();
+		Matcher m = Pattern.compile("<@(.*?)>").matcher(msg);
+		while (m.find()) {
+			DiscordUser dsUser = DiscordUser.getUser(m.group(1));
+			Player playerMentioned = Player.get(dsUser);
+			if (dsUser != null){
+				mentionedPlayers.add(playerMentioned);
+			}
+		}
+
 		for (DiscordChannel channel : channelList) {
-			sendMsg(channel, msg);
+			String msgCopy = String.valueOf(msg);
+			for (Player p : mentionedPlayers){
+				if (!channel.id.equals(p.getLastPublicChannel().id)){
+					msgCopy = msgCopy.replace(
+							"<@" + p.getDiscordUser().id + ">",
+							"**" + p.getDiscordUser().username + "**"
+					);
+				}
+			}
+			sendMsg(channel, msgCopy);
 		}
 	}
 	
 	public void sendMsg(List<DiscordChannel> channelList, String msg, DiscordEmbed embed) {
+		List<Player> mentionedPlayers = new ArrayList<Player>();
+		Matcher m = Pattern.compile("<@(.*?)>").matcher(msg);
+		while (m.find()) {
+			DiscordUser dsUser = DiscordUser.getUser(m.group(1));
+			Player playerMentioned = Player.get(dsUser);
+			if (dsUser != null){
+				mentionedPlayers.add(playerMentioned);
+			}
+		}
+
 		for (DiscordChannel channel : channelList) {
-			sendMsg(channel, msg, embed);
+			String msgCopy = String.valueOf(msg);
+			for (Player p : mentionedPlayers){
+				if (!channel.id.equals(p.getLastPublicChannel().id)){
+					msgCopy = msgCopy.replace(
+							"<@" + p.getDiscordUser().id + ">",
+							"**" + p.getDiscordUser().username + "**"
+					);
+				}
+			}
+			sendMsg(channel, msgCopy, embed);
 		}
 	}
 	

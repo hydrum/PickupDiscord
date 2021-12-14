@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.sentry.Sentry;
 import org.json.JSONObject;
 
 import de.gost0r.pickupbot.discord.DiscordButton;
@@ -208,6 +209,7 @@ public class Match implements Runnable {
 					server.getServerMonitor().surrender(i);
 				} catch (Exception e) {
 					LOGGER.log(Level.WARNING, "Exception: ", e);
+					Sentry.capture(e);
 				}
 				cleanUp();
 				sendAftermath();
