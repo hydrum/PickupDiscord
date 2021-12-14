@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.pickup.Match;
 import de.gost0r.pickupbot.pickup.Region;
+import io.sentry.Sentry;
 
 public class Server {
 	
@@ -52,6 +53,7 @@ public class Server {
 			this.socket.setSoTimeout(1000);
 		} catch (SocketException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 
@@ -101,6 +103,7 @@ public class Server {
 			return string;
 		} catch (IOException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return null;
 	}
@@ -128,6 +131,7 @@ public class Server {
 
 		} catch (IOException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return null;
 	}
@@ -166,6 +170,7 @@ public class Server {
 			return InetAddress.getByName(IP);
 		} catch (UnknownHostException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return null;
 	}

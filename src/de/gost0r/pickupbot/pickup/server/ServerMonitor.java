@@ -14,6 +14,7 @@ import de.gost0r.pickupbot.pickup.Player;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.Score;
 import de.gost0r.pickupbot.pickup.server.ServerPlayer.ServerPlayerState;
+import io.sentry.Sentry;
 
 public class ServerMonitor implements Runnable {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -78,6 +79,7 @@ public class ServerMonitor implements Runnable {
 			}
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 			match.getLogic().bot.sendMsg(match.getLogic().getChannelByType(PickupChannelType.ADMIN), "ServerMonitor " + e.toString());
 		}
 		LOGGER.info("run() ended");
@@ -306,6 +308,7 @@ public class ServerMonitor implements Runnable {
 				}
 			} catch (NumberFormatException e) {
 				LOGGER.log(Level.WARNING, "Exception: ", e);
+				Sentry.capture(e);
 			}
 		}
 		
@@ -524,7 +527,7 @@ public class ServerMonitor implements Runnable {
 
 		// hax to avoid empty
 		if (stripped.length == 1) {
-			LOGGER.warning("Corrupted RPP (too short), taking prevRPP instead");
+			LOGGER.info("Corrupted RPP (too short), taking prevRPP instead");
 			return prevRPP;
 		}
 		
@@ -634,7 +637,7 @@ public class ServerMonitor implements Runnable {
 		}
 		// hax to avoid empty
 		if (rpp.map == null || rpp.playercount != rpp.players.size()) {
-			LOGGER.warning("Corrupted RPP, taking prevRPP instead");
+			LOGGER.info("Corrupted RPP, taking prevRPP instead");
 			return prevRPP;
 		}
 		return rpp;

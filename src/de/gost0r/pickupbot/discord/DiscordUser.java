@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.sentry.Sentry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +45,7 @@ public class DiscordUser {
 			this.avatar = user.isNull("avatar") ? null : user.getString("avatar");
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -66,6 +68,7 @@ public class DiscordUser {
 			roles.put(guild, roleList);
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception for " + array.toString() + ": ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -81,6 +84,7 @@ public class DiscordUser {
 					list.add(role);
 				} catch (JSONException e) {
 					LOGGER.log(Level.WARNING, "Exception: ", e);
+					Sentry.capture(e);
 				}
 			}
 			roles.put(guild, list);
@@ -96,10 +100,9 @@ public class DiscordUser {
 				this.channel = channel;
 			}
 			return channel;
-		} catch (JSONException e) {
+		} catch (JSONException | NullPointerException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
-		} catch (NullPointerException e) {
-			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return null;
 	}
@@ -116,6 +119,7 @@ public class DiscordUser {
 			return newUser;
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return null;
 	}

@@ -4,6 +4,7 @@ import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.sentry.Sentry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,6 +72,7 @@ public class DiscordGateway implements MessageHandler {
 			
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception for '" + message + "': ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -94,6 +96,7 @@ public class DiscordGateway implements MessageHandler {
 			heartbeatTimer.scheduleAtFixedRate(heartbeatTask, interval/2, interval);			
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		
 		// sending identify
@@ -127,6 +130,7 @@ public class DiscordGateway implements MessageHandler {
 			
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		
 	}

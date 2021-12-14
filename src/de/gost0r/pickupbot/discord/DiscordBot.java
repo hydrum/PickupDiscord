@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.sentry.Sentry;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -49,6 +50,7 @@ public class DiscordBot  {
 			endpoint.addMessageHandler(gateway);
 		} catch (URISyntaxException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		} catch (Exception e) {
 			// we can trigger a handshake exception for endpoint. if that's the case, simply try again.
 			// TODO: need to check that this is really working
@@ -101,6 +103,7 @@ public class DiscordBot  {
 			}
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		tick();
 	}

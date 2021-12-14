@@ -20,6 +20,7 @@ import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
 import de.gost0r.pickupbot.pickup.stats.WinDrawLoss;
+import io.sentry.Sentry;
 
 public class Database {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -38,6 +39,7 @@ public class Database {
 			initTable();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -46,6 +48,7 @@ public class Database {
 			c.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 
@@ -163,6 +166,7 @@ public class Database {
 			stmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -197,6 +201,7 @@ public class Database {
 			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -212,6 +217,7 @@ public class Database {
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -223,6 +229,7 @@ public class Database {
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 
@@ -245,6 +252,7 @@ public class Database {
 			server.id = rs.getInt("ID");
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 
@@ -259,6 +267,7 @@ public class Database {
 			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -314,6 +323,7 @@ public class Database {
 			return mid;
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return -1;
 	}
@@ -328,6 +338,7 @@ public class Database {
 			return rs.getInt("id");
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return -1;
 	}
@@ -343,6 +354,7 @@ public class Database {
 			return rs.getInt("count");
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return -1;
 	}
@@ -371,6 +383,7 @@ public class Database {
 			stmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return map;
 	}
@@ -396,6 +409,7 @@ public class Database {
 			stmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return map;
 	}
@@ -421,6 +435,7 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return serverList;
 	}
@@ -440,6 +455,7 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return gametypeList;
 	}
@@ -469,6 +485,7 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return maplist;
 	}
@@ -489,6 +506,7 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return matchList;
 	}
@@ -575,6 +593,7 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return match;
 	}
@@ -590,6 +609,7 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return match;
 		
@@ -607,6 +627,7 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return match;
 		
@@ -657,6 +678,7 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return player;
 	}
@@ -671,6 +693,7 @@ public class Database {
 			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 
@@ -690,6 +713,7 @@ public class Database {
 			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -715,6 +739,7 @@ public class Database {
 			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}		
 	}
 
@@ -738,6 +763,7 @@ public class Database {
 			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}		
 	}
 
@@ -761,6 +787,7 @@ public class Database {
 			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}		
 	}
 	
@@ -831,6 +858,7 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -856,6 +884,7 @@ public class Database {
 			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}	
 	}
 
@@ -870,6 +899,7 @@ public class Database {
 			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -888,6 +918,7 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return list;
 	}
@@ -908,6 +939,7 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return list;
 	}
@@ -926,6 +958,7 @@ public class Database {
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return rank;
 	}
