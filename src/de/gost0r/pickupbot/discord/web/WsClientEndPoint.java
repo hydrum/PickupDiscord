@@ -59,13 +59,15 @@ public class WsClientEndPoint {
     
     @OnOpen
     public void onOpen(Session userSession) {
-		LOGGER.info("WebSocket opened. ");
+		LOGGER.warning("WebSocket opened. ");
+        Sentry.capture("WebSocket opened. ");
         this.userSession = userSession;
     }
     
     @OnClose
     public void onClose(Session userSession, CloseReason reason) {
-		LOGGER.info("WebSocket closed. " + reason.toString());
+		LOGGER.warning("WebSocket closed. " + reason.toString());
+        Sentry.capture("WebSocket closed. " + reason.toString());
         this.userSession = null;
         bot.reconnect();
     }

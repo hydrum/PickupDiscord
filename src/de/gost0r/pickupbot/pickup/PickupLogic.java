@@ -15,11 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.PickupBotDiscordMain;
-import de.gost0r.pickupbot.discord.DiscordChannel;
-import de.gost0r.pickupbot.discord.DiscordEmbed;
-import de.gost0r.pickupbot.discord.DiscordInteraction;
-import de.gost0r.pickupbot.discord.DiscordRole;
-import de.gost0r.pickupbot.discord.DiscordUser;
+import de.gost0r.pickupbot.discord.*;
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
@@ -155,9 +151,8 @@ public class PickupLogic {
 	public void cmdPick(DiscordInteraction interaction, Player player, int pick) {
 		for (Match match : ongoingMatches) {
 			if (match.isCaptainTurn(player)) {
-				match.pick(player, pick);
 				interaction.respond(null);
-				interaction.message.delete();
+				match.pick(player, pick);
 				return;
 			}
 		}
@@ -869,25 +864,32 @@ public class PickupLogic {
 		bot.sendMsg(channel, msg.toString());
 	}
 
-	public void cmdLive() {
+	public void cmdLive(DiscordChannel channel) {
 		String msg = "No live matches found.";
-		DiscordEmbed scoreBoardLink = new DiscordEmbed();
+		DiscordEmbed scoreBoardLinkEmbed = new DiscordEmbed();
 		for (Match match : ongoingMatches) {
 			msg = match.getMatchInfo();
-			if (match.getMatchState() == MatchState.AwaitingServer || match.getServer().getServerMonitor() == null || match.liveScoreMsg == null) {
+			if (match.getMatchState() == MatchState.AwaitingServer || match.getServer().getServerMonitor() == null || match.liveScoreMsgs.isEmpty()) {
 				bot.sendMsg(bot.getLatestMessageChannel(), msg);
 			} 
 			else {
-				StringBuilder embedDescription = new StringBuilder("[Live scoreboard](https://discord.com/channels/117622053061787657/" + match.threadChannel.id + "/" + match.liveScoreMsg.id + ")");
+				String scoreBoardLink = "";
+				for (DiscordMessage liveScoreMsg : match.liveScoreMsgs){
+					if(liveScoreMsg.channel.parent_id.equals(channel.id)){
+						scoreBoardLink = "[Live scoreboard](https://discord.com/channels/" + liveScoreMsg.channel.guild_id + "/" + liveScoreMsg.channel.id + "/" + liveScoreMsg.id + ")";
+						break;
+					}
+				}
+				StringBuilder embedDescription = new StringBuilder(scoreBoardLink);
 
-				scoreBoardLink.color = 7056881;
+				scoreBoardLinkEmbed.color = 7056881;
 				
 				if (match.getGtvServer() != null) {
 					embedDescription.append("\n").append(Config.pkup_go_pub_calm);
 				}
 
-				scoreBoardLink.description = embedDescription.toString();
-				bot.sendMsg(bot.getLatestMessageChannel(), msg, scoreBoardLink);
+				scoreBoardLinkEmbed.description = embedDescription.toString();
+				bot.sendMsg(bot.getLatestMessageChannel(), msg, scoreBoardLinkEmbed);
 			}
 		}
 		

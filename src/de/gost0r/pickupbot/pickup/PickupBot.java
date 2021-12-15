@@ -10,14 +10,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.gost0r.pickupbot.discord.DiscordBot;
-import de.gost0r.pickupbot.discord.DiscordChannel;
-import de.gost0r.pickupbot.discord.DiscordChannelType;
-import de.gost0r.pickupbot.discord.DiscordEmbed;
-import de.gost0r.pickupbot.discord.DiscordInteraction;
-import de.gost0r.pickupbot.discord.DiscordMessage;
-import de.gost0r.pickupbot.discord.DiscordRole;
-import de.gost0r.pickupbot.discord.DiscordUser;
+import de.gost0r.pickupbot.discord.*;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 
 public class PickupBot extends DiscordBot {
@@ -485,7 +478,7 @@ public class PickupBot extends DiscordBot {
 					{
 						if (data.length == 1)
 						{
-							logic.cmdLive();
+							logic.cmdLive(msg.channel);
 						}
 						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_LIVE));
 					}
@@ -1162,7 +1155,9 @@ public class PickupBot extends DiscordBot {
 		for (DiscordChannel channel : channelList) {
 			String msgCopy = String.valueOf(msg);
 			for (Player p : mentionedPlayers){
-				if (!channel.id.equals(p.getLastPublicChannel().id)){
+				if ((p.getLastPublicChannel() != null && !channel.isThread && !channel.id.equals(p.getLastPublicChannel().id)) ||
+					((p.getLastPublicChannel() != null && channel.isThread && channel.parent_id != null && !channel.parent_id.equals(p.getLastPublicChannel().id)))
+				){
 					msgCopy = msgCopy.replace(
 							"<@" + p.getDiscordUser().id + ">",
 							"**" + p.getDiscordUser().username + "**"
@@ -1187,7 +1182,9 @@ public class PickupBot extends DiscordBot {
 		for (DiscordChannel channel : channelList) {
 			String msgCopy = String.valueOf(msg);
 			for (Player p : mentionedPlayers){
-				if (!channel.id.equals(p.getLastPublicChannel().id)){
+				if ((p.getLastPublicChannel() != null && !channel.isThread &&  !channel.id.equals(p.getLastPublicChannel().id)) ||
+					((p.getLastPublicChannel() != null && channel.isThread && channel.parent_id != null && !channel.parent_id.equals(p.getLastPublicChannel().id)))
+				){
 					msgCopy = msgCopy.replace(
 							"<@" + p.getDiscordUser().id + ">",
 							"**" + p.getDiscordUser().username + "**"
@@ -1196,6 +1193,36 @@ public class PickupBot extends DiscordBot {
 			}
 			sendMsg(channel, msgCopy, embed);
 		}
+	}
+
+	public List<DiscordMessage> sendMsgToEdit(List<DiscordChannel> channelList, String msg, DiscordEmbed embed, List<DiscordComponent> components) {
+		List<Player> mentionedPlayers = new ArrayList<Player>();
+		List<DiscordMessage> sentMessages = new ArrayList<DiscordMessage>();
+		Matcher m = Pattern.compile("<@(.*?)>").matcher(msg);
+		while (m.find()) {
+			DiscordUser dsUser = DiscordUser.getUser(m.group(1));
+			Player playerMentioned = Player.get(dsUser);
+			if (dsUser != null){
+				mentionedPlayers.add(playerMentioned);
+			}
+		}
+
+		for (DiscordChannel channel : channelList) {
+			String msgCopy = String.valueOf(msg);
+			for (Player p : mentionedPlayers){
+				if ((p.getLastPublicChannel() != null && !channel.isThread &&  !channel.id.equals(p.getLastPublicChannel().id)) ||
+					((p.getLastPublicChannel() != null && channel.isThread && channel.parent_id != null && !channel.parent_id.equals(p.getLastPublicChannel().id)))
+				){
+					msgCopy = msgCopy.replace(
+							"<@" + p.getDiscordUser().id + ">",
+							"**" + p.getDiscordUser().username + "**"
+					);
+				}
+			}
+			sentMessages.add(sendMsgToEdit(channel, msgCopy, embed, components));
+		}
+
+		return sentMessages;
 	}
 	
 	public List<DiscordChannel> createThread(List<DiscordChannel> channelList, String name) {
