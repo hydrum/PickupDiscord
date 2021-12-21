@@ -1,0 +1,14 @@
+name: GitHub Actions Demo
+on: [push]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy jar to server
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          local: PickupBot.jar
+          remote: /home/pug/PickupDiscord/PickupBot.jar
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}

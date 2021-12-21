@@ -1169,6 +1169,10 @@ public class PickupBot extends DiscordBot {
 	}
 	
 	public void sendMsg(List<DiscordChannel> channelList, String msg, DiscordEmbed embed) {
+		if (msg == null){
+			msg = "";
+		}
+
 		List<Player> mentionedPlayers = new ArrayList<Player>();
 		Matcher m = Pattern.compile("<@(.*?)>").matcher(msg);
 		while (m.find()) {
@@ -1196,6 +1200,10 @@ public class PickupBot extends DiscordBot {
 	}
 
 	public List<DiscordMessage> sendMsgToEdit(List<DiscordChannel> channelList, String msg, DiscordEmbed embed, List<DiscordComponent> components) {
+		if (msg == null){
+			msg = "";
+		}
+
 		List<Player> mentionedPlayers = new ArrayList<Player>();
 		List<DiscordMessage> sentMessages = new ArrayList<DiscordMessage>();
 		Matcher m = Pattern.compile("<@(.*?)>").matcher(msg);

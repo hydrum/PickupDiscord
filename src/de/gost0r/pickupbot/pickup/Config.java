@@ -185,6 +185,7 @@ public class Config {
 	public static final String pkup_match_print_info	= "**.gametype. #.gamenumber.**: **[**.map.**] [**.ingame.**] [**.redteam.**]** VS **[**.blueteam.**]**";
 
 	public static final String pkup_go_player			= "Pickup starts now! Connect, choose positions and ready up! **[ /connect .server. ; password .password. ]**";
+	public static final String pkup_go_captains			= "Pickup is about to start and you are captain! Please pick players in the recently created discord thread.";
 	public static final String pkup_go_pub_head			= "**.gametype.: Match #.gamenumber.** .region. (avg ELO: .elo.)";
 	public static final String pkup_go_pub_team			= ".team. team: .playerlist.";
 	public static final String pkup_go_pub_map			= "Map: .map.";

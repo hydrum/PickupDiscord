@@ -373,7 +373,7 @@ public class PickupLogic {
 		}
 		
 		if (sendMsg) {
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+			bot.sendMsg(bot.getLatestMessageChannel(), msg);
 		}
 	}
 
@@ -413,7 +413,7 @@ public class PickupLogic {
 			statsEmbed.addField("Win rate", Math.round(db.getWDLForPlayer(p).calcWinRatio() * 100d) + "% (#" + p.stats.wdlRank + ")", true);
 		}
 		
-		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), null, statsEmbed);
+		bot.sendMsg(bot.getLatestMessageChannel(), null, statsEmbed);
 	}
 
 	public void cmdTopCountries(int number) {
@@ -552,7 +552,7 @@ public class PickupLogic {
 		if (shouldSend) {
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 		}
-		if (match.getMatchState() == MatchState.AwaitingServer && shouldSend){
+		if (match.getMatchState() == MatchState.AwaitingServer && shouldSend && match.getGametype().getTeamSize() > 1) {
 			msg = Config.pkup_status_server;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 			msg = msg.replace(".votes.", match.getMapVotes(true));

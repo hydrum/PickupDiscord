@@ -1,12 +1,8 @@
 package de.gost0r.pickupbot.pickup;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,7 +29,7 @@ public class Match implements Runnable {
 	private Map<String, List<Player>> teamList;
 	private Map<GameMap, Integer> mapVotes;
 	private Map<Player, MatchStats> playerStats;
-	private List<Player> sortPlayers;
+	private List<Player> sortedPlayers;
 	
 	public List<DiscordChannel> threadChannels;
 	public List<DiscordMessage> liveScoreMsgs;
@@ -62,7 +58,7 @@ public class Match implements Runnable {
 		teamList.put("red", new ArrayList<Player>());
 		teamList.put("blue", new ArrayList<Player>());
 		mapVotes = new HashMap<GameMap, Integer>();
-		sortPlayers = new ArrayList<Player>();
+		sortedPlayers = new ArrayList<Player>();
 		captainTurn = 1;
 		threadChannels = new ArrayList<DiscordChannel>();
 		liveScoreMsgs = new ArrayList<DiscordMessage>();
@@ -161,7 +157,7 @@ public class Match implements Runnable {
 	}
 
 	public void voteMap(Player player, GameMap map) {
-		if ((state == MatchState.Signup || state == MatchState.AwaitingServer) && (isInMatch(player) || sortPlayers.contains(player))) {
+		if ((state == MatchState.Signup || state == MatchState.AwaitingServer) && (isInMatch(player) || sortedPlayers.contains(player))) {
 			GameMap oldMap = player.getVotedMap(gametype);
 			if (oldMap != null) {
 				mapVotes.put(oldMap, mapVotes.get(oldMap) - 1);
@@ -409,32 +405,38 @@ public class Match implements Runnable {
 		// Sort players by elo
 		List<Player> playerList = new ArrayList<Player>(playerStats.keySet());
 
-		sortPlayers.add(playerList.get(0));
+		sortedPlayers.add(playerList.get(0));
 		for (Player player : playerList) {
-			for (Player sortplayer : sortPlayers) {
-				if (player.getElo() >= sortplayer.getElo() && !player.equals(sortplayer)) {
-					sortPlayers.add(sortPlayers.indexOf(sortplayer), player);
+			for (Player sortedPlayer : sortedPlayers) {
+				if (player.getElo() >= sortedPlayer.getElo() && !player.equals(sortedPlayer)) {
+					sortedPlayers.add(sortedPlayers.indexOf(sortedPlayer), player);
 					break;
 				}
 			}
-			if (!sortPlayers.contains(player)) {
-				sortPlayers.add(player);
+			if (!sortedPlayers.contains(player)) {
+				sortedPlayers.add(player);
 			}
 		}
 		
-		captains[0] = sortPlayers.get(0);
+		captains[0] = sortedPlayers.get(0);
 		teamList.get("red").add(captains[0]);
 		
-		captains[1] = sortPlayers.get(1);
+		captains[1] = sortedPlayers.get(1);
 		teamList.get("blue").add(captains[1]);
 		
-		sortPlayers.remove(0);
-		sortPlayers.remove(0);
-		
-		String captainAnnouncement = Config.pkup_go_pub_captains;
-		captainAnnouncement = captainAnnouncement.replace(".captain1.", captains[0].getDiscordUser().getMentionString());
-		captainAnnouncement = captainAnnouncement.replace(".captain2.", captains[1].getDiscordUser().getMentionString());
-		logic.bot.sendMsg(threadChannels, captainAnnouncement);
+		sortedPlayers.remove(0);
+		sortedPlayers.remove(0);
+
+		if (!sortedPlayers.isEmpty()){
+			String captainAnnouncement = Config.pkup_go_pub_captains;
+			captainAnnouncement = captainAnnouncement.replace(".captain1.", captains[0].getDiscordUser().getMentionString());
+			captainAnnouncement = captainAnnouncement.replace(".captain2.", captains[1].getDiscordUser().getMentionString());
+			logic.bot.sendMsg(threadChannels, captainAnnouncement);
+
+			String captainDm = Config.pkup_go_captains;
+			logic.bot.sendMsg(captains[0].getDiscordUser(), captainDm);
+			logic.bot.sendMsg(captains[1].getDiscordUser(), captainDm);
+		}
 		
 		checkTeams();
 		/*
@@ -484,32 +486,32 @@ public class Match implements Runnable {
 	}
 	
 	public void checkTeams() {
-		if (sortPlayers.isEmpty() && state == MatchState.AwaitingServer) {
+		if (sortedPlayers.isEmpty() && state == MatchState.AwaitingServer) {
 			state = MatchState.Live;
 			new Thread(this).start(); // do important changes that affect possibly other matches/servers/playerlists outside the thread!
 		}
 		else {
 			List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
 			int choiceNumber = 3;
-			if (sortPlayers.size() < choiceNumber) {
-				choiceNumber = sortPlayers.size();
+			if (sortedPlayers.size() < choiceNumber) {
+				choiceNumber = sortedPlayers.size();
 			}
 			for (int i = 0; i < choiceNumber; i++) {
 				DiscordButton button = new DiscordButton(DiscordButtonStyle.BLURPLE);
 				button.custom_id = Config.INT_PICK + "_" + i;
-				button.label = sortPlayers.get(i).getUrtauth() + " (" + sortPlayers.get(i).getElo() + ")";
-				button.emoji = sortPlayers.get(i).getRank().getEmojiJSON();
+				button.label = sortedPlayers.get(i).getUrtauth() + " (" + sortedPlayers.get(i).getElo() + ")";
+				button.emoji = sortedPlayers.get(i).getRank().getEmojiJSON();
 				buttons.add(button);
 			}
 			
 			// Include in the choices players that played less than 10 games to allow for new player skill uncertainty
-			if (choiceNumber < sortPlayers.size()) { 
-				for (int i = choiceNumber; i < sortPlayers.size(); i++) {
-					int matchPlayed = logic.db.getNumberOfGames(sortPlayers.get(i));
+			if (choiceNumber < sortedPlayers.size()) {
+				for (int i = choiceNumber; i < sortedPlayers.size(); i++) {
+					int matchPlayed = logic.db.getNumberOfGames(sortedPlayers.get(i));
 					if (matchPlayed < 30) {
 						DiscordButton button = new DiscordButton(DiscordButtonStyle.GREY);
 						button.custom_id = Config.INT_PICK + "_" + i;
-						button.label = sortPlayers.get(i).getUrtauth();
+						button.label = sortedPlayers.get(i).getUrtauth();
 						button.emoji = new JSONObject().put("name", "\u2753");
 						buttons.add(button);
 					}
@@ -532,18 +534,18 @@ public class Match implements Runnable {
 
 	public void pick(Player captain, int pick) {
 		String pickMsg = Config.pkup_go_pub_pickjoin;
-		pickMsg = pickMsg.replace(".pick.", sortPlayers.get(pick).getDiscordUser().getMentionString());
+		pickMsg = pickMsg.replace(".pick.", sortedPlayers.get(pick).getDiscordUser().getMentionString());
 		
 		if (captain.getUrtauth().equals(captains[0].getUrtauth())) {
-			teamList.get("red").add(sortPlayers.get(pick));
+			teamList.get("red").add(sortedPlayers.get(pick));
 			pickMsg = pickMsg.replace(".color.", "red");
 		}
 		else {
-			teamList.get("blue").add(sortPlayers.get(pick));
+			teamList.get("blue").add(sortedPlayers.get(pick));
 			pickMsg = pickMsg.replace(".color.", "blue");
 		}
 		
-		sortPlayers.remove(pick);
+		sortedPlayers.remove(pick);
 		logic.bot.sendMsg(threadChannels, pickMsg);
 		captainTurn = 1 - captainTurn;
 		timeLastPick = System.currentTimeMillis();
@@ -552,7 +554,7 @@ public class Match implements Runnable {
 			pickMessage.delete();
 		}
 		
-		if (sortPlayers.size() == 1) {
+		if (sortedPlayers.size() == 1) {
 			pick(captains[captainTurn], 0);
 			return;
 		}
@@ -906,10 +908,10 @@ public class Match implements Runnable {
 		}
 		
 		if (serverState == ServerState.LIVE && state == MatchState.Live && server != null) {
-			embed.title  = region_flag + " Match #" + id + " (" + state.name() + " - " + server.getServerMonitor().getGameTime() + ")";
+			embed.title  = region_flag + " Match #" + id + " (" + server.getServerMonitor().getGameTime() + ")";
 		}
 		else {
-			embed.title = region_flag + " Match #" + id + " (" + state.name() + ")";
+			embed.title = region_flag + " Match #" + id ;
 		}
 		
 		embed.color = 7056881;
@@ -949,6 +951,11 @@ public class Match implements Runnable {
 		embed.addField("\u200b", "\u200b", false);
 		embed.addField("<:rush_blue:510067909628788736> \u200b \u200b " + getScoreBlue() + "\n \u200b", blue_team_player_embed.toString(), true);
 		embed.addField("K/D/A" + "\n \u200b", blue_team_score_embed.toString(), true);
+
+		Date startDate = new Date(startTime);
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		embed.timestamp = df.format(startDate);
+		embed.footer = state.name();
 		
 		return embed;
 	}

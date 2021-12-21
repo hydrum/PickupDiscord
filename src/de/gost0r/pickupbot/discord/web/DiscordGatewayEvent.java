@@ -52,5 +52,6 @@ public enum DiscordGatewayEvent {
 	
 	INTERACTION_CREATE,
 
-	INVITE_CREATE
+	INVITE_CREATE,
+	INVITE_DELETE
 }

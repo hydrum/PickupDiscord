@@ -12,6 +12,9 @@ public class DiscordEmbed {
 	public String thumbnail;
 	public int color;
 	public List<JSONObject> fields;
+	public String footer;
+	public String footer_icon;
+	public String timestamp;
 	
 	public DiscordEmbed() {
 		fields = new ArrayList<JSONObject>();
@@ -43,7 +46,17 @@ public class DiscordEmbed {
 		} 
 		if (fields != null) {
 			embedJSON.put("fields", fields);
-		} 
+		}
+		if (footer != null){
+			JSONObject footerJSON = new JSONObject().put("text", footer);
+			if (footer_icon != null){
+				footerJSON.put("icon_url", footer_icon);
+			}
+			embedJSON.put("footer", footerJSON);
+		}
+		if (timestamp != null) {
+			embedJSON.put("timestamp", timestamp);
+		}
 		
 		return embedJSON;		
 	}
