@@ -196,9 +196,9 @@ public class Server {
 			return status;
 		}
 		
-		String rconStatusAck = sendRcon("status");
+		String rconStatusAck = sendRcon("status"); // TODO: Change to rcon players
 		
-		if(rconStatusAck.contains("num score ping name"))
+		if(rconStatusAck.contains("score ping name"))
 		{
 			// rcon is correct and server is up
 			status = ":green_circle:";

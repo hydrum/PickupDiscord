@@ -296,6 +296,21 @@ public class DiscordAPI {
 					.build();
 			
 			HttpResponse response = httpClient.send(patchRequest,HttpResponse.BodyHandlers.ofString());
+
+			if (response.statusCode() != 200 && response.statusCode() != 201 && response.statusCode() != 204) {
+				LOGGER.warning("API call failed: (" + response.statusCode() + ") " + response.statusCode()+ " for " + url.toString());
+				Sentry.capture("API call failed: (" + response.statusCode() + ") " + response.statusCode() + " for " + url.toString());
+				if (response.statusCode() == 429 || response.statusCode() == 502) {
+					try {
+						Thread.sleep(1000);
+						return sendPatchRequest(request, content);
+					} catch (InterruptedException e) {
+						LOGGER.log(Level.WARNING, "Exception: ", e);
+						Sentry.capture(e);
+					}
+					return null;
+				}
+			}
 			
 			return response.toString();
 			
@@ -369,7 +384,7 @@ public class DiscordAPI {
 				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {
 						Thread.sleep(1000);
-						return sendGetRequest(request);
+						return sendDeleteRequest(request);
 					} catch (InterruptedException e) {
 						LOGGER.log(Level.WARNING, "Exception: ", e);
 						Sentry.capture(e);

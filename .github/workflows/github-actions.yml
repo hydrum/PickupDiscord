@@ -1,7 +1,7 @@
-name: GitHub Actions Demo
+name: Build and deploy
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  Build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
