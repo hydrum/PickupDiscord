@@ -553,6 +553,8 @@ public class Match implements Runnable {
 		for (DiscordMessage pickMessage : pickMessages){
 			pickMessage.delete();
 		}
+		pickMessages.clear();
+
 		
 		if (sortedPlayers.size() == 1) {
 			pick(captains[captainTurn], 0);

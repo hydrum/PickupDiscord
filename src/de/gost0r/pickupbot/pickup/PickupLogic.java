@@ -260,7 +260,7 @@ public class PickupLogic {
 		
 		List<Player> players = db.getTopPlayers(number);
 		if (players.isEmpty()) {
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), "None");
+			bot.sendMsg(bot.getLatestMessageChannel(), "None");
 		} else {
 			for (Player p : players) {
 				String country;
@@ -279,7 +279,7 @@ public class PickupLogic {
 			embed.addField("Player", embed_player.toString(), true);
 			embed.addField("Elo", embed_elo.toString(), true);
 			
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), null, embed);
+			bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
 		}
 	}
 
@@ -294,7 +294,7 @@ public class PickupLogic {
 		
 		Map<Player, Float> topwdl = db.getTopWDL(number);
 		if (topwdl.isEmpty()) {
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), "None");
+			bot.sendMsg(bot.getLatestMessageChannel(), "None");
 		} else {
 			int rank = 1;
 			for (Map.Entry<Player, Float> entry : topwdl.entrySet()) {
@@ -314,7 +314,7 @@ public class PickupLogic {
 			embed.addField("Player", embed_player.toString(), true);
 			embed.addField("Win rate", embed_wdl.toString(), true);
 			
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), null, embed);
+			bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
 		}
 	}
 
@@ -329,7 +329,7 @@ public class PickupLogic {
 		
 		Map<Player, Float> topkdr = db.getTopKDR(number);
 		if (topkdr.isEmpty()) {
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), "None");
+			bot.sendMsg(bot.getLatestMessageChannel(), "None");
 		} else {
 			int rank = 1;
 			for (Map.Entry<Player, Float> entry : topkdr.entrySet()) {
@@ -349,7 +349,7 @@ public class PickupLogic {
 			embed.addField("Player", embed_player.toString(), true);
 			embed.addField("KDR", embed_wdl.toString(), true);
 			
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), null, embed);
+			bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
 		}
 	}
 
@@ -421,7 +421,7 @@ public class PickupLogic {
 		
 		ArrayList<CountryRank> countries = db.getTopCountries(number);
 		if (countries.isEmpty()) {
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg + "  None");
+			bot.sendMsg(bot.getLatestMessageChannel(), msg + "  None");
 		} else {
 			
 			for(int i = 0; i < countries.size(); i++) {
@@ -434,7 +434,7 @@ public class PickupLogic {
 				msg.append("\n").append(ranking);
 			}
 			
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg.toString());
+			bot.sendMsg(bot.getLatestMessageChannel(), msg.toString());
 		}
 	}
 
@@ -451,7 +451,7 @@ public class PickupLogic {
 			mapString = mapString.replace(".maplist.", curMatch.get(gametype).getMapVotes(!showZeroVote));
 			msg.append(mapString);
 		}
-		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg.toString());
+		bot.sendMsg(bot.getLatestMessageChannel(), msg.toString());
 	}
 
 	public void cmdMapVote(Player player, Gametype gametype, String mapname) {
