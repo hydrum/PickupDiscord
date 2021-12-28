@@ -19,7 +19,7 @@ public class DiscordBot  {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static String token = "";
-	private static DiscordGuild guild;
+	private static List<DiscordGuild> guilds;
 	
 	protected DiscordUser self = null;
 		
@@ -32,7 +32,7 @@ public class DiscordBot  {
 	public void init() {
 		reconnect();
 		self = DiscordUser.getUser("@me");
-		guild = DiscordGuild.getGuild("117622053061787657");
+		guilds = DiscordAPI.getBotGuilds();
 	}
 	
 	public void reconnect() {
@@ -153,12 +153,8 @@ public class DiscordBot  {
 		DiscordBot.token = token;
 	}
 
-	public static DiscordGuild getGuild() {
-		return guild;
-	}
-
-	public static void setGuild(DiscordGuild guild) {
-		DiscordBot.guild = guild;
+	public static List<DiscordGuild> getGuilds() {
+		return guilds;
 	}
 
 	public DiscordUser parseMention(String string) {

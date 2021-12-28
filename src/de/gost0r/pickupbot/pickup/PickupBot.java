@@ -5,7 +5,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1063,7 +1062,7 @@ public class PickupBot extends DiscordBot {
 						u = testUser;
 					}
 				}
-				List<DiscordRole> list = u.getRoles(DiscordBot.getGuild());
+				List<DiscordRole> list = u.getRoles(DiscordBot.getGuilds());
 				StringBuilder message = new StringBuilder();
 				for (DiscordRole role : list)
 				{

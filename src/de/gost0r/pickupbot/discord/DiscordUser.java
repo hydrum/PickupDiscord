@@ -72,12 +72,19 @@ public class DiscordUser {
 		}
 	}
 	
-	public List<DiscordRole> getRoles(DiscordGuild guild) {
-		if (roles.containsKey(guild)) {
-			return roles.get(guild);
-		} else {
+	public List<DiscordRole> getRoles(List<DiscordGuild> guilds) {
+		List<DiscordRole> list = new ArrayList<DiscordRole>();
+		for (DiscordGuild guild : guilds) {
+			if (roles.containsKey(guild)){
+				list.addAll(roles.get(guild));
+				continue;
+			}
+
 			JSONArray ar = DiscordAPI.requestUserGuildRoles(guild.id, this.id);
-			List<DiscordRole> list = new ArrayList<DiscordRole>();
+			if (ar == null){ // If the user is not a member of this guild
+				continue;
+			}
+
 			for (int i = 0; i < ar.length(); ++i) {
 				try {
 					DiscordRole role = DiscordRole.getRole(ar.getString(i));
@@ -88,8 +95,8 @@ public class DiscordUser {
 				}
 			}
 			roles.put(guild, list);
-			return list;
 		}
+		return list;
 	}
 	
 	public DiscordChannel getDMChannel() {
@@ -148,7 +155,7 @@ public class DiscordUser {
 	}
 	
 	public boolean hasAdminRights() {
-		List<DiscordRole> roleList = this.getRoles(DiscordBot.getGuild());
+		List<DiscordRole> roleList = this.getRoles(DiscordBot.getGuilds());
 		List<DiscordRole> adminList = PickupBot.logic.getAdminList();
 		for (DiscordRole s : roleList) {
 			for (DiscordRole r : adminList) {
@@ -161,7 +168,7 @@ public class DiscordUser {
 	}
 	
 	public boolean hasSuperAdminRights() {
-		List<DiscordRole> roleList = this.getRoles(DiscordBot.getGuild());
+		List<DiscordRole> roleList = this.getRoles(DiscordBot.getGuilds());
 		List<DiscordRole> adminList = PickupBot.logic.getSuperAdminList();
 		for (DiscordRole s : roleList) {
 			for (DiscordRole r : adminList) {

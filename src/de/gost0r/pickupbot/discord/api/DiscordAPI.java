@@ -1,11 +1,7 @@
 package de.gost0r.pickupbot.discord.api;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -15,16 +11,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.net.http.*;
 
+import de.gost0r.pickupbot.discord.*;
 import io.sentry.Sentry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import de.gost0r.pickupbot.discord.DiscordBot;
-import de.gost0r.pickupbot.discord.DiscordChannel;
-import de.gost0r.pickupbot.discord.DiscordComponent;
-import de.gost0r.pickupbot.discord.DiscordEmbed;
-import de.gost0r.pickupbot.discord.DiscordMessage;
 
 public class DiscordAPI {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -239,8 +230,6 @@ public class DiscordAPI {
 			}
 			
 			if (c.getResponseCode() != 200 && c.getResponseCode() != 201 && c.getResponseCode() != 204) {
-				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
-				Sentry.capture("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
 				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {
 						Thread.sleep(1000);
@@ -249,6 +238,10 @@ public class DiscordAPI {
 						LOGGER.log(Level.WARNING, "Exception: ", e);
 						Sentry.capture(e);
 					}
+				}
+				else{
+					LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
+					Sentry.capture("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
 				}
 				return null;
 			}
@@ -298,8 +291,6 @@ public class DiscordAPI {
 			HttpResponse response = httpClient.send(patchRequest,HttpResponse.BodyHandlers.ofString());
 
 			if (response.statusCode() != 200 && response.statusCode() != 201 && response.statusCode() != 204) {
-				LOGGER.warning("API call failed: (" + response.statusCode() + ") " + response.statusCode()+ " for " + url.toString());
-				Sentry.capture("API call failed: (" + response.statusCode() + ") " + response.statusCode() + " for " + url.toString());
 				if (response.statusCode() == 429 || response.statusCode() == 502) {
 					try {
 						Thread.sleep(1000);
@@ -309,6 +300,10 @@ public class DiscordAPI {
 						Sentry.capture(e);
 					}
 					return null;
+				}
+				else{
+					LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
+					Sentry.capture("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
 				}
 			}
 			
@@ -321,7 +316,7 @@ public class DiscordAPI {
 		return null;
 	}
 	
-	private static synchronized String sendGetRequest(String request) {
+	private static synchronized String sendGetRequest(String request, boolean canBeNull) {
 //		Thread.dumpStack();
 		try {
 			URL url = new URL(api_url + api_version + request);
@@ -331,17 +326,22 @@ public class DiscordAPI {
 			c.setRequestProperty("Authorization", "Bot " + DiscordBot.getToken());
 			
 			if (c.getResponseCode() != 200 && c.getResponseCode() != 201 && c.getResponseCode() != 204) {
-				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
-				Sentry.capture("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
 				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {
 						Thread.sleep(1000);
-						return sendGetRequest(request);
+						return sendGetRequest(request, canBeNull);
 					} catch (InterruptedException e) {
 						LOGGER.log(Level.WARNING, "Exception: ", e);
 						Sentry.capture(e);
 					}
 					return null;
+				}
+				if (c.getResponseCode() == 404 && canBeNull){
+					return  null;
+				}
+				else{
+					LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
+					Sentry.capture("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
 				}
 			}
 			
@@ -379,8 +379,6 @@ public class DiscordAPI {
 			c.setRequestProperty("Authorization", "Bot " + DiscordBot.getToken());
 			
 			if (c.getResponseCode() != 200 && c.getResponseCode() != 201 && c.getResponseCode() != 204) {
-				LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
-				Sentry.capture("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
 				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {
 						Thread.sleep(1000);
@@ -390,6 +388,10 @@ public class DiscordAPI {
 						Sentry.capture(e);
 					}
 					return null;
+				}
+				else{
+					LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
+					Sentry.capture("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
 				}
 			}
 			
@@ -430,7 +432,7 @@ public class DiscordAPI {
 	}
 
 	public static JSONArray requestDM() {
-		String reply = sendGetRequest("/users/@me/channels");
+		String reply = sendGetRequest("/users/@me/channels", false);
 		if (reply != null && !reply.isEmpty()) {
 			try {
 				return new JSONArray(reply);
@@ -443,7 +445,7 @@ public class DiscordAPI {
 	}
 
 	public static JSONObject requestUser(String userID) {
-		String reply = sendGetRequest("/users/" + userID);
+		String reply = sendGetRequest("/users/" + userID, false);
 		if (reply != null && !reply.isEmpty()) {
 			try {
 				return new JSONObject(reply);
@@ -456,7 +458,7 @@ public class DiscordAPI {
 	}
 
 	public static JSONObject requestChannel(String channelID) {
-		String reply = sendGetRequest("/channels/" + channelID);
+		String reply = sendGetRequest("/channels/" + channelID, false);
 		if (reply != null && !reply.isEmpty()) {
 			try {
 				return new JSONObject(reply);
@@ -469,10 +471,28 @@ public class DiscordAPI {
 	}
 	
 	public static JSONArray requestUserGuildRoles(String guild, String userID) {
-		String reply = sendGetRequest("/guilds/" + guild + "/members/" + userID);
+		String reply = sendGetRequest("/guilds/" + guild + "/members/" + userID, true);
 		if (reply != null && !reply.isEmpty()) {
 			try {
 				return new JSONObject(reply).getJSONArray("roles");
+			} catch (JSONException e) {
+				LOGGER.log(Level.WARNING, "Exception: ", e);
+				Sentry.capture("Unable to send msg, session is closed.");
+			}
+		}
+		return null;
+	}
+
+	public static List<DiscordGuild> getBotGuilds() {
+		List<DiscordGuild> guilds = new ArrayList<DiscordGuild>();
+		String reply = sendGetRequest("/users/@me/guilds", false);
+		if (reply != null && !reply.isEmpty()) {
+			try {
+				JSONArray guildArray = new JSONArray(reply);
+				for (int i = 0 ; i < guildArray.length() ; i++){
+					guilds.add(DiscordGuild.getGuild(guildArray.getJSONObject(i).getString("id")));
+				}
+				return guilds;
 			} catch (JSONException e) {
 				LOGGER.log(Level.WARNING, "Exception: ", e);
 				Sentry.capture("Unable to send msg, session is closed.");

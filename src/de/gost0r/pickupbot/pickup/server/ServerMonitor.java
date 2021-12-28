@@ -371,6 +371,7 @@ public class ServerMonitor implements Runnable {
 			else if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase)
 			{
 				state = ServerState.LIVE;
+				match.getLogic().setLastMapPlayed(match.getGametype(), match.getMap());
 				LOGGER.info("SWITCHED WELCOME -> LIVE");
 			}
 		}
@@ -379,6 +380,7 @@ public class ServerMonitor implements Runnable {
 			if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase)
 			{
 				state = ServerState.LIVE;
+				match.getLogic().setLastMapPlayed(match.getGametype(), match.getMap());
 				LOGGER.info("SWITCHED WARMUP -> LIVE");
 			}
 			else if (!rpp.matchready[0] || !rpp.matchready[1])

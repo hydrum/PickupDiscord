@@ -687,7 +687,7 @@ public class Match implements Runnable {
 		server.sendRcon("map " + this.map.name);
 		server.sendRcon("g_warmup 10");
 		
-		logic.setLastMapPlayed(gametype, map);
+		//logic.setLastMapPlayed(gametype, map);
 		
 		if (gtvServer != null) {
 			gtvServer.sendRcon("gtv_connect " + server.getAddress() + "  " + server.password);
