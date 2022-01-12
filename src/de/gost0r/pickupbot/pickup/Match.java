@@ -63,7 +63,7 @@ public class Match implements Runnable {
 		sortedPlayers = new ArrayList<Player>();
 		captainTurn = 1;
 		pickRound = 0;
-		pickSequence = new int[] {1, 0, 0, 1, 0, 1, 1};
+		pickSequence = new int[] {1, 0, 0, 1, 0, 1, 1, 0};
 		threadChannels = new ArrayList<DiscordChannel>();
 		liveScoreMsgs = new ArrayList<DiscordMessage>();
 	}
