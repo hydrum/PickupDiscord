@@ -42,6 +42,8 @@ public class Match implements Runnable {
 	
 	private Player[] captains = new Player[2];
 	private int captainTurn;
+	private int pickRound;
+	private int[] pickSequence;
 
 	private int[] surrender;
 
@@ -60,6 +62,8 @@ public class Match implements Runnable {
 		mapVotes = new HashMap<GameMap, Integer>();
 		sortedPlayers = new ArrayList<Player>();
 		captainTurn = 1;
+		pickRound = 0;
+		pickSequence = new int[] {1, 0, 0, 1, 0, 1, 1};
 		threadChannels = new ArrayList<DiscordChannel>();
 		liveScoreMsgs = new ArrayList<DiscordMessage>();
 	}
@@ -547,7 +551,9 @@ public class Match implements Runnable {
 		
 		sortedPlayers.remove(pick);
 		logic.bot.sendMsg(threadChannels, pickMsg);
-		captainTurn = 1 - captainTurn;
+		//captainTurn = 1 - captainTurn;
+		pickRound++;
+		captainTurn = pickSequence[pickRound];
 		timeLastPick = System.currentTimeMillis();
 
 		for (DiscordMessage pickMessage : pickMessages){
@@ -901,7 +907,7 @@ public class Match implements Runnable {
 		String region_flag;
 		if (server == null || server.region == null) {
 			region_flag = "";
-		} else if (server.region == Region.NA) {
+		} else if (server.region == Region.NA || server.region == Region.OC) {
 			region_flag =  ":flag_us:";
 		} else if (server.region == Region.EU) {
 			region_flag = ":flag_eu:";
@@ -963,57 +969,24 @@ public class Match implements Runnable {
 	}
 
 	public Region getPreferredServerRegion() {
-		Map<Region, Float> playerRegionPercentage= new HashMap<Region, Float>();
-		
-		// Init all region percentage to 0
-		for(Region r : Region.values()) {
-			playerRegionPercentage.put(r, 0.0F);
-		}
-		
-		Float percentPlayer = (float) (100/playerStats.keySet().size());
-		
-		// Update all regions percentages
+		int regionScore = 0;
+
 		for(Player p : playerStats.keySet()) {
-			Region PlayerRegion = p.getRegion();
-			Float RegionPercent = playerRegionPercentage.get(PlayerRegion);
-			playerRegionPercentage.put(p.getRegion(), RegionPercent + percentPlayer);
-		}
-		
-		Float bestRegionPercentage = 0.0F;
-		Region RegionMajoritary = Region.NA;
-		// Memorize which region has the most player occurrence
-		for(Region r : Region.values()) {
-			if(playerRegionPercentage.get(r) >= bestRegionPercentage) {
-				bestRegionPercentage = playerRegionPercentage.get(r);
-				RegionMajoritary = r;
+			if (p.getRegion() == Region.EU){
+				regionScore += 1;
+			}
+			else if (p.getRegion() == Region.OC){
+				regionScore -= 5;
 			}
 		}
-		
-		// If region percentage has more than 60% players, it is the majoritary region
-		if(bestRegionPercentage >= 70.0)
-		{
-			return RegionMajoritary;
+
+		if (regionScore < 0){
+			return Region.OC;
 		}
-		// Case when it is NA team vs EU team with more EU players and without "exotic" players
-		else if (playerRegionPercentage.get(Region.EU) >= 60.0 && playerRegionPercentage.get(Region.NA) >= 40.0 )
-		{
+		else if (regionScore > 5){
 			return Region.EU;
 		}
-		// If there are 50% EU players and at least one exotic player
-		else if (playerRegionPercentage.get(Region.EU) == 50.0 && ( (playerRegionPercentage.get(Region.AF) >= percentPlayer) ||
-																	(playerRegionPercentage.get(Region.AN) >= percentPlayer) ||
-																	(playerRegionPercentage.get(Region.AS) >= percentPlayer)))
-		{
-			return Region.EU;
-		}
-		// If there are 50% EU players and at least one Oceanic or Latino player
-		else if (playerRegionPercentage.get(Region.EU) >= 60.0 && ( (playerRegionPercentage.get(Region.SA) >= percentPlayer) ||
-																	(playerRegionPercentage.get(Region.OC) >= percentPlayer)))
-		{
-			return Region.NA;
-		}
-		else
-		{
+		else {
 			return Region.NA;
 		}
 	}

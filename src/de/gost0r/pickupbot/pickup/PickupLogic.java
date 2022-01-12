@@ -915,8 +915,7 @@ public class PickupLogic {
 			}			
 		
 		} catch (NumberFormatException e) {
-			LOGGER.log(Level.WARNING, "Exception: ", e);
-			Sentry.capture(e);
+			bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
 	}
