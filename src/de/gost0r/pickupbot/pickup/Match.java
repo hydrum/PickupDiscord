@@ -551,9 +551,12 @@ public class Match implements Runnable {
 		
 		sortedPlayers.remove(pick);
 		logic.bot.sendMsg(threadChannels, pickMsg);
-		//captainTurn = 1 - captainTurn;
-		pickRound++;
-		captainTurn = pickSequence[pickRound];
+
+		if (!sortedPlayers.isEmpty()){
+			pickRound++;
+			captainTurn = pickSequence[pickRound];
+		}
+
 		timeLastPick = System.currentTimeMillis();
 
 		for (DiscordMessage pickMessage : pickMessages){
