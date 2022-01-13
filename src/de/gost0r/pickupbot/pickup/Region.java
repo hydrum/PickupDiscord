@@ -8,5 +8,7 @@ public enum Region {
 	NA, // NORTH AMERICA
 	OC, // OCEANIA ( AUSTRALIA and ISLANDS )
 	SA, // SOUTH AMERICA
-	WORLD
+	WORLD,
+	NAE, // NA EAST
+	NAW // NA WEST
 }

@@ -624,10 +624,12 @@ public class Match implements Runnable {
 		msg = msg.replace(".gamenumber.", String.valueOf(id));
 		msg = msg.replace(".gametype.", gametype.getName());
 		msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
-		if (server.region == Region.NA) {
+		if (server.region == Region.NAE || server.region == Region.NAW) {
 			msg = msg.replace(".region.", ":flag_us:");
 		} else if (server.region == Region.EU) {
 			msg = msg.replace(".region.", ":flag_eu:");
+		} else if (server.region == Region.OC) {
+			msg = msg.replace(".region.", ":flag_au:");
 		} else {
 			msg = msg.replace(".region.", server.region.name());
 		}
@@ -910,8 +912,10 @@ public class Match implements Runnable {
 		String region_flag;
 		if (server == null || server.region == null) {
 			region_flag = "";
-		} else if (server.region == Region.NA || server.region == Region.OC) {
+		} else if (server.region == Region.NAE || server.region == Region.NAW) {
 			region_flag =  ":flag_us:";
+		} else if (server.region == Region.OC) {
+			region_flag =  ":flag_au:";
 		} else if (server.region == Region.EU) {
 			region_flag = ":flag_eu:";
 		} else {
@@ -972,25 +976,30 @@ public class Match implements Runnable {
 	}
 
 	public Region getPreferredServerRegion() {
-		int regionScore = 0;
+		float euPlayers = 0.0f;
+		float ocPlayers = 0.0f;
 
 		for(Player p : playerStats.keySet()) {
 			if (p.getRegion() == Region.EU){
-				regionScore += 1;
+				euPlayers++;
 			}
 			else if (p.getRegion() == Region.OC){
-				regionScore -= 5;
+				ocPlayers++;
 			}
 		}
+		float regionScore = euPlayers - gametype.getTeamSize() * ocPlayers;
 
-		if (regionScore < 0){
+		if (ocPlayers > gametype.getTeamSize() * 2 * 0.7){
 			return Region.OC;
 		}
-		else if (regionScore > 5){
+		else if (euPlayers > gametype.getTeamSize() * 2 * 0.7 || regionScore > gametype.getTeamSize()){
 			return Region.EU;
 		}
+		else if (regionScore < 0){
+			return Region.NAW;
+		}
 		else {
-			return Region.NA;
+			return Region.NAE;
 		}
 	}
 
