@@ -666,6 +666,11 @@ public class ServerMonitor implements Runnable {
 	}
 	
 	public void calcElo(Player player, int[] score) throws Exception {
+		if (match.getGametype().getName().equalsIgnoreCase("1v1") || match.getGametype().getName().equalsIgnoreCase("2v2")){
+			player.addElo(0);
+			return;
+		}
+
 		int team = match.getTeam(player).equalsIgnoreCase("red") ? 0 : 1;
 		int opp = (team + 1) % 2;
 		
