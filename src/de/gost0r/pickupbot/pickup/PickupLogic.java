@@ -1013,6 +1013,7 @@ public class PickupLogic {
 					for (Server server : serverList) {
 						if (server.active && !server.isTaken() && m.getMatchState() == MatchState.AwaitingServer) {	
 								m.launch(server);
+								break;
 						}
 					}
 				}
