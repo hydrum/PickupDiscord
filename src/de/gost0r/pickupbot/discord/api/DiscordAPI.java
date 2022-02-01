@@ -417,6 +417,66 @@ public class DiscordAPI {
 		}
 		return null;
 	}
+
+	private static synchronized String sendPutRequest(String request, JSONObject content) {
+//		Thread.dumpStack();
+		try {
+			byte[] postData       = content.toString().getBytes( StandardCharsets.UTF_8 );
+			int    postDataLength = postData.length;
+
+			URL url = new URL(api_url + api_version + request);
+			HttpURLConnection c = (HttpURLConnection) url.openConnection();
+			c.setRequestMethod("PUT");
+			c.setRequestProperty("Authorization", "Bot " + DiscordBot.getToken());
+			c.setRequestProperty("charset", "utf-8");
+			c.setRequestProperty("Content-Type", "application/json");
+			c.setRequestProperty("User-Agent", "Bot");
+			c.setDoOutput(true);
+			c.setUseCaches(false);
+			c.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+			try (DataOutputStream wr = new DataOutputStream( c.getOutputStream())) {
+				wr.write(postData);
+			}
+
+			if (c.getResponseCode() != 200 && c.getResponseCode() != 201 && c.getResponseCode() != 204) {
+				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
+					try {
+						Thread.sleep(1000);
+						return sendPostRequest(request, content);
+					} catch (InterruptedException e) {
+						LOGGER.log(Level.WARNING, "Exception: ", e);
+						Sentry.capture(e);
+					}
+				}
+				else{
+					LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
+					Sentry.capture("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
+				}
+				return null;
+			}
+
+			BufferedReader br = new BufferedReader(new InputStreamReader((c.getInputStream())));
+			String fullmsg = "";
+			String output = "";
+			while ((output = br.readLine()) != null) {
+				try {
+					fullmsg += output;
+				} catch (ClassCastException | NullPointerException e) {
+					LOGGER.log(Level.WARNING, "Exception: ", e);
+					Sentry.capture(e);
+				}
+			}
+			c.disconnect();
+
+			LOGGER.fine("API call complete for " + request + ": " + fullmsg);
+			return fullmsg;
+
+		} catch (IOException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+		return null;
+	}
 	
 	
 	public static JSONObject createDM(String userid) {
@@ -499,6 +559,32 @@ public class DiscordAPI {
 			}
 		}
 		return null;
+	}
+
+	public static boolean addUserRole(DiscordUser user, DiscordRole role) {
+		try {
+			// TODO IMPLEMENT THIS FOR OTHER SERVERS
+			String reply = sendPutRequest("/guilds/117622053061787657/members/" + user.id + "/roles/" + role.id, new JSONObject());
+
+			return reply != null;
+		} catch (JSONException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+		return false;
+	}
+
+	public static boolean removeUserRole(DiscordUser user, DiscordRole role) {
+		try {
+			// TODO IMPLEMENT THIS FOR OTHER SERVERS
+			String reply = sendDeleteRequest("/guilds/117622053061787657/members/" + user.id + "/roles/" + role.id);
+
+			return reply != null;
+		} catch (JSONException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+		return false;
 	}
 
 }

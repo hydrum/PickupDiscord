@@ -496,7 +496,7 @@ public class Match implements Runnable {
 		}
 		else {
 			List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
-			int choiceNumber = 3;
+			int choiceNumber = 10;
 			if (sortedPlayers.size() < choiceNumber) {
 				choiceNumber = sortedPlayers.size();
 			}

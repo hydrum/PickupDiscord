@@ -6,11 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import de.gost0r.pickupbot.discord.DiscordChannel;
+import de.gost0r.pickupbot.discord.DiscordGuild;
 import de.gost0r.pickupbot.discord.DiscordUser;
+
+import javax.swing.*;
 
 public class Player {
 	
 	public static Database db;
+	public static PickupLogic logic;
 	
 	private DiscordUser user;
 	private String urtauth;
@@ -193,7 +197,9 @@ public class Player {
 	}
 
 	private PlayerRank getRank(int elo) {
-		if (elo >= 1600) {
+		if (db.getRankForPlayer(this) <= 5){
+			return PlayerRank.LEET;
+		} else if (elo >= 1600) {
 			return PlayerRank.DIAMOND;
 		} else if (elo >= 1400) {
 			return PlayerRank.PLATINUM;
@@ -211,6 +217,19 @@ public class Player {
 	public boolean didChangeRank() {
 		PlayerRank currentRank = getRank(elo);
 		PlayerRank previousRank = getRank(elo-eloChange);
+
+		// Update roles
+		// TODO make it work for different servers
+		if (currentRank != previousRank){
+			logic.bot.removeUserRole(getDiscordUser(), previousRank.getRole());
+		}
+		if (getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), PlayerRank.LEET.getRole()) && db.getRankForPlayer(this) > 5){
+			logic.bot.removeUserRole(getDiscordUser(), PlayerRank.LEET.getRole());
+		}
+		if (!getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), currentRank.getRole())){
+			logic.bot.addUserRole(getDiscordUser(), currentRank.getRole());
+		}
+
 		return currentRank != previousRank;
 	}
 

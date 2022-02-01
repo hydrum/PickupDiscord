@@ -98,6 +98,25 @@ public class DiscordUser {
 		}
 		return list;
 	}
+
+	public boolean hasRole(DiscordGuild guild, DiscordRole role){
+		JSONArray ar = DiscordAPI.requestUserGuildRoles(guild.id, this.id);
+		if (ar == null){ // If the user is not a member of this guild
+			return false;
+		}
+
+		for (int i = 0; i < ar.length(); ++i) {
+			try {
+				if (role.id.equals(ar.getString(i))){
+					return true;
+				}
+			} catch (JSONException e) {
+				LOGGER.log(Level.WARNING, "Exception: ", e);
+				Sentry.capture(e);
+			}
+		}
+		return false;
+	}
 	
 	public DiscordChannel getDMChannel() {
 		try {

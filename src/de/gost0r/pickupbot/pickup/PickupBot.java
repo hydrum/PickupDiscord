@@ -18,10 +18,12 @@ public class PickupBot extends DiscordBot {
 	private DiscordChannel latestMessageChannel;
 
 	public static PickupLogic logic;
+	public String env;
 
 	@Override
-	public void init() {
-		super.init();
+	public void init(String env) {
+		super.init(env);
+		this.env = env;
 	
 		logic = new PickupLogic(this);
 		sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), Config.bot_online);
@@ -833,6 +835,11 @@ public class PickupBot extends DiscordBot {
 							
 						}
 						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_CHANGE_COUNTRY));
+						break;
+
+					case Config.CMD_RESETELO:
+						logic.cmdResetElo();
+						sendNotice(msg.user, Config.elo_reset);
 						break;
 				}
 			}

@@ -69,6 +69,8 @@ public class Config {
 	public static final String CMD_ADDROLE				= "!addrole";
 	public static final String CMD_REMOVEROLE			= "!removerole";
 
+	public static final String CMD_RESETELO  			= "!resetelo";
+
 	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_MAP + " " + CMD_MATCH + " " 
 	+ CMD_LAST + " " + CMD_LIVE + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS 
 	+ " " + CMD_TOP_COUNTRIES + " " + CMD_TOP_KDR + " " + CMD_TOP_WDL + " " + CMD_COUNTRY + " " + CMD_SURRENDER + " " + CMD_BANINFO 
@@ -280,4 +282,6 @@ public class Config {
 	public static final String wait_testing_server		= "Testing server list. This can take a while...";
 	
 	public static final String bot_online				= "The bot is back online!";
+
+	public static final String elo_reset   				= "The elo has been reset! Don't forget to reboot the bot and remove all rank roles manually.";
 }

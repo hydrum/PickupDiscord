@@ -20,17 +20,17 @@ import io.sentry.Sentry;
 public class PickupBotDiscordMain {
 
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-	private static String sentryenv;
+	private static String env;
 	private static Dotenv dotenv;
 
 	public static void main(String[] args) {
 		Locale.setDefault(new Locale("en", "EN"));
 		try {
 			dotenv = Dotenv.configure().filename(".prod.env").load();
-			sentryenv = "prod";
+			env = "prod";
 			if (args.length > 0 && args[0].equals("dev")){
 				dotenv = Dotenv.configure().filename(".dev.env").load();
-				sentryenv = "dev";
+				env = "dev";
 			}
 
 			setupLogger();
@@ -39,7 +39,7 @@ public class PickupBotDiscordMain {
 
 			DiscordBot.setToken(dotenv.get("DISCORD_TOKEN"));
 			PickupBot bot = new PickupBot();
-			bot.init();
+			bot.init(env);
 
 
 			while (true) {
@@ -68,7 +68,7 @@ public class PickupBotDiscordMain {
 		logfile.setLevel(Level.WARNING);
 		logger.addHandler(logfile);
 
-		Sentry.init(dotenv.get("SENTRY_DSN") + "?environment=" + sentryenv);
+		Sentry.init(dotenv.get("SENTRY_DSN") + "?environment=" + env);
 
 		LOGGER.severe("Bot started.");
 		Sentry.capture("Bot started");

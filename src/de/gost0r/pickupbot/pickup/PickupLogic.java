@@ -50,6 +50,7 @@ public class PickupLogic {
 		
 		db = new Database(this);
 		Player.db = db;
+		Player.logic = this;
 		
 		serverList = db.loadServers();
 		roles = db.loadRoles();
@@ -948,6 +949,10 @@ public class PickupLogic {
 			Sentry.capture(e);
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
+	}
+
+	public void cmdResetElo(){
+		db.resetElo();
 	}
 
 	// Matchcreation

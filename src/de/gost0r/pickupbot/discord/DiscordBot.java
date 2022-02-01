@@ -25,14 +25,16 @@ public class DiscordBot  {
 		
 	private DiscordGateway gateway = null;
 	private WsClientEndPoint endpoint = null;
+	private String env;
 	
 	public DiscordBot() {
 	}
 	
-	public void init() {
+	public void init(String env) {
 		reconnect();
 		self = DiscordUser.getUser("@me");
 		guilds = DiscordAPI.getBotGuilds();
+		this.env = env;
 	}
 	
 	public void reconnect() {
@@ -55,7 +57,7 @@ public class DiscordBot  {
 			// we can trigger a handshake exception for endpoint. if that's the case, simply try again.
 			// TODO: need to check that this is really working
 			LOGGER.log(Level.SEVERE, "Exception: ", e);
-			init();
+			init(env);
 		}
 	}
 	
@@ -160,6 +162,14 @@ public class DiscordBot  {
 	public DiscordUser parseMention(String string) {
 		string = string.replaceAll("[^\\d]", "" );
 		return DiscordUser.getUser(string);
+	}
+
+	public boolean addUserRole(DiscordUser user, DiscordRole role){
+		return DiscordAPI.addUserRole(user, role);
+	}
+
+	public boolean removeUserRole(DiscordUser user, DiscordRole role){
+		return DiscordAPI.removeUserRole(user, role);
 	}
 
 }
