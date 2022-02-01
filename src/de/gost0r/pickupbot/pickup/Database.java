@@ -1136,22 +1136,22 @@ public class Database {
 	public void resetElo() {
 		try {
 			// TODO: maybe move this somewhere
-			String sql = "UPDATE Players SET elo = 1400 WHERE elo > 1400;";
+			String sql = "UPDATE player SET elo = 1400 WHERE elo > 1400;";
 			PreparedStatement stmt = c.prepareStatement(sql);
 			stmt.executeUpdate();
 			stmt.close();
 
-			sql = "UPDATE Players SET elo = 1200 WHERE elo > 1200 AND elo < 1400;";
+			sql = "UPDATE player SET elo = 1200 WHERE elo > 1200 AND elo < 1400;";
 			stmt = c.prepareStatement(sql);
 			stmt.executeUpdate();
 			stmt.close();
 
-			sql = "UPDATE Players SET elo = 1000 WHERE elo > 1000 AND elo < 1200;";
+			sql = "UPDATE player SET elo = 1000 WHERE elo > 1000 AND elo < 1200;";
 			stmt = c.prepareStatement(sql);
 			stmt.executeUpdate();
 			stmt.close();
 
-			sql = "UPDATE Players SET elo = 800 WHERE elo < 1000;";
+			sql = "UPDATE player SET elo = 800 WHERE elo < 1000;";
 			stmt = c.prepareStatement(sql);
 			stmt.executeUpdate();
 			stmt.close();
