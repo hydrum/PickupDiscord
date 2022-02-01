@@ -692,7 +692,7 @@ public class ServerMonitor implements Runnable {
 		Score[] playerStats = match.getStats(player).score;
 		int performance = 0;
 		for (Score stats : playerStats) {
-			performance += 2 * stats.score + stats.assists;
+			performance += 1.5 * stats.score + 0.75 * stats.assists;
 		}
 		float performanceRating = 1;
 		if (elochange > 0) {
