@@ -435,6 +435,10 @@ public class Match implements Runnable {
 			String captainAnnouncement = Config.pkup_go_pub_captains;
 			captainAnnouncement = captainAnnouncement.replace(".captain1.", captains[0].getDiscordUser().getMentionString());
 			captainAnnouncement = captainAnnouncement.replace(".captain2.", captains[1].getDiscordUser().getMentionString());
+			// List players stats
+			for (Player p : sortedPlayers){
+				captainAnnouncement += "\n" + logic.cmdGetElo(p, false);
+			}
 			logic.bot.sendMsg(threadChannels, captainAnnouncement);
 
 			String captainDm = Config.pkup_go_captains;

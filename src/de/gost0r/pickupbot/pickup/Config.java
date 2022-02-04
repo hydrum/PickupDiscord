@@ -195,7 +195,7 @@ public class Config {
 	public static final String pkup_go_pub_calm_notavi	= "GTV: not available";
 	public static final String pkup_go_pub_sent			= "**.gametype.**: Server info has been sent. If you didn't get a DM try **!lostpass**.";
 	public static final String pkup_go_pub_threadtitle	= "Match .ID.";
-	public static final String pkup_go_pub_captains 	= "The captains are .captain1. (**red**) and .captain2. (**blue**) as they have the highest elo.";
+	public static final String pkup_go_pub_captains 	= "The captains are .captain1. (**red**) and .captain2. (**blue**) as they have the highest elo. Player stats:";
 	public static final String pkup_go_pub_pick 		= ".captain. pick a player:";
 	public static final String pkup_go_pub_pickjoin		= ".pick. joins the **.color.** team.";
 

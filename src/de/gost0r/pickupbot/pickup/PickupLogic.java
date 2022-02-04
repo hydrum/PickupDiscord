@@ -354,9 +354,9 @@ public class PickupLogic {
 		}
 	}
 
-	public void cmdGetElo(Player p, boolean sendMsg) {
+	public String cmdGetElo(Player p, boolean sendMsg) {
 		if (p == null) {
-			return;
+			return "";
 		}
 		String msg = Config.pkup_getelo;
 		msg = msg.replace(".urtauth.", p.getUrtauth());
@@ -376,6 +376,8 @@ public class PickupLogic {
 		if (sendMsg) {
 			bot.sendMsg(bot.getLatestMessageChannel(), msg);
 		}
+
+		return msg;
 	}
 
 	public void cmdGetStats(Player p) {
