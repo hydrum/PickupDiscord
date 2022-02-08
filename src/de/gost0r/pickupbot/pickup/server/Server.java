@@ -184,6 +184,19 @@ public class Server {
 		String isActive = this.active ? "" : "(inactive)";
 		return "#" + id + " " + IP + ":" + port + " " + region + " " + isReachable() + " " + isActive ;
 	}
+
+	public boolean isOnline(){
+		try {
+			InetAddress.getByName(IP).isReachable(1000);
+		} catch (UnknownHostException e) {
+			return false;
+		} catch (IOException e) {
+			return false;
+		}
+
+		String rconStatusAck = sendRcon("status"); // TODO: Change to rcon players
+		return rconStatusAck.contains("score ping name");
+	}
 	
 	public String isReachable() {
 		String status = ":red_circle: (Host Timeout)";

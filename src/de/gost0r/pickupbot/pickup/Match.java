@@ -277,11 +277,13 @@ public class Match implements Runnable {
 
 	public void end() {
 		state = MatchState.Done;
+		if (server.getServerMonitor().noMercyIssued){
+			state = MatchState.Mercy;
+		}
 		cleanUp();
 		sendAftermath();
 		logic.matchRemove(this);
 		logic.db.saveMatch(this);
-		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), null, getMatchEmbed());
 
 		for (DiscordChannel threadChannel : threadChannels){
 			threadChannel.archive();
@@ -345,7 +347,7 @@ public class Match implements Runnable {
 			}
 		}
 		
-		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg.toString());
+		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg.toString(), getMatchEmbed());
 	}
 
 	private void sendAftermath(Status status, List<Player> involvedPlayers) {
@@ -427,11 +429,8 @@ public class Match implements Runnable {
 		
 		captains[1] = sortedPlayers.get(1);
 		teamList.get("blue").add(captains[1]);
-		
-		sortedPlayers.remove(0);
-		sortedPlayers.remove(0);
 
-		if (!sortedPlayers.isEmpty()){
+		if (sortedPlayers.size() > 2){
 			String captainAnnouncement = Config.pkup_go_pub_captains;
 			captainAnnouncement = captainAnnouncement.replace(".captain1.", captains[0].getDiscordUser().getMentionString());
 			captainAnnouncement = captainAnnouncement.replace(".captain2.", captains[1].getDiscordUser().getMentionString());
@@ -445,6 +444,9 @@ public class Match implements Runnable {
 			logic.bot.sendMsg(captains[0].getDiscordUser(), captainDm);
 			logic.bot.sendMsg(captains[1].getDiscordUser(), captainDm);
 		}
+
+		sortedPlayers.remove(0);
+		sortedPlayers.remove(0);
 		
 		checkTeams();
 		/*
@@ -762,7 +764,7 @@ public class Match implements Runnable {
 	}
 
 	public boolean isOver() {
-		return state == MatchState.Done || state == MatchState.Abort || state == MatchState.Abandon || state == MatchState.Surrender;
+		return state == MatchState.Done || state == MatchState.Abort || state == MatchState.Abandon || state == MatchState.Surrender || state == MatchState.Mercy;
 	}
 
 	public MatchState getMatchState() {
@@ -1015,6 +1017,7 @@ public class Match implements Runnable {
 		case AwaitingServer: msg = Config.pkup_match_print_server; break;
 		case Live: msg = Config.pkup_match_print_live; break;
 		case Done: msg = Config.pkup_match_print_done; break;
+		case Mercy: msg = Config.pkup_match_print_done; break;
 		case Abort: msg = Config.pkup_match_print_abort; break;
 		case Abandon: msg = Config.pkup_match_print_abandon; break;
 		case Surrender: msg = Config.pkup_match_print_sur; break;

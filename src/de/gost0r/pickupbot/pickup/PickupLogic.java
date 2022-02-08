@@ -1011,20 +1011,20 @@ public class PickupLogic {
 			{
 				Server bs = getBestServer(m.getPreferredServerRegion());
 				
-				if(bs != null && bs.active && !bs.isTaken() && m.getMatchState() == MatchState.AwaitingServer)
+				if(bs != null && bs.active && !bs.isTaken() && bs.isOnline() && m.getMatchState() == MatchState.AwaitingServer)
 				{
 					m.launch(bs);
 				}
 				else
 				{
 					for (Server server : serverList) { // Use NAE server by default when the best region is not avi
-						if (server.active && !server.isTaken() && m.getMatchState() == MatchState.AwaitingServer && server.region == Region.NAE) {
+						if (server.active && !server.isTaken() && server.isOnline() && m.getMatchState() == MatchState.AwaitingServer && server.region == Region.NAE) {
 								m.launch(server);
 								return;
 						}
 					}
 					for (Server server : serverList) { // If no NAE servers are avi take the first avi
-						if (server.active && !server.isTaken() && m.getMatchState() == MatchState.AwaitingServer) {
+						if (server.active && !server.isTaken() && server.isOnline() && m.getMatchState() == MatchState.AwaitingServer) {
 							m.launch(server);
 							return;
 						}

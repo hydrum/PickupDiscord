@@ -47,7 +47,7 @@ public class ServerMonitor implements Runnable {
 	private long lastServerMessage = 0L;
 	private long lastDiscordMessage = System.currentTimeMillis();
 	
-	private boolean noMercyIssued;
+	public boolean noMercyIssued;
 	
 	private RconPlayersParsed prevRPP = new RconPlayersParsed();
 
