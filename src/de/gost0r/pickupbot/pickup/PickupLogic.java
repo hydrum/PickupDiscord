@@ -1,8 +1,10 @@
 package de.gost0r.pickupbot.pickup;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +22,7 @@ import de.gost0r.pickupbot.discord.api.DiscordAPI;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
 import io.sentry.Sentry;
+import org.json.JSONObject;
 
 public class PickupLogic {
 	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -1451,5 +1454,63 @@ public class PickupLogic {
 		final ProcessBuilder builder = new ProcessBuilder(command);
 		builder.start();
 		System.exit(0);
+	}
+
+	public void cmdLaunchAC(DiscordInteraction interaction, Player p, int matchId, String ip, String password){
+		for (Match match : ongoingMatches) {
+			if (match.getID() == matchId) {
+				List<Player> playersInMatch = match.getPlayerList();
+				for (Player playerInMatch : playersInMatch){
+					if (playerInMatch.getDiscordUser().id.equals(p.getDiscordUser().id)){
+
+						JSONObject requestObj = new JSONObject()
+								.put("discord_id", Long.parseLong(p.getDiscordUser().id))
+								.put("address", ip)
+								.put("password", password);
+
+						sendFTWPostRequest(requestObj);
+						String response = sendFTWPostRequest(requestObj);
+						interaction.respond(response);
+						return;
+					}
+				}
+				interaction.respond(Config.ftw_playernotinmatch);
+				return;
+			}
+		}
+
+		interaction.respond(Config.ftw_matchnotfound);
+	}
+
+	private synchronized String sendFTWPostRequest(JSONObject content) {
+		try {
+			byte[] postData       = content.toString().getBytes( StandardCharsets.UTF_8 );
+			int    postDataLength = postData.length;
+
+			URL url = new URL(bot.ftwAPIUrl);
+			HttpURLConnection c = (HttpURLConnection) url.openConnection();
+			c.setRequestMethod("POST");
+			c.setRequestProperty("Authorization", bot.ftwAPIkey);
+			c.setRequestProperty("charset", "utf-8");
+			c.setRequestProperty("Content-Type", "application/json");
+			c.setRequestProperty("User-Agent", "Bot");
+			c.setDoOutput(true);
+			c.setUseCaches(false);
+			c.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+			try (DataOutputStream wr = new DataOutputStream( c.getOutputStream())) {
+				wr.write(postData);
+			}
+			if (c.getResponseCode() == 200){
+				c.disconnect();
+				return Config.ftw_success;
+			}
+			c.disconnect();
+			return Config.ftw_notconnected;
+
+		} catch (IOException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+		return Config.ftw_error;
 	}
 }

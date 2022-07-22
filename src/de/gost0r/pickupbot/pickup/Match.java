@@ -680,7 +680,15 @@ public class Match implements Runnable {
 		//msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
 		fullmsg.append("\n").append(msg);
 
-		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg.toString());
+		List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
+		DiscordButton button = new DiscordButton(DiscordButtonStyle.GREEN);
+		button.custom_id = Config.INT_LAUNCHAC + "_" + String.valueOf(id) + "_" + server.getAddress() + "_" + server.password;
+		button.label = Config.BTN_LAUNCHAC;
+		//button.emoji = new JSONObject().put("name", "\uF3AE");
+		buttons.add(button);
+
+
+		logic.bot.sendMsgToEdit(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg.toString(), null, buttons);
 
 		msg = Config.pkup_go_player;
 		msg = msg.replace(".server.", server.getAddress());

@@ -157,9 +157,13 @@ public class Config {
 	//------------------------------------------------------------------------------------//
 	
 	public static final String INT_PICK					= "pick";
+	public static final String INT_LAUNCHAC				= "launchac";
 	
 	//------------------------------------------------------------------------------------//
 
+	public static final String BTN_LAUNCHAC				= "Connect to server";
+
+	//------------------------------------------------------------------------------------//
 	public static final String pkup_lock				= "Pickup games are now locked.";
 	public static final String pkup_map					= "You voted for .map..";
 	public static final String pkup_map_list			= "**.gametype.**: .maplist.";
@@ -284,4 +288,12 @@ public class Config {
 	public static final String bot_online				= "The bot is back online!";
 
 	public static final String elo_reset   				= "The elo has been reset! Don't forget to reboot the bot and remove all rank roles manually.";
+
+	public static final String ftw_playernotinmatch   	= "Player not in match";
+	public static final String ftw_matchnotfound    	= "Match not found";
+	public static final String ftw_success     	    	= "Game launched";
+	public static final String ftw_notconnected  	    = "User not connected to the FTW launcher";
+	public static final String ftw_error 		  	    = "Unknown error";
+
+
 }

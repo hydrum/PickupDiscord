@@ -39,7 +39,7 @@ public class PickupBotDiscordMain {
 
 			DiscordBot.setToken(dotenv.get("DISCORD_TOKEN"));
 			PickupBot bot = new PickupBot();
-			bot.init(env);
+			bot.init(env, dotenv.get("FTW_URL"), dotenv.get("FTW_KEY"));
 
 
 			while (true) {

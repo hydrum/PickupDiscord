@@ -19,11 +19,15 @@ public class PickupBot extends DiscordBot {
 
 	public static PickupLogic logic;
 	public String env;
+	public String ftwAPIUrl;
+	public String ftwAPIkey;
 
 	@Override
-	public void init(String env) {
-		super.init(env);
+	public void init(String env, String ftwAPIUrl, String ftwAPIkey) {
+		super.init(env, ftwAPIUrl, ftwAPIkey);
 		this.env = env;
+		this.ftwAPIUrl = ftwAPIUrl;
+		this.ftwAPIkey = ftwAPIkey;
 	
 		logic = new PickupLogic(this);
 		sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), Config.bot_online);
@@ -1133,6 +1137,10 @@ public class PickupBot extends DiscordBot {
 		{
 		case Config.INT_PICK:
 			logic.cmdPick(interaction, p, Integer.parseInt(data[1]));
+			break;
+
+		case Config.INT_LAUNCHAC:
+			logic.cmdLaunchAC(interaction, p, Integer.parseInt(data[1]), data[2], data[3]);
 			break;
 		}
 	}
