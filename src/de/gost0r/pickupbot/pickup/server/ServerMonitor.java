@@ -149,7 +149,7 @@ public class ServerMonitor implements Runnable {
 		}
 		
 		if (!playerlist.isEmpty()) {
-			long timeleft = (match.getStartTime() + 240000L) - System.currentTimeMillis(); // 4min
+			long timeleft = (match.getStartTime() + 180000L) - System.currentTimeMillis(); // 3min
 			if (timeleft > 0) {
 				String time = getTimeString(timeleft); 
 				String sendString = "(" + time + ") Waiting for: ^1" + playerlist;
@@ -161,7 +161,7 @@ public class ServerMonitor implements Runnable {
 					server.sendRcon("restart"); // restart map
 					server.sendRcon("startserverdemo all");
 				}
-			} else if (timeleft < -240000L) { // if noshow timer ran out twice
+			} else if (timeleft < -180000L) { // if noshow timer ran out twice
 				// we're way over time to accurately log a noshow, therefore simply abandon
 				abandonMatch(MatchStats.Status.NOSHOW, new ArrayList<Player>());
 			} else { // if the noshow time ran out
@@ -201,7 +201,7 @@ public class ServerMonitor implements Runnable {
 			boolean shouldPause = false;
 			long timeleft = 0;
 			if (state == ServerState.WELCOME) {
-				timeleft = (earliestLeaver + 240000L) - System.currentTimeMillis(); // 4min
+				timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
 			} else if (state == ServerState.WARMUP) {
 				timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
 				server.sendRcon("restart"); // restart map
@@ -648,7 +648,6 @@ public class ServerMonitor implements Runnable {
 	private void endGame() throws Exception {
 		calcStats();
 		match.end();
-		match.getServer().sendRcon("uploadserverdemo now"); //tarquas google demo upload (prolly needs to be reworked)
 		stop();
 	}
 	
