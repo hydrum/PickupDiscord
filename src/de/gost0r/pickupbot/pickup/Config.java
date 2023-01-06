@@ -223,6 +223,8 @@ public class Config {
 	public static final String is_unbanned				= ".user. (.urtauth.) is unbanned.";
 	public static final String is_notbanned				= ".urtauth. is not banned (yet).";
 	public static final String not_banned				= "No active bans found for .urtauth.";
+	public static final String ban_history				= "**__Ban history:__** (Past 2 months)";
+	public static final String ban_history_item			= "<t:.date.:d> .duration. .reason.";
 	public static final String map_not_found			= "Map not found.";
 	public static final String map_not_unique			= "Mapstring not unique.";
 	public static final String map_cannot_vote			= "You cannot vote right now.";

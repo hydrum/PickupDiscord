@@ -183,6 +183,16 @@ public class Player {
 		return i;
 	}
 
+	public ArrayList<PlayerBan> getPlayerBanListSince(long time) {
+		ArrayList<PlayerBan> banList= new ArrayList<PlayerBan>();
+		for (PlayerBan ban : bans) {
+			if (ban.startTime >= time) {
+				banList.add(ban);
+			}
+		}
+		return banList;
+	}
+
 	public boolean isBanned() {
 		for (PlayerBan ban : bans) {
 			if (!ban.forgiven && ban.endTime > System.currentTimeMillis()) {

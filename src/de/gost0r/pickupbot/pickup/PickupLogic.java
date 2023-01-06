@@ -74,7 +74,7 @@ public class PickupLogic {
 		
 		banDuration = new HashMap<BanReason, String[]>();
 		banDuration.put(BanReason.NOSHOW, new String[] {"10m", "30m", "1h", "2h", "6h", "12h", "3d", "1w", "2w", "1M"});
-		banDuration.put(BanReason.RAGEQUIT, new String[] {"30m", "1h", "2h", "6h", "12h", "3d", "1w", "2w", "1M", "3M"});
+		banDuration.put(BanReason.RAGEQUIT, new String[] {"12h", "1d", "3d", "1w", "2w", "1M", "3M"});
 		
 		awaitingServer = new LinkedList<Match>();
 		
@@ -1160,7 +1160,7 @@ public class PickupLogic {
 		int strength = 0;
 		if (latestBan != null) {
 			long latestBanDuration = latestBan.endTime - latestBan.startTime;
-			latestBanDuration = Math.max(latestBanDuration * 2, parseDurationFromString("1w"));
+			latestBanDuration = Math.max(latestBanDuration * 2, parseDurationFromString("1M"));
 			strength = player.getPlayerBanCountSince(System.currentTimeMillis() - latestBanDuration);
 			strength = Math.min(strength, durationString.length - 1);
 		}
@@ -1212,21 +1212,43 @@ public class PickupLogic {
 
 	public String printBanInfo(Player player) {
 		PlayerBan ban = player.getLatestBan();
-		
+
+		String msg = Config.not_banned;
 		if (ban == null || ban.endTime <= System.currentTimeMillis() || ban.forgiven) {
-			String msg = Config.not_banned;
 			msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
 			msg = msg.replace(".urtauth.", player.getUrtauth());
+		}
+		else{
+			String time = parseStringFromDuration(ban.endTime - System.currentTimeMillis());
+
+			msg = Config.is_banned;
+			msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
+			msg = msg.replace(".urtauth.", player.getUrtauth());
+			msg = msg.replace(".reason.", ban.reason.name());
+			msg = msg.replace(".time.", time);
+		}
+
+		ArrayList<PlayerBan> past_bans = player.getPlayerBanListSince(System.currentTimeMillis() - parseDurationFromString("2M"));
+		if (past_bans.size() == 0){
 			return msg;
 		}
-		
-		String time = parseStringFromDuration(ban.endTime - System.currentTimeMillis());
-		
-		String msg = Config.is_banned;
-		msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
-		msg = msg.replace(".urtauth.", player.getUrtauth());
-		msg = msg.replace(".reason.", ban.reason.name());
-		msg = msg.replace(".time.", time);
+
+		msg = msg + "\n\n";
+		msg = msg + Config.ban_history;
+		String ban_item;
+		for (PlayerBan past_ban : past_bans){
+			ban_item = '\n' + Config.ban_history_item;
+
+			ban_item = ban_item.replace(".date.", String.valueOf(past_ban.startTime / 1000));
+			ban_item = ban_item.replace(".duration.", parseStringFromDuration(past_ban.endTime - past_ban.startTime));
+			ban_item = ban_item.replace(".reason.", past_ban.reason.name());
+
+			if (past_ban.forgiven){
+				ban_item = ban_item + " *(forgiven)*";
+			}
+			msg = msg + ban_item;
+		}
+
 		return msg;
 	}
 
