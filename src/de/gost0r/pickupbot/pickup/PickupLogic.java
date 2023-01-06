@@ -183,6 +183,10 @@ public class PickupLogic {
 						p.setElo(db.getAvgElo());
 						db.createPlayer(p);
 						bot.sendNotice(user, Config.auth_success);
+						String admin_msg = Config.auth_success_admin;
+						admin_msg = admin_msg.replace(".user.", user.getMentionString());
+						admin_msg = admin_msg.replace(".urtauth.", urtauth);
+						bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), admin_msg);
 					} else {
 						DiscordAPI.deleteMessage(bot.getLatestMessageChannel(), msgid);
 						bot.sendNotice(user, Config.auth_sent_key);

@@ -238,6 +238,7 @@ public class Config {
 	public static final String auth_taken_user			= "You have already registered an account.";
 	public static final String auth_invalid				= "Your **urtauth** seems to be invalid.";
 	public static final String auth_success				= "Your **urtauth** has been linked to your account.";
+	public static final String auth_success_admin		= "The user .user. registered using the auth ``.urtauth.``.";
 	public static final String auth_sent_key			= "You have to register your auth name and not your auth key!!!";
 
 	public static final String player_already_added		= "You are already added to a pickup game.";
