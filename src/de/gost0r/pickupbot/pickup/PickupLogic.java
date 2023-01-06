@@ -1018,7 +1018,7 @@ public class PickupLogic {
 			{
 				Server bs = getBestServer(m.getPreferredServerRegion());
 				
-				if(bs != null && bs.active && !bs.isTaken() && bs.isOnline() && m.getMatchState() == MatchState.AwaitingServer)
+				if(bs != null && m.getMatchState() == MatchState.AwaitingServer)
 				{
 					m.launch(bs);
 				}
@@ -1046,7 +1046,7 @@ public class PickupLogic {
 		Server bestServer = null;
 		
 		for (Server server : serverList) {
-			if (server.region == r && server.active && !server.isTaken()) {	
+			if (server.region == r && server.active && !server.isTaken() && server.isOnline()) {
 				bestServer = server;
 				break;
 			}
