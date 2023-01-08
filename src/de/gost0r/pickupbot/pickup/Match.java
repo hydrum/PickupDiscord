@@ -992,6 +992,7 @@ public class Match implements Runnable {
 	public Region getPreferredServerRegion() {
 		float euPlayers = 0.0f;
 		float ocPlayers = 0.0f;
+		float saPlayers = 0.0f;
 
 		for(Player p : playerStats.keySet()) {
 			if (p.getRegion() == Region.EU){
@@ -1000,11 +1001,17 @@ public class Match implements Runnable {
 			else if (p.getRegion() == Region.OC){
 				ocPlayers++;
 			}
+			else if (p.getRegion() == Region.SA){
+				saPlayers++;
+			}
 		}
 		float regionScore = euPlayers - gametype.getTeamSize() * ocPlayers;
 
 		if (ocPlayers > gametype.getTeamSize() * 2 * 0.7){
 			return Region.OC;
+		}
+		else if (saPlayers > gametype.getTeamSize() * 2 * 0.7){
+			return Region.SA;
 		}
 		else if (euPlayers > gametype.getTeamSize() * 2 * 0.7 || regionScore > gametype.getTeamSize()){
 			return Region.EU;
