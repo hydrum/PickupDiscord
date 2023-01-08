@@ -73,8 +73,8 @@ public class PickupLogic {
 		createCurrentMatches();
 		
 		banDuration = new HashMap<BanReason, String[]>();
-		banDuration.put(BanReason.NOSHOW, new String[] {"10m", "30m", "1h", "2h", "6h", "12h", "3d", "1w", "2w", "1M"});
-		banDuration.put(BanReason.RAGEQUIT, new String[] {"12h", "1d", "3d", "1w", "2w", "1M", "3M"});
+		banDuration.put(BanReason.NOSHOW, new String[] {"10m", "30m", "1h", "2h", "6h", "12h", "1d", "2d", "3d", "1w", "1w", "1w", "1M"});
+		banDuration.put(BanReason.RAGEQUIT, new String[] {"6h", "12h", "1d", "2d", "3d", "1w", "1w", "1w", "1w", "1w", "1w", "1w", "1M"});
 		
 		awaitingServer = new LinkedList<Match>();
 		
