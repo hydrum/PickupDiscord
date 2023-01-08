@@ -636,6 +636,8 @@ public class Match implements Runnable {
 			msg = msg.replace(".region.", ":flag_eu:");
 		} else if (server.region == Region.OC) {
 			msg = msg.replace(".region.", ":flag_au:");
+		} else if (server.region == Region.SA) {
+			msg = msg.replace(".region.", ":flag_br:");
 		} else {
 			msg = msg.replace(".region.", server.region.name());
 		}
@@ -930,6 +932,8 @@ public class Match implements Runnable {
 			region_flag =  ":flag_us:";
 		} else if (server.region == Region.OC) {
 			region_flag =  ":flag_au:";
+		} else if (server.region == Region.SA) {
+			region_flag =  ":flag_br:";
 		} else if (server.region == Region.EU) {
 			region_flag = ":flag_eu:";
 		} else {
