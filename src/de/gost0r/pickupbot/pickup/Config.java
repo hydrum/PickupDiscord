@@ -250,7 +250,7 @@ public class Config {
 	public static final String player_not_in_match		= "You are not added to any queue.";
 	public static final String player_already_match		= "You are already in a match.";
 	public static final String player_not_admin			= "You must be an admin to use this command.";
-	public static final String player_notdiv1			= "Hi <:puma:849287183474884628>, you need to be in the Top ``.minrank.`` (you are currently #``.rank.``) to add to the **div1** queue. Keep practicing on Sexy CTF.";
+	public static final String player_notdiv1			= "Hi <:puma:849287183474884628>, you need to be in the either Top ``.minrank.``  ELO (#``.rank.``) **OR** Top ``.minkdrrank.``  KDR (#``.kdrrank.``) **OR** Top ``.minwinrank.``  KDR (#``.winrank.``) to add to the **div1** queue. Keep practicing on Sexy CTF.";
 
 	public static final String player_not_captain		= "You can't pick a player. You are not captain or it is not your turn to pick.";
 

@@ -104,12 +104,23 @@ public class PickupLogic {
 			return;
 		}
 		
-		int rank = db.getRankForPlayer(player);
-		int minrank = 50;
-		if (gt.getName().equalsIgnoreCase("div1") && rank > minrank){
+		int eloRank = db.getRankForPlayer(player);
+		int minEloRank = 40;
+		int kdrRank = db.getKDRRankForPlayer(player);
+		int minKdrRank = 20;
+		int winRank = db.getWDLRankForPlayer(player);
+		int minWinRank = 20;
+		if (gt.getName().equalsIgnoreCase("div1")
+				&& eloRank > minEloRank
+				&& (kdrRank > minKdrRank || kdrRank == -1)
+				&& winRank > minWinRank || winRank == -1) {
 			String errmsg = Config.player_notdiv1;
-			errmsg = errmsg.replace(".minrank.", String.valueOf(minrank));
-			errmsg = errmsg.replace(".rank.", String.valueOf(rank));
+			errmsg = errmsg.replace(".minrank.", String.valueOf(minEloRank));
+			errmsg = errmsg.replace(".rank.", String.valueOf(eloRank));
+			errmsg = errmsg.replace(".minkdrrank.", String.valueOf(minKdrRank));
+			errmsg = errmsg.replace(".kdrrank.", String.valueOf(kdrRank));
+			errmsg = errmsg.replace(".minwinrank.", String.valueOf(minWinRank));
+			errmsg = errmsg.replace(".winrank.", String.valueOf(winRank));
 			bot.sendNotice(player.getDiscordUser(), errmsg);
 			return;
 		}
