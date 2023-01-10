@@ -113,7 +113,7 @@ public class PickupLogic {
 		if (gt.getName().equalsIgnoreCase("div1")
 				&& eloRank > minEloRank
 				&& (kdrRank > minKdrRank || kdrRank == -1)
-				&& winRank > minWinRank || winRank == -1) {
+				&& (winRank > minWinRank || winRank == -1)) {
 			String errmsg = Config.player_notdiv1;
 			errmsg = errmsg.replace(".minrank.", String.valueOf(minEloRank));
 			errmsg = errmsg.replace(".rank.", String.valueOf(eloRank));
