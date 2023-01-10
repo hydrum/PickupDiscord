@@ -104,9 +104,13 @@ public class PickupLogic {
 			return;
 		}
 		
-		int minEloDiv1 = 1400; //=Platinum players and higher.
-		if (gt.getName().equalsIgnoreCase("div1") && player.getElo() < minEloDiv1){
-			bot.sendNotice(player.getDiscordUser(), Config.player_notdiv1.replace(".minelo.", String.valueOf(minEloDiv1)));
+		int rank = db.getRankForPlayer(player);
+		int minrank = 50;
+		if (gt.getName().equalsIgnoreCase("div1") && rank > minrank){
+			String errmsg = Config.player_notdiv1;
+			errmsg = errmsg.replace(".minrank.", String.valueOf(minrank));
+			errmsg = errmsg.replace(".rank.", String.valueOf(rank));
+			bot.sendNotice(player.getDiscordUser(), errmsg);
 			return;
 		}
 		if (forced) {
