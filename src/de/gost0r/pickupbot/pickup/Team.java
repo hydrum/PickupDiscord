@@ -72,7 +72,7 @@ public class Team {
         buttons.add(button_decline);
         DiscordButton button_cancel = new DiscordButton(DiscordButtonStyle.GREY);
         button_cancel.custom_id = "teaminvite_2_" + captain.getUrtauth() + "_" + player.getUrtauth();
-        button_cancel.label = "Decline";
+        button_cancel.label = "Cancel";
         buttons.add(button_cancel);
 
         String invite_message = Config.team_invited;
