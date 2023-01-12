@@ -20,6 +20,7 @@ public class Config {
 	public static final String CMD_LEAVETEAM			= "!leaveteam";
 	public static final String CMD_ADDTEAM				= "!addteam";
 	public static final String CMD_REMOVETEAM			= "!removeteam";
+	public static final String CMD_TEAMS				= "!teams";
 
 	public static final String CMD_LOCK					= "!lock";
 	public static final String CMD_UNLOCK				= "!unlock";
@@ -288,6 +289,7 @@ public class Config {
 	public static final String pkup_match_unavi 		= "Match is not available right now.";
 	public static final String pkup_match_invalid_gt	= "No match for that gametype is available right now.";
 	public static final String no_gt_found				= "Unable to find a matching gametype. Try `!add ctf`";
+	public static final String no_gt_team_found			= "Unable to find a matching gametype. Try `!addteam ctf`";
 	
 	public static final String banreason_not_found		= "Use one of the following ban reasons: .banreasons.";	
 	public static final String banduration_invalid		= "Invalid ban duration. Try 1m,1h,1d,1w,1M.";
@@ -329,4 +331,7 @@ public class Config {
 	public static final String team_removed_queue		= "Team removed from all queues: .team.";
 	public static final String team_cant_soloqueue		= "You can't queue by yourself as you are currently in a team. ``!leaveteam`` to solo queue.";
 	public static final String team_print_info			= "Your current team: .team.";
+	public static final String team_print_all			= "__List of all active teams:__";
+	public static final String team_print_noteam		= "No teams are currently active.";
+	public static final String team_only_mentions 		= "Please specify players using: ``!team @user``.";
 }

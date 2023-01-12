@@ -1628,11 +1628,14 @@ public class PickupLogic {
 				activeTeams.remove(activeTeam);
 				activeTeam.archive();
 				bot.sendNotice(player.getDiscordUser(), Config.team_leave_captain);
+
+				cmdRemovePlayer(player, null);
 				return;
 			}
 			else if (activeTeam.isInTeam(player)){
 				activeTeam.removePlayer(player);
 				bot.sendNotice(player.getDiscordUser(), Config.team_leave.replace(".captain.", activeTeam.getCaptain().getUrtauth()));
+				cmdRemovePlayer(player, null);
 				return;
 			}
 		}
@@ -1698,6 +1701,7 @@ public class PickupLogic {
 		team.removePlayer(playerToRemove);
 		interaction.respond(null);
 		interaction.message.delete();
+		cmdRemovePlayer(playerToRemove, null);
 	}
 
 	public void cmdAddTeam(Player player, Gametype gt){
@@ -1815,5 +1819,18 @@ public class PickupLogic {
 		}
 
 		bot.sendNotice(player.getDiscordUser(), Config.team_print_info.replace(".team.", team.getTeamStringNoMention()));
+	}
+
+	public void cmdPrintTeams(Player player){
+		String msg = Config.team_print_all;
+		for (Team activeTeam : activeTeams){
+			msg = msg + "\n" + activeTeam.getTeamStringNoMention();
+		}
+		if (msg.equals(Config.team_print_all)){
+			bot.sendMsg(player.getLastPublicChannel(), Config.team_print_noteam);
+			return;
+		}
+
+		bot.sendMsg(player.getLastPublicChannel(), msg);
 	}
 }

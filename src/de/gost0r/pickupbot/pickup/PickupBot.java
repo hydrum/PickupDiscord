@@ -568,6 +568,7 @@ public class PickupBot extends DiscordBot {
 					if (p != null) {
 						if (data.length >= 2) {
 							List<Player> invitedPlayers = new ArrayList<Player>();
+							boolean noMentions = false;
 							for (int i = 1; i < data.length; i++) {
 								if (data[i].trim().length() == 0) {
 									continue;
@@ -578,7 +579,7 @@ public class PickupBot extends DiscordBot {
 									playerToInvite = Player.get(u);
 								}
 								else {
-									logic.bot.sendNotice(p.getDiscordUser(), data[i] + " " + Config.player_not_found);
+									noMentions = true;
 									continue;
 								}
 								if (playerToInvite != null) {
@@ -587,6 +588,9 @@ public class PickupBot extends DiscordBot {
 								else{
 									logic.bot.sendNotice(p.getDiscordUser(), Config.other_user_not_registered.replace(".user.", u.getMentionString()));
 								}
+							}
+							if (noMentions){
+								logic.bot.sendNotice(p.getDiscordUser(), Config.team_only_mentions);
 							}
 							if (!invitedPlayers.isEmpty()){
 								logic.invitePlayersToTeam(p, invitedPlayers);
@@ -609,7 +613,7 @@ public class PickupBot extends DiscordBot {
 						if (data.length == 2) {
 							Gametype gt = logic.getGametypeByString(data[1]);
 							if (gt == null) {
-								sendNotice(msg.user, Config.no_gt_found);
+								sendNotice(msg.user, Config.no_gt_team_found);
 								return;
 							}
 
@@ -624,6 +628,12 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_REMOVETEAM:
 					if (p != null){
 						logic.cmdRemoveTeam(p, true);
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+				case Config.CMD_TEAMS:
+					if (p != null){
+						logic.cmdPrintTeams(p);
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
