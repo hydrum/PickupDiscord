@@ -577,13 +577,23 @@ public class PickupBot extends DiscordBot {
 								if (u != null) {
 									playerToInvite = Player.get(u);
 								}
+								else {
+									logic.bot.sendNotice(p.getDiscordUser(), data[i] + " " + Config.player_not_found);
+									continue;
+								}
 								if (playerToInvite != null) {
 									invitedPlayers.add(playerToInvite);
+								}
+								else{
+									logic.bot.sendNotice(p.getDiscordUser(), Config.other_user_not_registered.replace(".user.", u.getMentionString()));
 								}
 							}
 							if (!invitedPlayers.isEmpty()){
 								logic.invitePlayersToTeam(p, invitedPlayers);
 							}
+						}
+						else{
+							logic.cmdPrintTeam(p);
 						}
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
@@ -596,7 +606,7 @@ public class PickupBot extends DiscordBot {
 					break;
 				case Config.CMD_ADDTEAM:
 					if (p != null){
-						if (data.length > 1) {
+						if (data.length == 2) {
 							Gametype gt = logic.getGametypeByString(data[1]);
 							if (gt == null) {
 								sendNotice(msg.user, Config.no_gt_found);
@@ -605,12 +615,15 @@ public class PickupBot extends DiscordBot {
 
 							logic.cmdAddTeam(p, gt);
 						}
+						else {
+							sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADDTEAM));
+						}
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
 				case Config.CMD_REMOVETEAM:
 					if (p != null){
-						logic.cmdRemoveTeam(p);
+						logic.cmdRemoveTeam(p, true);
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;

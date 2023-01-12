@@ -107,6 +107,12 @@ public class PickupLogic {
 			bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
 			return;
 		}
+		for (Team activeTeam: activeTeams){
+			if (activeTeam.isInTeam(player)){
+				bot.sendNotice(player.getDiscordUser(), Config.team_cant_soloqueue);
+				return;
+			}
+		}
 		
 		int eloRank = db.getRankForPlayer(player);
 		int minEloRank = 40;
@@ -163,6 +169,7 @@ public class PickupLogic {
 			for (Match match : curMatch.values()) {
 				match.removePlayer(player, true);
 			}
+			cmdRemoveTeam(player, false);
 			checkTeams();
 			return;
 		}
@@ -172,7 +179,7 @@ public class PickupLogic {
 				curMatch.get(gt).removePlayer(player, true); // conditions checked within function
 			}
 		}
-
+		cmdRemoveTeam(player, false);
 		checkTeams();
 	}
 
@@ -1633,11 +1640,6 @@ public class PickupLogic {
 	}
 
 	public void answerTeamInvite(DiscordInteraction interaction, Player player, int answer, Player captain, Player invitedPlayer){
-		if (!player.equals(invitedPlayer)){
-			interaction.respond(Config.team_error_invite.replace(".player.", invitedPlayer.getUrtauth()));
-			return;
-		}
-
 		Team team = null;
 		for (Team activeTeam : activeTeams) {
 			if (activeTeam.getCaptain().equals(captain)) {
@@ -1646,6 +1648,18 @@ public class PickupLogic {
 		}
 		if (team == null){
 			interaction.respond(Config.team_error_active);
+			interaction.message.delete();
+			return;
+		}
+
+		if (player.equals(captain) && answer == 2){
+			team.cancelInvitation(invitedPlayer);
+			interaction.respond(null);
+			interaction.message.delete();
+			return;
+		}
+		if (!player.equals(invitedPlayer)){
+			interaction.respond(Config.team_error_invite.replace(".player.", invitedPlayer.getUrtauth()));
 			return;
 		}
 
@@ -1753,21 +1767,25 @@ public class PickupLogic {
 		}
 	}
 
-	public void cmdRemoveTeam(Player player){
+	public void cmdRemoveTeam(Player player, boolean shouldSpam){
 		Team team = null;
 		for (Team activeTeam : activeTeams){
-			if (activeTeam.getCaptain().equals(player)){
+			if (activeTeam.isInTeam(player)){
 				team = activeTeam;
 				break;
 			}
 		}
 		if (team == null){
-			bot.sendNotice(player.getDiscordUser(), Config.team_noteam_captain);
+			if (shouldSpam){
+				bot.sendNotice(player.getDiscordUser(), Config.team_noteam);
+			}
 			return;
 		}
 
 		if (playerInActiveMatch(player) != null) {
-			bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
+			if (shouldSpam) {
+				bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
+			}
 			return;
 		}
 
@@ -1775,11 +1793,27 @@ public class PickupLogic {
 
 		for (Match match : curMatch.values()) {
 			for (Player teamPlayer : team.getPlayers()){
-				match.removePlayer(teamPlayer, true);
+				match.removePlayer(teamPlayer, shouldSpam);
 			}
 			match.removeSquad(team);
 		}
 
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.team_removed_queue.replace(".team.", team.getTeamString()));
+	}
+
+	public void cmdPrintTeam(Player player){
+		Team team = null;
+		for (Team activeTeam : activeTeams){
+			if (activeTeam.isInTeam(player)){
+				team = activeTeam;
+				break;
+			}
+		}
+		if (team == null){
+			bot.sendNotice(player.getDiscordUser(), Config.team_noteam);
+			return;
+		}
+
+		bot.sendNotice(player.getDiscordUser(), Config.team_print_info.replace(".team.", team.getTeamStringNoMention()));
 	}
 }

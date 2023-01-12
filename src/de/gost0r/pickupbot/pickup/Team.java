@@ -70,6 +70,10 @@ public class Team {
         button_decline.custom_id = "teaminvite_0_" + captain.getUrtauth() + "_" + player.getUrtauth();
         button_decline.label = "Decline";
         buttons.add(button_decline);
+        DiscordButton button_cancel = new DiscordButton(DiscordButtonStyle.GREY);
+        button_cancel.custom_id = "teaminvite_2_" + captain.getUrtauth() + "_" + player.getUrtauth();
+        button_cancel.label = "Decline";
+        buttons.add(button_cancel);
 
         String invite_message = Config.team_invited;
         invite_message = invite_message.replace(".invited.", player.getDiscordUser().getMentionString());
@@ -95,6 +99,11 @@ public class Team {
     public void declineInvitation(Player player){
         invitedPlayers.remove(player);
         logic.bot.sendMsg(threadChannel, Config.team_declined.replace(".player.", player.getDiscordUser().getMentionString()));
+    }
+
+    public void cancelInvitation(Player player){
+        invitedPlayers.remove(player);
+        logic.bot.sendMsg(threadChannel, Config.team_canceled.replace(".player.", player.getDiscordUser().getMentionString()));
     }
 
     public boolean isFull(){

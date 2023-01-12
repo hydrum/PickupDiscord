@@ -158,6 +158,8 @@ public class Config {
 	public static final String USE_CMD_ADDROLE			= "!addrole <@role> <admin/superadmin>";
 	public static final String USE_CMD_REMOVEROLE		= "!removerole <@role> <admin/superadmin>";
 
+	public static final String USE_CMD_ADDTEAM			= "!addteam <gametype>";
+
 	//------------------------------------------------------------------------------------//
 	
 	public static final String INT_PICK					= "pick";
@@ -312,6 +314,7 @@ public class Config {
 	public static final String team_invited				= ".invited. You are invited to join .captain.'s team.";
 	public static final String team_accepted			= ".player. is now a member of this team.";
 	public static final String team_declined			= ".player. declined the invitation to join this team.";
+	public static final String team_canceled			= ".player.'s invitation to join your team has been canceled.";
 	public static final String team_removed				= ".player. has been removed from this team.";
 	public static final String team_leave_captain		= "Your team has been dissolved.";
 	public static final String team_leave				= "You left ``.captain.``'s team.";
@@ -324,4 +327,6 @@ public class Config {
 	public static final String team_error_wrong_gt      = "You can't add as a team for that gamemode.";
 	public static final String team_added				= "**.gamemode.**: Team sign up: .team.";
 	public static final String team_removed_queue		= "Team removed from all queues: .team.";
+	public static final String team_cant_soloqueue		= "You can't queue by yourself as you are currently in a team. ``!leaveteam`` to solo queue.";
+	public static final String team_print_info			= "Your current team: .team.";
 }
