@@ -79,7 +79,7 @@ public class Config {
 	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_MAP + " " + CMD_MATCH + " " 
 	+ CMD_LAST + " " + CMD_LIVE + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS 
 	+ " " + CMD_TOP_COUNTRIES + " " + CMD_TOP_KDR + " " + CMD_TOP_WDL + " " + CMD_COUNTRY + " " + CMD_SURRENDER + " " + CMD_BANINFO 
-	+ " " + CMD_VOTES + " " + CMD_LAST;
+	+ " " + CMD_VOTES + " " + CMD_LAST + " " + CMD_TEAM + " " + CMD_LEAVETEAM + " " + CMD_ADDTEAM + " " + CMD_REMOVETEAM + " " + CMD_TEAMS;
 	
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " " + CMD_ENABLEMAP 
 	+ " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE + " " 
@@ -126,15 +126,15 @@ public class Config {
 	public static final String USE_CMD_REGISTER			= "!register <urtauth>";
 	public static final String USE_CMD_COUNTRY			= "!country <COUNTRY CODE> See:` <https://datahub.io/core/country-list/r/0.html>";
 	public static final String USE_CMD_CHANGE_COUNTRY	= "!country <urtauth> <COUNTRY CODE> See:` <https://datahub.io/core/country-list/r/0.html>";
-	public static final String USE_CMD_GETELO			= "!elo </@DiscordUser|urtauth/>";
-	public static final String USE_CMD_GETSTATS			= "!stats </@DiscordUser|urtauth/>";
+	public static final String USE_CMD_GETELO			= "!elo </@User|urtauth/>";
+	public static final String USE_CMD_GETSTATS			= "!stats </@User|urtauth/>";
 	public static final String USE_CMD_TOP10			= "!top10 displays the top 10 players";
 	public static final String USE_CMD_TOP_COUNTRIES	= "!topcountries ordered by average ELO";
 	public static final String USE_CMD_TOP_WDL			= "!topwin: players with the best win ratio";
 	public static final String USE_CMD_TOP_KDR			= "!topkdr: players with the best KDR";
 
 	public static final String USE_CMD_MATCH			= "!match <id>";
-	public static final String USE_CMD_LAST				= "!last </@DiscordUser|urtauth/>";
+	public static final String USE_CMD_LAST				= "!last </@User|urtauth/>";
 
 	//public static final String USE_CMD_REPORT			= "!report <qauth> <reason>";
 	//public static final String USE_CMD_EXCUSE			= "!excuse <excuse>";
@@ -142,7 +142,7 @@ public class Config {
 
 	public static final String USE_CMD_ADDBAN			= "!ban <urtauth> <reason> <duration> (duration=1y1M1w1d1h1m1s)";
 	public static final String USE_CMD_REMOVEBAN		= "!unban <urtauth>";
-	public static final String USE_CMD_BANINFO			= "!baninfo </@DiscordUser|urtauth/>";
+	public static final String USE_CMD_BANINFO			= "!baninfo </@User|urtauth/>";
 
 	public static final String USE_CMD_SHOWSERVERS		= "!showservers";
 	public static final String USE_CMD_ADDSERVER		= "!addserver <ip:port> <rcon> <region>";
@@ -160,6 +160,10 @@ public class Config {
 	public static final String USE_CMD_REMOVEROLE		= "!removerole <@role> <admin/superadmin>";
 
 	public static final String USE_CMD_ADDTEAM			= "!addteam <gametype>";
+	public static final String USE_CMD_REMOVETEAM			= "!removeteam <gametype>";
+	public static final String USE_CMD_TEAM				= "!team <@user1> <@user2> <...>";
+	public static final String USE_CMD_LEAVETEAM			= "!leaveteam removes you from your current team";
+	public static final String USE_CMD_TEAMS			= "!teams lists the active teams";
 
 	//------------------------------------------------------------------------------------//
 	
@@ -332,6 +336,6 @@ public class Config {
 	public static final String team_cant_soloqueue		= "You can't queue by yourself as you are currently in a team. ``!leaveteam`` to solo queue.";
 	public static final String team_print_info			= "Your current team: .team.";
 	public static final String team_print_all			= "__List of all active teams:__";
-	public static final String team_print_noteam		= "No teams are currently active.";
+	public static final String team_print_noteam		= "No team is currently active.";
 	public static final String team_only_mentions 		= "Please specify players using: ``!team @user``.";
 }
