@@ -1062,10 +1062,10 @@ public class PickupBot extends DiscordBot {
 								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_VOTES));
 								break;
 							case Config.CMD_TOP_WDL:
-								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_WDL));
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP_WDL));
 								break;
 							case Config.CMD_TOP_KDR:
-								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_KDR));
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TOP_KDR));
 								break;
 							case Config.CMD_LAST:
 								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LAST));
