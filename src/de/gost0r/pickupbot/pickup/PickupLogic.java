@@ -1620,6 +1620,7 @@ public class PickupLogic {
 			}
 			team.invitePlayer(invitedPlayer);
 		}
+		cmdRemovePlayer(captain, null);
 	}
 
 	public void leaveTeam(Player player){
