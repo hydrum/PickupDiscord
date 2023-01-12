@@ -1025,6 +1025,18 @@ public class PickupBot extends DiscordBot {
 							case Config.CMD_DISABLEGAMETYPE:
 								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DISABLEGAMETYPE));
 								break;
+							case Config.CMD_ADDCHANNEL:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDCHANNEL));
+								break;
+							case Config.CMD_REMOVECHANNEL:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVECHANNEL));
+								break;
+							case Config.CMD_ADDROLE:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDROLE));
+								break;
+							case Config.CMD_REMOVEROLE:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVEROLE));
+								break;
 							case Config.CMD_SHOWMATCHES:
 								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SHOWMATCHES));
 								break;
@@ -1034,7 +1046,46 @@ public class PickupBot extends DiscordBot {
 							case Config.CMD_COUNTRY:
 								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_COUNTRY));
 								break;
-
+							case Config.CMD_BM:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_BM));
+								break;
+							case Config.CMD_CTF:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_CTF));
+								break;
+							case Config.CMD_TS:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TS));
+								break;
+							case Config.CMD_DIV1:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DIV1));
+								break;
+							case Config.CMD_VOTES:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_VOTES));
+								break;
+							case Config.CMD_TOP_WDL:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_WDL));
+								break;
+							case Config.CMD_TOP_KDR:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_KDR));
+								break;
+							case Config.CMD_LAST:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LAST));
+								break;
+							case Config.CMD_ADDTEAM:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDTEAM));
+								break;
+							case Config.CMD_REMOVETEAM:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVETEAM));
+								break;
+							case Config.CMD_TEAM:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TEAM));
+								break;
+							case Config.CMD_LEAVETEAM:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LEAVETEAM));
+								break;
+							case Config.CMD_TEAMS:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_TEAMS));
+								break;								
+								
 							default:
 								super.sendMsg(msg.channel, Config.help_unknown);
 								break;
