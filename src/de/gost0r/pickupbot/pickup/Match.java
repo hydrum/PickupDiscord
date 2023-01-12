@@ -30,6 +30,7 @@ public class Match implements Runnable {
 	private Map<GameMap, Integer> mapVotes;
 	private Map<Player, MatchStats> playerStats;
 	private List<Player> sortedPlayers;
+	private List<Team> squadList; // Premade teams
 	
 	public List<DiscordChannel> threadChannels;
 	public List<DiscordMessage> liveScoreMsgs;
@@ -66,6 +67,7 @@ public class Match implements Runnable {
 		pickSequence = new int[] {1, 0, 1, 0, 1, 0, 1, 0};//{1, 0, 0, 1, 0, 1, 1, 0};
 		threadChannels = new ArrayList<DiscordChannel>();
 		liveScoreMsgs = new ArrayList<DiscordMessage>();
+		squadList = new ArrayList<Team>();
 	}
 
 	public Match(PickupLogic logic, Gametype gametype, List<GameMap> maplist) {
@@ -157,6 +159,18 @@ public class Match implements Runnable {
 			playerStats.remove(player);
 			checkServerState();
 			logic.cmdStatus(this, player, shouldSpam);
+		}
+	}
+
+	public void addSquad(Team squad) {
+		if (state == MatchState.Signup) {
+			squadList.add(squad);
+		}
+	}
+
+	public void removeSquad(Team squad) {
+		if (state == MatchState.Signup) {
+			squadList.remove(squad);
 		}
 	}
 
@@ -410,6 +424,23 @@ public class Match implements Runnable {
 	public void sortPlayers() {
 		// Sort players by elo
 		List<Player> playerList = new ArrayList<Player>(playerStats.keySet());
+		LOGGER.warning("HERE!!");
+
+		if (squadList.size() > 0){
+			Team squad = squadList.get(0);
+			for (Player player : playerList){
+				if (squad.isInTeam(player)){
+					teamList.get("red").add(player);
+				}
+				else {
+					teamList.get("blue").add(player);
+				}
+			}
+			LOGGER.warning("HERE!");
+			sortedPlayers.clear();
+			checkTeams();
+			return;
+		}
 
 		sortedPlayers.add(playerList.get(0));
 		for (Player player : playerList) {

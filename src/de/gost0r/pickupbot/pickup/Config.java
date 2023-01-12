@@ -16,6 +16,10 @@ public class Config {
 	public static final String CMD_SURRENDER			= "!surrender";
 	public static final String CMD_LIVE					= "!live";
 	public static final String CMD_VOTES				= "!votes";
+	public static final String CMD_TEAM					= "!team";
+	public static final String CMD_LEAVETEAM			= "!leaveteam";
+	public static final String CMD_ADDTEAM				= "!addteam";
+	public static final String CMD_REMOVETEAM			= "!removeteam";
 
 	public static final String CMD_LOCK					= "!lock";
 	public static final String CMD_UNLOCK				= "!unlock";
@@ -158,6 +162,8 @@ public class Config {
 	
 	public static final String INT_PICK					= "pick";
 	public static final String INT_LAUNCHAC				= "launchac";
+	public static final String INT_TEAMINVITE			= "teaminvite";
+	public static final String INT_TEAMREMOVE			= "teamremove";
 	
 	//------------------------------------------------------------------------------------//
 
@@ -298,5 +304,24 @@ public class Config {
 	public static final String ftw_notconnected  	    = "User not connected to the FTW launcher";
 	public static final String ftw_error 		  	    = "Unknown error";
 
-
+	public static final String team_involved_other		= "You are already involved in an active team. You can leave it by sending ``!leaveteam``.";
+	public static final String team_already_involved	= "``.auth.`` is already in a team.";
+	public static final String team_is_full				= "Your team already has 5 players.";
+	public static final String team_already_in			= "The player ``.auth.`` is already in your team.";
+	public static final String team_already_invited		= "The player ``.auth.`` has already been invited to your team.";
+	public static final String team_invited				= ".invited. You are invited to join .captain.'s team.";
+	public static final String team_accepted			= ".player. is now a member of this team.";
+	public static final String team_declined			= ".player. declined the invitation to join this team.";
+	public static final String team_removed				= ".player. has been removed from this team.";
+	public static final String team_leave_captain		= "Your team has been dissolved.";
+	public static final String team_leave				= "You left ``.captain.``'s team.";
+	public static final String team_noteam				= "You are currently not involved in any team.";
+	public static final String team_noteam_captain		= "You are not captain of any team.";
+	public static final String team_error_invite		= "Only the player ``.player.`` can answer.";
+	public static final String team_error_active		= "This team is no longer active.";
+	public static final String team_error_remove		= "Only the team captain or the player in question can press this button.";
+	public static final String team_error_teamsize      = "You need to be exactly ``.teamsize.`` in your team to queue for this gamemode.";
+	public static final String team_error_wrong_gt      = "You can't add as a team for that gamemode.";
+	public static final String team_added				= "**.gamemode.**: Team sign up: .team.";
+	public static final String team_removed_queue		= "Team removed from all queues: .team.";
 }

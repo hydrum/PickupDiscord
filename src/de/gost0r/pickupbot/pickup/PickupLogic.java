@@ -38,10 +38,12 @@ public class PickupLogic {
 	private Map<PickupChannelType, List<DiscordChannel>> channels;
 	
 	private List<Match> ongoingMatches; // ongoing matches (live)
+	private List<Team> activeTeams;
 	
 	private Queue<Match> awaitingServer;
 	
 	private Map<Gametype, Match> curMatch;
+	private Map<Team, Gametype> teamsQueued;
 	
 	private boolean locked;
 	
@@ -60,6 +62,7 @@ public class PickupLogic {
 		channels = db.loadChannels();
 		
 		curMatch = new HashMap<Gametype, Match>();
+		teamsQueued = new HashMap<Team, Gametype>();
 		lastMapPlayed = new HashMap<Gametype, GameMap>();
 		for (Gametype gt : db.loadGametypes()) {
 			if (gt.getActive()) {
@@ -69,6 +72,7 @@ public class PickupLogic {
 		}
 		mapList = db.loadMaps(); // needs current gamemode list
 		ongoingMatches = db.loadOngoingMatches(); // need maps, servers and gamemodes
+		activeTeams = new ArrayList<Team>();
 		
 		createCurrentMatches();
 		
@@ -143,6 +147,8 @@ public class PickupLogic {
 		if (!msg.toString().equals(defmsg)) {
 			bot.sendNotice(player.getDiscordUser(), msg.toString());
 		}
+
+		checkTeams();
 	}
 
 	public void cmdRemovePlayer(Player player, List<Gametype> modes) {
@@ -157,6 +163,7 @@ public class PickupLogic {
 			for (Match match : curMatch.values()) {
 				match.removePlayer(player, true);
 			}
+			checkTeams();
 			return;
 		}
 		
@@ -165,6 +172,8 @@ public class PickupLogic {
 				curMatch.get(gt).removePlayer(player, true); // conditions checked within function
 			}
 		}
+
+		checkTeams();
 	}
 
 	public void cmdPick(DiscordInteraction interaction, Player player, int pick) {
@@ -564,6 +573,12 @@ public class PickupLogic {
 						playernames = new StringBuilder(p.getUrtauth());
 					} else {
 						playernames.append(" ").append(p.getUrtauth());
+					}
+				}
+				for (Team teamQueued : teamsQueued.keySet()){
+					if (teamsQueued.get(teamQueued).equals(match.getGametype())){
+						playernames.append("\n__Awaiting team__: ");
+						playernames.append(teamQueued.getTeamStringNoMention());
 					}
 				}
 			} else {
@@ -1553,5 +1568,218 @@ public class PickupLogic {
 			Sentry.capture(e);
 		}
 		return Config.ftw_error;
+	}
+
+	public void invitePlayersToTeam(Player captain, List<Player> invitedPlayers) {
+		Team team = null;
+		for (Team activeTeam : activeTeams){
+			if (activeTeam.getCaptain().equals(captain)){
+				team = activeTeam;
+				break;
+			}
+			else if (activeTeam.isInTeam(captain)){
+				bot.sendNotice(captain.getDiscordUser(), Config.team_involved_other);
+				return;
+			}
+		}
+		if (team == null){
+			team = new Team(this, captain);
+			activeTeams.add(team);
+		}
+
+		for (Player invitedPlayer : invitedPlayers){
+			if (team.isFull()){
+				bot.sendNotice(captain.getDiscordUser(), Config.team_is_full);
+				return;
+			}
+			if (team.isInTeam(invitedPlayer)){
+				bot.sendNotice(captain.getDiscordUser(), Config.team_already_in.replace(".auth.", invitedPlayer.getUrtauth()));
+				continue;
+			}
+			if (team.isInvitedToTeam(invitedPlayer)){
+				bot.sendNotice(captain.getDiscordUser(), Config.team_already_invited.replace(".auth.", invitedPlayer.getUrtauth()));
+				continue;
+			}
+			boolean alreadyInvolved = false;
+			for (Team activeTeam : activeTeams) {
+				if (activeTeam.isInTeam(invitedPlayer)) {
+					alreadyInvolved = true;
+					break;
+				}
+			}
+			if (alreadyInvolved){
+				bot.sendNotice(captain.getDiscordUser(), Config.team_already_involved.replace(".auth.", invitedPlayer.getUrtauth()));
+				continue;
+			}
+			team.invitePlayer(invitedPlayer);
+		}
+	}
+
+	public void leaveTeam(Player player){
+		for (Team activeTeam : activeTeams){
+			if (activeTeam.getCaptain().equals(player)){
+				activeTeams.remove(activeTeam);
+				activeTeam.archive();
+				bot.sendNotice(player.getDiscordUser(), Config.team_leave_captain);
+				return;
+			}
+			else if (activeTeam.isInTeam(player)){
+				activeTeam.removePlayer(player);
+				bot.sendNotice(player.getDiscordUser(), Config.team_leave.replace(".captain.", activeTeam.getCaptain().getUrtauth()));
+				return;
+			}
+		}
+		bot.sendNotice(player.getDiscordUser(), Config.team_noteam);
+	}
+
+	public void answerTeamInvite(DiscordInteraction interaction, Player player, int answer, Player captain, Player invitedPlayer){
+		if (!player.equals(invitedPlayer)){
+			interaction.respond(Config.team_error_invite.replace(".player.", invitedPlayer.getUrtauth()));
+			return;
+		}
+
+		Team team = null;
+		for (Team activeTeam : activeTeams) {
+			if (activeTeam.getCaptain().equals(captain)) {
+				team = activeTeam;
+			}
+		}
+		if (team == null){
+			interaction.respond(Config.team_error_active);
+			return;
+		}
+
+		if (answer == 1){
+			if (team.isFull()){
+				interaction.respond(Config.team_is_full);
+				return;
+			}
+			team.acceptInvitation(invitedPlayer);
+
+		}
+		else{
+			team.declineInvitation(invitedPlayer);
+		}
+		interaction.respond(null);
+		interaction.message.delete();
+	}
+
+	public void removeTeamMember(DiscordInteraction interaction, Player player, Player captain, Player playerToRemove){
+		if (!player.equals(playerToRemove) && !player.equals(captain)){
+			interaction.respond(Config.team_error_remove);
+			return;
+		}
+
+		Team team = null;
+		for (Team activeTeam : activeTeams) {
+			if (activeTeam.getCaptain().equals(captain)) {
+				team = activeTeam;
+			}
+		}
+		if (team == null){
+			interaction.respond(Config.team_error_active);
+			return;
+		}
+
+		team.removePlayer(playerToRemove);
+		interaction.respond(null);
+		interaction.message.delete();
+	}
+
+	public void cmdAddTeam(Player player, Gametype gt){
+		Team team = null;
+		for (Team activeTeam : activeTeams){
+			if (activeTeam.getCaptain().equals(player)){
+				team = activeTeam;
+				break;
+			}
+		}
+		if (team == null){
+			bot.sendNotice(player.getDiscordUser(), Config.team_noteam_captain);
+			return;
+		}
+
+		if (gt.getTeamSize() < 2){
+			bot.sendNotice(player.getDiscordUser(), Config.team_error_wrong_gt);
+			return;
+		}
+
+		if (team.getPlayers().size() != gt.getTeamSize()){
+			bot.sendNotice(player.getDiscordUser(), Config.team_error_teamsize.replace(".teamsize.", String.valueOf(gt.getTeamSize())));
+			return;
+		}
+
+		Match m = curMatch.get(gt);
+
+		for (Player teamPlayer : team.getPlayers()){
+			if (teamPlayer.isBanned()) {
+				bot.sendMsg(bot.getLatestMessageChannel(), printBanInfo(teamPlayer));
+				return;
+			}
+			if (playerInActiveMatch(teamPlayer) != null) {
+				bot.sendNotice(teamPlayer.getDiscordUser(), Config.player_already_match);
+				return;
+			}
+			if (curMatch.containsKey(gt)) {
+				if (m.getMatchState() != MatchState.Signup || m.isInMatch(teamPlayer) || playerInActiveMatch(teamPlayer) != null) {
+					m.removePlayer(teamPlayer, false);
+				}
+			}
+		}
+
+		teamsQueued.put(team, gt);
+
+		String addedMsg = Config.team_added;
+		addedMsg = addedMsg.replace(".gamemode.", gt.getName());
+		addedMsg = addedMsg.replace(".team.", team.getTeamString());
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), addedMsg);
+		checkTeams();
+	}
+
+	public void checkTeams(){
+		for (Team queuedTeam : teamsQueued.keySet()) {
+			Gametype gt = teamsQueued.get(queuedTeam);
+			Match m = curMatch.get(gt);
+			if (curMatch.containsKey(gt)) {
+				if (m.getPlayerCount() <= gt.getTeamSize()) {
+					m.addSquad(queuedTeam);
+					teamsQueued.remove(queuedTeam);
+					for (Player teamPlayer : queuedTeam.getPlayers()) {
+						m.addPlayer(teamPlayer);
+						teamPlayer.afkCheck();
+					}
+				}
+			}
+		}
+	}
+
+	public void cmdRemoveTeam(Player player){
+		Team team = null;
+		for (Team activeTeam : activeTeams){
+			if (activeTeam.getCaptain().equals(player)){
+				team = activeTeam;
+				break;
+			}
+		}
+		if (team == null){
+			bot.sendNotice(player.getDiscordUser(), Config.team_noteam_captain);
+			return;
+		}
+
+		if (playerInActiveMatch(player) != null) {
+			bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
+			return;
+		}
+
+		teamsQueued.remove(team);
+
+		for (Match match : curMatch.values()) {
+			for (Player teamPlayer : team.getPlayers()){
+				match.removePlayer(teamPlayer, true);
+			}
+			match.removeSquad(team);
+		}
+
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.team_removed_queue.replace(".team.", team.getTeamString()));
 	}
 }

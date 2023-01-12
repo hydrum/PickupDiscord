@@ -563,6 +563,57 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
+
+				case Config.CMD_TEAM:
+					if (p != null) {
+						if (data.length >= 2) {
+							List<Player> invitedPlayers = new ArrayList<Player>();
+							for (int i = 1; i < data.length; i++) {
+								if (data[i].trim().length() == 0) {
+									continue;
+								}
+								DiscordUser u = DiscordUser.getUser(data[i].replaceAll("[^\\d.]", ""));
+								Player playerToInvite = null;
+								if (u != null) {
+									playerToInvite = Player.get(u);
+								}
+								if (playerToInvite != null) {
+									invitedPlayers.add(playerToInvite);
+								}
+							}
+							if (!invitedPlayers.isEmpty()){
+								logic.invitePlayersToTeam(p, invitedPlayers);
+							}
+						}
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+				case Config.CMD_LEAVETEAM:
+					if (p != null){
+						logic.leaveTeam(p);
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+				case Config.CMD_ADDTEAM:
+					if (p != null){
+						if (data.length > 1) {
+							Gametype gt = logic.getGametypeByString(data[1]);
+							if (gt == null) {
+								sendNotice(msg.user, Config.no_gt_found);
+								return;
+							}
+
+							logic.cmdAddTeam(p, gt);
+						}
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+				case Config.CMD_REMOVETEAM:
+					if (p != null){
+						logic.cmdRemoveTeam(p);
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
 			}
 		}
 
@@ -1141,6 +1192,14 @@ public class PickupBot extends DiscordBot {
 
 		case Config.INT_LAUNCHAC:
 			logic.cmdLaunchAC(interaction, p, Integer.parseInt(data[1]), data[2], data[3]);
+			break;
+
+		case Config.INT_TEAMINVITE:
+			logic.answerTeamInvite(interaction, p, Integer.parseInt(data[1]), Player.get(data[2]), Player.get(data[3]));
+			break;
+
+		case Config.INT_TEAMREMOVE:
+			logic.removeTeamMember(interaction, p, Player.get(data[1]), Player.get(data[2]));
 			break;
 		}
 	}
