@@ -976,7 +976,7 @@ public class Match implements Runnable {
 		if (server == null || server.region == null) {
 			region_flag = "";
 		} else if (logic.getDynamicServers()){
-			region_flag = Country.getCountryFlag(server.country);
+			region_flag = Country.getCountryFlag(server.country) + " " + server.city + " - ";
 		} else if (server.region == Region.NAE || server.region == Region.NAW) {
 			region_flag =  ":flag_us:";
 		} else if (server.region == Region.OC) {

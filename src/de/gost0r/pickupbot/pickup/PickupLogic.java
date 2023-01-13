@@ -488,6 +488,9 @@ public class PickupLogic {
 	public void cmdGetMaps(boolean showZeroVote) {
 		StringBuilder msg = new StringBuilder("None");
 		for (Gametype gametype : curMatch.keySet()) {
+			if (gametype.getName().startsWith("SCRIM") && curMatch.get(gametype).getPlayerCount() == 0){
+				continue;
+			}
 			if (msg.toString().equals("None")) {
 				msg = new StringBuilder();
 			} else {
@@ -555,13 +558,25 @@ public class PickupLogic {
 			return;
 		}
 		StringBuilder msg = new StringBuilder("None");
+		boolean scrimEmpty = true;
 		for (Match m : curMatch.values()) {
+			if (m.getGametype().getName().startsWith("SCRIM")) {
+				if (m.getPlayerCount() > 0){
+					scrimEmpty = false;
+				}
+				else{
+					continue;
+				}
+			}
 			if (msg.toString().equals("None")) {
 				msg = new StringBuilder();
 			} else {
 				msg.append("\n");
 			}
 			msg.append(cmdStatus(m, null, false));
+		}
+		if (scrimEmpty){
+			msg.append("\n" + Config.team_no_scrim);
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), msg.toString());
 	}
@@ -1690,10 +1705,10 @@ public class PickupLogic {
 			return;
 		}
 
-		if (gt.getTeamSize() < 2){
-			bot.sendNotice(player.getDiscordUser(), Config.team_error_wrong_gt);
-			return;
-		}
+//		if (gt.getTeamSize() < 2){
+//			bot.sendNotice(player.getDiscordUser(), Config.team_error_wrong_gt);
+//			return;
+//		}
 
 		if (team.getPlayers().size() != gt.getTeamSize()){
 			bot.sendNotice(player.getDiscordUser(), Config.team_error_teamsize.replace(".teamsize.", String.valueOf(gt.getTeamSize())));

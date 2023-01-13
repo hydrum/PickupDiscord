@@ -605,19 +605,24 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
-				case Config.CMD_ADDTEAM:
+				case Config.CMD_SCRIM:
 					if (p != null){
 						if (data.length == 2) {
-							Gametype gt = logic.getGametypeByString(data[1]);
-							if (gt == null) {
-								sendNotice(msg.user, Config.no_gt_team_found);
+							Gametype gt;
+							if (data[1].equalsIgnoreCase("2V2")){
+								gt = logic.getGametypeByString("2V2");
+							}
+							else gt = logic.getGametypeByString( "SCRIM " + data[1]);
+
+							if (gt == null || !gt.isTeamGamemode()) {
+								sendNotice(msg.user, Config.team_error_wrong_gt);
 								return;
 							}
 
 							logic.cmdAddTeam(p, gt);
 						}
 						else {
-							sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADDTEAM));
+							sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_SCRIM));
 						}
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
@@ -1083,8 +1088,8 @@ public class PickupBot extends DiscordBot {
 							case Config.CMD_LAST:
 								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_LAST));
 								break;
-							case Config.CMD_ADDTEAM:
-								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_ADDTEAM));
+							case Config.CMD_SCRIM:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_SCRIM));
 								break;
 							case Config.CMD_REMOVETEAM:
 								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_REMOVETEAM));

@@ -481,6 +481,12 @@ public class Database {
 					maplist.add(map);
 				}
 				map.setGametype(logic.getGametypeByString(rs.getString("gametype")), Boolean.parseBoolean(rs.getString("active")));
+				if (rs.getString("gametype").equalsIgnoreCase("TS")){
+					map.setGametype(logic.getGametypeByString("SCRIM TS"), Boolean.parseBoolean(rs.getString("active")));
+				}
+				if (rs.getString("gametype").equalsIgnoreCase("CTF")){
+					map.setGametype(logic.getGametypeByString("SCRIM CTF"), Boolean.parseBoolean(rs.getString("active")));
+				}
 				LOGGER.config(map.name + " " + rs.getString("gametype") + "="+ map.isActiveForGametype(logic.getGametypeByString(rs.getString("gametype"))));
 			}
 		} catch (SQLException e) {

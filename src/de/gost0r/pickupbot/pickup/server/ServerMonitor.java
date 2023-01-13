@@ -665,7 +665,7 @@ public class ServerMonitor implements Runnable {
 	}
 	
 	public void calcElo(Player player, int[] score) throws Exception {
-		if (match.getGametype().getName().equalsIgnoreCase("1v1") || match.getGametype().getName().equalsIgnoreCase("2v2")){
+		if (match.getGametype().getName().equalsIgnoreCase("1v1") || match.getGametype().getName().equalsIgnoreCase("2v2") || match.getGametype().getName().equalsIgnoreCase("SCRIM TS") || match.getGametype().getName().equalsIgnoreCase("SCRIM CTF")){
 			player.addElo(0);
 			return;
 		}

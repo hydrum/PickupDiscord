@@ -87,7 +87,11 @@ public class Gametype {
 		
 		try {
 			for ( File f : contents ) {
-				if ( f.getName().contentEquals(this.getName() + ".cfg") ) {
+				String configName = this.getName();
+				if (configName.startsWith("SCRIM")){
+					configName = configName.split(" ")[1];
+				}
+				if ( f.getName().contentEquals(configName + ".cfg") ) {
 					
 					BufferedReader br = new BufferedReader(new FileReader(CONFIGS_DIRECTORY.getPath() + "/" + f.getName()));
 					
@@ -125,6 +129,10 @@ public class Gametype {
 			LOGGER.log(Level.SEVERE, "Configuration file not found for gametype : " + this.getName());
 		}
 		
+	}
+
+	public boolean isTeamGamemode(){
+		return this.getName().equalsIgnoreCase("SCRIM TS") || this.getName().equalsIgnoreCase("SCRIM CTF") || this.getName().equalsIgnoreCase("2v2");
 	}
 	
 }

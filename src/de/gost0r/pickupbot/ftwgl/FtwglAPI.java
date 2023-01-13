@@ -42,12 +42,11 @@ public class FtwglAPI {
                 .put("password", password);
 
         String response =  sendPostRequest("/launch/pug", requestObj);
-        JSONObject obj = new JSONObject(response);
 
-        if (obj.getInt("code") == 200){
-            return Config.ftw_success;
+        if (response == null){
+            return Config.ftw_notconnected;
         }
-        else return Config.ftw_notconnected;
+        else return Config.ftw_success;
     }
 
     public static boolean checkIfPingStored(Player p){

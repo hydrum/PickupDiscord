@@ -18,7 +18,7 @@ public class Config {
 	public static final String CMD_VOTES				= "!votes";
 	public static final String CMD_TEAM					= "!team";
 	public static final String CMD_LEAVETEAM			= "!leaveteam";
-	public static final String CMD_ADDTEAM				= "!addteam";
+	public static final String CMD_SCRIM				= "!scrim";
 	public static final String CMD_REMOVETEAM			= "!removeteam";
 	public static final String CMD_TEAMS				= "!teams";
 	public static final String CMD_PING					= "!ping";
@@ -83,7 +83,7 @@ public class Config {
 	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_MAP + " " + CMD_MATCH + " " 
 	+ CMD_LAST + " " + CMD_LIVE + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS 
 	+ " " + CMD_TOP_COUNTRIES + " " + CMD_TOP_KDR + " " + CMD_TOP_WDL + " " + CMD_COUNTRY + " " + CMD_SURRENDER + " " + CMD_BANINFO 
-	+ " " + CMD_VOTES + " " + CMD_LAST + " " + CMD_TEAM + " " + CMD_LEAVETEAM + " " + CMD_ADDTEAM + " " + CMD_REMOVETEAM + " " + CMD_TEAMS;
+	+ " " + CMD_VOTES + " " + CMD_LAST + " " + CMD_TEAM + " " + CMD_LEAVETEAM + " " + CMD_SCRIM + " " + CMD_REMOVETEAM + " " + CMD_TEAMS;
 	
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " " + CMD_ENABLEMAP 
 	+ " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE + " " 
@@ -163,10 +163,10 @@ public class Config {
 	public static final String USE_CMD_ADDROLE			= "!addrole <@role> <admin/superadmin>";
 	public static final String USE_CMD_REMOVEROLE		= "!removerole <@role> <admin/superadmin>";
 
-	public static final String USE_CMD_ADDTEAM			= "!addteam <gametype>";
-	public static final String USE_CMD_REMOVETEAM			= "!removeteam <gametype>";
+	public static final String USE_CMD_SCRIM			= "!scrim <ts/ctf/2v2>";
+	public static final String USE_CMD_REMOVETEAM		= "!removeteam <gametype>";
 	public static final String USE_CMD_TEAM				= "!team <@user1> <@user2> <...>";
-	public static final String USE_CMD_LEAVETEAM			= "!leaveteam removes you from your current team";
+	public static final String USE_CMD_LEAVETEAM		= "!leaveteam removes you from your current team";
 	public static final String USE_CMD_TEAMS			= "!teams lists the active teams";
 
 	//------------------------------------------------------------------------------------//
@@ -298,7 +298,7 @@ public class Config {
 	public static final String pkup_match_unavi 		= "Match is not available right now.";
 	public static final String pkup_match_invalid_gt	= "No match for that gametype is available right now.";
 	public static final String no_gt_found				= "Unable to find a matching gametype. Try `!add ctf`";
-	public static final String no_gt_team_found			= "Unable to find a matching gametype. Try `!addteam ctf`";
+	public static final String no_gt_team_found			= "Unable to find a matching gametype. Try `!scrim ctf`";
 	
 	public static final String banreason_not_found		= "Use one of the following ban reasons: .banreasons.";	
 	public static final String banduration_invalid		= "Invalid ban duration. Try 1m,1h,1d,1w,1M.";
@@ -345,4 +345,5 @@ public class Config {
 	public static final String team_print_all			= "__List of all active teams:__";
 	public static final String team_print_noteam		= "No team is currently active.";
 	public static final String team_only_mentions 		= "Please specify players using: ``!team @user``.";
+	public static final String team_no_scrim	 		= "**SCRIM**: No team signed up. Type ``!scrim <ts/ctf/2v2>`` to play.";
 }
