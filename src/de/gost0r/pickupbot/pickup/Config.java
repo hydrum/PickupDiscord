@@ -316,7 +316,8 @@ public class Config {
 	public static final String ftw_success     	    	= "Game launched";
 	public static final String ftw_notconnected  	    = "User not connected to the FTW launcher";
 	public static final String ftw_error 		  	    = "Unknown error";
-	public static final String ftw_error_noping	  	    = "Please click here to register your ping in the different server locations: .url.";
+	public static final String ftw_error_noping	  	    = "Check your dm and click on the link to register your ping in the different server locations.";
+	public static final String ftw_dm_noping	  	    = "Please click here to register your ping in the different server locations: .url.";
 
 	public static final String team_involved_other		= "You are already involved in an active team. You can leave it by sending ``!leaveteam``.";
 	public static final String team_already_involved	= "``.auth.`` is already in a team.";

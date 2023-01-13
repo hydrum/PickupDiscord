@@ -97,7 +97,7 @@ public class PickupLogic {
 
 	public void cmdAddPlayer(Player player, Gametype gt, boolean forced) {
 		if (dynamicServers && !FtwglAPI.checkIfPingStored(player)){
-			bot.sendNotice(player.getDiscordUser(), Config.ftw_error_noping.replace(".url.", FtwglAPI.requestPingUrl(player)));
+			cmdGetPingURL(player);
 			return;
 		}
 		
@@ -1820,6 +1820,7 @@ public class PickupLogic {
 	}
 
 	public void cmdGetPingURL(Player player) {
-		bot.sendNotice(player.getDiscordUser(), Config.ftw_error_noping.replace(".url.", FtwglAPI.requestPingUrl(player)));
+		bot.sendNotice(player.getDiscordUser(), Config.ftw_error_noping);
+		bot.sendMsg(player.getDiscordUser(), Config.ftw_dm_noping.replace(".url.", FtwglAPI.requestPingUrl(player)));
 	}
 }
