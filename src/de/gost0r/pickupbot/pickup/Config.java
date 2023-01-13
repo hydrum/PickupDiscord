@@ -21,6 +21,7 @@ public class Config {
 	public static final String CMD_ADDTEAM				= "!addteam";
 	public static final String CMD_REMOVETEAM			= "!removeteam";
 	public static final String CMD_TEAMS				= "!teams";
+	public static final String CMD_PING					= "!ping";
 
 	public static final String CMD_LOCK					= "!lock";
 	public static final String CMD_UNLOCK				= "!unlock";
@@ -34,6 +35,9 @@ public class Config {
 
 	public static final String CMD_ENABLEGAMETYPE		= "!enablegametype";
 	public static final String CMD_DISABLEGAMETYPE		= "!disablegametype";
+
+	public static final String CMD_ENABLEDYNSERVER		= "!enabledynservers";
+	public static final String CMD_DISABLEDYNSERVER		= "!disabledynservers";
 
 	//public static final String CMD_ADDGAMECONFIG		= "!addgameconfig";
 	//public static final String CMD_REMOVEGAMECONFIG	= "!delgameconfig";
@@ -215,6 +219,7 @@ public class Config {
 	public static final String pkup_go_pub_captains 	= "The captains are .captain1. (**red**) and .captain2. (**blue**) as they have the highest elo. Player stats:";
 	public static final String pkup_go_pub_pick 		= ".captain. pick a player:";
 	public static final String pkup_go_pub_pickjoin		= ".pick. joins the **.color.** team.";
+	public static final String pkup_go_pub_servspawn	= "**Spawning Server:** .flag. ``.city.`` (fairest server to all players)\n:hourglass: The ip will be send to all players when the server is spawned.";
 
 	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber. (.map.):";
 	public static final String pkup_aftermath_result	= ".team. .result. (.score.) -";
@@ -311,6 +316,7 @@ public class Config {
 	public static final String ftw_success     	    	= "Game launched";
 	public static final String ftw_notconnected  	    = "User not connected to the FTW launcher";
 	public static final String ftw_error 		  	    = "Unknown error";
+	public static final String ftw_error_noping	  	    = "Please click here to register your ping in the different server locations: .url.";
 
 	public static final String team_involved_other		= "You are already involved in an active team. You can leave it by sending ``!leaveteam``.";
 	public static final String team_already_involved	= "``.auth.`` is already in a team.";

@@ -26,19 +26,15 @@ public class DiscordBot  {
 	private DiscordGateway gateway = null;
 	private WsClientEndPoint endpoint = null;
 	private String env;
-	public String ftwAPIUrl;
-	public String ftwAPIkey;
 	
 	public DiscordBot() {
 	}
 	
-	public void init(String env, String ftwAPIUrl, String ftwAPIkey) {
+	public void init(String env) {
 		reconnect();
 		self = DiscordUser.getUser("@me");
 		guilds = DiscordAPI.getBotGuilds();
 		this.env = env;
-		this.ftwAPIUrl = ftwAPIUrl;
-		this.ftwAPIkey = ftwAPIkey;
 	}
 	
 	public void reconnect() {
@@ -61,7 +57,7 @@ public class DiscordBot  {
 			// we can trigger a handshake exception for endpoint. if that's the case, simply try again.
 			// TODO: need to check that this is really working
 			LOGGER.log(Level.SEVERE, "Exception: ", e);
-			init(env, ftwAPIUrl, ftwAPIkey);
+			init(env);
 		}
 	}
 	

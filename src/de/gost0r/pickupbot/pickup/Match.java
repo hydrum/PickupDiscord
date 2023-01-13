@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.gost0r.pickupbot.ftwgl.FtwglAPI;
 import io.sentry.Sentry;
 import org.json.JSONObject;
 
@@ -424,7 +425,6 @@ public class Match implements Runnable {
 	public void sortPlayers() {
 		// Sort players by elo
 		List<Player> playerList = new ArrayList<Player>(playerStats.keySet());
-		LOGGER.warning("HERE!!");
 
 		if (squadList.size() > 0){
 			Team squad = squadList.get(0);
@@ -436,7 +436,6 @@ public class Match implements Runnable {
 					teamList.get("blue").add(player);
 				}
 			}
-			LOGGER.warning("HERE!");
 			sortedPlayers.clear();
 			checkTeams();
 			return;
@@ -468,6 +467,9 @@ public class Match implements Runnable {
 			// List players stats
 			for (Player p : sortedPlayers){
 				captainAnnouncement += "\n" + logic.cmdGetElo(p, false);
+				if (logic.getDynamicServers()){
+					captainAnnouncement += " " + String.valueOf(server.playerPing.get(p)) + " ms";
+				}
 			}
 			logic.bot.sendMsg(threadChannels, captainAnnouncement);
 
@@ -623,11 +625,10 @@ public class Match implements Runnable {
 
 
 	// DONT CALL THIS OUTSIDE OF launch() !!!
-	public void run() {	
-		startTime = System.currentTimeMillis();
+	public void run() {
 		
 		gtvServer = logic.setupGTV();
-		
+
 		Random rand = new Random();
 		int password = rand.nextInt((999999-100000) + 1) + 100000;
 		server.password = String.valueOf(password);
@@ -661,7 +662,9 @@ public class Match implements Runnable {
 		msg = msg.replace(".gamenumber.", String.valueOf(id));
 		msg = msg.replace(".gametype.", gametype.getName());
 		msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
-		if (server.region == Region.NAE || server.region == Region.NAW) {
+		if (logic.getDynamicServers()){
+			msg = msg.replace(".region.", Country.getCountryFlag(server.country));
+		} else if (server.region == Region.NAE || server.region == Region.NAW) {
 			msg = msg.replace(".region.", ":flag_us:");
 		} else if (server.region == Region.EU) {
 			msg = msg.replace(".region.", ":flag_eu:");
@@ -713,15 +716,23 @@ public class Match implements Runnable {
 		//msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
 		fullmsg.append("\n").append(msg);
 
-		List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
-		DiscordButton button = new DiscordButton(DiscordButtonStyle.GREEN);
-		button.custom_id = Config.INT_LAUNCHAC + "_" + String.valueOf(id) + "_" + server.getAddress() + "_" + server.password;
-		button.label = Config.BTN_LAUNCHAC;
-		//button.emoji = new JSONObject().put("name", "\uF3AE");
-		buttons.add(button);
+		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg.toString());
 
+		if (logic.getDynamicServers()){
+			String spawnMsg = Config.pkup_go_pub_servspawn;
+			spawnMsg = spawnMsg.replace(".flag.", Country.getCountryFlag(server.country));
+			spawnMsg = spawnMsg.replace(".city.", server.city);
+			logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), spawnMsg);
+			FtwglAPI.getSpawnedServerIp(server);
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				LOGGER.log(Level.WARNING, "Exception: ", e);
+				Sentry.capture(e);
+			}
+		}
 
-		logic.bot.sendMsgToEdit(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg.toString(), null, buttons);
+		startTime = System.currentTimeMillis();
 
 		msg = Config.pkup_go_player;
 		msg = msg.replace(".server.", server.getAddress());
@@ -735,7 +746,12 @@ public class Match implements Runnable {
 
 		msg = Config.pkup_go_pub_sent;
 		msg = msg.replace(".gametype.", gametype.getName());
-		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), msg);
+		List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
+		DiscordButton button = new DiscordButton(DiscordButtonStyle.GREEN);
+		button.custom_id = Config.INT_LAUNCHAC + "_" + String.valueOf(id) + "_" + server.getAddress() + "_" + server.password;
+		button.label = Config.BTN_LAUNCHAC;
+		buttons.add(button);
+		logic.bot.sendMsgToEdit(logic.getChannelByType(PickupChannelType.PUBLIC), msg, null, buttons);
 
 		// set server data
 		server.sendRcon("g_password " + server.password);
@@ -959,6 +975,8 @@ public class Match implements Runnable {
 		String region_flag;
 		if (server == null || server.region == null) {
 			region_flag = "";
+		} else if (logic.getDynamicServers()){
+			region_flag = Country.getCountryFlag(server.country);
 		} else if (server.region == Region.NAE || server.region == Region.NAW) {
 			region_flag =  ":flag_us:";
 		} else if (server.region == Region.OC) {
@@ -983,8 +1001,10 @@ public class Match implements Runnable {
 		
 		StringBuilder red_team_player_embed = new StringBuilder();
 		StringBuilder red_team_score_embed = new StringBuilder();
+		StringBuilder red_team_ping_embed = new StringBuilder();
 		StringBuilder blue_team_player_embed = new StringBuilder();
 		StringBuilder blue_team_score_embed = new StringBuilder();
+		StringBuilder blue_team_ping_embed = new StringBuilder();
 		
 		// Order teams scores by score
 		List<Map.Entry<Player, MatchStats>> entries = new ArrayList<Map.Entry<Player, MatchStats>>(playerStats.entrySet());
@@ -1000,21 +1020,38 @@ public class Match implements Runnable {
 			}
 			String player_row = country + " \u200b \u200b " +  entry.getKey().getUrtauth() + "\n";
 			String score_row = entry.getValue().score[0].score +  "/" + entry.getValue().score[0].deaths + "/" + entry.getValue().score[0].assists + "\n";
+
+			String ping_row = "";
+			if (logic.getDynamicServers()){
+				ping_row = String.valueOf(server.playerPing.get(entry.getKey())) + "\n";
+			}
 			if (teamList.get("red").contains(entry.getKey())) {
 				red_team_player_embed.append(player_row);
 				red_team_score_embed.append(score_row);
+				if (logic.getDynamicServers()){
+					red_team_ping_embed.append(ping_row);
+				}
 			}
 			else if (teamList.get("blue").contains(entry.getKey())) {
 				blue_team_player_embed.append(player_row);
 				blue_team_score_embed.append(score_row);
+				if (logic.getDynamicServers()){
+					blue_team_ping_embed.append(ping_row);
+				}
 			}
 		}
 		
 		embed.addField("<:rush_red:510982162263179275> \u200b \u200b " + getScoreRed() + "\n \u200b", red_team_player_embed.toString(), true);
 		embed.addField("K/D/A" + "\n \u200b", red_team_score_embed.toString(), true);
+		if (logic.getDynamicServers()){
+			embed.addField("Ping (ms)" + "\n \u200b", red_team_ping_embed.toString(), true);
+		}
 		embed.addField("\u200b", "\u200b", false);
 		embed.addField("<:rush_blue:510067909628788736> \u200b \u200b " + getScoreBlue() + "\n \u200b", blue_team_player_embed.toString(), true);
 		embed.addField("K/D/A" + "\n \u200b", blue_team_score_embed.toString(), true);
+		if (logic.getDynamicServers()){
+			embed.addField("Ping (ms)" + "\n \u200b", blue_team_ping_embed.toString(), true);
+		}
 
 		Date startDate = new Date(startTime);
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");

@@ -7,10 +7,13 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.gost0r.pickupbot.pickup.Match;
+import de.gost0r.pickupbot.pickup.Player;
 import de.gost0r.pickupbot.pickup.Region;
 import io.sentry.Sentry;
 
@@ -26,6 +29,9 @@ public class Server {
 	public String	password;
 	public boolean	active;
 	public Region	region;
+	public String	country;
+	public String	city;
+	public Map<Player, Integer> playerPing;
 
 	private boolean taken = false;
 
@@ -45,6 +51,7 @@ public class Server {
 		
 		connect();
 		monitor = null;
+		playerPing = new HashMap<Player, Integer>();
 	}
 
 	public void connect() {

@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import de.gost0r.pickupbot.PickupBotDiscordMain;
 import de.gost0r.pickupbot.discord.*;
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
+import de.gost0r.pickupbot.ftwgl.FtwglAPI;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
 import io.sentry.Sentry;
@@ -46,6 +47,7 @@ public class PickupLogic {
 	private Map<Team, Gametype> teamsQueued;
 	
 	private boolean locked;
+	private boolean dynamicServers;
 	
 	private Map<BanReason, String[]> banDuration;
 	private Map<Gametype, GameMap> lastMapPlayed;
@@ -94,6 +96,10 @@ public class PickupLogic {
 	}
 
 	public void cmdAddPlayer(Player player, Gametype gt, boolean forced) {
+		if (dynamicServers && !FtwglAPI.checkIfPingStored(player)){
+			bot.sendNotice(player.getDiscordUser(), Config.ftw_error_noping.replace(".url.", FtwglAPI.requestPingUrl(player)));
+			return;
+		}
 		
 		if (locked && !forced) {
 			bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
@@ -1053,7 +1059,13 @@ public class PickupLogic {
 			
 			if(m != null)
 			{
-				Server bs = getBestServer(m.getPreferredServerRegion());
+				Server bs;
+				if (dynamicServers){
+					bs = FtwglAPI.spawnDynamicServer(m.getPlayerList());
+				}
+				else{
+					bs = getBestServer(m.getPreferredServerRegion());
+				}
 				
 				if(bs != null && m.getMatchState() == MatchState.AwaitingServer)
 				{
@@ -1519,20 +1531,12 @@ public class PickupLogic {
 		System.exit(0);
 	}
 
-	public void cmdLaunchAC(DiscordInteraction interaction, Player p, int matchId, String ip, String password){
+	public void cmdLaunchAC(DiscordInteraction interaction, Player player, int matchId, String ip, String password){
 		for (Match match : ongoingMatches) {
 			if (match.getID() == matchId) {
-				List<Player> playersInMatch = match.getPlayerList();
-				for (Player playerInMatch : playersInMatch){
-					if (playerInMatch.getDiscordUser().id.equals(p.getDiscordUser().id)){
-
-						JSONObject requestObj = new JSONObject()
-								.put("discord_id", Long.parseLong(p.getDiscordUser().id))
-								.put("address", ip)
-								.put("password", password);
-
-						sendFTWPostRequest(requestObj);
-						String response = sendFTWPostRequest(requestObj);
+				for (Player playerInMatch : match.getPlayerList()){
+					if (playerInMatch.equals(player)){
+						String response = FtwglAPI.launchAC(player, ip, password);
 						interaction.respond(response);
 						return;
 					}
@@ -1543,38 +1547,6 @@ public class PickupLogic {
 		}
 
 		interaction.respond(Config.ftw_matchnotfound);
-	}
-
-	private synchronized String sendFTWPostRequest(JSONObject content) {
-		try {
-			byte[] postData       = content.toString().getBytes( StandardCharsets.UTF_8 );
-			int    postDataLength = postData.length;
-
-			URL url = new URL(bot.ftwAPIUrl);
-			HttpURLConnection c = (HttpURLConnection) url.openConnection();
-			c.setRequestMethod("POST");
-			c.setRequestProperty("Authorization", bot.ftwAPIkey);
-			c.setRequestProperty("charset", "utf-8");
-			c.setRequestProperty("Content-Type", "application/json");
-			c.setRequestProperty("User-Agent", "Bot");
-			c.setDoOutput(true);
-			c.setUseCaches(false);
-			c.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-			try (DataOutputStream wr = new DataOutputStream( c.getOutputStream())) {
-				wr.write(postData);
-			}
-			if (c.getResponseCode() == 200){
-				c.disconnect();
-				return Config.ftw_success;
-			}
-			c.disconnect();
-			return Config.ftw_notconnected;
-
-		} catch (IOException e) {
-			LOGGER.log(Level.WARNING, "Exception: ", e);
-			Sentry.capture(e);
-		}
-		return Config.ftw_error;
 	}
 
 	public void invitePlayersToTeam(Player captain, List<Player> invitedPlayers) {
@@ -1833,5 +1805,21 @@ public class PickupLogic {
 		}
 
 		bot.sendMsg(player.getLastPublicChannel(), msg);
+	}
+
+	public void cmdEnableDynamicServer(){
+		dynamicServers = true;
+	}
+
+	public void cmdDisableDynamicServer(){
+		dynamicServers = false;
+	}
+
+	public boolean getDynamicServers(){
+		return dynamicServers;
+	}
+
+	public void cmdGetPingURL(Player player) {
+		bot.sendNotice(player.getDiscordUser(), Config.ftw_error_noping.replace(".url.", FtwglAPI.requestPingUrl(player)));
 	}
 }

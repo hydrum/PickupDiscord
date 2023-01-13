@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.gost0r.pickupbot.discord.*;
+import de.gost0r.pickupbot.ftwgl.FtwglAPI;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 
 public class PickupBot extends DiscordBot {
@@ -19,15 +20,11 @@ public class PickupBot extends DiscordBot {
 
 	public static PickupLogic logic;
 	public String env;
-	public String ftwAPIUrl;
-	public String ftwAPIkey;
 
 	@Override
-	public void init(String env, String ftwAPIUrl, String ftwAPIkey) {
-		super.init(env, ftwAPIUrl, ftwAPIkey);
+	public void init(String env) {
+		super.init(env);
 		this.env = env;
-		this.ftwAPIUrl = ftwAPIUrl;
-		this.ftwAPIkey = ftwAPIkey;
 	
 		logic = new PickupLogic(this);
 		sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), Config.bot_online);
@@ -637,6 +634,12 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
+				case Config.CMD_PING:
+					if (p != null){
+						logic.cmdGetPingURL(p);
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
 			}
 		}
 
@@ -918,6 +921,16 @@ public class PickupBot extends DiscordBot {
 					case Config.CMD_RESETELO:
 						logic.cmdResetElo();
 						sendNotice(msg.user, Config.elo_reset);
+						break;
+
+					case Config.CMD_ENABLEDYNSERVER:
+						logic.cmdEnableDynamicServer();
+						super.sendMsg(msg.channel, Config.admin_cmd_successful + msg.content);
+						break;
+
+					case Config.CMD_DISABLEDYNSERVER:
+						logic.cmdDisableDynamicServer();
+						super.sendMsg(msg.channel, Config.admin_cmd_successful + msg.content);
 						break;
 				}
 			}

@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import de.gost0r.pickupbot.ftwgl.FtwglAPI;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.json.JSONException;
 
@@ -38,8 +39,9 @@ public class PickupBotDiscordMain {
 			Country.initCountryCodes();
 
 			DiscordBot.setToken(dotenv.get("DISCORD_TOKEN"));
+			FtwglAPI.setupCredentials(dotenv.get("FTW_URL"), dotenv.get("FTW_KEY"));
 			PickupBot bot = new PickupBot();
-			bot.init(env, dotenv.get("FTW_URL"), dotenv.get("FTW_KEY"));
+			bot.init(env);
 
 
 			while (true) {
