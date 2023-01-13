@@ -468,7 +468,7 @@ public class Match implements Runnable {
 			for (Player p : sortedPlayers){
 				captainAnnouncement += "\n" + logic.cmdGetElo(p, false);
 				if (logic.getDynamicServers()){
-					captainAnnouncement += " " + String.valueOf(server.playerPing.get(p)) + " ms";
+					captainAnnouncement += " " + String.valueOf("\t " + server.playerPing.get(p)) + "ms";
 				}
 			}
 			logic.bot.sendMsg(threadChannels, captainAnnouncement);
