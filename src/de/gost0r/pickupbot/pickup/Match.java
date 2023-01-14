@@ -362,7 +362,7 @@ public class Match implements Runnable {
 			}
 		}
 		
-		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg.toString(), getMatchEmbed());
+		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg.toString(), getMatchEmbed(false));
 	}
 
 	private void sendAftermath(Status status, List<Player> involvedPlayers) {
@@ -663,7 +663,7 @@ public class Match implements Runnable {
 		msg = msg.replace(".gametype.", gametype.getName());
 		msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
 		if (logic.getDynamicServers()){
-			msg = msg.replace(".region.", Country.getCountryFlag(server.country));
+			msg = msg.replace(".region.", Country.getCountryFlag(server.country) + " ``" + server.city + "``");
 		} else if (server.region == Region.NAE || server.region == Region.NAW) {
 			msg = msg.replace(".region.", ":flag_us:");
 		} else if (server.region == Region.EU) {
@@ -719,10 +719,6 @@ public class Match implements Runnable {
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg.toString());
 
 		if (logic.getDynamicServers()){
-			String spawnMsg = Config.pkup_go_pub_servspawn;
-			spawnMsg = spawnMsg.replace(".flag.", Country.getCountryFlag(server.country));
-			spawnMsg = spawnMsg.replace(".city.", server.city);
-			logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), spawnMsg);
 			FtwglAPI.getSpawnedServerIp(server);
 			try {
 				Thread.sleep(5000);
@@ -769,7 +765,7 @@ public class Match implements Runnable {
 		
 		server.startMonitoring(this);
 		
-		liveScoreMsgs = logic.bot.sendMsgToEdit(threadChannels, "", getMatchEmbed(), null);
+		liveScoreMsgs = logic.bot.sendMsgToEdit(threadChannels, "", getMatchEmbed(false), null);
 	}
 
 	List<GameMap> getMostMapVotes() {
@@ -964,7 +960,7 @@ public class Match implements Runnable {
 		return msg;
 	}
 	
-	public DiscordEmbed getMatchEmbed() {
+	public DiscordEmbed getMatchEmbed(boolean forceNoDynamic) {
 		ServerState serverState = null;
 		if (server.isTaken()) {
 			serverState = server.getServerMonitor().getState();
@@ -975,7 +971,7 @@ public class Match implements Runnable {
 		String region_flag;
 		if (server == null || server.region == null) {
 			region_flag = "";
-		} else if (logic.getDynamicServers()){
+		} else if (logic.getDynamicServers() && !forceNoDynamic){
 			region_flag = Country.getCountryFlag(server.country) + " " + server.city + " - ";
 		} else if (server.region == Region.NAE || server.region == Region.NAW) {
 			region_flag =  ":flag_us:";
@@ -1022,20 +1018,20 @@ public class Match implements Runnable {
 			String score_row = entry.getValue().score[0].score +  "/" + entry.getValue().score[0].deaths + "/" + entry.getValue().score[0].assists + "\n";
 
 			String ping_row = "";
-			if (logic.getDynamicServers()){
+			if (logic.getDynamicServers() && !forceNoDynamic){
 				ping_row = String.valueOf(server.playerPing.get(entry.getKey())) + "\n";
 			}
 			if (teamList.get("red").contains(entry.getKey())) {
 				red_team_player_embed.append(player_row);
 				red_team_score_embed.append(score_row);
-				if (logic.getDynamicServers()){
+				if (logic.getDynamicServers() && !forceNoDynamic){
 					red_team_ping_embed.append(ping_row);
 				}
 			}
 			else if (teamList.get("blue").contains(entry.getKey())) {
 				blue_team_player_embed.append(player_row);
 				blue_team_score_embed.append(score_row);
-				if (logic.getDynamicServers()){
+				if (logic.getDynamicServers() && !forceNoDynamic){
 					blue_team_ping_embed.append(ping_row);
 				}
 			}
@@ -1137,7 +1133,7 @@ public class Match implements Runnable {
 			score = server.getServerMonitor().getScoreArray();
 		}
 		for (DiscordMessage liveScoreMsg : liveScoreMsgs) {
-			liveScoreMsg.edit(null, getMatchEmbed());
+			liveScoreMsg.edit(null, getMatchEmbed(false));
 		}
 	}
 	

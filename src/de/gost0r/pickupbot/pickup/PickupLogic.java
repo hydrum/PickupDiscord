@@ -978,7 +978,7 @@ public class PickupLogic {
 			
 			Match match = db.loadMatch(idx); // TODO: cache?
 			if (match != null) {
-				bot.sendMsg(bot.getLatestMessageChannel(), null, match.getMatchEmbed());
+				bot.sendMsg(bot.getLatestMessageChannel(), null, match.getMatchEmbed(true));
 				return;
 			}			
 		
@@ -992,7 +992,7 @@ public class PickupLogic {
 		try {
 			Match match = db.loadLastMatch(); 
 			if (match != null) {
-				bot.sendMsg(bot.getLatestMessageChannel(), null, match.getMatchEmbed());
+				bot.sendMsg(bot.getLatestMessageChannel(), null, match.getMatchEmbed(true));
 				return;
 			}			
 		
@@ -1007,7 +1007,7 @@ public class PickupLogic {
 		try {
 			Match match = db.loadLastMatchPlayer(p); 
 			if (match != null) {
-				bot.sendMsg(bot.getLatestMessageChannel(), null, match.getMatchEmbed());
+				bot.sendMsg(bot.getLatestMessageChannel(), null, match.getMatchEmbed(true));
 				return;
 			}			
 		
@@ -1077,6 +1077,12 @@ public class PickupLogic {
 				Server bs;
 				if (dynamicServers){
 					bs = FtwglAPI.spawnDynamicServer(m.getPlayerList());
+					if (bs != null) {
+						String spawnMsg = Config.pkup_go_pub_servspawn;
+						spawnMsg = spawnMsg.replace(".flag.", Country.getCountryFlag(bs.country));
+						spawnMsg = spawnMsg.replace(".city.", bs.city);
+						bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), spawnMsg);
+					}
 				}
 				else{
 					bs = getBestServer(m.getPreferredServerRegion());
