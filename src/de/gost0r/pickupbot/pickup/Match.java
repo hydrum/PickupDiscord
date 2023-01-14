@@ -628,12 +628,14 @@ public class Match implements Runnable {
 	public void run() {
 		
 		gtvServer = logic.setupGTV();
-
 		Random rand = new Random();
-		int password = rand.nextInt((999999-100000) + 1) + 100000;
-		server.password = String.valueOf(password);
-		LOGGER.info("Password: " + server.password);
 
+		if (!logic.getDynamicServers()){
+			int password = rand.nextInt((999999-100000) + 1) + 100000;
+			server.password = String.valueOf(password);
+			LOGGER.info("Password: " + server.password);
+		}
+		
 		// Get most voted map
 		List<GameMap> mapList = getMostMapVotes();
 		if (mapList.size() == 0) {
