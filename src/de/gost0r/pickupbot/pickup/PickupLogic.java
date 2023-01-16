@@ -191,7 +191,7 @@ public class PickupLogic {
 
 	public void cmdPick(DiscordInteraction interaction, Player player, int pick) {
 		for (Match match : ongoingMatches) {
-			if (match.isCaptainTurn(player)) {
+			if (!match.hasSquads() && match.isCaptainTurn(player)) {
 				interaction.respond(null);
 				match.pick(player, pick);
 				return;

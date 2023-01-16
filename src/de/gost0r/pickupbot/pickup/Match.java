@@ -635,7 +635,7 @@ public class Match implements Runnable {
 			server.password = String.valueOf(password);
 			LOGGER.info("Password: " + server.password);
 		}
-		
+
 		// Get most voted map
 		List<GameMap> mapList = getMostMapVotes();
 		if (mapList.size() == 0) {
@@ -1141,5 +1141,9 @@ public class Match implements Runnable {
 	
 	public Server getGtvServer() {
 		return gtvServer;
+	}
+
+	public boolean hasSquads(){
+		return squadList.size() > 0;
 	}
 }
