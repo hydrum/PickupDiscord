@@ -995,7 +995,7 @@ public class Match implements Runnable {
 		}
 		
 		embed.color = 7056881;
-		embed.description = map != null ? "**" + gametype.getName() + "** - *" + map.name + "*" : "null";
+		embed.description = map != null ? "**" + gametype.getName() + "** - [" + map.name + "](https://urt.li/q3ut4/" + map.name + ".pk3)" : "null";
 		
 		StringBuilder red_team_player_embed = new StringBuilder();
 		StringBuilder red_team_score_embed = new StringBuilder();

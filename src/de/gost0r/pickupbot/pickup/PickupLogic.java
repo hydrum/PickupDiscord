@@ -1212,6 +1212,7 @@ public class PickupLogic {
 				bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 				autoBanPlayer(m.getCaptainsTurn(), BanReason.NOSHOW);
 				m.reset();
+				ongoingMatches.remove(m);
 			} else if (pickReminderTime < System.currentTimeMillis() && !m.getPickReminderSent()) {
 				m.setPickReminderSent(true);
 				LOGGER.info("PICK: REMINDER - " + m.getCaptainsTurn().getUrtauth() + ": " + pickKickTime + " > " + System.currentTimeMillis());

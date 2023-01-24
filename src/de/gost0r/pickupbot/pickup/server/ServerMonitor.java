@@ -125,7 +125,7 @@ public class ServerMonitor implements Runnable {
 		
 	}
 	private void checkNoMercy(RconPlayersParsed rpp) {
-		if (Math.abs(rpp.scores[0] - rpp.scores[1]) >= 10 & !noMercyIssued){
+		if (Math.abs(rpp.scores[0] - rpp.scores[1]) >= 10 && !noMercyIssued && !match.getGametype().getName().equalsIgnoreCase("1V1")){
 			server.sendRcon("timelimit 1");
 			server.sendRcon("bigtext \"Mercy rule! Ending game in 1min\"");
 			server.sendRcon("say \"^1[MERCY RULE] ^3Ending game in 1min\"");
@@ -391,7 +391,8 @@ public class ServerMonitor implements Runnable {
 		}
 		else if (state == ServerState.LIVE)
 		{
-			if (rpp.gametime != null && rpp.gametime.equals("00:00:00"))
+			// TODO: Refactor this, hard-coded for 1v1
+			if ((rpp.gametime != null && rpp.gametime.equals("00:00:00") && !match.getGametype().getName().equalsIgnoreCase("1v1")) || (match.getGametype().getName().equalsIgnoreCase("1v1") && (rpp.scores[0] >= 15 || rpp.scores[1] >= 15)))
 			{
 				state = ServerState.SCORE;
 				LOGGER.info("SWITCHED LIVE -> SCORE");
