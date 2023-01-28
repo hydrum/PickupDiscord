@@ -249,6 +249,13 @@ public class PickupLogic {
 		return true;
 	}
 
+	public boolean cmdEnforcePlayerAC(Player player) {
+		boolean oldEnforceAC = player.getEnforceAC();
+		player.setEnforceAC(!oldEnforceAC);
+		db.enforcePlayerAC(player);
+		return !oldEnforceAC;
+	}
+
 	public void cmdSetPlayerCountry(DiscordUser user, String str_country) {
 		
 			// check if user is already registered
@@ -691,23 +698,18 @@ public class PickupLogic {
 		}
 	}
 
-	public void cmdGetData(String id, DiscordChannel channel) {
-		String msg = "Match not found.";
-		try {
-			int i_id = Integer.parseInt(id);
-			for (Match match : ongoingMatches) {
-				if (match.getID() == i_id) {
-					msg = Config.pkup_pw;
-					msg = msg.replace(".server.", match.getServer().getAddress());
-					msg = msg.replace(".password.", match.getServer().password);
-					bot.sendMsg(channel, msg);
-				}
-			}
-		} catch (NumberFormatException e) {
-			LOGGER.log(Level.WARNING, "Exception: ", e);
-			Sentry.capture(e);
+	public void cmdGetData(DiscordChannel channel) {
+		if (ongoingMatches.isEmpty()){
+			String msg = "No active matches.";
+			bot.sendMsg(channel, msg);
 		}
-		bot.sendMsg(channel, msg);
+
+		for (Match match : ongoingMatches) {
+			String msg = "**" + match.getGametype().getName() + " Match #" + String.valueOf(match.getID()) + "** " +  Config.pkup_pw;
+			msg = msg.replace(".server.", match.getServer().getAddress());
+			msg = msg.replace(".password.", match.getServer().password);
+			bot.sendMsg(channel, msg);
+		}
 	}
 
 	public boolean cmdEnableMap(String mapname, String gametype) {

@@ -731,12 +731,21 @@ public class Match implements Runnable {
 		}
 
 		startTime = System.currentTimeMillis();
+		List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
+		DiscordButton button = new DiscordButton(DiscordButtonStyle.GREEN);
+		button.custom_id = Config.INT_LAUNCHAC + "_" + String.valueOf(id) + "_" + server.getAddress() + "_" + server.password;
+		button.label = Config.BTN_LAUNCHAC;
+		buttons.add(button);
 
 		msg = Config.pkup_go_player;
 		msg = msg.replace(".server.", server.getAddress());
 		msg = msg.replace(".password.", server.password);
 		for (String team : teamList.keySet()) {
 			for (Player player : teamList.get(team)) {
+				if (player.getEnforceAC()){
+					logic.bot.sendMsgToEdit(player.getDiscordUser().getDMChannel(), Config.pkup_go_player_ac, null, buttons);
+					continue;
+				}
 				String msg_t = msg.replace(".team.", team.toUpperCase());
 				logic.bot.sendMsg(player.getDiscordUser(), msg_t);
 			}
@@ -744,11 +753,6 @@ public class Match implements Runnable {
 
 		msg = Config.pkup_go_pub_sent;
 		msg = msg.replace(".gametype.", gametype.getName());
-		List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
-		DiscordButton button = new DiscordButton(DiscordButtonStyle.GREEN);
-		button.custom_id = Config.INT_LAUNCHAC + "_" + String.valueOf(id) + "_" + server.getAddress() + "_" + server.password;
-		button.label = Config.BTN_LAUNCHAC;
-		buttons.add(button);
 		logic.bot.sendMsgToEdit(logic.getChannelByType(PickupChannelType.PUBLIC), msg, null, buttons);
 
 		// set server data
@@ -995,7 +999,7 @@ public class Match implements Runnable {
 		}
 		
 		embed.color = 7056881;
-		embed.description = map != null ? "**" + gametype.getName() + "** - [" + map.name + "](https://urt.li/q3ut4/" + map.name + ".pk3)" : "null";
+		embed.description = map != null ? "**" + gametype.getName() + "** - [" + map.name + "](https://cdn.ftwgl.net/download/" + map.name + ".pk3)" : "null";
 		
 		StringBuilder red_team_player_embed = new StringBuilder();
 		StringBuilder red_team_score_embed = new StringBuilder();

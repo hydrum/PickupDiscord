@@ -61,6 +61,7 @@ public class Database {
 													+ "elochange INTEGER DEFAULT 0,"
 													+ "active TEXT,"
 													+ "country TEXT,"
+													+ "enforce_ac TEXT DEFAULT 'false',"
 													+ "PRIMARY KEY (userid, urtauth) )";
 			stmt.executeUpdate(sql);
 			
@@ -651,7 +652,7 @@ public class Database {
 	public Player loadPlayer(DiscordUser user, String urtauth, boolean onlyActive) {
 		Player player = null;
 		try {
-			String sql = "SELECT userid, urtauth, elo, elochange, active, country FROM player WHERE userid LIKE ? AND urtauth LIKE ? AND active LIKE ?";
+			String sql = "SELECT userid, urtauth, elo, elochange, active, country, enforce_ac FROM player WHERE userid LIKE ? AND urtauth LIKE ? AND active LIKE ?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, user == null ? "%" : user.id);
 			pstmt.setString(2, urtauth == null ? "%" : urtauth);
@@ -662,6 +663,7 @@ public class Database {
 				player.setElo(rs.getInt("elo"));
 				player.setEloChange(rs.getInt("elochange"));
 				player.setActive(Boolean.parseBoolean(rs.getString("active")));
+				player.setEnforceAC(Boolean.parseBoolean(rs.getString("enforce_ac")));
 				player.setCountry(rs.getString("country"));
 
 				sql = "SELECT start, end, reason, pardon, forgiven FROM banlist WHERE player_userid=? AND player_urtauth=?";
@@ -899,6 +901,21 @@ public class Database {
 			String sql = "UPDATE player SET active=? WHERE userid=? AND urtauth=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, String.valueOf(false));
+			pstmt.setString(2, player.getDiscordUser().id);
+			pstmt.setString(3, player.getUrtauth());
+			pstmt.executeUpdate();
+			pstmt.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+	}
+
+	public void enforcePlayerAC(Player player) {
+		try {
+			String sql = "UPDATE player SET enforce_ac=? WHERE userid=? AND urtauth=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, String.valueOf(player.getEnforceAC()));
 			pstmt.setString(2, player.getDiscordUser().id);
 			pstmt.setString(3, player.getUrtauth());
 			pstmt.executeUpdate();

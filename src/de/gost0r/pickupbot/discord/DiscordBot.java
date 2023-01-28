@@ -77,11 +77,16 @@ public class DiscordBot  {
 									DiscordUser.getUser(obj.getJSONObject("message").getJSONObject("author")),
 									DiscordChannel.findChannel(obj.getJSONObject("message").getString("channel_id")),
 									obj.getJSONObject("message").getString("content"));
-				
+				if (obj.has("member")){
+					user = DiscordUser.getUser(obj.getJSONObject("member").getJSONObject("user"));
+				}
+				else{
+					user = DiscordUser.getUser(obj.getJSONObject("user"));
+				}
 				DiscordInteraction interaction = new DiscordInteraction(obj.getString("id"), 
 												obj.getString("token"), 
 												obj.getJSONObject("data").getString("custom_id"),
-												DiscordUser.getUser(obj.getJSONObject("member").getJSONObject("user")),
+												user,
 												message);
 				
 				recvInteraction(interaction);

@@ -72,6 +72,7 @@ public class Config {
 	public static final String CMD_SHOWMATCHES			= "!showmatches";
 	
 	public static final String CMD_UNREGISTER			= "!unregister";
+	public static final String CMD_ENFORCEAC			= "!enforceac";
 
 	public static final String CMD_ADDCHANNEL			= "!addchannel";
 	public static final String CMD_REMOVECHANNEL		= "!removechannel";
@@ -113,7 +114,7 @@ public class Config {
 	public static final String USE_CMD_LOCK				= "!lock to prevent joining the queues.";
 	public static final String USE_CMD_UNLOCK			= "!unlock";
 	public static final String USE_CMD_RESET			= "!reset <all/cur/type/id>";
-	public static final String USE_CMD_GETDATA			= "!getdata <match id>";
+	public static final String USE_CMD_GETDATA			= "!getdata";
 	public static final String USE_CMD_ENABLEMAP		= "!enablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_DISABLEMAP		= "!disablemap <ut4_map> <gametype>";
 	public static final String USE_CMD_RCON				= "!rcon <serverid> <rconstring>";
@@ -157,6 +158,7 @@ public class Config {
 	public static final String USE_CMD_SHOWMATCHES		= "!showmatches displays the queues AND live matches";
 
 	public static final String USE_CMD_UNREGISTER		= "!unregister <urtauth>";
+	public static final String USE_CMD_ENFORCEAC		= "!enforceac <urtauth>";
 
 	public static final String USE_CMD_ADDCHANNEL		= "!addchannel <#name> <public/admin>";
 	public static final String USE_CMD_REMOVECHANNEL	= "!removechannel <#name> <public/admin>";
@@ -208,6 +210,7 @@ public class Config {
 	public static final String pkup_match_print_info	= "**.gametype. #.gamenumber.**: **[**.map.**] [**.ingame.**] [**.redteam.**]** VS **[**.blueteam.**]**";
 
 	public static final String pkup_go_player			= "Pickup starts now! Connect, choose positions and ready up! **[ /connect .server. ; password .password. ]**";
+	public static final String pkup_go_player_ac		= "Pickup starts now! Connect, choose positions and ready up!\n :warning: **You are forced to use the anticheat, click the button below to connect.**";
 	public static final String pkup_go_captains			= "Pickup is about to start and you are captain! Please pick players in the recently created discord thread.";
 	public static final String pkup_go_pub_head			= "**.gametype.: Match #.gamenumber.** .region. (avg ELO: .elo.)";
 	public static final String pkup_go_pub_team			= ".team. team: .playerlist.";
@@ -306,6 +309,8 @@ public class Config {
 	public static final String admin_cmd_successful		= ":white_check_mark: Successful: ";
 	public static final String admin_cmd_unsuccessful	= ":x: Unsuccessful: ";
 	public static final String wait_testing_server		= "Testing server list. This can take a while...";
+	public static final String admin_enforce_ac_on		= ":white_check_mark: The anticheat is now enforced for the player ``.urtauth.``";
+	public static final String admin_enforce_ac_off		= ":negative_squared_cross_mark: The anticheat is no longer enforced for the player ``.urtauth.``";
 	
 	public static final String bot_online				= "The bot is back online!";
 

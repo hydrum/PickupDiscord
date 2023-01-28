@@ -30,6 +30,7 @@ public class Player {
 	private List<PlayerBan> bans = new ArrayList<PlayerBan>();
 		
 	private boolean active = true;
+	private boolean enforceAC = false;
 	
 	private boolean surrender = false;
 	
@@ -315,4 +316,8 @@ public class Player {
 	public void setLastPublicChannel(DiscordChannel channel){
 		lastPublicChannel = channel;
 	}
+
+	public boolean getEnforceAC() { return this.enforceAC; }
+
+	public void setEnforceAC(boolean enforceAC) { this.enforceAC = enforceAC; }
 }

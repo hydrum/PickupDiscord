@@ -249,6 +249,9 @@ public class PickupBot extends DiscordBot {
 							{
 								playerToAdd = Player.get(u);
 							}
+							else {
+								playerToAdd = Player.get(data[i]);
+							}
 							if (playerToAdd != null)
 							{
 								playerToAdd.setLastPublicChannel(p.getLastPublicChannel());
@@ -678,9 +681,9 @@ public class PickupBot extends DiscordBot {
 						break;
 
 					case Config.CMD_GETDATA:
-						if (data.length == 2)
+						if (data.length == 1)
 						{
-							logic.cmdGetData(data[1], msg.channel);
+							logic.cmdGetData(msg.channel);
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_GETDATA));
 						break;
@@ -836,6 +839,23 @@ public class PickupBot extends DiscordBot {
 							else sendMsg(msg.channel, Config.player_not_found);
 						}
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_UNREGISTER));
+						break;
+
+					case Config.CMD_ENFORCEAC:
+						if (data.length == 2)
+						{
+							Player player = Player.get(data[1].toLowerCase());
+							if (player != null)
+							{
+								if (logic.cmdEnforcePlayerAC(player))
+								{
+									super.sendMsg(msg.channel, Config.admin_enforce_ac_on.replace(".urtauth.", player.getUrtauth()));
+								}
+								else super.sendMsg(msg.channel, Config.admin_enforce_ac_off.replace(".urtauth.", player.getUrtauth()));
+							}
+							else sendMsg(msg.channel, Config.player_not_found);
+						}
+						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ENFORCEAC));
 						break;
 
 					case Config.CMD_ADDBAN:
