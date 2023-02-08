@@ -320,4 +320,8 @@ public class Player {
 	public boolean getEnforceAC() { return this.enforceAC; }
 
 	public void setEnforceAC(boolean enforceAC) { this.enforceAC = enforceAC; }
+
+	public float getCaptainScore(){
+		return (float) (elo + (kdr * 500 + db.getWDLForPlayer(this).calcWinRatio() * 500.0));
+	}
 }

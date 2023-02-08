@@ -444,7 +444,7 @@ public class Match implements Runnable {
 		sortedPlayers.add(playerList.get(0));
 		for (Player player : playerList) {
 			for (Player sortedPlayer : sortedPlayers) {
-				if (player.getElo() >= sortedPlayer.getElo() && !player.equals(sortedPlayer)) {
+				if (player.getCaptainScore() >= sortedPlayer.getCaptainScore() && !player.equals(sortedPlayer)) {
 					sortedPlayers.add(sortedPlayers.indexOf(sortedPlayer), player);
 					break;
 				}
