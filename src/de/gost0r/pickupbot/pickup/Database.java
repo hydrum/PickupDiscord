@@ -1035,7 +1035,7 @@ public class Database {
 	public int getKDRRankForPlayer(Player player) {
 		int rank = -1;
 		try {
-			String sql = "WITH tablekdr (auth, matchcount, kdr) AS (SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) AS kdr FROM (score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid)  WHERE player.active = 'true' GROUP BY player_in_match.player_urtauth HAVING matchcount > 100 ORDER BY kdr DESC) SELECT ( SELECT COUNT(*) + 1  FROM tablekdr  WHERE kdr > t.kdr) as rowIndex FROM tablekdr t WHERE auth = ?";
+			String sql = "WITH tablekdr (auth, matchcount, kdr) AS (SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) AS kdr FROM (score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid INNER JOIN match ON player_in_match.matchid = match.id)  WHERE player.active = 'true' and match.gametype=\"TS\" GROUP BY player_in_match.player_urtauth HAVING matchcount > 100 ORDER BY kdr DESC) SELECT ( SELECT COUNT(*) + 1  FROM tablekdr  WHERE kdr > t.kdr) as rowIndex FROM tablekdr t WHERE auth = ?";
 			//String sql = "SELECT rank FROM (SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) AS kdr, ROW_NUMBER() OVER (ORDER BY (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) DESC) as rank FROM (score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid)  WHERE player.active = 'true' GROUP BY player_in_match.player_urtauth HAVING matchcount > 10 ) WHERE auth = ?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, player.getUrtauth());
@@ -1069,7 +1069,7 @@ public class Database {
 	public Map<Player, Float> getTopKDR(int number) {
 		Map<Player, Float> topkdr = new LinkedHashMap<Player, Float>();
 		try {
-			String sql = "SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) AS kdr FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid  WHERE player.active = \"true\" GROUP BY player_in_match.player_urtauth HAVING matchcount > 100 ORDER BY kdr DESC LIMIT ?";
+			String sql = "SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) AS kdr FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid INNER JOIN match ON match.id = player_in_match.matchid WHERE player.active = \"true\" and match.gametype = \"TS\" GROUP BY player_in_match.player_urtauth HAVING matchcount > 100 ORDER BY kdr DESC LIMIT ?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setInt(1, number);
 			ResultSet rs = pstmt.executeQuery();
@@ -1136,7 +1136,7 @@ public class Database {
 		
 		try {
 			// TODO: maybe move this somewhere
-			String sql = "SELECT SUM(kills) as sumkills, SUM(deaths) as sumdeaths, SUM(assists) as sumassists FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim WHERE player_userid=? AND player_urtauth=?;";
+			String sql = "SELECT SUM(kills) as sumkills, SUM(deaths) as sumdeaths, SUM(assists) as sumassists FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim INNER JOIN match ON match.id = player_in_match.matchid WHERE match.gametype=\"TS\" AND player_userid=? AND player_urtauth=?;";
 			PreparedStatement stmt = c.prepareStatement(sql);
 			stmt.setString(1, player.getDiscordUser().id);
 			stmt.setString(2, player.getUrtauth());
