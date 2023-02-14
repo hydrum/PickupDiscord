@@ -626,7 +626,7 @@ public class Match implements Runnable {
 
 	// DONT CALL THIS OUTSIDE OF launch() !!!
 	public void run() {
-		
+		startTime = System.currentTimeMillis();
 		gtvServer = logic.setupGTV();
 		Random rand = new Random();
 
@@ -730,7 +730,6 @@ public class Match implements Runnable {
 			}
 		}
 
-		startTime = System.currentTimeMillis();
 		List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
 		DiscordButton button = new DiscordButton(DiscordButtonStyle.GREEN);
 		button.custom_id = Config.INT_LAUNCHAC + "_" + String.valueOf(id) + "_" + server.getAddress() + "_" + server.password;
