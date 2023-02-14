@@ -1021,7 +1021,10 @@ public class Match implements Runnable {
 				country = ":flag_" + entry.getKey().getCountry().toLowerCase() + ":";
 			}
 			String player_row = country + " \u200b \u200b " +  entry.getKey().getUrtauth() + "\n";
-			String score_row = entry.getValue().score[0].score +  "/" + entry.getValue().score[0].deaths + "/" + entry.getValue().score[0].assists + "\n";
+			int score = entry.getValue().score[0].score + entry.getValue().score[1].score;
+			int deaths = entry.getValue().score[0].deaths + entry.getValue().score[1].deaths;
+			int assists = entry.getValue().score[0].assists + entry.getValue().score[1].assists;
+			String score_row = score +  "/" + deaths + "/" + assists + "\n";
 
 			String ping_row = "";
 			if (logic.getDynamicServers() && !forceNoDynamic){
