@@ -177,6 +177,9 @@ public class Config {
 	public static final String INT_LAUNCHAC				= "launchac";
 	public static final String INT_TEAMINVITE			= "teaminvite";
 	public static final String INT_TEAMREMOVE			= "teamremove";
+	public static final String INT_SEASONSTATS			= "seasonstats";
+	public static final String INT_SEASONLIST			= "seasonlist";
+	public static final String INT_SEASONSELECTED		= "seasonselected";
 	
 	//------------------------------------------------------------------------------------//
 

@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import io.sentry.Sentry;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -83,11 +84,16 @@ public class DiscordBot  {
 				else{
 					user = DiscordUser.getUser(obj.getJSONObject("user"));
 				}
+				JSONArray values = null;
+				if (obj.getJSONObject("data").has("values")){
+					values = obj.getJSONObject("data").getJSONArray("values");
+				}
 				DiscordInteraction interaction = new DiscordInteraction(obj.getString("id"), 
 												obj.getString("token"), 
 												obj.getJSONObject("data").getString("custom_id"),
 												user,
-												message);
+												message,
+												values);
 				
 				recvInteraction(interaction);
 				break;

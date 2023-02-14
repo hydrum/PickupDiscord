@@ -197,16 +197,49 @@ public class DiscordAPI {
 		return false;
 	}
 	
-	public static void interactionRespond(String interaction_id, String interaction_token, String content) {
-		if (content == null) {
+	public static void interactionRespond(String interaction_id, String interaction_token, String content, DiscordEmbed embed, ArrayList<DiscordComponent> components) {
+		if (content == null && embed == null && components == null) {
 			sendPostRequest("/interactions/"+ interaction_id + "/" + interaction_token + "/callback", new JSONObject().put("type", 6));
+			return;
 		}
-		else {
-			JSONObject data = new JSONObject();
+
+		JSONObject data = new JSONObject();
+		data.put("flags", 64);
+		if (content != null){
 			data.put("content", content);
-			data.put("flags", 64);
-			sendPostRequest("/interactions/"+ interaction_id + "/" + interaction_token + "/callback", new JSONObject().put("type", 4).put("data", data));
 		}
+		if (embed != null){
+			List<JSONObject> embedList = new ArrayList<JSONObject>();
+			embedList.add(embed.getJSON());
+			data.put("embeds", embedList);
+		}
+
+		List<List<JSONObject>> componentListGlob = new ArrayList<List<JSONObject>>();
+		List<JSONObject> componentList = new ArrayList<JSONObject>();
+		if(components != null) {
+			for (DiscordComponent component : components) {
+				componentList.add(component.getJSON());
+
+				if (componentList.size() == 5) {
+					componentListGlob.add(new ArrayList<JSONObject>(componentList));
+					componentList.clear();
+				}
+			}
+
+			if (!componentList.isEmpty()) {
+				componentListGlob.add(componentList);
+			}
+
+			List<JSONObject> componentObjList = new ArrayList<JSONObject>();
+			for (List<JSONObject> componentListElem : componentListGlob) {
+				JSONObject componentObj = new JSONObject();
+				componentObj.put("type", 1);
+				componentObj.put("components", componentListElem);
+				componentObjList.add(componentObj);
+			}
+			data.put("components", componentObjList);
+		}
+		sendPostRequest("/interactions/"+ interaction_id + "/" + interaction_token + "/callback", new JSONObject().put("type", 4).put("data", data));
 	}
 	
 	private static synchronized String sendPostRequest(String request, JSONObject content) {

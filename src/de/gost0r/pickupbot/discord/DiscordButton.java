@@ -26,7 +26,6 @@ public class DiscordButton extends DiscordComponent {
 		if (disabled) {
 			buttonJSON.put("disabled", disabled);
 		}
-		
 		if (label != null) {
 			buttonJSON.put("label", label);
 		} 

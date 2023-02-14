@@ -444,7 +444,7 @@ public class Match implements Runnable {
 		sortedPlayers.add(playerList.get(0));
 		for (Player player : playerList) {
 			for (Player sortedPlayer : sortedPlayers) {
-				if (player.getCaptainScore() >= sortedPlayer.getCaptainScore() && !player.equals(sortedPlayer)) {
+				if (player.getCaptainScore(gametype) >= sortedPlayer.getCaptainScore(gametype) && !player.equals(sortedPlayer)) {
 					sortedPlayers.add(sortedPlayers.indexOf(sortedPlayer), player);
 					break;
 				}
@@ -1087,7 +1087,7 @@ public class Match implements Runnable {
 		else if (saPlayers > gametype.getTeamSize() * 2 * 0.7){
 			return Region.SA;
 		}
-		else if (euPlayers > gametype.getTeamSize() * 2 * 0.7 || regionScore > gametype.getTeamSize()){
+		else if (euPlayers > gametype.getTeamSize() * 2 * 0.7){
 			return Region.EU;
 		}
 		else if (regionScore < 0){

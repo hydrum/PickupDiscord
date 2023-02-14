@@ -1313,6 +1313,18 @@ public class PickupBot extends DiscordBot {
 		case Config.INT_TEAMREMOVE:
 			logic.removeTeamMember(interaction, p, Player.get(data[1]), Player.get(data[2]));
 			break;
+
+		case Config.INT_SEASONSTATS:
+			logic.showSeasonStats(interaction, Player.get(data[1]), Integer.parseInt(data[2]));
+			break;
+
+		case Config.INT_SEASONLIST:
+			logic.showSeasonList(interaction, Player.get(data[1]));
+			break;
+
+		case Config.INT_SEASONSELECTED:
+			logic.showSeasonStats(interaction, Player.get(data[1]), Integer.parseInt(interaction.values.get(0)));
+			break;
 		}
 	}
 	

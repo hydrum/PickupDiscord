@@ -321,7 +321,7 @@ public class Player {
 
 	public void setEnforceAC(boolean enforceAC) { this.enforceAC = enforceAC; }
 
-	public float getCaptainScore(){
-		return (float) (elo + (kdr * 500 + db.getWDLForPlayer(this).calcWinRatio() * 500.0));
+	public float getCaptainScore(Gametype gt){
+		return (float) (elo + (kdr * 500 + db.getWDLForPlayer(this, gt, Season.AllTimeSeason()).calcWinRatio() * 500.0));
 	}
 }

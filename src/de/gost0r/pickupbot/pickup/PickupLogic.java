@@ -51,6 +51,8 @@ public class PickupLogic {
 	
 	private Map<BanReason, String[]> banDuration;
 	private Map<Gametype, GameMap> lastMapPlayed;
+
+	private Season currentSeason;
 	
 	public PickupLogic(PickupBot bot) {
 		this.bot = bot;
@@ -87,6 +89,8 @@ public class PickupLogic {
 		Server testGTV = new Server(0, "gtv.b00bs-clan.com", 709, "arkon4bmn", "SevenAndJehar", true, null);
 		gtvServerList = new ArrayList<Server>();
 		gtvServerList.add(testGTV);
+
+		currentSeason = db.getCurrentSeason();
 	}
 
 	public void cmdAddPlayer(Player player, List<Gametype> modes, boolean forced) {
@@ -122,9 +126,9 @@ public class PickupLogic {
 		
 		int eloRank = db.getRankForPlayer(player);
 		int minEloRank = 40;
-		int kdrRank = db.getKDRRankForPlayer(player);
+		int kdrRank = db.getKDRRankForPlayer(player, Season.AllTimeSeason());
 		int minKdrRank = 20;
-		int winRank = db.getWDLRankForPlayer(player);
+		int winRank = db.getWDLRankForPlayer(player, getGametypeByString("TS"), Season.AllTimeSeason());
 		int minWinRank = 20;
 		if (gt.getName().equalsIgnoreCase("div1")
 				&& eloRank > minEloRank
@@ -412,7 +416,7 @@ public class PickupLogic {
 		String msg = Config.pkup_getelo;
 		msg = msg.replace(".urtauth.", p.getUrtauth());
 		msg = msg.replace(".elo.", String.valueOf(p.getElo()));
-		msg = msg.replace(".wdl.", String.valueOf(Math.round(db.getWDLForPlayer(p).calcWinRatio() * 100d)));
+		msg = msg.replace(".wdl.", String.valueOf(Math.round(db.getWDLForPlayer(p, getGametypeByString("TS"), Season.AllTimeSeason()).calcWinRatio() * 100d)));
 		msg = msg.replace(".position.", String.valueOf(db.getRankForPlayer(p)));
 		msg = msg.replace(".rank.", p.getRank().getEmoji());
 		msg = msg.replace(".kdr.", String.format("%.02f", p.getKdr()));
@@ -436,38 +440,146 @@ public class PickupLogic {
 			return;
 		}
 		
-		p.stats = db.getPlayerStats(p);
-		
+		DiscordEmbed statsEmbed = getStatsEmbed(p, currentSeason);
+
+		List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
+		DiscordButton buttonSeason = new DiscordButton(DiscordButtonStyle.GREY);
+		buttonSeason.custom_id = Config.INT_SEASONLIST + "_" + p.getUrtauth();
+		buttonSeason.label = "Select season";
+		buttons.add(buttonSeason);
+		DiscordButton buttonAlltime = new DiscordButton(DiscordButtonStyle.BLURPLE);
+		buttonAlltime.custom_id = Config.INT_SEASONSTATS + "_" + p.getUrtauth() + "_0";
+		buttonAlltime.label = "All-time stats";
+		buttons.add(buttonAlltime);
+
+		bot.sendMsgToEdit(bot.getLatestMessageChannel(), null, statsEmbed, buttons);
+	}
+
+	public void showSeasonList(DiscordInteraction interaction, Player p){
+		if (p == null) {
+			return;
+		}
+		ArrayList<DiscordSelectOption> options = new ArrayList<DiscordSelectOption>();
+		for (int i = 1 ; i <= currentSeason.number ; i++){
+			DiscordSelectOption option = new DiscordSelectOption("Season " + i, String.valueOf(i));
+			options.add(option);
+		}
+
+		ArrayList<DiscordComponent> components = new ArrayList<DiscordComponent>();
+		DiscordSelectMenu seasonMenu = new DiscordSelectMenu(options);
+		seasonMenu.custom_id = Config.INT_SEASONSELECTED + "_" + p.getUrtauth();
+		components.add(seasonMenu);
+		interaction.respond(null, null, components);
+	}
+
+	public void showSeasonStats(DiscordInteraction interaction, Player p, int seasonnumber){
+		if (p == null) {
+			return;
+		}
+
+		Season season;
+		if (seasonnumber == 0){
+			season = Season.AllTimeSeason();
+		}
+		else{
+			season = db.getSeason(seasonnumber);
+		}
+
+		DiscordEmbed statsEmbed = getDetailedStatsEmbed(p, season);
+		interaction.respond(null, statsEmbed);
+	}
+
+	public DiscordEmbed getStatsEmbed(Player p, Season season){
+		PlayerStats stats = db.getPlayerStats(p, season);
 		String country = "<:puma:849287183474884628>";
 		if(!p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
 			country = ":flag_" + p.getCountry().toLowerCase() + ":";
 		}
-			
+
 		DiscordEmbed statsEmbed = new DiscordEmbed();
 		statsEmbed.color = 7056881;
 		statsEmbed.title = country + " \u200b \u200b  " +  p.getUrtauth();
 		statsEmbed.thumbnail = p.getDiscordUser().getAvatarUrl();
-		statsEmbed.description = p.getRank().getEmoji() + " \u200b \u200b  **" + p.getElo() + "**  #" + db.getRankForPlayer(p);
-		
-		statsEmbed.addField("Kills / Assists", p.stats.kills + "/" + p.stats.assists, true);
-		statsEmbed.addField("Deaths", String.valueOf(p.stats.deaths), true);
-		if (p.stats.kdrRank == -1) {
-			statsEmbed.addField("KDR", String.format("%.02f", p.getKdr()), true);
-			
+		statsEmbed.description = p.getRank().getEmoji() + " \u200b \u200b  **" + p.getElo() + "**  #" + db.getRankForPlayer(p) + "\n\n``Season " + season.number + "``";
+
+		if (stats.kdrRank == -1) {
+			statsEmbed.addField("KDR", String.format("%.02f", stats.kdr), true);
+
 		} else {
-			statsEmbed.addField("KDR", String.format("%.02f", p.getKdr()) + " (#" + p.stats.kdrRank + ")", true);
+			statsEmbed.addField("KDR", String.format("%.02f", stats.kdr) + " (#" + stats.kdrRank + ")", true);
 		}
-		
-		statsEmbed.addField("Wins / Draws", p.stats.wins + "/" + p.stats.draws, true);
-		statsEmbed.addField("Defeats", String.valueOf(p.stats.losses), true);
-		if (p.stats.wdlRank == -1) {
-			statsEmbed.addField("Win rate", Math.round(db.getWDLForPlayer(p).calcWinRatio() * 100d) + "%", true);
-			
+		statsEmbed.addField("CTF rating", String.format("%.02f", stats.ctf_rating), true);
+		statsEmbed.addField("\u200b", "\u200b", true);
+
+		if (stats.wdlRank == -1) {
+			statsEmbed.addField("TS Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
+
 		} else {
-			statsEmbed.addField("Win rate", Math.round(db.getWDLForPlayer(p).calcWinRatio() * 100d) + "% (#" + p.stats.wdlRank + ")", true);
+			statsEmbed.addField("Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
 		}
-		
-		bot.sendMsg(bot.getLatestMessageChannel(), null, statsEmbed);
+		if (stats.ctfWdlRank == -1) {
+			statsEmbed.addField("CTF Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
+
+		} else {
+			statsEmbed.addField("CTF Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "% (#" + stats.ctfWdlRank + ")", true);
+		}
+
+		return statsEmbed;
+	}
+
+	public DiscordEmbed getDetailedStatsEmbed(Player p, Season season){
+		PlayerStats stats = db.getPlayerStats(p, season);
+		String country = "<:puma:849287183474884628>";
+		if(!p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+			country = ":flag_" + p.getCountry().toLowerCase() + ":";
+		}
+
+		DiscordEmbed statsEmbed = new DiscordEmbed();
+		statsEmbed.color = 7056881;
+		statsEmbed.title = country + " \u200b \u200b  " +  p.getUrtauth();
+		statsEmbed.thumbnail = p.getDiscordUser().getAvatarUrl();
+		statsEmbed.description = "Season " + season.number + " (from <t:" + season.startdate / 1000 + ":d> to <t:" + season.enddate / 1000 + ":d>)";
+		if (season.startdate == 0){
+			statsEmbed.description = "Season " + season.number + " (until <t:" + season.enddate / 1000 + ":d>)";
+		}
+		if (season.number == 0){
+			statsEmbed.description = "All time stats";
+		}
+		statsEmbed.addField("\u200b", "``Team Survivor``", false);
+		statsEmbed.addField("Kills / Assists", stats.kills + "/" + stats.assists, true);
+		statsEmbed.addField("Deaths", String.valueOf(stats.deaths), true);
+		if (stats.kdrRank == -1) {
+			statsEmbed.addField("KDR", String.format("%.02f", stats.kdr), true);
+
+		} else {
+			statsEmbed.addField("KDR", String.format("%.02f", stats.kdr) + " (#" + stats.kdrRank + ")", true);
+		}
+
+		statsEmbed.addField("Wins", String.valueOf(stats.ts_wdl.win), true);
+		statsEmbed.addField("Defeats", String.valueOf(stats.ts_wdl.loss), true);
+		if (stats.wdlRank == -1) {
+			statsEmbed.addField("Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
+
+		} else {
+			statsEmbed.addField("Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
+		}
+		statsEmbed.addField("\u200b", "``Capture the Flag``", false);
+		statsEmbed.addField("Caps", String.valueOf(stats.caps), true);
+		statsEmbed.addField("Returns", String.valueOf(stats.returns), true);
+		statsEmbed.addField("CTF rating", String.format("%.02f", stats.ctf_rating), true);
+		statsEmbed.addField("FC kills", String.valueOf(stats.fckills), true);
+		statsEmbed.addField("Stopped caps", String.valueOf(stats.stopcaps), true);
+		statsEmbed.addField("Protected flags", String.valueOf(stats.protflag), true);
+		statsEmbed.addField("Wins", String.valueOf(stats.ctf_wdl.win), true);
+		statsEmbed.addField("Defeats", String.valueOf(stats.ctf_wdl.loss), true);
+		if (stats.ctfWdlRank == -1) {
+			statsEmbed.addField("Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
+
+		} else {
+			statsEmbed.addField("Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "% (#" + stats.ctfWdlRank + ")", true);
+		}
+
+		return statsEmbed;
 	}
 
 	public void cmdTopCountries(int number) {
