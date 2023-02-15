@@ -444,7 +444,7 @@ public class PickupLogic {
 			return;
 		}
 		
-		DiscordEmbed statsEmbed = getStatsEmbed(p, currentSeason);
+		DiscordEmbed statsEmbed = getStatsEmbed(p);
 
 		List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
 		DiscordButton buttonSeason = new DiscordButton(DiscordButtonStyle.GREY);
@@ -493,8 +493,7 @@ public class PickupLogic {
 		interaction.respond(null, statsEmbed);
 	}
 
-	public DiscordEmbed getStatsEmbed(Player p, Season season){
-		PlayerStats stats = db.getPlayerStats(p, season);
+	public DiscordEmbed getStatsEmbed(Player p){
 		String country = "<:puma:849287183474884628>";
 		if(!p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
 			country = ":flag_" + p.getCountry().toLowerCase() + ":";
@@ -504,41 +503,41 @@ public class PickupLogic {
 		statsEmbed.color = 7056881;
 		statsEmbed.title = country + " \u200b \u200b  " +  p.getUrtauth();
 		statsEmbed.thumbnail = p.getDiscordUser().getAvatarUrl();
-		statsEmbed.description = p.getRank().getEmoji() + " \u200b \u200b  **" + p.getElo() + "**  #" + db.getRankForPlayer(p) + "\n\n``Season " + season.number + "``";
+		statsEmbed.description = p.getRank().getEmoji() + " \u200b \u200b  **" + p.getElo() + "**  #" + db.getRankForPlayer(p) + "\n\n``Season " + currentSeason.number + "``";
 
-		if (stats.ts_wdl.getTotal() < 5){
-			statsEmbed.addField("\u200b", "**TS**: ``" + stats.ts_wdl.getTotal() + "/5`` placement games", false);
+		if (p.stats.ts_wdl.getTotal() < 5){
+			statsEmbed.addField("\u200b", "**TS**: ``" + p.stats.ts_wdl.getTotal() + "/5`` placement games", false);
 		}
 		else{
 			statsEmbed.addField("\u200b", "TS <:lr:401457276478554112>", false);
-			statsEmbed.addField("Played", String.valueOf(stats.ts_wdl.getTotal()), true);
-			if (stats.kdrRank == -1) {
-				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr), true);
+			statsEmbed.addField("Played", String.valueOf(p.stats.ts_wdl.getTotal()), true);
+			if (p.stats.kdrRank == -1) {
+				statsEmbed.addField("KDR", String.format("%.02f", p.stats.kdr), true);
 
 			} else {
-				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr) + " (#" + stats.kdrRank + ")", true);
+				statsEmbed.addField("KDR", String.format("%.02f", p.stats.kdr) + " (#" + p.stats.kdrRank + ")", true);
 			}
-			if (stats.wdlRank == -1) {
-				statsEmbed.addField("Win %", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
+			if (p.stats.wdlRank == -1) {
+				statsEmbed.addField("Win %", Math.round(p.stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
 
 			} else {
-				statsEmbed.addField("Win %", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
+				statsEmbed.addField("Win %", Math.round(p.stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + p.stats.wdlRank + ")", true);
 			}
 		}
 
-		if (stats.ctf_wdl.getTotal() < 5) {
-			statsEmbed.addField("\u200b", "**CTF**: ``" + stats.ctf_wdl.getTotal() + "/5`` placement games", false);
+		if (p.stats.ctf_wdl.getTotal() < 5) {
+			statsEmbed.addField("\u200b", "**CTF**: ``" + p.stats.ctf_wdl.getTotal() + "/5`` placement games", false);
 		}
 		else{
 			statsEmbed.addField("\u200b", "CTF <:red_flag:400778174415503371>", false);
-			statsEmbed.addField("Played", String.valueOf(stats.ctf_wdl.getTotal()), true);
-			statsEmbed.addField("Rating", String.format("%.02f", stats.ctf_rating), true);
+			statsEmbed.addField("Played", String.valueOf(p.stats.ctf_wdl.getTotal()), true);
+			statsEmbed.addField("Rating", String.format("%.02f", p.stats.ctf_rating), true);
 
-			if (stats.ctfWdlRank == -1) {
-				statsEmbed.addField("Win %", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
+			if (p.stats.ctfWdlRank == -1) {
+				statsEmbed.addField("Win %", Math.round(p.stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
 
 			} else {
-				statsEmbed.addField("Win %", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "% (#" + stats.ctfWdlRank + ")", true);
+				statsEmbed.addField("Win %", Math.round(p.stats.ctf_wdl.calcWinRatio() * 100d) + "% (#" + p.stats.ctfWdlRank + ")", true);
 			}
 		}
 

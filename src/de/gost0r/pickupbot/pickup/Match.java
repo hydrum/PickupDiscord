@@ -296,9 +296,13 @@ public class Match implements Runnable {
 			state = MatchState.Mercy;
 		}
 		cleanUp();
-		sendAftermath();
 		logic.matchRemove(this);
 		logic.db.saveMatch(this);
+		// Update player stats
+		for (Player p : playerStats.keySet()){
+			p.stats = logic.db.getPlayerStats(p, logic.currentSeason);
+		}
+		sendAftermath();
 
 		for (DiscordChannel threadChannel : threadChannels){
 			threadChannel.archive();
