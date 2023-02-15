@@ -296,7 +296,7 @@ public class Match implements Runnable {
 			state = MatchState.Mercy;
 		}
 		cleanUp();
-		
+
 		logic.db.saveMatch(this);
 		// Update player stats
 		for (Player p : playerStats.keySet()){
@@ -1015,7 +1015,9 @@ public class Match implements Runnable {
 		
 		// Order teams scores by score
 		List<Map.Entry<Player, MatchStats>> entries = new ArrayList<Map.Entry<Player, MatchStats>>(playerStats.entrySet());
-		entries.sort((a, b) -> Integer.compare(b.getValue().score[0].score, a.getValue().score[0].score));
+		entries.sort((a, b) -> Integer.compare(
+				b.getValue().score[0].score + b.getValue().score[1].score,
+				a.getValue().score[0].score + a.getValue().score[1].score));
 		
 		for (Map.Entry<Player, MatchStats> entry : entries) {
 			String country;
