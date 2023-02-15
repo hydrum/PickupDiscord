@@ -296,13 +296,12 @@ public class Match implements Runnable {
 			state = MatchState.Mercy;
 		}
 		cleanUp();
-		logic.matchRemove(this);
+		
 		logic.db.saveMatch(this);
 		// Update player stats
 		for (Player p : playerStats.keySet()){
 			p.stats = logic.db.getPlayerStats(p, logic.currentSeason);
 		}
-		sendAftermath();
 
 		for (DiscordChannel threadChannel : threadChannels){
 			threadChannel.archive();
@@ -312,6 +311,9 @@ public class Match implements Runnable {
 			gtvServer.free();
 			gtvServer.sendRcon("gtv_disconnect 1");
 		}
+
+		sendAftermath();
+		logic.matchRemove(this);
 	}
 
 	public void cancelStart() {
