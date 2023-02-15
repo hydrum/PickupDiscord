@@ -1089,7 +1089,7 @@ public class Match implements Runnable {
 		else if (saPlayers > gametype.getTeamSize() * 2 * 0.7){
 			return Region.SA;
 		}
-		else if (euPlayers > gametype.getTeamSize() * 2 * 0.6 && saPlayers < 2){
+		else if (euPlayers > gametype.getTeamSize() * 2 * 0.6 && (saPlayers + ocPlayers) < 2){
 			return Region.EU;
 		}
 		else if (regionScore < 0){
