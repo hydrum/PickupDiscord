@@ -466,7 +466,7 @@ public class Match implements Runnable {
 			captainAnnouncement = captainAnnouncement.replace(".captain2.", captains[1].getDiscordUser().getMentionString());
 			// List players stats
 			for (Player p : sortedPlayers){
-				captainAnnouncement += "\n" + logic.cmdGetElo(p, false);
+				captainAnnouncement += "\n" + logic.cmdGetElo(p, gametype);
 				if (logic.getDynamicServers()){
 					captainAnnouncement += " " + String.valueOf("\t " + server.playerPing.get(p)) + "ms";
 				}

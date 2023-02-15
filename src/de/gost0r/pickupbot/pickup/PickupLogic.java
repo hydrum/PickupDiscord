@@ -409,28 +409,31 @@ public class PickupLogic {
 		}
 	}
 
-	public String cmdGetElo(Player p, boolean sendMsg) {
+	public String cmdGetElo(Player p, Gametype gt) {
 		if (p == null) {
 			return "";
 		}
-		PlayerStats stats = db.getPlayerStats(p, currentSeason);
 		String msg = Config.pkup_getelo;
 		msg = msg.replace(".urtauth.", p.getUrtauth());
 		msg = msg.replace(".elo.", String.valueOf(p.getElo()));
-		msg = msg.replace(".wdl.", String.valueOf(stats.ts_wdl.calcWinRatio() * 100d));
+		if (gt.getName().equals("CTF")){
+			msg = msg.replace(".wdl.", String.format("%.02f", p.stats.ctf_wdl.calcWinRatio() * 100d));
+			msg = msg.replace(".kdr.", String.format("%.02f", p.stats.ctf_rating));
+		}
+		else {
+			msg = msg.replace(".wdl.", String.format("%.02f", p.stats.ts_wdl.calcWinRatio() * 100d));
+			msg = msg.replace(".kdr.", String.format("%.02f", p.stats.kdr));
+		}
+
 		msg = msg.replace(".position.", String.valueOf(db.getRankForPlayer(p)));
 		msg = msg.replace(".rank.", p.getRank().getEmoji());
-		msg = msg.replace(".kdr.", String.format("%.02f", stats.kdr));
+
 		
 		if( p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
 			msg = msg.replace(".country.", "<:puma:849287183474884628>");
 		}
 		else {
 			msg = msg.replace(".country.", ":flag_" + p.getCountry().toLowerCase() + ":");
-		}
-		
-		if (sendMsg) {
-			bot.sendMsg(bot.getLatestMessageChannel(), msg);
 		}
 
 		return msg;

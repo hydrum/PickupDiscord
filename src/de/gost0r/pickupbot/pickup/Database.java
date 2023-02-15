@@ -688,7 +688,7 @@ public class Database {
 					player.addBan(ban);
 				}
 				
-				player.stats = getPlayerStats(player, Season.AllTimeSeason());
+				player.stats = getPlayerStats(player, logic.currentSeason);
 			}
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);

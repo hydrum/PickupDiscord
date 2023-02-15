@@ -366,7 +366,7 @@ public class PickupBot extends DiscordBot {
 					{
 						if (data.length == 1)
 						{
-							logic.cmdGetElo(p, true);
+							logic.cmdGetStats(p);
 						}
 						else if (data.length == 2)
 						{
@@ -383,7 +383,7 @@ public class PickupBot extends DiscordBot {
 							
 							if (pOther != null)
 							{
-								logic.cmdGetElo(pOther, true);
+								logic.cmdGetStats(pOther);
 							}
 							else sendNotice(msg.user, Config.player_not_found);
 						}
