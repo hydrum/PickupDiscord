@@ -502,26 +502,39 @@ public class PickupLogic {
 		statsEmbed.thumbnail = p.getDiscordUser().getAvatarUrl();
 		statsEmbed.description = p.getRank().getEmoji() + " \u200b \u200b  **" + p.getElo() + "**  #" + db.getRankForPlayer(p) + "\n\n``Season " + season.number + "``";
 
-		if (stats.kdrRank == -1) {
-			statsEmbed.addField("KDR", String.format("%.02f", stats.kdr), true);
-
-		} else {
-			statsEmbed.addField("KDR", String.format("%.02f", stats.kdr) + " (#" + stats.kdrRank + ")", true);
+		if (stats.ts_wdl.getTotal() < 5){
+			statsEmbed.addField("\u200b", "**TS**: ``" + stats.ts_wdl.getTotal() + "/5`` placement games", false);
 		}
-		statsEmbed.addField("CTF rating", String.format("%.02f", stats.ctf_rating), true);
-		statsEmbed.addField("\u200b", "\u200b", true);
+		else{
+			statsEmbed.addField("TS Games", String.valueOf(stats.ts_wdl.getTotal()), true);
+			if (stats.kdrRank == -1) {
+				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr), true);
 
-		if (stats.wdlRank == -1) {
-			statsEmbed.addField("TS Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
+			} else {
+				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr) + " (#" + stats.kdrRank + ")", true);
+			}
+			if (stats.wdlRank == -1) {
+				statsEmbed.addField("TS Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
 
-		} else {
-			statsEmbed.addField("Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
+			} else {
+				statsEmbed.addField("TS Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
+			}
 		}
-		if (stats.ctfWdlRank == -1) {
-			statsEmbed.addField("CTF Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
 
-		} else {
-			statsEmbed.addField("CTF Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "% (#" + stats.ctfWdlRank + ")", true);
+		if (stats.ctf_wdl.getTotal() < 5) {
+			statsEmbed.addField("\u200b", "**CTF**: ``" + stats.ctf_wdl.getTotal() + "/5`` placement games", false);
+		}
+		else{
+			statsEmbed.addField("CTF Games", String.valueOf(stats.ctf_wdl.getTotal()), true);
+			statsEmbed.addField("CTF rating", String.format("%.02f", stats.ctf_rating), true);
+			statsEmbed.addField("\u200b", "\u200b", true);
+
+			if (stats.ctfWdlRank == -1) {
+				statsEmbed.addField("CTF Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
+
+			} else {
+				statsEmbed.addField("CTF Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "% (#" + stats.ctfWdlRank + ")", true);
+			}
 		}
 
 		return statsEmbed;
@@ -545,38 +558,48 @@ public class PickupLogic {
 		if (season.number == 0){
 			statsEmbed.description = "All time stats";
 		}
-		statsEmbed.addField("\u200b", "``Team Survivor``", false);
-		statsEmbed.addField("Kills / Assists", stats.kills + "/" + stats.assists, true);
-		statsEmbed.addField("Deaths", String.valueOf(stats.deaths), true);
-		if (stats.kdrRank == -1) {
-			statsEmbed.addField("KDR", String.format("%.02f", stats.kdr), true);
-
-		} else {
-			statsEmbed.addField("KDR", String.format("%.02f", stats.kdr) + " (#" + stats.kdrRank + ")", true);
+		if (stats.ts_wdl.getTotal() == 0){
+			statsEmbed.addField("\u200b", "*No TS games this season*", false);
 		}
+		else{
+			statsEmbed.addField("\u200b", "``Team Survivor``", false);
+			statsEmbed.addField("Kills / Assists", stats.kills + "/" + stats.assists, true);
+			statsEmbed.addField("Deaths", String.valueOf(stats.deaths), true);
+			if (stats.kdrRank == -1) {
+				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr), true);
 
-		statsEmbed.addField("Wins", String.valueOf(stats.ts_wdl.win), true);
-		statsEmbed.addField("Defeats", String.valueOf(stats.ts_wdl.loss), true);
-		if (stats.wdlRank == -1) {
-			statsEmbed.addField("Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
+			} else {
+				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr) + " (#" + stats.kdrRank + ")", true);
+			}
 
-		} else {
-			statsEmbed.addField("Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
+			statsEmbed.addField("Wins", String.valueOf(stats.ts_wdl.win), true);
+			statsEmbed.addField("Defeats", String.valueOf(stats.ts_wdl.loss), true);
+			if (stats.wdlRank == -1) {
+				statsEmbed.addField("Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
+
+			} else {
+				statsEmbed.addField("Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
+			}
 		}
-		statsEmbed.addField("\u200b", "``Capture the Flag``", false);
-		statsEmbed.addField("Caps", String.valueOf(stats.caps), true);
-		statsEmbed.addField("Returns", String.valueOf(stats.returns), true);
-		statsEmbed.addField("CTF rating", String.format("%.02f", stats.ctf_rating), true);
-		statsEmbed.addField("FC kills", String.valueOf(stats.fckills), true);
-		statsEmbed.addField("Stopped caps", String.valueOf(stats.stopcaps), true);
-		statsEmbed.addField("Protected flags", String.valueOf(stats.protflag), true);
-		statsEmbed.addField("Wins", String.valueOf(stats.ctf_wdl.win), true);
-		statsEmbed.addField("Defeats", String.valueOf(stats.ctf_wdl.loss), true);
-		if (stats.ctfWdlRank == -1) {
-			statsEmbed.addField("Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
+		if (stats.ctf_wdl.getTotal() == 0){
+			statsEmbed.addField("\u200b", "*No CTF games this season*", false);
+		}
+		else {
+			statsEmbed.addField("\u200b", "``Capture the Flag``", false);
+			statsEmbed.addField("Caps", String.valueOf(stats.caps), true);
+			statsEmbed.addField("Returns", String.valueOf(stats.returns), true);
+			statsEmbed.addField("CTF rating", String.format("%.02f", stats.ctf_rating), true);
+			statsEmbed.addField("FC kills", String.valueOf(stats.fckills), true);
+			statsEmbed.addField("Stopped caps", String.valueOf(stats.stopcaps), true);
+			statsEmbed.addField("Protected flags", String.valueOf(stats.protflag), true);
+			statsEmbed.addField("Wins", String.valueOf(stats.ctf_wdl.win), true);
+			statsEmbed.addField("Defeats", String.valueOf(stats.ctf_wdl.loss), true);
+			if (stats.ctfWdlRank == -1) {
+				statsEmbed.addField("Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
 
-		} else {
-			statsEmbed.addField("Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "% (#" + stats.ctfWdlRank + ")", true);
+			} else {
+				statsEmbed.addField("Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "% (#" + stats.ctfWdlRank + ")", true);
+			}
 		}
 
 		return statsEmbed;
