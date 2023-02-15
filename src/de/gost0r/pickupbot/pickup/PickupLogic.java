@@ -514,10 +514,10 @@ public class PickupLogic {
 				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr) + " (#" + stats.kdrRank + ")", true);
 			}
 			if (stats.wdlRank == -1) {
-				statsEmbed.addField("TS Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
+				statsEmbed.addField("TS Win %", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
 
 			} else {
-				statsEmbed.addField("TS Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
+				statsEmbed.addField("TS Win %", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
 			}
 		}
 
@@ -526,14 +526,14 @@ public class PickupLogic {
 		}
 		else{
 			statsEmbed.addField("CTF Games", String.valueOf(stats.ctf_wdl.getTotal()), true);
-			statsEmbed.addField("CTF rating", String.format("%.02f", stats.ctf_rating), true);
+			statsEmbed.addField("Rating", String.format("%.02f", stats.ctf_rating), true);
 			statsEmbed.addField("\u200b", "\u200b", true);
 
 			if (stats.ctfWdlRank == -1) {
-				statsEmbed.addField("CTF Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
+				statsEmbed.addField("CTF Win %", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
 
 			} else {
-				statsEmbed.addField("CTF Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "% (#" + stats.ctfWdlRank + ")", true);
+				statsEmbed.addField("CTF Win %", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "% (#" + stats.ctfWdlRank + ")", true);
 			}
 		}
 
