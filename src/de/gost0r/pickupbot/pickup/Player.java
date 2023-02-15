@@ -322,6 +322,11 @@ public class Player {
 	public void setEnforceAC(boolean enforceAC) { this.enforceAC = enforceAC; }
 
 	public float getCaptainScore(Gametype gt){
-		return (float) (elo + (kdr * 500 + db.getWDLForPlayer(this, gt, Season.AllTimeSeason()).calcWinRatio() * 500.0));
+		PlayerStats stats = db.getPlayerStats(this, logic.currentSeason);
+		double wdl = stats.ts_wdl.calcWinRatio();
+		if (gt.getName().equals("CTF")){
+			wdl = stats.ctf_wdl.calcWinRatio();
+		}
+		return (float) (elo + (stats.kdr * 500 + wdl * 500.0));
 	}
 }
