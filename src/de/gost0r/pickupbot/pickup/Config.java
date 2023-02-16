@@ -135,8 +135,8 @@ public class Config {
 	public static final String USE_CMD_GETSTATS			= "!stats </@User|urtauth/>";
 	public static final String USE_CMD_TOP10			= "!top10 displays the top 10 players";
 	public static final String USE_CMD_TOP_COUNTRIES	= "!topcountries ordered by average ELO";
-	public static final String USE_CMD_TOP_WDL			= "!topwin: players with the best win ratio";
-	public static final String USE_CMD_TOP_KDR			= "!topkdr: players with the best KDR";
+	public static final String USE_CMD_TOP_WDL			= "!topwin <gametype>: players with the best win ratio for a specific gamemode";
+	public static final String USE_CMD_TOP_KDR			= "!topkdr <gametype>: players with the best KDR for a specific gamemode";
 
 	public static final String USE_CMD_MATCH			= "!match <id>";
 	public static final String USE_CMD_LAST				= "!last </@User|urtauth/>";

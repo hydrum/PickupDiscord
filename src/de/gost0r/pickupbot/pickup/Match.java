@@ -301,6 +301,7 @@ public class Match implements Runnable {
 		// Update player stats
 		for (Player p : playerStats.keySet()){
 			p.stats = logic.db.getPlayerStats(p, logic.currentSeason);
+			p.setRank(logic.db.getRankForPlayer(p));
 		}
 
 		for (DiscordChannel threadChannel : threadChannels){

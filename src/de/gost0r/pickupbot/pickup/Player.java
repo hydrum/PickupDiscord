@@ -22,6 +22,7 @@ public class Player {
 	private Map<Gametype, GameMap> votedMap = new HashMap<Gametype, GameMap>();
 	private int elo = 1000;
 	private int eloChange = 0;
+	private int elorank = 0;
 	
 	private float kdr = 0.0f;
 	
@@ -208,7 +209,7 @@ public class Player {
 	}
 
 	private PlayerRank getRank(int elo) {
-		if (db.getRankForPlayer(this) <= 5){
+		if (elorank <= 5){
 			return PlayerRank.LEET;
 		} else if (elo >= 1600) {
 			return PlayerRank.DIAMOND;
@@ -234,7 +235,7 @@ public class Player {
 		if (currentRank != previousRank){
 			logic.bot.removeUserRole(getDiscordUser(), previousRank.getRole());
 		}
-		if (getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), PlayerRank.LEET.getRole()) && db.getRankForPlayer(this) > 5){
+		if (getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), PlayerRank.LEET.getRole()) && elorank > 5){
 			logic.bot.removeUserRole(getDiscordUser(), PlayerRank.LEET.getRole());
 		}
 		if (!getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), currentRank.getRole())){
@@ -327,5 +328,12 @@ public class Player {
 			wdl = stats.ctf_wdl.calcWinRatio();
 		}
 		return (float) (elo + (stats.kdr * 500 + wdl * 500.0));
+	}
+
+	public void setRank(int rank){
+		this.elorank = rank;
+	}
+	public int getEloRank(){
+		return elorank;
 	}
 }

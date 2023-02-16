@@ -687,7 +687,7 @@ public class Database {
 					ban.forgiven = banSet.getBoolean("forgiven");
 					player.addBan(ban);
 				}
-				
+				player.setRank(getRankForPlayer(player));
 				player.stats = getPlayerStats(player, logic.currentSeason);
 			}
 		} catch (SQLException e) {
@@ -1049,15 +1049,20 @@ public class Database {
 		return rank;
 	}
 	
-	public int getKDRRankForPlayer(Player player, Season season) {
+	public int getKDRRankForPlayer(Player player, Gametype gt, Season season) {
 		int rank = -1;
 		try {
 			int limit = 20;
 			if (season.number == 0){
 				limit = 100;
 			}
-			String sql = "WITH tablekdr (auth, matchcount, kdr) AS (SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) AS kdr FROM (score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid INNER JOIN match ON player_in_match.matchid = match.id)  WHERE player.active = 'true' and match.gametype=\"TS\" AND match.starttime > ? AND match.starttime < ? GROUP BY player_in_match.player_urtauth HAVING matchcount > ? ORDER BY kdr DESC) SELECT ( SELECT COUNT(*) + 1  FROM tablekdr  WHERE kdr > t.kdr) as rowIndex FROM tablekdr t WHERE auth = ?";
-			//String sql = "SELECT rank FROM (SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) AS kdr, ROW_NUMBER() OVER (ORDER BY (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) DESC) as rank FROM (score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid)  WHERE player.active = 'true' GROUP BY player_in_match.player_urtauth HAVING matchcount > 10 ) WHERE auth = ?";
+
+			String rating_query = "(CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT)";
+			if (gt.getName().equals("CTF")){
+				limit = 10;
+				rating_query = "CAST(SUM(kills) / 50  AS FLOAT)";
+			}
+			String sql = "WITH tablekdr (auth, matchcount, kdr) AS (SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, " + rating_query + " AS kdr FROM (score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid INNER JOIN match ON player_in_match.matchid = match.id)  WHERE player.active = 'true' and match.gametype=\"TS\" AND match.starttime > ? AND match.starttime < ? GROUP BY player_in_match.player_urtauth HAVING matchcount > ? ORDER BY kdr DESC) SELECT ( SELECT COUNT(*) + 1  FROM tablekdr  WHERE kdr > t.kdr) as rowIndex FROM tablekdr t WHERE auth = ?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setLong(1, season.startdate);
 			pstmt.setLong(2, season.enddate);
@@ -1073,12 +1078,23 @@ public class Database {
 		return rank;
 	}
 		
-	public Map<Player, Float> getTopWDL(int number) {
+	public Map<Player, Float> getTopWDL(int number, Gametype gt, Season season) {
 		Map<Player, Float> topwdl = new LinkedHashMap<Player, Float>();
 		try {
-			String sql = "SELECT urtauth, COUNT(urtauth) as matchcount, SUM(CASE WHEN stat.myscore > stat.oppscore THEN 1 ELSE 0 END) as win, SUM(CASE WHEN stat.myscore = stat.oppscore THEN 1 ELSE 0 END) as draw, SUM(CASE WHEN stat.myscore < stat.oppscore THEN 1 ELSE 0 END) loss , (CAST(SUM(CASE WHEN stat.myscore > stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)+ CAST(SUM(CASE WHEN stat.myscore = stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)/2)/(CAST(SUM(CASE WHEN stat.myscore > stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)+ CAST(SUM(CASE WHEN stat.myscore = stat.oppscore THEN 1 ELSE 0 END) AS FLOAT) + CAST(SUM(CASE WHEN stat.myscore < stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)) as winrate FROM (SELECT pim.player_urtauth AS urtauth, (CASE WHEN pim.team = 'red' THEN m.score_red ELSE m.score_blue END) AS myscore, (CASE WHEN pim.team = 'blue' THEN m.score_red ELSE m.score_blue END) AS oppscore FROM 'player_in_match' AS pim JOIN 'match' AS m ON m.id = pim.matchid JOIN 'player' AS p ON pim.player_urtauth=p.urtauth AND pim.player_userid=p.userid AND p.active='true'   WHERE (m.state = 'Done' OR m.state = 'Surrender' OR m.state = 'Mercy')) AS stat GROUP BY urtauth HAVING COUNT(urtauth) > 100 ORDER BY winrate DESC LIMIT ?";
+			int limit = 20;
+			if (season.number == 0){
+				limit = 100;
+			}
+			if (gt.getName().equals("CTF")){
+				limit = 10;
+			}
+			String sql = "SELECT urtauth, COUNT(urtauth) as matchcount, SUM(CASE WHEN stat.myscore > stat.oppscore THEN 1 ELSE 0 END) as win, SUM(CASE WHEN stat.myscore = stat.oppscore THEN 1 ELSE 0 END) as draw, SUM(CASE WHEN stat.myscore < stat.oppscore THEN 1 ELSE 0 END) loss , (CAST(SUM(CASE WHEN stat.myscore > stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)+ CAST(SUM(CASE WHEN stat.myscore = stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)/2)/(CAST(SUM(CASE WHEN stat.myscore > stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)+ CAST(SUM(CASE WHEN stat.myscore = stat.oppscore THEN 1 ELSE 0 END) AS FLOAT) + CAST(SUM(CASE WHEN stat.myscore < stat.oppscore THEN 1 ELSE 0 END) AS FLOAT)) as winrate FROM (SELECT pim.player_urtauth AS urtauth, (CASE WHEN pim.team = 'red' THEN m.score_red ELSE m.score_blue END) AS myscore, (CASE WHEN pim.team = 'blue' THEN m.score_red ELSE m.score_blue END) AS oppscore FROM 'player_in_match' AS pim JOIN 'match' AS m ON m.id = pim.matchid JOIN 'player' AS p ON pim.player_urtauth=p.urtauth AND pim.player_userid=p.userid AND p.active='true'   WHERE (m.state = 'Done' OR m.state = 'Surrender' OR m.state = 'Mercy') AND m.gametype = ? AND m.starttime > ? AND m.starttime < ?) AS stat GROUP BY urtauth HAVING COUNT(urtauth) > ? ORDER BY winrate DESC LIMIT ?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
-			pstmt.setInt(1, number);
+			pstmt.setString(1, gt.getName());
+			pstmt.setLong(2, season.startdate);
+			pstmt.setLong(3, season.enddate);
+			pstmt.setLong(4, limit);
+			pstmt.setInt(5, number);
 			ResultSet rs = pstmt.executeQuery();
 			while (rs.next()) {
 				Player p = Player.get(rs.getString("urtauth"));
@@ -1090,12 +1106,26 @@ public class Database {
 		return topwdl;
 	}
 	
-	public Map<Player, Float> getTopKDR(int number) {
+	public Map<Player, Float> getTopKDR(int number, Gametype gt, Season season) {
 		Map<Player, Float> topkdr = new LinkedHashMap<Player, Float>();
 		try {
-			String sql = "SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, (CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT) AS kdr FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid INNER JOIN match ON match.id = player_in_match.matchid WHERE player.active = \"true\" and match.gametype = \"TS\" GROUP BY player_in_match.player_urtauth HAVING matchcount > 100 ORDER BY kdr DESC LIMIT ?";
+			int limit = 20;
+			if (season.number == 0){
+				limit = 100;
+			}
+
+			String rating_query = "(CAST(SUM(kills) AS FLOAT) + CAST(SUM(assists) AS FLOAT)/2) / CAST(SUM(deaths) AS FLOAT)";
+			if (gt.getName().equals("CTF")){
+				limit = 10;
+				rating_query = "CAST(SUM(kills) / 50 AS FLOAT)";
+			}
+			String sql = "SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, " + rating_query + " AS kdr FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid INNER JOIN match ON match.id = player_in_match.matchid WHERE player.active = \"true\" AND match.gametype = ? AND match.starttime > ? AND match.starttime < ? GROUP BY player_in_match.player_urtauth HAVING matchcount > ? ORDER BY kdr DESC LIMIT ?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
-			pstmt.setInt(1, number);
+			pstmt.setString(1, gt.getName());
+			pstmt.setLong(2, season.startdate);
+			pstmt.setLong(3, season.enddate);
+			pstmt.setLong(4, limit);
+			pstmt.setInt(5, number);
 			ResultSet rs = pstmt.executeQuery();
 			while (rs.next()) {
 				Player p = Player.get(rs.getString("auth"));
@@ -1150,7 +1180,8 @@ public class Database {
 	public PlayerStats getPlayerStats(Player player, Season season) {
 		PlayerStats stats = new PlayerStats();
 		 
-		stats.kdrRank = getKDRRankForPlayer(player, season);
+		stats.kdrRank = getKDRRankForPlayer(player, logic.getGametypeByString("TS"), season);
+		stats.ctfRank = getKDRRankForPlayer(player, logic.getGametypeByString("CTF"), season);
 
 		stats.wdlRank = getWDLRankForPlayer(player, logic.getGametypeByString("TS"), season);
 		stats.ctfWdlRank = getWDLRankForPlayer(player, logic.getGametypeByString("CTF"), season);

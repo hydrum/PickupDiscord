@@ -449,7 +449,17 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_TOP_WDL: 
 					if (p != null)
 					{
-						logic.cmdTopWDL(10);
+						if (data.length == 2)
+						{
+							Gametype gt = logic.getGametypeByString(data[1]);
+							if (gt != null) {
+								logic.cmdTopWDL(10, gt);
+							}
+							else {
+								sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_TOP_WDL));
+							}
+						}
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_TOP_WDL));
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
@@ -457,7 +467,17 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_TOP_KDR: 
 					if (p != null)
 					{
-						logic.cmdTopKDR(10);
+						if (data.length == 2)
+						{
+							Gametype gt = logic.getGametypeByString(data[1]);
+							if (gt != null) {
+								logic.cmdTopKDR(10, gt);
+							}
+							else {
+								sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_TOP_KDR));
+							}
+						}
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_TOP_KDR));
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;	

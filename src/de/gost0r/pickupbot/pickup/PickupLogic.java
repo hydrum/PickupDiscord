@@ -123,27 +123,29 @@ public class PickupLogic {
 				return;
 			}
 		}
-		
-		int eloRank = db.getRankForPlayer(player);
-		int minEloRank = 40;
-		int kdrRank = db.getKDRRankForPlayer(player, Season.AllTimeSeason());
-		int minKdrRank = 20;
-		int winRank = db.getWDLRankForPlayer(player, getGametypeByString("TS"), Season.AllTimeSeason());
-		int minWinRank = 20;
-		if (gt.getName().equalsIgnoreCase("div1")
-				&& eloRank > minEloRank
+
+		if (gt.getName().equalsIgnoreCase("div1")){
+			int eloRank = player.getEloRank();
+			int minEloRank = 40;
+			int kdrRank = player.stats.kdrRank;
+			int minKdrRank = 20;
+			int winRank = player.stats.wdlRank;
+			int minWinRank = 20;
+			if (eloRank > minEloRank
 				&& (kdrRank > minKdrRank || kdrRank == -1)
 				&& (winRank > minWinRank || winRank == -1)) {
-			String errmsg = Config.player_notdiv1;
-			errmsg = errmsg.replace(".minrank.", String.valueOf(minEloRank));
-			errmsg = errmsg.replace(".rank.", String.valueOf(eloRank));
-			errmsg = errmsg.replace(".minkdrrank.", String.valueOf(minKdrRank));
-			errmsg = errmsg.replace(".kdrrank.", String.valueOf(kdrRank));
-			errmsg = errmsg.replace(".minwinrank.", String.valueOf(minWinRank));
-			errmsg = errmsg.replace(".winrank.", String.valueOf(winRank));
-			bot.sendNotice(player.getDiscordUser(), errmsg);
-			return;
+				String errmsg = Config.player_notdiv1;
+				errmsg = errmsg.replace(".minrank.", String.valueOf(minEloRank));
+				errmsg = errmsg.replace(".rank.", String.valueOf(eloRank));
+				errmsg = errmsg.replace(".minkdrrank.", String.valueOf(minKdrRank));
+				errmsg = errmsg.replace(".kdrrank.", String.valueOf(kdrRank));
+				errmsg = errmsg.replace(".minwinrank.", String.valueOf(minWinRank));
+				errmsg = errmsg.replace(".winrank.", String.valueOf(winRank));
+				bot.sendNotice(player.getDiscordUser(), errmsg);
+				return;
+			}
 		}
+
 		if (forced) {
 			player.setLastMessage(System.currentTimeMillis());
 		}
@@ -339,16 +341,17 @@ public class PickupLogic {
 		}
 	}
 
-	public void cmdTopWDL(int number) {
+	public void cmdTopWDL(int number, Gametype gt) {
 		StringBuilder embed_rank = new StringBuilder();
 		StringBuilder embed_player = new StringBuilder();
 		StringBuilder embed_wdl = new StringBuilder();
 		DiscordEmbed embed = new DiscordEmbed();
-		embed.title = "Top 10 win rate";
+		embed.title = "Top 10 win rate " + gt.getName();
+		embed.description = "``Season " + currentSeason.number + "``";
 		embed.color = 7056881;
 		
 		
-		Map<Player, Float> topwdl = db.getTopWDL(number);
+		Map<Player, Float> topwdl = db.getTopWDL(number, gt, currentSeason);
 		if (topwdl.isEmpty()) {
 			bot.sendMsg(bot.getLatestMessageChannel(), "None");
 		} else {
@@ -374,16 +377,16 @@ public class PickupLogic {
 		}
 	}
 
-	public void cmdTopKDR(int number) {
+	public void cmdTopKDR(int number, Gametype gt) {
 		StringBuilder embed_rank = new StringBuilder();
 		StringBuilder embed_player = new StringBuilder();
 		StringBuilder embed_wdl = new StringBuilder();
 		DiscordEmbed embed = new DiscordEmbed();
-		embed.title = "Top 10 kill death ratio";
+		embed.title = "Top 10 kill death ratio " + gt.getName();
+		embed.description = "``Season " + currentSeason.number + "``";
 		embed.color = 7056881;
 		
-		
-		Map<Player, Float> topkdr = db.getTopKDR(number);
+		Map<Player, Float> topkdr = db.getTopKDR(number, gt, currentSeason);
 		if (topkdr.isEmpty()) {
 			bot.sendMsg(bot.getLatestMessageChannel(), "None");
 		} else {
@@ -425,7 +428,7 @@ public class PickupLogic {
 			msg = msg.replace(".kdr.", String.format("%.02f", p.stats.kdr));
 		}
 
-		msg = msg.replace(".position.", String.valueOf(db.getRankForPlayer(p)));
+		msg = msg.replace(".position.", String.valueOf(p.getEloRank()));
 		msg = msg.replace(".rank.", p.getRank().getEmoji());
 
 		
@@ -503,7 +506,7 @@ public class PickupLogic {
 		statsEmbed.color = 7056881;
 		statsEmbed.title = country + " \u200b \u200b  " +  p.getUrtauth();
 		statsEmbed.thumbnail = p.getDiscordUser().getAvatarUrl();
-		statsEmbed.description = p.getRank().getEmoji() + " \u200b \u200b  **" + p.getElo() + "**  #" + db.getRankForPlayer(p) + "\n\n``Season " + currentSeason.number + "``";
+		statsEmbed.description = p.getRank().getEmoji() + " \u200b \u200b  **" + p.getElo() + "**  #" + p.getEloRank() + "\n\n``Season " + currentSeason.number + "``";
 
 		if (p.stats.ts_wdl.getTotal() < 5){
 			statsEmbed.addField("\u200b", "**TS**: ``" + p.stats.ts_wdl.getTotal() + "/5`` placement games", false);
