@@ -534,7 +534,12 @@ public class PickupLogic {
 		else{
 			statsEmbed.addField("\u200b", "CTF <:red_flag:400778174415503371>", false);
 			statsEmbed.addField("Played", String.valueOf(p.stats.ctf_wdl.getTotal()), true);
-			statsEmbed.addField("Rating", String.format("%.02f", p.stats.ctf_rating), true);
+			if (p.stats.ctfRank == -1) {
+				statsEmbed.addField("Rating", String.format("%.02f", p.stats.ctf_rating), true);
+
+			} else {
+				statsEmbed.addField("Rating", String.format("%.02f", p.stats.ctf_rating) + " (#" + p.stats.ctfRank + ")", true);
+			}
 
 			if (p.stats.ctfWdlRank == -1) {
 				statsEmbed.addField("Win %", Math.round(p.stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
@@ -595,7 +600,12 @@ public class PickupLogic {
 			statsEmbed.addField("\u200b", "``Capture the Flag``", false);
 			statsEmbed.addField("Caps", String.valueOf(stats.caps), true);
 			statsEmbed.addField("Returns", String.valueOf(stats.returns), true);
-			statsEmbed.addField("CTF rating", String.format("%.02f", stats.ctf_rating), true);
+			if (stats.ctfRank == -1) {
+				statsEmbed.addField("Rating", String.format("%.02f", stats.ctf_rating), true);
+
+			} else {
+				statsEmbed.addField("Rating", String.format("%.02f", stats.ctf_rating) + " (#" + stats.ctfRank + ")", true);
+			}
 			statsEmbed.addField("FC kills", String.valueOf(stats.fckills), true);
 			statsEmbed.addField("Stopped caps", String.valueOf(stats.stopcaps), true);
 			statsEmbed.addField("Protected flags", String.valueOf(stats.protflag), true);
