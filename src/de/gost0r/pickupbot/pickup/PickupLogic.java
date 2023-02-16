@@ -60,6 +60,8 @@ public class PickupLogic {
 		db = new Database(this);
 		Player.db = db;
 		Player.logic = this;
+
+		currentSeason = db.getCurrentSeason();
 		
 		serverList = db.loadServers();
 		roles = db.loadRoles();
@@ -89,8 +91,6 @@ public class PickupLogic {
 		Server testGTV = new Server(0, "gtv.b00bs-clan.com", 709, "arkon4bmn", "SevenAndJehar", true, null);
 		gtvServerList = new ArrayList<Server>();
 		gtvServerList.add(testGTV);
-
-		currentSeason = db.getCurrentSeason();
 	}
 
 	public void cmdAddPlayer(Player player, List<Gametype> modes, boolean forced) {
