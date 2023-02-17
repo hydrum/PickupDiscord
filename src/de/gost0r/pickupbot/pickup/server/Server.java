@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.gost0r.pickupbot.pickup.Country;
 import de.gost0r.pickupbot.pickup.Match;
 import de.gost0r.pickupbot.pickup.Player;
 import de.gost0r.pickupbot.pickup.Region;
@@ -245,24 +244,6 @@ public class Server {
 
 	public String getAddress() {
 		return IP + ":" + port;
-	}
-
-	public String getRegionFlag(boolean dynServer, boolean forceNoDynamic){
-		if (region == null) {
-			return "";
-		} else if (dynServer && !forceNoDynamic){
-			return Country.getCountryFlag(country) + " " + city + " - ";
-		} else if (region == Region.NAE || region == Region.NAW) {
-			return  ":flag_us:";
-		} else if (region == Region.OC) {
-			return  ":flag_au:";
-		} else if (region == Region.SA) {
-			return ":flag_br:";
-		} else if (region == Region.EU) {
-			return ":flag_eu:";
-		} else {
-			return region.name();
-		}
 	}
 
 }

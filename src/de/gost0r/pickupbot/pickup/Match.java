@@ -478,12 +478,6 @@ public class Match implements Runnable {
 					captainAnnouncement += " " + String.valueOf("\t " + server.playerPing.get(p)) + "ms";
 				}
 			}
-			if (logic.getDynamicServers()){
-				captainAnnouncement +="\n**Server:** " + Country.getCountryFlag(server.country) + "``" + server.city + "``";
-			}
-			else{
-				captainAnnouncement +="\n**Server:** " + server.getRegionFlag(false, false) + "``" + server.region.name() + "``";
-			}
 			logic.bot.sendMsg(threadChannels, captainAnnouncement);
 
 			String captainDm = Config.pkup_go_captains;
@@ -986,7 +980,22 @@ public class Match implements Runnable {
 		
 		DiscordEmbed embed = new DiscordEmbed();
 		
-		String region_flag = server.getRegionFlag(logic.getDynamicServers(), forceNoDynamic);
+		String region_flag;
+		if (server == null || server.region == null) {
+			region_flag = "";
+		} else if (logic.getDynamicServers() && !forceNoDynamic){
+			region_flag = Country.getCountryFlag(server.country) + " " + server.city + " - ";
+		} else if (server.region == Region.NAE || server.region == Region.NAW) {
+			region_flag =  ":flag_us:";
+		} else if (server.region == Region.OC) {
+			region_flag =  ":flag_au:";
+		} else if (server.region == Region.SA) {
+			region_flag =  ":flag_br:";
+		} else if (server.region == Region.EU) {
+			region_flag = ":flag_eu:";
+		} else {
+			region_flag = server.region.name();
+		}
 		
 		if (serverState == ServerState.LIVE && state == MatchState.Live && server != null) {
 			embed.title  = region_flag + " Match #" + id + " (" + server.getServerMonitor().getGameTime() + ")";
