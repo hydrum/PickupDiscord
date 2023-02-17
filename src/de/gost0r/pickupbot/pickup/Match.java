@@ -263,9 +263,9 @@ public class Match implements Runnable {
 		cleanUp();
 		logic.db.saveMatch(this);
 
-		for (DiscordChannel threadChannel : threadChannels){
-			threadChannel.archive();
-		}
+//		for (DiscordChannel threadChannel : threadChannels){
+//			threadChannel.archive();
+//		}
 
 		if (gtvServer != null) {
 			gtvServer.free();
@@ -280,9 +280,9 @@ public class Match implements Runnable {
 		logic.matchRemove(this);
 		logic.db.saveMatch(this);
 
-		for (DiscordChannel threadChannel : threadChannels){
-			threadChannel.archive();
-		}
+//		for (DiscordChannel threadChannel : threadChannels){
+//			threadChannel.archive();
+//		}
 		
 		if (gtvServer != null) {
 			gtvServer.free();
@@ -304,9 +304,9 @@ public class Match implements Runnable {
 			p.setRank(logic.db.getRankForPlayer(p));
 		}
 
-		for (DiscordChannel threadChannel : threadChannels){
-			threadChannel.archive();
-		}
+//		for (DiscordChannel threadChannel : threadChannels){
+//			threadChannel.archive();
+//		}
 		
 		if (gtvServer != null) {
 			gtvServer.free();

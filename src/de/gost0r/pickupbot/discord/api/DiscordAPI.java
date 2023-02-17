@@ -170,7 +170,7 @@ public class DiscordAPI {
 	
 	public static DiscordChannel createThread(DiscordChannel channel, String name) {
 		try {
-			String reply = sendPostRequest("/channels/"+ channel.id + "/threads", new JSONObject().put("name", name).put("type", 11));
+			String reply = sendPostRequest("/channels/"+ channel.id + "/threads", new JSONObject().put("name", name).put("type", 11).put("auto_archive_duration", 60));
 
 			if (reply == null) {
 				return null;

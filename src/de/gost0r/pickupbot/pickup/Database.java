@@ -1195,7 +1195,7 @@ public class Database {
 		
 		try {
 			// TODO: maybe move this somewhere
-			String sql = "SELECT SUM(kills) as sumkills, SUM(deaths) as sumdeaths, SUM(assists) as sumassists FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim INNER JOIN match ON match.id = player_in_match.matchid WHERE match.gametype=\"TS\" AND player_userid=? AND player_urtauth=? AND match.starttime > ? AND match.starttime < ?;";
+			String sql = "SELECT SUM(kills) as sumkills, SUM(deaths) as sumdeaths, SUM(assists) as sumassists FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim INNER JOIN match ON match.id = player_in_match.matchid WHERE match.gametype=\"TS\" AND (match.state = 'Done' OR match.state = 'Surrender' OR match.state = 'Mercy') AND player_userid=? AND player_urtauth=? AND match.starttime > ? AND match.starttime < ?;";
 			PreparedStatement stmt = c.prepareStatement(sql);
 			stmt.setString(1, player.getDiscordUser().id);
 			stmt.setString(2, player.getUrtauth());
@@ -1212,7 +1212,7 @@ public class Database {
 			}
 
 			// CTF
-			sql = "SELECT COUNT(player_in_match.player_urtauth)/2 as matchcount, CAST (SUM(score.kills) AS FLOAT) / (COUNT(player_in_match.player_urtauth)/2 ) / 50   as ctfrating, SUM(caps) as sumcaps, SUM(returns) as sumreturns, SUM(fckills) as sumfckills, SUM(stopcaps) as sumstopcaps, SUM(protflag) as sumprotflag, player_in_match.player_urtauth as auth, match.id as matchid FROM score INNER JOIN stats ON (score.id = stats.score_1 OR score.id = stats.score_2) INNER JOIN player_in_match ON player_in_match.id = stats.pim INNER JOIN match ON player_in_match.matchid = match.id WHERE match.gametype=\"CTF\" AND match.state=\"Done\" AND auth=?  AND match.starttime > ? AND match.starttime < ?;";
+			sql = "SELECT COUNT(player_in_match.player_urtauth)/2 as matchcount, CAST (SUM(score.kills) AS FLOAT) / (COUNT(player_in_match.player_urtauth)/2 ) / 50   as ctfrating, SUM(caps) as sumcaps, SUM(returns) as sumreturns, SUM(fckills) as sumfckills, SUM(stopcaps) as sumstopcaps, SUM(protflag) as sumprotflag, player_in_match.player_urtauth as auth, match.id as matchid FROM score INNER JOIN stats ON (score.id = stats.score_1 OR score.id = stats.score_2) INNER JOIN player_in_match ON player_in_match.id = stats.pim INNER JOIN match ON player_in_match.matchid = match.id WHERE match.gametype=\"CTF\" AND (match.state = 'Done' OR match.state = 'Surrender' OR match.state = 'Mercy') AND auth=?  AND match.starttime > ? AND match.starttime < ?;";
 			stmt = c.prepareStatement(sql);
 			stmt.setString(1, player.getUrtauth());
 			stmt.setLong(2, season.startdate);
