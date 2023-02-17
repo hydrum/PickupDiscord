@@ -150,7 +150,7 @@ public class DiscordUser {
 		return null;
 	}
 	public static DiscordUser getUser(String id) {
-		if (id.matches("[0-9]+")) {
+		if (id.matches("[0-9]+") && id.length() > 10) {
 			if (userList.containsKey(id)) {
 				return userList.get(id);
 			}
