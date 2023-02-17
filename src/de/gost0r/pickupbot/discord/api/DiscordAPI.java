@@ -410,7 +410,7 @@ public class DiscordAPI {
 			c.setRequestMethod("DELETE");
 			c.setRequestProperty("User-Agent", "Bot");
 			c.setRequestProperty("Authorization", "Bot " + DiscordBot.getToken());
-			
+
 			if (c.getResponseCode() != 200 && c.getResponseCode() != 201 && c.getResponseCode() != 204) {
 				if (c.getResponseCode() == 429 || c.getResponseCode() == 502) {
 					try {
@@ -610,6 +610,7 @@ public class DiscordAPI {
 	public static boolean removeUserRole(DiscordUser user, DiscordRole role) {
 		try {
 			// TODO IMPLEMENT THIS FOR OTHER SERVERS
+			// 404 can happen when trying to remove a role from a user that is only in the other pickup server
 			String reply = sendDeleteRequest("/guilds/117622053061787657/members/" + user.id + "/roles/" + role.id);
 
 			return reply != null;

@@ -334,6 +334,6 @@ public class Player {
 		this.elorank = rank;
 	}
 	public int getEloRank(){
-		return elorank;
+		return db.getRankForPlayer(this);
 	}
 }
