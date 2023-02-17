@@ -1241,6 +1241,12 @@ public class PickupLogic {
 				}
 				else{
 					bs = getBestServer(m.getPreferredServerRegion());
+					if (bs != null){
+						String spawnMsg = Config.pkup_go_pub_requestserver;
+						spawnMsg = spawnMsg.replace(".flag.", bs.getRegionFlag(false, false));
+						spawnMsg = spawnMsg.replace(".region.", bs.region.name());
+						bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), spawnMsg);
+					}
 				}
 				
 				if(bs != null && m.getMatchState() == MatchState.AwaitingServer)
