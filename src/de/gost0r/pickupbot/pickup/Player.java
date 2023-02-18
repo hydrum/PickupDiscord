@@ -327,7 +327,7 @@ public class Player {
 		if (gt.getName().equals("CTF")){
 			wdl = stats.ctf_wdl.calcWinRatio();
 		}
-		return (float) (elo + (stats.kdr * 500 + wdl * 500.0));
+		return (float) (elo + (stats.kdr * 500 + wdl * 500.0) / 4);
 	}
 
 	public void setRank(int rank){
