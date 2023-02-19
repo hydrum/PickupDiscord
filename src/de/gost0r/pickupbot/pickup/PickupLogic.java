@@ -858,7 +858,7 @@ public class PickupLogic {
 		}
 
 		for (Match match : ongoingMatches) {
-			String msg = "**" + match.getGametype().getName() + " Match #" + String.valueOf(match.getID()) + "** " +  Config.pkup_pw;
+			String msg = "**" + match.getGametype().getName() + " Match #" + String.valueOf(match.getID()) + "** " +  Config.pkup_pw + " Server #" + match.getServer().id;
 			msg = msg.replace(".server.", match.getServer().getAddress());
 			msg = msg.replace(".password.", match.getServer().password);
 			bot.sendMsg(channel, msg);
