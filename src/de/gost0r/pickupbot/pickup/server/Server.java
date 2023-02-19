@@ -41,6 +41,8 @@ public class Server {
 	private ServerMonitor monitor;
 	private Thread monitorThread;
 
+	public int matchid;
+
 	public Server(int id, String ip, int port, String rconpassword, String password, boolean active, Region region) {
 		this.id = id;
 		this.IP = ip;
@@ -190,7 +192,8 @@ public class Server {
 	@Override
 	public String toString() {
 		String isActive = this.active ? "" : "(inactive)";
-		return "#" + id + " " + IP + ":" + port + " " + region + " " + isReachable() + " " + isActive ;
+		String isTaken = this.isTaken() ? "used for Match#" + matchid : "";
+		return "#" + id + " " + IP + ":" + port + " " + region + " " + isReachable() + " " + isActive + isTaken ;
 	}
 
 	public boolean isOnline(){

@@ -404,9 +404,11 @@ public class Match implements Runnable {
 	public void launch(Server server) {
 
 		if (!isOver() && state != MatchState.Live) {
-			
+			// Need to set temp id here to cancel games during draft
+			id = logic.db.getLastMatchID() + 1;
 			this.server = server;
 			server.take();
+			server.matchid = id;
 
 			for (Player player : getPlayerList()) {				
 				for (Match m : logic.playerInMatch(player)) {
@@ -670,6 +672,7 @@ public class Match implements Runnable {
 		LOGGER.info("Team Blue: " + elo[1] + " " + Arrays.toString(teamList.get("blue").toArray()));
 
 		id = logic.db.createMatch(this);
+		server.matchid = id;
 
 		// MESSAGE HYPE
 
