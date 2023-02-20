@@ -1206,6 +1206,9 @@ public class PickupLogic {
 
 	public void cancelRequestServer(Match match) {
 		awaitingServer.remove(match);
+		if (match.getServer() != null && match.getServer().isTaken()){
+			match.getServer().free();
+		}
 	}
 
 	public void matchStarted(Match match) {
