@@ -232,9 +232,9 @@ public class Match implements Runnable {
 					Sentry.capture(e);
 				}
 				cleanUp();
-				sendAftermath();
 				logic.matchRemove(this);
 				logic.db.saveMatch(this);
+				sendAftermath();
 			}
 		}
 	}
@@ -276,8 +276,6 @@ public class Match implements Runnable {
 	public void abandon(Status status, List<Player> involvedPlayers) {
 		state = MatchState.Abandon;
 		cleanUp();
-		sendAftermath(status, involvedPlayers);
-		logic.matchRemove(this);
 		logic.db.saveMatch(this);
 
 //		for (DiscordChannel threadChannel : threadChannels){
@@ -288,6 +286,9 @@ public class Match implements Runnable {
 			gtvServer.free();
 			gtvServer.sendRcon("gtv_disconnect 1");
 		}
+
+		logic.matchRemove(this);
+		sendAftermath(status, involvedPlayers);
 	}
 
 	public void end() {
@@ -313,8 +314,8 @@ public class Match implements Runnable {
 			gtvServer.sendRcon("gtv_disconnect 1");
 		}
 
-		sendAftermath();
 		logic.matchRemove(this);
+		sendAftermath();
 	}
 
 	public void cancelStart() {
