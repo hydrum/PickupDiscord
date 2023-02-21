@@ -8,6 +8,7 @@ import java.util.Map;
 import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordGuild;
 import de.gost0r.pickupbot.discord.DiscordUser;
+import de.gost0r.pickupbot.pickup.stats.WinDrawLoss;
 
 import javax.swing.*;
 
@@ -323,11 +324,16 @@ public class Player {
 	public void setEnforceAC(boolean enforceAC) { this.enforceAC = enforceAC; }
 
 	public float getCaptainScore(Gametype gt){
-		double wdl = stats.ts_wdl.calcWinRatio();
+		WinDrawLoss wdl = stats.ts_wdl;
+		float kdr = stats.kdr;
 		if (gt.getName().equals("CTF")){
-			wdl = stats.ctf_wdl.calcWinRatio();
+			wdl = stats.ctf_wdl;
+			kdr = stats.ctf_rating;
 		}
-		return (float) (elo + (stats.kdr * 500 + wdl * 500.0) / 4);
+		if (wdl.getTotal() < 5){
+			return (float) elo;
+		}
+		return (float) (elo + (kdr * 500 + wdl.calcWinRatio() * 500.0) / 4);
 	}
 
 	public void setRank(int rank){
