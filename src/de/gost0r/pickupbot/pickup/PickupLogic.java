@@ -645,7 +645,15 @@ public class PickupLogic {
 		}
 	}
 
-	public void cmdGetMaps(boolean showZeroVote) {
+	public void cmdGetMaps(Player player, boolean showZeroVote) {
+		Match activeMatch = playerInActiveMatch(player);
+		if (activeMatch != null){
+			String msg = Config.pkup_map_list;
+			msg = msg.replace(".gametype.", activeMatch.getGametype().getName());
+			msg = msg.replace(".maplist.", activeMatch.getMapVotes(true));
+			bot.sendMsg(bot.getLatestMessageChannel(), msg);
+			return;
+		}
 		StringBuilder msg = new StringBuilder("None");
 		for (Gametype gametype : curMatch.keySet()) {
 			if (gametype.getName().startsWith("SCRIM") && curMatch.get(gametype).getPlayerCount() == 0){

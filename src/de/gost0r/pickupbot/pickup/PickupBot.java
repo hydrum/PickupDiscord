@@ -281,7 +281,7 @@ public class PickupBot extends DiscordBot {
 					{
 						if (data.length == 1)
 						{
-							logic.cmdGetMaps(true);
+							logic.cmdGetMaps(p, true);
 						}
 						else if (data.length == 2)
 						{
@@ -308,7 +308,7 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_VOTES:
 					if (data.length == 1)
 					{
-						logic.cmdGetMaps(false);
+						logic.cmdGetMaps(p, false);
 					}
 					else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_VOTES));
 					break;

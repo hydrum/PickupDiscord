@@ -186,6 +186,7 @@ public class Match implements Runnable {
 			player.voteMap(gametype, map);
 			String msg = Config.pkup_map;
 			msg = msg.replace(".map.", map.name);
+			msg = msg.replace(".count.", String.valueOf(mapVotes.get(map)));
 			logic.bot.sendNotice(player.getDiscordUser(), msg);
 		} else {
 			logic.bot.sendNotice(player.getDiscordUser(), Config.map_cannot_vote);

@@ -187,7 +187,7 @@ public class Config {
 
 	//------------------------------------------------------------------------------------//
 	public static final String pkup_lock				= "Pickup games are now locked. :lock:";
-	public static final String pkup_map					= "You voted for .map..";
+	public static final String pkup_map					= "You voted for .map. (``.count.``).";
 	public static final String pkup_map_list			= "**.gametype.**: .maplist.";
 //	public static final String pkup_signup				= "You can sign up again!";
 	public static final String pkup_pw					= "[ /connect .server. ; password .password. ]";
