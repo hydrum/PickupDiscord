@@ -45,7 +45,7 @@ public class PickupBot extends DiscordBot {
 
 		this.latestMessageChannel = msg.channel;
 
-		if (msg.user.equals(self)) {
+		if (msg.user.equals(self) || logic == null) {
 			return;
 		}
 
