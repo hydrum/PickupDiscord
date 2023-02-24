@@ -700,7 +700,7 @@ public class Match implements Runnable {
 		msg = Config.pkup_map_list;
 		msg = msg.replace(".gametype.", gametype.getName());			
 		if (getMostMapVotes().size() == mapVotes.keySet().size()) {
-			msg = msg.replace(".maplist.", "NO VOTES - RANDOM!");
+			msg = msg.replace(".maplist.", "NO VOTES - RANDOM");
 		}
 		else {
 			msg = msg.replace(".maplist.", getMapVotes(true));
@@ -1001,7 +1001,7 @@ public class Match implements Runnable {
 		}
 		
 		embed.color = 7056881;
-		embed.description = map != null ? "**" + gametype.getName() + "** - [" + map.name + "](https://cdn.ftwgl.net/download/" + map.name + ".pk3)" : "null";
+		embed.description = map != null ? "**" + gametype.getName() + "** - [" + map.name + "](https://maps.pugbot.net/q3ut4/" + map.name + ".pk3)" : "null";
 		
 		StringBuilder red_team_player_embed = new StringBuilder();
 		StringBuilder red_team_score_embed = new StringBuilder();

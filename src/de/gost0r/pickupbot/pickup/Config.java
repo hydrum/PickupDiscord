@@ -70,7 +70,7 @@ public class Config {
 	public static final String CMD_UPDATESERVER			= "!updateserver";
 
 	public static final String CMD_SHOWMATCHES			= "!showmatches";
-	
+
 	public static final String CMD_UNREGISTER			= "!unregister";
 	public static final String CMD_ENFORCEAC			= "!enforceac";
 
@@ -79,7 +79,7 @@ public class Config {
 	public static final String CMD_ADDROLE				= "!addrole";
 	public static final String CMD_REMOVEROLE			= "!removerole";
 
-	public static final String CMD_RESETELO  			= "!resetelo";
+	public static final String CMD_RESETELO				= "!resetelo";
 
 	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_MAP + " " + CMD_MATCH + " " 
 	+ CMD_LAST + " " + CMD_LIVE + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS 
@@ -197,10 +197,10 @@ public class Config {
 //	public static final String pkup_status_players		= "**.gametype.**: Players [.playernumber./10]: .playerlist.";
 //	public static final String pkup_started				= "**.gametype.**: Match has already started. .status. - .time. minutes in.";
 
-	public static final String pkup_reset_all 			= "*All matches and queues have been reset.*";
-	public static final String pkup_reset_cur 			= "*All queues have been reset.*";
-	public static final String pkup_reset_type 			= "*.gametype. queue has been reset.*";
-	public static final String pkup_reset_id 			= "*Match #.id. has been reset.*";
+	public static final String pkup_reset_all			= "*All matches and queues have been reset.*";
+	public static final String pkup_reset_cur			= "*All queues have been reset.*";
+	public static final String pkup_reset_type			= "*.gametype. queue has been reset.*";
+	public static final String pkup_reset_id			= "*Match #.id. has been reset.*";
 
 	public static final String pkup_match_print_live	= "**[** Match #.gamenumber. **][** Live **][** .gametype. **][** .map. **][** ELO red: .elored. ELO blue: .eloblue. **][** Players: .playerlist. **]**";
 	public static final String pkup_match_print_signup	= "**[** Match #--- **][** Signup **][** Gametype: .gametype. **][** .playernumber./.maxplayer. **][** Players: .playerlist. **]**";
@@ -212,9 +212,9 @@ public class Config {
 
 	public static final String pkup_match_print_info	= "**.gametype. #.gamenumber.**: **[**.map.**] [**.ingame.**] [**.redteam.**]** VS **[**.blueteam.**]**";
 
-	public static final String pkup_go_player			= "Pickup starts now! Connect, choose positions and ready up! **[ /connect .server. ; password .password. ]**";
+	public static final String pkup_go_player			= "Pickup starts now! Connect, choose positions and ready up! [ **/connect .server. ; password .password. **]\n :warning: The **AC** will soon be **mandatory** for all players, forcing you to press the :green_square: **Connect to server** button to join games.\n Check out: https://discord.com/channels/117622053061787657/1067227082372952084/1067227082372952084**";
 	public static final String pkup_go_player_ac		= "Pickup starts now! Connect, choose positions and ready up!\n :warning: **You are forced to use the anticheat, click the button below to connect.**";
-	public static final String pkup_go_captains			= "Pickup is about to start and you are captain! Please pick players in the recently created discord thread.";
+	public static final String pkup_go_captains			= "Pickup is about to start and you are **captain**! Please pick players in the recently created discord thread.";
 	public static final String pkup_go_pub_head			= "**.gametype.: Match #.gamenumber.** .region. (avg ELO: .elo.)";
 	public static final String pkup_go_pub_team			= ".team. team: .playerlist.";
 	public static final String pkup_go_pub_map			= "Map: .map.";
@@ -222,8 +222,8 @@ public class Config {
 	public static final String pkup_go_pub_calm_notavi	= "GTV: not available";
 	public static final String pkup_go_pub_sent			= "**.gametype.**: Server info has been sent. If you didn't get a DM try **!lostpass**.";
 	public static final String pkup_go_pub_threadtitle	= "Match .ID.";
-	public static final String pkup_go_pub_captains 	= "The captains are .captain1. (**red**) and .captain2. (**blue**) as they have the highest elo. Player stats:";
-	public static final String pkup_go_pub_pick 		= ".captain. pick a player:";
+	public static final String pkup_go_pub_captains		= "The captains are .captain1. (**red**) and .captain2. (**blue**). Player stats:";
+	public static final String pkup_go_pub_pick			= ".captain. pick a player:";
 	public static final String pkup_go_pub_pickjoin		= ".pick. joins the **.color.** team.";
 	public static final String pkup_go_pub_servspawn	= "**Spawning Server:** .flag. ``.city.`` (fairest server to all players)\n:hourglass: The ip will be send to all players when the server is spawned.";
 	public static final String pkup_go_pub_requestserver= "**Requesting Server:** .flag. ``.region.``";
@@ -275,12 +275,12 @@ public class Config {
 	public static final String player_not_in_match		= "You are not added to any queue.";
 	public static final String player_already_match		= "You are already in a match.";
 	public static final String player_not_admin			= "You must be an admin to use this command.";
-	public static final String player_notdiv1			= "Hi <:puma:849287183474884628>, you need to be in the either Top ``.minrank.``  **ELO** (#``.rank.``) *OR* Top ``.minkdrrank.``  **KDR** (#``.kdrrank.``) *OR* Top ``.minwinrank.``  **Win Rate** (#``.winrank.``) to add to the **div1** queue. Keep practicing on Sexy CTF.";
+	public static final String player_notdiv1			= "Hi <:puma:849287183474884628>, you need to be in either the Top ``.minrank.``  **ELO** (#``.rank.``) *OR* Top ``.minkdrrank.``  **KDR** (#``.kdrrank.``) *OR* Top ``.minwinrank.``  **Win Rate** (#``.winrank.``) to add to the **div1** queue. Keep practicing on Sexy CTF.";
 
 	public static final String player_not_captain		= "You can't pick a player. You are not captain or it is not your turn to pick.";
 
 	public static final String player_already_surrender	= "You already surrendered.";
-	
+
 	public static final String afk_reminder				= "**[AFK]** .user. will be removed in 3 minutes. Write something in the channel to stay in queue.";
 	public static final String pick_reminder			= "**[CAPTAIN PICK]** .user. you have 1 min to pick a player in the game thread channel.";
 	public static final String pick_reset				= "**[CAPTAIN PICK]** The match **.matchid.** has been reset. .user. did not pick a player in time and was punished accordingly.";
@@ -302,11 +302,11 @@ public class Config {
 	public static final String lock_enable				= "*Game is LOCKED.* :lock:";
 	public static final String lock_disable				= "*Game is now unlocked.*";
 
-	public static final String pkup_match_unavi 		= "Match is not available right now.";
+	public static final String pkup_match_unavi			= "Match is not available right now.";
 	public static final String pkup_match_invalid_gt	= "No match for that gametype is available right now.";
 	public static final String no_gt_found				= "Unable to find a matching gametype. Try `!add ctf`";
 	public static final String no_gt_team_found			= "Unable to find a matching gametype. Try `!scrim ctf`";
-	
+
 	public static final String banreason_not_found		= "Use one of the following ban reasons: .banreasons.";	
 	public static final String banduration_invalid		= "Invalid ban duration. Try 1m,1h,1d,1w,1M.";
 
@@ -314,21 +314,21 @@ public class Config {
 	public static final String admin_cmd_unsuccessful	= ":x: Unsuccessful: ";
 	public static final String wait_testing_server		= "Testing server list. This can take a while...";
 	public static final String admin_enforce_ac_on		= ":white_check_mark: The anticheat is now enforced for the player ``.urtauth.``";
-	public static final String admin_enforce_ac_off		= ":negative_squared_cross_mark: The anticheat is no longer enforced for the player ``.urtauth.``";
+	public static final String admin_enforce_ac_off		= ":negative_squared_cross_mark: The anticheat is **no longer** enforced for the player ``.urtauth.``";
 	
 	public static final String bot_online				= "The bot is back online!";
 
-	public static final String elo_reset   				= "The elo has been reset! Don't forget to reboot the bot and remove all rank roles manually.";
+	public static final String elo_reset				= "The elo has been reset! Don't forget to reboot the bot and remove all rank roles manually.";
 
-	public static final String ftw_playernotinmatch   	= "Player not in match";
-	public static final String ftw_matchnotfound    	= "Match not found";
-	public static final String ftw_success     	    	= "Game launched";
-	public static final String ftw_notconnected  	    = "User not connected to the FTW launcher";
-	public static final String ftw_error 		  	    = "Unknown error";
-	public static final String ftw_error_noping	  	    = "Check your dms and click on the link to register your ping in the different server locations.";
-	public static final String ftw_dm_noping	  	    = "Please click here to register your ping in the different server locations: .url.";
+	public static final String ftw_playernotinmatch		= "Player not in match";
+	public static final String ftw_matchnotfound		= "Match not found";
+	public static final String ftw_success				= "Game launched";
+	public static final String ftw_notconnected			= "User not connected to the FTW launcher";
+	public static final String ftw_error				= "Unknown error";
+	public static final String ftw_error_noping			= "Check your dms and click on the link to register your ping in the different server locations.";
+	public static final String ftw_dm_noping			= "Please click here to register your ping in the different server locations: .url.";
 
-	public static final String team_involved_other		= "You are already involved in an active team. You can leave it by sending ``!leaveteam``.";
+	public static final String team_involved_other		= "You are already involved in an active team. Leave it by sending ``!leaveteam``.";
 	public static final String team_already_involved	= "``.auth.`` is already in a team.";
 	public static final String team_is_full				= "Your team already has 5 players.";
 	public static final String team_already_in			= "The player ``.auth.`` is already in your team.";
@@ -345,14 +345,14 @@ public class Config {
 	public static final String team_error_invite		= "Only the player ``.player.`` can answer.";
 	public static final String team_error_active		= "This team is no longer active.";
 	public static final String team_error_remove		= "Only the team captain or the player in question can press this button.";
-	public static final String team_error_teamsize      = "You need to be exactly ``.teamsize.`` in your team to queue for this gamemode.";
-	public static final String team_error_wrong_gt      = "You can't add as a team for that gamemode.";
+	public static final String team_error_teamsize		= "You need to be exactly ``.teamsize.`` in your team to queue for this gamemode.";
+	public static final String team_error_wrong_gt		= "You can't add as a team for that gamemode.";
 	public static final String team_added				= "**.gamemode.**: Team sign up: .team.";
 	public static final String team_removed_queue		= "Team removed from all queues: .team.";
 	public static final String team_cant_soloqueue		= "You can't queue by yourself as you are currently in a team. ``!leaveteam`` to solo queue.";
 	public static final String team_print_info			= "Your current team: .team.";
 	public static final String team_print_all			= "__List of all active teams:__";
 	public static final String team_print_noteam		= "No team is currently active.";
-	public static final String team_only_mentions 		= "Please specify players using: ``!team @user``.";
-	public static final String team_no_scrim	 		= "**SCRIM**: No team signed up. Type ``!scrim <ts/ctf/2v2>`` to play.";
+	public static final String team_only_mentions		= "Please specify players using: ``!team @user``.";
+	public static final String team_no_scrim			= "**SCRIM**: No team signed up. Type ``!scrim <ts/ctf/2v2>`` to play.";
 }

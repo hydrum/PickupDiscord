@@ -150,7 +150,7 @@ public class PickupLogic {
 			player.setLastMessage(System.currentTimeMillis());
 		}
 		
-		String defmsg = "You are already in queue for:";
+		String defmsg = "You are already queued for:";
 		StringBuilder msg = new StringBuilder(defmsg);
 		
 		if (curMatch.containsKey(gt)) {
@@ -278,12 +278,12 @@ public class PickupLogic {
 					}
 					else
 					{
-						bot.sendNotice(user, "Unknown county code. Look yours up: <https://datahub.io/core/country-list/r/0.html>");
+						bot.sendNotice(user, "Unknown county code. Check: <https://datahub.io/core/country-list/r/0.html>");
 					}
 				}
 				else {
 					// Region has been set by user, need an admin 
-					bot.sendNotice(user, "Your country code is already set. Corresponding region: " + p.getRegion().toString());
+					bot.sendNotice(user, "Your country is already set. Corresponding region: " + p.getRegion().toString());
 				}
 			} 
 			else {
@@ -303,7 +303,7 @@ public class PickupLogic {
 		}
 		else
 		{
-			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), "Unknown county code. Look yours up: <https://datahub.io/core/country-list/r/0.html>");
+			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), "Unknown county code. Check: <https://datahub.io/core/country-list/r/0.html>");
 		}	
 	}
 
