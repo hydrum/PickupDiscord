@@ -61,7 +61,7 @@ public class Database {
 													+ "elochange INTEGER DEFAULT 0,"
 													+ "active TEXT,"
 													+ "country TEXT,"
-													+ "enforce_ac TEXT DEFAULT 'false',"
+													+ "enforce_ac TEXT DEFAULT 'true',"
 													+ "PRIMARY KEY (userid, urtauth) )";
 			stmt.executeUpdate(sql);
 			
