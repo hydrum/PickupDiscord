@@ -212,7 +212,7 @@ public class Config {
 
 	public static final String pkup_match_print_info	= "**.gametype. #.gamenumber.**: **[**.map.**] [**.ingame.**] [**.redteam.**]** VS **[**.blueteam.**]**";
 
-	public static final String pkup_go_player			= "Pickup starts now! Connect, choose positions and ready up! [ **/connect .server. ; password .password. **]\n :warning: The **AC** will soon be **mandatory** for all players, forcing you to press the :green_square: **Connect to server** button to join games.\n Check out: https://discord.com/channels/117622053061787657/1067227082372952084/1067227082372952084**";
+	public static final String pkup_go_player			= "Pickup starts now! Connect, choose positions and ready up! **[ /connect .server. ; password .password. ]**\n\n :warning: The **AC** will soon be **mandatory** for all players, forcing you to press the :green_square: **Connect to server** button to join games.\n Check out: <https://discord.com/channels/117622053061787657/1067227082372952084/1067227082372952084>";
 	public static final String pkup_go_player_ac		= "Pickup starts now! Connect, choose positions and ready up!\n :warning: **You are forced to use the anticheat, click the button below to connect.**";
 	public static final String pkup_go_captains			= "Pickup is about to start and you are **captain**! Please pick players in the recently created discord thread.";
 	public static final String pkup_go_pub_head			= "**.gametype.: Match #.gamenumber.** .region. (avg ELO: .elo.)";
