@@ -226,6 +226,7 @@ public class PickupLogic {
 						p.setElo(db.getAvgElo());
 						db.createPlayer(p);
 						bot.sendNotice(user, Config.auth_success);
+						bot.sendMsg(user.getDMChannel(), Config.ac_enforced);
 						String admin_msg = Config.auth_success_admin;
 						admin_msg = admin_msg.replace(".user.", user.getMentionString());
 						admin_msg = admin_msg.replace(".urtauth.", urtauth);

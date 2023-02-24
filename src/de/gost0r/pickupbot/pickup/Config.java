@@ -268,6 +268,8 @@ public class Config {
 	public static final String auth_success_admin		= "The user .user. registered using the auth ``.urtauth.``.";
 	public static final String auth_sent_key			= "You have to register your auth name and not your auth key!!!";
 
+	public static final String ac_enforced				= ":warning: **From now on the anticheat (AC) will be mandatory for you to play pickup games.**\n\n If the AC is new to you, check out the channel below for information on how to set it up: https://discord.com/channels/117622053061787657/1067227082372952084/1067227082372952084 If you run into any kind of issue, don't hesitate to ask for support in **#help** or by DM to ``@solitary#5004``\n\nYou will now need to press the green **Connect to server** button in the **#pickup** channel to join.";
+
 	public static final String player_already_added		= "You are already added to a pickup game.";
 	public static final String player_already_removed	= "You are not added to any pickup game.";
 	public static final String player_cannot_add		= "You cannot add right now.";
