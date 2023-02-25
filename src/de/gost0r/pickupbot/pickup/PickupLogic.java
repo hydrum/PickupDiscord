@@ -761,7 +761,8 @@ public class PickupLogic {
 			msg = Config.pkup_status_signup;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 			msg = msg.replace(".playernumber.", String.valueOf(playerCount));
-			msg = msg.replace(".maxplayer.", String.valueOf(match.getGametype().getTeamSize() * 2));
+			int maxplayer = match.getGametype().getTeamSize() == 0 ? 1 : match.getGametype().getTeamSize() * 2;
+			msg = msg.replace(".maxplayer.", String.valueOf(maxplayer));
 
 			StringBuilder playernames = new StringBuilder("None");
 			if (player == null) {

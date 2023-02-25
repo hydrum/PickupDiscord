@@ -241,7 +241,8 @@ public class Match implements Runnable {
 	}
 
 	public void checkReadyState(Player player) {
-		if (playerStats.keySet().size() == gametype.getTeamSize() * 2) {
+		if (playerStats.keySet().size() == gametype.getTeamSize() * 2
+			|| (gametype.getTeamSize() == 0 && playerStats.keySet().size() == 1)) {
 			state = MatchState.AwaitingServer;
 			logic.cmdStatus(this, player, true);
 			
@@ -253,7 +254,8 @@ public class Match implements Runnable {
 	}
 
 	public void checkServerState() {
-		if (state == MatchState.AwaitingServer && playerStats.keySet().size() != gametype.getTeamSize() * 2) {
+		if (state == MatchState.AwaitingServer && (playerStats.keySet().size() != gametype.getTeamSize() * 2
+			|| (gametype.getTeamSize() == 0 && playerStats.keySet().size() != 1))) {
 			state = MatchState.Signup;
 			logic.cancelRequestServer(this);
 		}
@@ -467,9 +469,11 @@ public class Match implements Runnable {
 		
 		captains[0] = sortedPlayers.get(0);
 		teamList.get("red").add(captains[0]);
-		
-		captains[1] = sortedPlayers.get(1);
-		teamList.get("blue").add(captains[1]);
+
+		if (gametype.getTeamSize() != 0){
+			captains[1] = sortedPlayers.get(1);
+			teamList.get("blue").add(captains[1]);
+		}
 
 		if (sortedPlayers.size() > 2){
 			String captainAnnouncement = Config.pkup_go_pub_captains;
@@ -496,7 +500,9 @@ public class Match implements Runnable {
 		}
 
 		sortedPlayers.remove(0);
-		sortedPlayers.remove(0);
+		if (gametype.getTeamSize() != 0){
+			sortedPlayers.remove(0);
+		}
 		
 		checkTeams();
 		/*
@@ -665,10 +671,12 @@ public class Match implements Runnable {
 
 		// avg elo
 		elo = new int[] {0, 0};
-		for (Player p : teamList.get("red")) elo[0] += p.getElo();
-		for (Player p : teamList.get("blue")) elo[1] += p.getElo();
-		elo[0] /= gametype.getTeamSize();
-		elo[1] /= gametype.getTeamSize();
+		if (gametype.getTeamSize() != 0){
+			for (Player p : teamList.get("red")) elo[0] += p.getElo();
+			for (Player p : teamList.get("blue")) elo[1] += p.getElo();
+			elo[0] /= gametype.getTeamSize();
+			elo[1] /= gametype.getTeamSize();
+		}
 
 		LOGGER.info("Team Red: " + elo[0] + " " + Arrays.toString(teamList.get("red").toArray()));
 		LOGGER.info("Team Blue: " + elo[1] + " " + Arrays.toString(teamList.get("blue").toArray()));
@@ -708,6 +716,9 @@ public class Match implements Runnable {
 		fullmsg.append("\n").append(msg);
 
 		String[] teamname = {"Red", "Blue"};
+		if (gametype.getTeamSize() == 0){
+			teamname = new String[]{"Red"};
+		}
 		for (String team : teamname) {
 			StringBuilder playernames = new StringBuilder();
 			for (Player p : teamList.get(team.toLowerCase())) {
@@ -787,7 +798,7 @@ public class Match implements Runnable {
 		}
 		
 		server.startMonitoring(this);
-		
+
 		liveScoreMsgs = logic.bot.sendMsgToEdit(threadChannels, "", getMatchEmbed(false), null);
 	}
 
@@ -1041,7 +1052,7 @@ public class Match implements Runnable {
 					red_team_ping_embed.append(ping_row);
 				}
 			}
-			else if (teamList.get("blue").contains(entry.getKey())) {
+			else if (gametype.getTeamSize() != 0 && teamList.get("blue").contains(entry.getKey())) {
 				blue_team_player_embed.append(player_row);
 				blue_team_score_embed.append(score_row);
 				if (logic.getDynamicServers() && !forceNoDynamic){
@@ -1055,11 +1066,13 @@ public class Match implements Runnable {
 		if (logic.getDynamicServers()){
 			embed.addField("Ping (ms)" + "\n \u200b", red_team_ping_embed.toString(), true);
 		}
-		embed.addField("\u200b", "\u200b", false);
-		embed.addField("<:rush_blue:510067909628788736> \u200b \u200b " + getScoreBlue() + "\n \u200b", blue_team_player_embed.toString(), true);
-		embed.addField("K/D/A" + "\n \u200b", blue_team_score_embed.toString(), true);
-		if (logic.getDynamicServers()){
-			embed.addField("Ping (ms)" + "\n \u200b", blue_team_ping_embed.toString(), true);
+		if (gametype.getTeamSize() != 0){
+			embed.addField("\u200b", "\u200b", false);
+			embed.addField("<:rush_blue:510067909628788736> \u200b \u200b " + getScoreBlue() + "\n \u200b", blue_team_player_embed.toString(), true);
+			embed.addField("K/D/A" + "\n \u200b", blue_team_score_embed.toString(), true);
+			if (logic.getDynamicServers()){
+				embed.addField("Ping (ms)" + "\n \u200b", blue_team_ping_embed.toString(), true);
+			}
 		}
 
 		Date startDate = new Date(startTime);
@@ -1135,7 +1148,8 @@ public class Match implements Runnable {
 		msg = msg.replace(".elored.", String.valueOf(elo[0]));
 		msg = msg.replace(".eloblue.", String.valueOf(elo[1]));
 		msg = msg.replace(".playernumber.", String.valueOf(getPlayerCount()));
-		msg = msg.replace(".maxplayer.", String.valueOf(gametype.getTeamSize() * 2));
+		int maxplayer = gametype.getTeamSize() == 0 ? 1 : gametype.getTeamSize() * 2;
+		msg = msg.replace(".maxplayer.", String.valueOf(maxplayer));
 		msg = msg.replace(".playerlist.", playernames.toString());
 		msg = msg.replace(".score.", score[0] + " " + score[1]);
 		return msg;

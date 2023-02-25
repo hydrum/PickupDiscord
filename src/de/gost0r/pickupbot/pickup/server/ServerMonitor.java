@@ -1,8 +1,6 @@
 package de.gost0r.pickupbot.pickup.server;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,6 +33,7 @@ public class ServerMonitor implements Runnable {
 	
 	
 	private List<ServerPlayer> players;
+	private Map<String, CTF_Stats> backupStats;
 	private List<ServerPlayer> leavers;
 	private String gameTime;
 	private ServerState state;
@@ -66,6 +65,7 @@ public class ServerMonitor implements Runnable {
 		noMercyIssued = false;
 		
 		players = new ArrayList<ServerPlayer>();
+		backupStats = new HashMap<String, CTF_Stats>();
 		leavers = new ArrayList<ServerPlayer>();
 	}
 
@@ -100,32 +100,13 @@ public class ServerMonitor implements Runnable {
 		
 		updatePlayers(rpp);	
 		evaluateState(rpp);
-		
 		forceplayers();
-		
-		if (state == ServerState.WELCOME)
-		{
-			
-		}
-		else if (state == ServerState.WARMUP)
-		{
-			// Do nothing
-		}
-		else if (state == ServerState.LIVE)
-		{
-			checkNoMercy(rpp);
-			
-		}
-		else if (state == ServerState.SCORE)
-		{
-			
-		}
 		checkNoshow();
 		checkRagequit();
 		
 	}
 	private void checkNoMercy(RconPlayersParsed rpp) {
-		if (Math.abs(rpp.scores[0] - rpp.scores[1]) >= 10 && !noMercyIssued && !match.getGametype().getName().equalsIgnoreCase("1V1")){
+		if (Math.abs(rpp.scores[0] - rpp.scores[1]) >= 10 && !noMercyIssued && match.getGametype().getTeamSize() > 2){
 			server.sendRcon("timelimit 1");
 			server.sendRcon("bigtext \"Mercy rule! Ending game in 1min\"");
 			server.sendRcon("say \"^1[MERCY RULE] ^3Ending game in 1min\"");
@@ -278,13 +259,13 @@ public class ServerMonitor implements Runnable {
 		}
 	}
 
-	private void saveStats(int[] scorex) throws Exception {
+	private void saveStats(int[] scorex, RconPlayersParsed rpp) throws Exception {
 		int half = firstHalf ? 0 : 1;
 		
 		score[half] = scorex;
 		
 		// reset matchstats to previous
-		for (ServerPlayer sp : prevRPP.players) {
+		for (ServerPlayer sp : rpp.players) {
 			for (ServerPlayer player : players) {
 				if (sp.equals(player)) {
 					player.copy(sp);
@@ -296,15 +277,17 @@ public class ServerMonitor implements Runnable {
 		// save playerscores
 		for (ServerPlayer player : players) {
 			try {
-				if (player.player != null && match.isInMatch(player.player)) {
-					match.getStats(player.player).score[half].score = Integer.valueOf(player.ctfstats.score);
-					match.getStats(player.player).score[half].deaths = Integer.valueOf(player.ctfstats.deaths);
-					match.getStats(player.player).score[half].assists = Integer.valueOf(player.ctfstats.assists);
-					match.getStats(player.player).score[half].caps = Integer.valueOf(player.ctfstats.caps);
-					match.getStats(player.player).score[half].returns = Integer.valueOf(player.ctfstats.returns);
-					match.getStats(player.player).score[half].fc_kills = Integer.valueOf(player.ctfstats.fc_kills);
-					match.getStats(player.player).score[half].stop_caps = Integer.valueOf(player.ctfstats.stop_caps);
-					match.getStats(player.player).score[half].protect_flag = Integer.valueOf(player.ctfstats.protect_flag);
+				if (player.player != null && match.isInMatch(player.player) && rpp.players.contains(player)) {
+					// player.ctfstats.add(backupStats.get(player.auth));
+					CTF_Stats backupstats = backupStats.get(player.auth);
+					match.getStats(player.player).score[half].score = player.ctfstats.score + backupstats.score;
+					match.getStats(player.player).score[half].deaths = player.ctfstats.deaths + backupstats.deaths;
+					match.getStats(player.player).score[half].assists = player.ctfstats.assists + backupstats.assists;
+					match.getStats(player.player).score[half].caps = player.ctfstats.caps + backupstats.caps;
+					match.getStats(player.player).score[half].returns = player.ctfstats.returns + backupstats.returns;
+					match.getStats(player.player).score[half].fc_kills = player.ctfstats.fc_kills + backupstats.fc_kills;
+					match.getStats(player.player).score[half].stop_caps = player.ctfstats.stop_caps + backupstats.stop_caps;
+					match.getStats(player.player).score[half].protect_flag = player.ctfstats.protect_flag + backupstats.protect_flag;
 				}
 			} catch (NumberFormatException e) {
 				LOGGER.log(Level.WARNING, "Exception: ", e);
@@ -363,7 +346,12 @@ public class ServerMonitor implements Runnable {
 	private void evaluateState(RconPlayersParsed rpp) throws Exception {
 		if (state == ServerState.WELCOME)
 		{
-			if (rpp.matchready[0] && rpp.matchready[1] && rpp.warmupphase)
+			if (match.getGametype().getTeamSize() == 0 && (rpp.matchready[0] || rpp.matchready[1]) && !rpp.warmupphase){
+				server.sendRcon("forceready");
+				state = ServerState.WARMUP;
+				LOGGER.info("SWITCHED WELCOME -> WARMUP");
+			}
+			else if (rpp.matchready[0] && rpp.matchready[1] && rpp.warmupphase)
 			{
 				state = ServerState.WARMUP;
 				LOGGER.info("SWITCHED WELCOME -> WARMUP");
@@ -381,6 +369,10 @@ public class ServerMonitor implements Runnable {
 			{
 				state = ServerState.LIVE;
 				match.getLogic().setLastMapPlayed(match.getGametype(), match.getMap());
+				backupStats.clear();
+				for (ServerPlayer p : players){
+					backupStats.put(p.auth, new CTF_Stats());
+				}
 				LOGGER.info("SWITCHED WARMUP -> LIVE");
 			}
 			else if (!rpp.matchready[0] || !rpp.matchready[1])
@@ -391,13 +383,17 @@ public class ServerMonitor implements Runnable {
 		}
 		else if (state == ServerState.LIVE)
 		{
-			// TODO: Refactor this, hard-coded for 1v1
-			if ((rpp.gametime != null && rpp.gametime.equals("00:00:00") && !match.getGametype().getName().equalsIgnoreCase("1v1")) || (match.getGametype().getName().equalsIgnoreCase("1v1") && (rpp.scores[0] >= 15 || rpp.scores[1] >= 15)))
+			// TODO: Refactor this, hard-coded for 1v1 and 2v2
+			if ((rpp.gametime != null && rpp.gametime.equals("00:00:00")
+					&& match.getGametype().getTeamSize() > 2)
+					|| (match.getGametype().getTeamSize() <= 2 && (rpp.scores[0] >= 15 || rpp.scores[1] >= 15)))
 			{
 				state = ServerState.SCORE;
 				LOGGER.info("SWITCHED LIVE -> SCORE");
 			}
-			saveStats(rpp.scores);
+			checkNoMercy(rpp);
+			backUpScores(rpp);
+			saveStats(rpp.scores, rpp);
 			match.updateScoreEmbed();
 		}
 		else if (state == ServerState.SCORE)
@@ -438,7 +434,7 @@ public class ServerMonitor implements Runnable {
 	private void handleScoreTransition() throws Exception {		
 		swapRoles = getSwapRoles();
 		
-		saveStats(prevRPP.scores);
+		saveStats(prevRPP.scores, prevRPP);
 		if (!swapRoles || (swapRoles && !firstHalf)) {
 			endGame();
 		} else {
@@ -485,6 +481,9 @@ public class ServerMonitor implements Runnable {
 			if (player.state != ServerPlayerState.Disconnected) {
 				player.state = ServerPlayerState.Disconnected;
 				player.timeDisconnect = System.currentTimeMillis();
+				CTF_Stats backup_stats = backupStats.get(player.auth);
+				backup_stats.add(player.ctfstats);
+				backupStats.put(player.auth, backup_stats);
 				LOGGER.info("Player " + player.name + " (" + player.auth + ") disconnected.");
 			}
 		}
@@ -593,11 +592,11 @@ public class ServerMonitor implements Runnable {
 				
 				if (splitted[0].equals("CTF:") && awaitsStats) {
 					// ctfstats
-					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).caps = splitted[1].split(":")[1];
-					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).returns = splitted[2].split(":")[1];
-					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).fc_kills = splitted[3].split(":")[1];
-					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).stop_caps = splitted[4].split(":")[1];
-					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).protect_flag = splitted[5].split(":")[1];
+					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).caps = Integer.parseInt(splitted[1].split(":")[1]);
+					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).returns = Integer.parseInt(splitted[2].split(":")[1]);
+					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).fc_kills = Integer.parseInt(splitted[3].split(":")[1]);
+					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).stop_caps = Integer.parseInt(splitted[4].split(":")[1]);
+					((CTF_Stats) rpp.players.get(rpp.players.size()-1).ctfstats).protect_flag = Integer.parseInt(splitted[5].split(":")[1]);
 					awaitsStats = false;
 				}
 				else if (splitted[0].equals("BOMB:") && awaitsStats)
@@ -619,9 +618,9 @@ public class ServerMonitor implements Runnable {
 					sp.id = splitted[0].split(":")[0];
 					sp.name = splitted[0].split(":").length > 1 ? splitted[0].split(":")[1] : "unknown";
 					sp.team = splitted[1].split(":")[1];
-					sp.ctfstats.score = splitted[2].split(":")[1];
-					sp.ctfstats.deaths = splitted[3].split(":")[1];
-					sp.ctfstats.assists = splitted[4].split(":")[1];
+					sp.ctfstats.score = Integer.parseInt(splitted[2].split(":")[1]);
+					sp.ctfstats.deaths = Integer.parseInt(splitted[3].split(":")[1]);
+					sp.ctfstats.assists = Integer.parseInt(splitted[4].split(":")[1]);
 					sp.ping = splitted[5].split(":")[1];
 					sp.auth = splitted[6].split(":")[1];
 					sp.ip = splitted[7].split(":")[1];
@@ -639,7 +638,7 @@ public class ServerMonitor implements Runnable {
 			}
 		}
 		// hax to avoid empty
-		if (rpp.map == null || rpp.playercount != rpp.players.size()) {
+		if (rpp.map == null || (rpp.playercount != rpp.players.size() && match.getGametype().getTeamSize() != 0)) {
 			LOGGER.info("Corrupted RPP, taking prevRPP instead");
 			return prevRPP;
 		}
@@ -666,7 +665,7 @@ public class ServerMonitor implements Runnable {
 	}
 	
 	public void calcElo(Player player, int[] score) throws Exception {
-		if (match.getGametype().getName().equalsIgnoreCase("1v1") || match.getGametype().getName().equalsIgnoreCase("2v2") || match.getGametype().getName().equalsIgnoreCase("SCRIM TS") || match.getGametype().getName().equalsIgnoreCase("SCRIM CTF")){
+		if (match.getGametype().getTeamSize() <= 2 || match.getGametype().getName().equalsIgnoreCase("SCRIM TS") || match.getGametype().getName().equalsIgnoreCase("SCRIM CTF")){
 			player.addElo(0);
 			return;
 		}
@@ -712,7 +711,7 @@ public class ServerMonitor implements Runnable {
 	public void surrender(int teamid) throws Exception {
 		// save stats
 		if (state == ServerState.LIVE || state == ServerState.SCORE) {
-			saveStats(new int[] {0, 0}); // score don't matter as we override them. don't matter
+			saveStats(new int[] {0, 0}, prevRPP); // score don't matter as we override them. don't matter
 		}
 		
 		int[] scorex = new int[2];
@@ -730,7 +729,7 @@ public class ServerMonitor implements Runnable {
 	private void abandonMatch(Status status, List<Player> involvedPlayers) throws Exception {
 		// save stats
 		if (state == ServerState.LIVE || state == ServerState.SCORE) {
-			saveStats(new int[] {0, 0}); // score don't matter as we override them. don't matter
+			saveStats(new int[] {0, 0}, prevRPP); // score don't matter as we override them. don't matter
 		}
 		
 		for (Player player : match.getPlayerList()) {
@@ -838,5 +837,25 @@ public class ServerMonitor implements Runnable {
 
 	public ServerState getState() {
 		return state;
+	}
+
+	private void backUpScores(RconPlayersParsed rpp){
+		for (ServerPlayer p : rpp.players){
+			ServerPlayer oldP = null;
+			for (ServerPlayer prevP : prevRPP.players){
+				if (p.auth.equals(prevP.auth)){
+					oldP = prevP;
+					break;
+				}
+			}
+			if (oldP != null){
+				// + 4 in case of tks in between ticks
+				if (p.ctfstats.score + 4 < oldP.ctfstats.score || p.ctfstats.assists < oldP.ctfstats.assists || p.ctfstats.deaths < oldP.ctfstats.deaths){
+					CTF_Stats newStats = backupStats.get(p.auth);
+					newStats.add(oldP.ctfstats);
+					backupStats.put(oldP.auth, newStats);
+				}
+			}
+		}
 	}
 }

@@ -8,6 +8,7 @@ public class Config {
 	public static final String CMD_1v1					= "!1v1";
 	public static final String CMD_2v2					= "!2v2";
 	public static final String CMD_DIV1					= "!div1";
+	public static final String CMD_TEST					= "!test"; // TEMPORARY
 	public static final String CMD_REMOVE				= "!remove";
 	public static final String CMD_MAPS					= "!maps";
 	public static final String CMD_MAP					= "!map";
