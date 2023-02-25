@@ -359,7 +359,9 @@ public class ServerMonitor implements Runnable {
 			else if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase)
 			{
 				state = ServerState.LIVE;
-				match.getLogic().setLastMapPlayed(match.getGametype(), match.getMap());
+				if (match.getGametype().getTeamSize() > 2){
+					match.getLogic().setLastMapPlayed(match.getGametype(), match.getMap());
+				}
 				LOGGER.info("SWITCHED WELCOME -> LIVE");
 			}
 		}
@@ -368,7 +370,9 @@ public class ServerMonitor implements Runnable {
 			if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase)
 			{
 				state = ServerState.LIVE;
-				match.getLogic().setLastMapPlayed(match.getGametype(), match.getMap());
+				if (match.getGametype().getTeamSize() > 2){
+					match.getLogic().setLastMapPlayed(match.getGametype(), match.getMap());
+				}
 				backupStats.clear();
 				for (ServerPlayer p : players){
 					backupStats.put(p.auth, new CTF_Stats());
@@ -392,7 +396,7 @@ public class ServerMonitor implements Runnable {
 				LOGGER.info("SWITCHED LIVE -> SCORE");
 			}
 			checkNoMercy(rpp);
-			backUpScores(rpp);
+			//backUpScores(rpp);
 			saveStats(rpp.scores, rpp);
 			match.updateScoreEmbed();
 		}
@@ -481,9 +485,9 @@ public class ServerMonitor implements Runnable {
 			if (player.state != ServerPlayerState.Disconnected) {
 				player.state = ServerPlayerState.Disconnected;
 				player.timeDisconnect = System.currentTimeMillis();
-				CTF_Stats backup_stats = backupStats.get(player.auth);
-				backup_stats.add(player.ctfstats);
-				backupStats.put(player.auth, backup_stats);
+//				CTF_Stats backup_stats = backupStats.get(player.auth);
+//				backup_stats.add(player.ctfstats);
+//				backupStats.put(player.auth, backup_stats);
 				LOGGER.info("Player " + player.name + " (" + player.auth + ") disconnected.");
 			}
 		}
@@ -755,6 +759,9 @@ public class ServerMonitor implements Runnable {
 		LOGGER.info(sendString);
 		
 		stop();
+		if (match.getLogic().getLastMapPlayed(match.getGametype()).equals(match.getMap())){
+			match.getLogic().removeLastMapPlayed(match.getGametype());
+		}
 		match.abandon(status, involvedPlayers);
 	}
 
