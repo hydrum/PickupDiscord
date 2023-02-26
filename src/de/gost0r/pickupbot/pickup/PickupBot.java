@@ -189,10 +189,10 @@ public class PickupBot extends DiscordBot {
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
 
-				case Config.CMD_TEST: // Temporary: future skeet
+				case Config.CMD_SKEET:
 					if (p != null)
 					{
-						Gametype gt = logic.getGametypeByString("test");
+						Gametype gt = logic.getGametypeByString("SKEET");
 						if (gt != null) {
 							logic.cmdAddPlayer(p, gt, false);
 						} else {

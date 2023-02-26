@@ -739,15 +739,17 @@ public class ServerMonitor implements Runnable {
 		for (Player player : match.getPlayerList()) {
 			player.setEloChange(0);
 		}
-		
-		for (Player player : involvedPlayers) {			
-			BanReason reason = BanReason.NOSHOW;
-			if (match.getStats(player).getStatus() == Status.NOSHOW) {
-				reason = BanReason.NOSHOW;
-			} else if (match.getStats(player).getStatus() == Status.RAGEQUIT) {
-				reason = BanReason.RAGEQUIT;
+
+		if (match.getGametype().getTeamSize() > 2){
+			for (Player player : involvedPlayers) {
+				BanReason reason = BanReason.NOSHOW;
+				if (match.getStats(player).getStatus() == Status.NOSHOW) {
+					reason = BanReason.NOSHOW;
+				} else if (match.getStats(player).getStatus() == Status.RAGEQUIT) {
+					reason = BanReason.RAGEQUIT;
+				}
+				match.getLogic().autoBanPlayer(player, reason);
 			}
-			match.getLogic().autoBanPlayer(player, reason);
 		}
 		
 		String reason = status == Status.NOSHOW ? "NOSHOW" : status == Status.RAGEQUIT ? "RAGEQUIT" : "UNKNOWN";

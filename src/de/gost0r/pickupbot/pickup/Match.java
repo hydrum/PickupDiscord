@@ -233,9 +233,9 @@ public class Match implements Runnable {
 					Sentry.capture(e);
 				}
 				cleanUp();
-				logic.matchRemove(this);
 				logic.db.saveMatch(this);
 				sendAftermath();
+				logic.matchRemove(this);
 			}
 		}
 	}
@@ -290,8 +290,8 @@ public class Match implements Runnable {
 			gtvServer.sendRcon("gtv_disconnect 1");
 		}
 
-		logic.matchRemove(this);
 		sendAftermath(status, involvedPlayers);
+		logic.matchRemove(this);
 	}
 
 	public void end() {
@@ -317,8 +317,8 @@ public class Match implements Runnable {
 			gtvServer.sendRcon("gtv_disconnect 1");
 		}
 
-		logic.matchRemove(this);
 		sendAftermath();
+		logic.matchRemove(this);
 	}
 
 	public void cancelStart() {
@@ -784,6 +784,7 @@ public class Match implements Runnable {
 		logic.bot.sendMsgToEdit(logic.getChannelByType(PickupChannelType.PUBLIC), msg, null, buttons);
 
 		// set server data
+		server.sendRcon("kick allbots");
 		server.sendRcon("g_password " + server.password);
 		for (String s : this.gametype.getConfig()) {
 			server.sendRcon(s);
