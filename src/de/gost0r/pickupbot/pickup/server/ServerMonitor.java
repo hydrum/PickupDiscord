@@ -705,7 +705,10 @@ public class ServerMonitor implements Runnable {
 		}
 		performanceRating = Math.min(1.75f, Math.max(0.25f, performanceRating));
 		elochange = (int) Math.floor(result * performanceRating);
-		
+
+		if (player.hasBoostActive()){
+			elochange = Math.max(0, elochange) * 2;
+		}
 				
 		int newelo = player.getElo() + elochange;
 		LOGGER.info("ELO player: " + player.getUrtauth() + " old ELO: " + player.getElo() + " new ELO: " + newelo + " (" + (!String.valueOf(elochange).startsWith("-") ? "+" : "") + elochange + ")");

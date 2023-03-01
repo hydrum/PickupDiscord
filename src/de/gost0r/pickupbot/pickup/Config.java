@@ -23,6 +23,8 @@ public class Config {
 	public static final String CMD_REMOVETEAM			= "!removeteam";
 	public static final String CMD_TEAMS				= "!teams";
 	public static final String CMD_PING					= "!ping";
+	public static final String CMD_ADDVOTE				= "!addvote";
+	public static final String CMD_BANMAP				= "!banmap";
 
 	public static final String CMD_LOCK					= "!lock";
 	public static final String CMD_UNLOCK				= "!unlock";
@@ -52,6 +54,7 @@ public class Config {
 	public static final String CMD_TOP_COUNTRIES		= "!topcountries";
 	public static final String CMD_TOP_WDL				= "!topwin";
 	public static final String CMD_TOP_KDR				= "!topkdr";
+	public static final String CMD_TOP_RICH				= "!toprich";
 
 	public static final String CMD_MATCH				= "!match";
 	public static final String CMD_LAST					= "!last";
@@ -106,6 +109,8 @@ public class Config {
 	public static final String USE_CMD_DIV1				= "!div1 <map>";
 	public static final String USE_CMD_MAPS				= "!maps displays the map list for each gametype.";
 	public static final String USE_CMD_MAP				= "!map <gametype> <mapname>";
+	public static final String USE_CMD_ADDVOTE			= "!addvote <gametype> <mapname>";
+	public static final String USE_CMD_BANMAP			= "!banmap <map>";
 	public static final String USE_CMD_STATUS			= "Type !status to get information on the queues.";
 	public static final String USE_CMD_HELP				= "!help <command>";
 	public static final String USE_CMD_SURRENDER		= "Type !surrender to abandon your match.";
@@ -181,6 +186,19 @@ public class Config {
 	public static final String INT_SEASONSTATS			= "seasonstats";
 	public static final String INT_SEASONLIST			= "seasonlist";
 	public static final String INT_SEASONSELECTED		= "seasonselected";
+	public static final String INT_SHOWBET				= "showbet";
+	public static final String INT_BET					= "bet";
+	public static final String INT_BUY					= "buy";
+	public static final String INT_BUY_BOOST			= "eloboost";
+	public static final String INT_BUY_SHOWVOTEOPTIONS	= "showvoteoptions";
+	public static final String INT_BUY_ADDVOTES			= "additionalvote";
+	public static final String INT_BUY_MAPBAN			= "banmap";
+
+
+	//------------------------------------------------------------------------------------//
+
+	public static final String APP_BET = "bet";
+	public static final String APP_BUY = "buy";
 	
 	//------------------------------------------------------------------------------------//
 
@@ -256,6 +274,12 @@ public class Config {
 	public static final String map_cannot_vote			= "You cannot vote right now.";
 	public static final String map_specify_gametype		= "Please use: **!map <gametype> <map>**.";
 	public static final String map_played_last_game		= "This map was played last game, please vote for a different map.";
+	public static final String map_already_banned		= "This map is already banned (Expires <t:.remaining.:R>).";
+	public static final String map_banned				= "This map is currently banned (Expires <t:.remaining.:R>).";
+	public static final String no_additonal_vote		= "You currently don't have any additional vote to spend. Buy some by sending ``/buy``.";
+	public static final String used_additonal_vote		= ".player. used their bonus and added ``.vote.`` votes to .map. (``.count.``)";
+	public static final String no_map_ban				= "You currently don't have any map bans to spend. Buy some by sending ``/buy``.";
+	public static final String used_map_ban				= ".player. used their bonus and banned the map .map. until <t:.time.:t>";
 
 	public static final String player_not_found			= "Player not found.";
 	public static final String user_not_registered		= "You're not registered. Please use `" + USE_CMD_REGISTER + "`";
@@ -358,4 +382,20 @@ public class Config {
 	public static final String team_print_noteam		= "No team is currently active.";
 	public static final String team_only_mentions		= "Please specify players using: ``!team @user``.";
 	public static final String team_no_scrim			= "**SCRIM**: No team signed up. Type ``!scrim <ts/ctf/2v2>`` to play.";
+
+	public static final String bets_notaccepting		= "This match is not accepting bets anymore.";
+	public static final String bets_howmuch				= "How much would you like to bet for team ``.team.``? \nTo bet a custom amount, use ``/bet .matchid. .team. <amount>``\n*Current balance:* ``.balance.`` <:.emojiname.:.emojiid.>";
+	public static final String bets_insufficient		= "Insufficient funds.";
+	public static final String bets_won					= ".player. won his bet: ``+.amount.`` <:.emojiname.:.emojiid.>";
+	public static final String bets_refund				= ".player.'s bet was canceled and was refunded ``.amount.`` <:.emojiname.:.emojiid.>";
+	public static final String bets_otherteam			= "You can't bet against your team, have some faith!";
+	public static final String bets_place				= ".player. bets ``.amount.`` <:.emojiname.:.emojiid.> on this game.";
+
+	public static final String buy_show					= "What perk would you like to purchase? \n*Current balance:* ``.balance.`` <:.emojiname.:.emojiid.>";
+	public static final String buy_boostactive			= "You already have an active elo boost. (Expires <t:.remaining.:R> )";
+	public static final String buy_boostactivated		= ".player. purchased an elo boost for ``.price.`` <:.emojiname.:.emojiid.> (Expires <t:.remaining.:R> )";
+	public static final String buy_showvoteoptions		= "How many map votes would you like to purchase?";
+	public static final String buy_voteoptionsalready	= "You already have a set of additional votes (currently ``.vote.`` votes). Use them to purchase another set.";
+	public static final String buy_addvotesactivated	= ".player. purchased ``.vote.`` additional votes for ``.price.`` <:.emojiname.:.emojiid.>";
+	public static final String buy_mapbanactivated		= ".player. purchased a map ban for ``.price.`` <:.emojiname.:.emojiid.>";
 }

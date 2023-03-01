@@ -42,6 +42,11 @@ public class Player {
 	
 	private String country = "NOT_DEFINED";
 
+	private int coins;
+	private long eloBoost;
+	private int additionalMapVotes;
+	private int mapBans;
+
 	public Player(DiscordUser user, String urtauth) {
 		this.user = user;
 		this.setUrtauth(urtauth);
@@ -341,5 +346,40 @@ public class Player {
 	}
 	public int getEloRank(){
 		return db.getRankForPlayer(this);
+	}
+
+	public int getCoins() {return coins;}
+	public void setCoins(int coins) {this.coins = coins ;}
+
+	public void addCoins(int amount) {
+		coins += amount ;
+	}
+	public void spendCoins(int amount) {
+		coins -= amount ;
+	}
+	public void saveWallet(){
+		db.updatePlayerCoins(this);
+	}
+
+	public long getEloBoost() {return eloBoost;}
+	public void setEloBoost(long eloBoost) {
+		this.eloBoost = eloBoost ;
+		db.updatePlayerBoost(this);
+	}
+
+	public boolean hasBoostActive(){
+		return eloBoost >= System.currentTimeMillis();
+	}
+
+	public int getAdditionalMapVotes() {return additionalMapVotes;}
+	public void setAdditionalMapVotes(int mapVotes) {
+		this.additionalMapVotes = mapVotes ;
+		db.updatePlayerBoost(this);
+	}
+
+	public int getMapBans() {return mapBans;}
+	public void setMapBans(int mapBans) {
+		this.mapBans = mapBans ;
+		db.updatePlayerBoost(this);
 	}
 }
