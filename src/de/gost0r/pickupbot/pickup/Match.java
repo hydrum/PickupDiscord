@@ -466,14 +466,13 @@ public class Match implements Runnable {
 				sortedPlayers.add(player);
 			}
 		}
-		
-		captains[0] = sortedPlayers.get(0);
-		teamList.get("red").add(captains[0]);
-
 		if (gametype.getTeamSize() != 0){
-			captains[1] = sortedPlayers.get(1);
-			teamList.get("blue").add(captains[1]);
+			captains[0] = sortedPlayers.get(0);
+			teamList.get("red").add(captains[0]);
 		}
+
+		captains[1] = sortedPlayers.get(1);
+		teamList.get("blue").add(captains[1]);
 
 		if (sortedPlayers.size() > 2){
 			String captainAnnouncement = Config.pkup_go_pub_captains;
@@ -653,7 +652,7 @@ public class Match implements Runnable {
 		gtvServer = logic.setupGTV();
 		Random rand = new Random();
 
-		if (!logic.getDynamicServers()){
+		if (!logic.getDynamicServers() && gametype.getTeamSize() > 0){
 			int password = rand.nextInt((999999-100000) + 1) + 100000;
 			server.password = String.valueOf(password);
 			LOGGER.info("Password: " + server.password);
@@ -690,7 +689,7 @@ public class Match implements Runnable {
 		msg = msg.replace(".gamenumber.", String.valueOf(id));
 		msg = msg.replace(".gametype.", gametype.getName());
 		msg = msg.replace(".elo.", String.valueOf((elo[0] + elo[1])/2));
-		if (logic.getDynamicServers()){
+		if (logic.getDynamicServers() || gametype.getTeamSize() == 0){
 			msg = msg.replace(".region.", Country.getCountryFlag(server.country) + " ``" + server.city + "``");
 		} else if (server.region == Region.NAE || server.region == Region.NAW) {
 			msg = msg.replace(".region.", ":flag_us:");
@@ -717,7 +716,7 @@ public class Match implements Runnable {
 
 		String[] teamname = {"Red", "Blue"};
 		if (gametype.getTeamSize() == 0){
-			teamname = new String[]{"Red"};
+			teamname = new String[]{"Blue"};
 		}
 		for (String team : teamname) {
 			StringBuilder playernames = new StringBuilder();
@@ -749,7 +748,7 @@ public class Match implements Runnable {
 
 		logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), fullmsg.toString());
 
-		if (logic.getDynamicServers()){
+		if (logic.getDynamicServers() || gametype.getTeamSize() == 0){
 			FtwglAPI.getSpawnedServerIp(server);
 			try {
 				Thread.sleep(5000);
@@ -1003,7 +1002,7 @@ public class Match implements Runnable {
 		
 		DiscordEmbed embed = new DiscordEmbed();
 
-		String region_flag = server.getRegionFlag(logic.getDynamicServers(), forceNoDynamic);
+		String region_flag = server.getRegionFlag(logic.getDynamicServers() || gametype.getTeamSize() == 0, forceNoDynamic);
 		
 		if (serverState == ServerState.LIVE && state == MatchState.Live && server != null) {
 			embed.title  = region_flag + " Match #" + id + " (" + server.getServerMonitor().getGameTime() + ")";
@@ -1043,37 +1042,38 @@ public class Match implements Runnable {
 			String score_row = score +  "/" + deaths + "/" + assists + "\n";
 
 			String ping_row = "";
-			if (logic.getDynamicServers() && !forceNoDynamic){
+			if ((logic.getDynamicServers() || gametype.getTeamSize() == 0) && !forceNoDynamic){
 				ping_row = String.valueOf(server.playerPing.get(entry.getKey())) + "\n";
 			}
-			if (teamList.get("red").contains(entry.getKey())) {
+			if (gametype.getTeamSize() != 0 && teamList.get("red").contains(entry.getKey())) {
 				red_team_player_embed.append(player_row);
 				red_team_score_embed.append(score_row);
-				if (logic.getDynamicServers() && !forceNoDynamic){
+				if ((logic.getDynamicServers() || gametype.getTeamSize() == 0) && !forceNoDynamic){
 					red_team_ping_embed.append(ping_row);
 				}
 			}
-			else if (gametype.getTeamSize() != 0 && teamList.get("blue").contains(entry.getKey())) {
+			else if (teamList.get("blue").contains(entry.getKey())) {
 				blue_team_player_embed.append(player_row);
 				blue_team_score_embed.append(score_row);
-				if (logic.getDynamicServers() && !forceNoDynamic){
+				if ((logic.getDynamicServers() || gametype.getTeamSize() == 0) && !forceNoDynamic){
 					blue_team_ping_embed.append(ping_row);
 				}
 			}
 		}
-		
-		embed.addField("<:rush_red:510982162263179275> \u200b \u200b " + getScoreRed() + "\n \u200b", red_team_player_embed.toString(), true);
-		embed.addField("K/D/A" + "\n \u200b", red_team_score_embed.toString(), true);
-		if (logic.getDynamicServers()){
-			embed.addField("Ping (ms)" + "\n \u200b", red_team_ping_embed.toString(), true);
-		}
-		if (gametype.getTeamSize() != 0){
-			embed.addField("\u200b", "\u200b", false);
-			embed.addField("<:rush_blue:510067909628788736> \u200b \u200b " + getScoreBlue() + "\n \u200b", blue_team_player_embed.toString(), true);
-			embed.addField("K/D/A" + "\n \u200b", blue_team_score_embed.toString(), true);
-			if (logic.getDynamicServers()){
-				embed.addField("Ping (ms)" + "\n \u200b", blue_team_ping_embed.toString(), true);
+		if (gametype.getTeamSize() != 0) {
+
+			embed.addField("<:rush_red:510982162263179275> \u200b \u200b " + getScoreRed() + "\n \u200b", red_team_player_embed.toString(), true);
+			embed.addField("K/D/A" + "\n \u200b", red_team_score_embed.toString(), true);
+			if (logic.getDynamicServers() || gametype.getTeamSize() == 0) {
+				embed.addField("Ping (ms)" + "\n \u200b", red_team_ping_embed.toString(), true);
 			}
+		}
+
+		embed.addField("\u200b", "\u200b", false);
+		embed.addField("<:rush_blue:510067909628788736> \u200b \u200b " + getScoreBlue() + "\n \u200b", blue_team_player_embed.toString(), true);
+		embed.addField("K/D/A" + "\n \u200b", blue_team_score_embed.toString(), true);
+		if (logic.getDynamicServers() || gametype.getTeamSize() == 0){
+			embed.addField("Ping (ms)" + "\n \u200b", blue_team_ping_embed.toString(), true);
 		}
 
 		Date startDate = new Date(startTime);

@@ -100,7 +100,7 @@ public class PickupLogic {
 	}
 
 	public void cmdAddPlayer(Player player, Gametype gt, boolean forced) {
-		if (dynamicServers && !FtwglAPI.checkIfPingStored(player)){
+		if ((dynamicServers || gt.getTeamSize() == 0) && !FtwglAPI.checkIfPingStored(player)){
 			cmdGetPingURL(player);
 			return;
 		}
@@ -1243,7 +1243,7 @@ public class PickupLogic {
 			if(m != null)
 			{
 				Server bs;
-				if (dynamicServers){
+				if (dynamicServers || m.getGametype().getTeamSize() == 0){
 					bs = FtwglAPI.spawnDynamicServer(m.getPlayerList());
 					if (bs != null) {
 						String spawnMsg = Config.pkup_go_pub_servspawn;
