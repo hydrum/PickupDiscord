@@ -466,13 +466,16 @@ public class Match implements Runnable {
 				sortedPlayers.add(player);
 			}
 		}
-		if (gametype.getTeamSize() != 0){
+		if (gametype.getTeamSize() != 0) {
 			captains[0] = sortedPlayers.get(0);
 			teamList.get("red").add(captains[0]);
-		}
 
-		captains[1] = sortedPlayers.get(1);
-		teamList.get("blue").add(captains[1]);
+			captains[1] = sortedPlayers.get(1);
+			teamList.get("blue").add(captains[1]);
+		} else{
+			captains[0] = sortedPlayers.get(0);
+			teamList.get("blue").add(captains[0]);
+		}
 
 		if (sortedPlayers.size() > 2){
 			String captainAnnouncement = Config.pkup_go_pub_captains;
@@ -1067,9 +1070,9 @@ public class Match implements Runnable {
 			if (logic.getDynamicServers() || gametype.getTeamSize() == 0) {
 				embed.addField("Ping (ms)" + "\n \u200b", red_team_ping_embed.toString(), true);
 			}
+			embed.addField("\u200b", "\u200b", false);
 		}
 
-		embed.addField("\u200b", "\u200b", false);
 		embed.addField("<:rush_blue:510067909628788736> \u200b \u200b " + getScoreBlue() + "\n \u200b", blue_team_player_embed.toString(), true);
 		embed.addField("K/D/A" + "\n \u200b", blue_team_score_embed.toString(), true);
 		if (logic.getDynamicServers() || gametype.getTeamSize() == 0){

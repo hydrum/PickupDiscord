@@ -390,7 +390,8 @@ public class ServerMonitor implements Runnable {
 			// TODO: Refactor this, hard-coded for 1v1 and 2v2
 			if ((rpp.gametime != null && rpp.gametime.equals("00:00:00")
 					&& match.getGametype().getTeamSize() > 2)
-					|| (match.getGametype().getTeamSize() <= 2 && (rpp.scores[0] >= 15 || rpp.scores[1] >= 15)))
+				|| (match.getGametype().getTeamSize() <= 2 && (rpp.scores[0] >= 15 || rpp.scores[1] >= 15)
+					&& rpp.gametime.equals("00:00:00")))
 			{
 				state = ServerState.SCORE;
 				LOGGER.info("SWITCHED LIVE -> SCORE");

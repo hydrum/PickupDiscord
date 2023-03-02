@@ -80,9 +80,12 @@ public class FtwglAPI {
         String response = sendPostRequest("/rent/pug", requestObj);
         JSONObject obj = new JSONObject(response);
 
-        if (!obj.has("server")){
+        if (!obj.has("server") || !obj.getJSONObject("server").has("config")){
+            spawnDynamicServer(playerList);
             return null;
         }
+
+        LOGGER.warning(obj.toString());
 
         JSONObject serverObj = obj.getJSONObject("server").getJSONObject("config");
         JSONObject serverLocationObj = obj.getJSONObject("server_location");
@@ -127,6 +130,15 @@ public class FtwglAPI {
             }
         }
         server.IP = serverObj.getString("ip");
+        if (!server.isOnline()){
+            try {
+                Thread.sleep(1000);
+                return getSpawnedServerIp(server);
+            } catch (InterruptedException e) {
+                LOGGER.log(Level.WARNING, "Exception: ", e);
+                Sentry.capture(e);
+            }
+        }
 
         return server;
     }

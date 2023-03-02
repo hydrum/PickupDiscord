@@ -226,7 +226,7 @@ public class Config {
 	public static final String pkup_go_pub_captains		= "The captains are .captain1. (**red**) and .captain2. (**blue**). Player stats:";
 	public static final String pkup_go_pub_pick			= ".captain. pick a player:";
 	public static final String pkup_go_pub_pickjoin		= ".pick. joins the **.color.** team.";
-	public static final String pkup_go_pub_servspawn	= "**Spawning Server:** .flag. ``.city.`` (fairest server to all players)\n:hourglass: The ip will be send to all players when the server is spawned.";
+	public static final String pkup_go_pub_servspawn	= "**Spawning Server:** .flag. ``.city.`` (fairest server to all players)\n:hourglass: The ip will be send to all players when the server is spawned. ``Estimated wait time: 2min``";
 	public static final String pkup_go_pub_requestserver= "**Requesting Server:** .flag. ``.region.``";
 
 	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber. (.map.):";
