@@ -39,6 +39,7 @@ public class PickupBotDiscordMain {
 			Country.initCountryCodes();
 
 			DiscordBot.setToken(dotenv.get("DISCORD_TOKEN"));
+			DiscordBot.setApplicationId(dotenv.get("DISCORD_APPLICATION_ID"));
 			FtwglAPI.setupCredentials(dotenv.get("FTW_URL"), dotenv.get("FTW_KEY"));
 			PickupBot bot = new PickupBot();
 			bot.init(env);

@@ -10,7 +10,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.gost0r.pickupbot.discord.*;
-import de.gost0r.pickupbot.ftwgl.FtwglAPI;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 
 public class PickupBot extends DiscordBot {
@@ -27,6 +26,7 @@ public class PickupBot extends DiscordBot {
 		this.env = env;
 	
 		logic = new PickupLogic(this);
+		createApplicationCommands();
 		sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), Config.bot_online);
 	}
 
@@ -95,7 +95,7 @@ public class PickupBot extends DiscordBot {
 							logic.cmdAddPlayer(p, gt, false);
 							
 							if (data.length > 1) {
-								logic.cmdMapVote(p, gt, data[1]);
+								logic.cmdMapVote(p, gt, data[1], 1);
 							}
 						} else {
 							sendNotice(msg.user, Config.no_gt_found);
@@ -112,7 +112,7 @@ public class PickupBot extends DiscordBot {
 							logic.cmdAddPlayer(p, gt, false);
 
 							if (data.length > 1) {
-								logic.cmdMapVote(p, gt, data[1]);
+								logic.cmdMapVote(p, gt, data[1], 1);
 							}
 						} else {
 							sendNotice(msg.user, Config.no_gt_found);
@@ -129,7 +129,7 @@ public class PickupBot extends DiscordBot {
 							logic.cmdAddPlayer(p, gt, false);
 
 							if (data.length > 1) {
-								logic.cmdMapVote(p, gt, data[1]);
+								logic.cmdMapVote(p, gt, data[1], 1);
 							}
 						} else {
 							sendNotice(msg.user, Config.no_gt_found);
@@ -146,7 +146,7 @@ public class PickupBot extends DiscordBot {
 							logic.cmdAddPlayer(p, gt, false);
 
 							if (data.length > 1) {
-								logic.cmdMapVote(p, gt, data[1]);
+								logic.cmdMapVote(p, gt, data[1], 1);
 							}
 						} else {
 							sendNotice(msg.user, Config.no_gt_found);
@@ -163,7 +163,7 @@ public class PickupBot extends DiscordBot {
 							logic.cmdAddPlayer(p, gt, false);
 
 							if (data.length > 1) {
-								logic.cmdMapVote(p, gt, data[1]);
+								logic.cmdMapVote(p, gt, data[1], 1);
 							}
 						} else {
 							sendNotice(msg.user, Config.no_gt_found);
@@ -180,7 +180,7 @@ public class PickupBot extends DiscordBot {
 							logic.cmdAddPlayer(p, gt, false);
 
 							if (data.length > 1) {
-								logic.cmdMapVote(p, gt, data[1]);
+								logic.cmdMapVote(p, gt, data[1], 1);
 							}
 						} else {
 							sendNotice(msg.user, Config.no_gt_found);
@@ -298,14 +298,42 @@ public class PickupBot extends DiscordBot {
 						}
 						else if (data.length == 2)
 						{
-							logic.cmdMapVote(p, null, data[1]);
+							logic.cmdMapVote(p, null, data[1], 1);
 						}
 						else if (data.length == 3)
 						{
 							Gametype gt = logic.getGametypeByString(data[1]);
-							logic.cmdMapVote(p, gt, data[2]);
+							logic.cmdMapVote(p, gt, data[2], 1);
 						}
 						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_MAP));
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+				case Config.CMD_ADDVOTE:
+					if (p != null)
+					{
+						if (data.length == 2)
+						{
+							logic.cmdMapVote(p, null, data[1], 0);
+						}
+						else if (data.length == 3)
+						{
+							Gametype gt = logic.getGametypeByString(data[1]);
+							logic.cmdMapVote(p, gt, data[2], 0);
+						}
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADDVOTE));
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+
+				case Config.CMD_BANMAP:
+					if (p != null)
+					{
+						if (data.length == 2)
+						{
+							logic.cmdUseMapBan(p, data[1]);
+						}
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_BANMAP));
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
@@ -678,6 +706,12 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_PING:
 					if (p != null){
 						logic.cmdGetPingURL(p);
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+				case Config.CMD_TOP_RICH:
+					if (p != null){
+						logic.cmdTopRich(10);
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
@@ -1326,6 +1360,10 @@ public class PickupBot extends DiscordBot {
 		LOGGER.info("RECV #" + ((interaction.message.channel == null || interaction.message.channel.name == null) ?  "null" : interaction.message.channel.name) + " " + interaction.user.username + ": " + interaction.custom_id);
 
 		Player p = Player.get(interaction.user);
+		if (p == null) {
+			interaction.respond(Config.user_not_registered);
+			return;
+		}
 
 		String[] data = interaction.custom_id.split("_");
 
@@ -1358,9 +1396,56 @@ public class PickupBot extends DiscordBot {
 		case Config.INT_SEASONSELECTED:
 			logic.showSeasonStats(interaction, Player.get(data[1]), Integer.parseInt(interaction.values.get(0)));
 			break;
+
+		case Config.INT_SHOWBET:
+			logic.showBets(interaction, Integer.parseInt(data[2]), data[1], p);
+			break;
+
+		case Config.INT_BET:
+			logic.bet(interaction, Integer.parseInt(data[1]), data[2], Integer.parseInt(data[3]), p);
+			break;
+
+		case Config.INT_BUY:
+			switch(data[1]){
+				case Config.INT_BUY_BOOST:
+					logic.buyBoost(interaction, p);
+					break;
+				case Config.INT_BUY_SHOWVOTEOPTIONS:
+					logic.showAdditionalVoteOptions(interaction, p);
+					break;
+				case Config.INT_BUY_ADDVOTES:
+					logic.buyAdditionalVotes(interaction, p, Integer.parseInt(data[2]));
+					break;
+				case Config.INT_BUY_MAPBAN:
+					logic.buyBanMap(interaction, p);
+					break;
+			}
+			break;
 		}
 	}
-	
+
+	@Override
+	protected void recvApplicationCommand(DiscordInteraction interaction) {
+		LOGGER.info("RECV #" + interaction.name + " " + interaction.user.username);
+
+		Player p = Player.get(interaction.user);
+		if (p == null) {
+			interaction.respond(Config.user_not_registered);
+			return;
+		}
+
+		switch (interaction.name)
+		{
+		case Config.APP_BET:
+			logic.bet(interaction, Integer.parseInt(interaction.options.get(0).value), interaction.options.get(1).value, Integer.parseInt(interaction.options.get(2).value), p);
+			break;
+
+		case Config.APP_BUY:
+			logic.showBuys(interaction, p);
+			break;
+		}
+	}
+
 	public boolean isChannel(PickupChannelType type, DiscordChannel channel) {
 		return logic.getChannelByType(type).contains(channel);
 	}
@@ -1473,5 +1558,21 @@ public class PickupBot extends DiscordBot {
 	
 	public DiscordChannel getLatestMessageChannel() {
 		return latestMessageChannel;
+	}
+
+	public void createApplicationCommands(){
+		DiscordApplicationCommand appBet = new DiscordApplicationCommand("bet", "Place a bet for a game");
+		DiscordCommandOption option1 = new DiscordCommandOption(DiscordCommandOptionType.INTEGER, "matchid", "The game number.");
+		appBet.addOption(option1);
+		DiscordCommandOption option2 = new DiscordCommandOption(DiscordCommandOptionType.STRING, "team", "The color of the team you want to bet on.");
+		option2.addChoice(new DiscordCommandOptionChoice("red", "red"));
+		option2.addChoice(new DiscordCommandOptionChoice("blue", "blue"));
+		appBet.addOption(option2);
+		DiscordCommandOption option3 = new DiscordCommandOption(DiscordCommandOptionType.INTEGER, "amount", "The amount of coins you want to bet");
+		appBet.addOption(option3);
+		appBet.create();
+
+		DiscordApplicationCommand appBuy = new DiscordApplicationCommand("buy", "Buy a perk with your coins.");
+		appBuy.create();
 	}
 }

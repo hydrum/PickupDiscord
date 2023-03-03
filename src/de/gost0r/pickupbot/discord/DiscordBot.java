@@ -3,6 +3,7 @@ package de.gost0r.pickupbot.discord;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.function.LongFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,6 +21,7 @@ public class DiscordBot  {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static String token = "";
+	private static String application_id = "";
 	private static List<DiscordGuild> guilds;
 	
 	protected DiscordUser self = null;
@@ -74,10 +76,14 @@ public class DiscordBot  {
 				recvMessage(msg);
 				break;
 			case INTERACTION_CREATE:
-				DiscordMessage message = new DiscordMessage(obj.getJSONObject("message").getString("id"),
-									DiscordUser.getUser(obj.getJSONObject("message").getJSONObject("author")),
-									DiscordChannel.findChannel(obj.getJSONObject("message").getString("channel_id")),
-									obj.getJSONObject("message").getString("content"));
+				DiscordMessage message = null;
+				if (obj.has("message")){
+					message = new DiscordMessage(obj.getJSONObject("message").getString("id"),
+							DiscordUser.getUser(obj.getJSONObject("message").getJSONObject("author")),
+							DiscordChannel.findChannel(obj.getJSONObject("message").getString("channel_id")),
+							obj.getJSONObject("message").getString("content"));
+				}
+
 				if (obj.has("member")){
 					user = DiscordUser.getUser(obj.getJSONObject("member").getJSONObject("user"));
 				}
@@ -90,12 +96,19 @@ public class DiscordBot  {
 				}
 				DiscordInteraction interaction = new DiscordInteraction(obj.getString("id"), 
 												obj.getString("token"), 
-												obj.getJSONObject("data").getString("custom_id"),
+												obj.getJSONObject("data"),
 												user,
 												message,
 												values);
-				
-				recvInteraction(interaction);
+				if (obj.getJSONObject("data").has("custom_id")){
+					recvInteraction(interaction);
+				}
+				else if (obj.getJSONObject("data").has("name")){
+					if (obj.getJSONObject("data").has("options")){
+						interaction.getOptions(obj.getJSONObject("data").optJSONArray("options"));
+					}
+					recvApplicationCommand(interaction);
+				}
 				break;
 			case GUILD_MEMBER_UPDATE:
 				user = DiscordUser.findUser(obj.getJSONObject("user").getString("id"));
@@ -132,6 +145,10 @@ public class DiscordBot  {
 	protected void recvInteraction(DiscordInteraction interaction) {
 		
 	}
+
+	protected void recvApplicationCommand(DiscordInteraction interaction) {
+
+	}
 	
 	public void sendMsg(DiscordChannel channel, String msg) {
 		DiscordAPI.sendMessage(channel, msg);
@@ -164,6 +181,14 @@ public class DiscordBot  {
 
 	public static void setToken(String token) {
 		DiscordBot.token = token;
+	}
+
+	public static String getApplicationId() {
+		return application_id;
+	}
+
+	public static void setApplicationId(String application_id) {
+		DiscordBot.application_id = application_id;
 	}
 
 	public static List<DiscordGuild> getGuilds() {

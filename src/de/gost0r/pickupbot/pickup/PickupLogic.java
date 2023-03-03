@@ -22,6 +22,7 @@ import de.gost0r.pickupbot.discord.api.DiscordAPI;
 import de.gost0r.pickupbot.ftwgl.FtwglAPI;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
+import de.gost0r.pickupbot.pickup.server.ServerMonitor;
 import io.sentry.Sentry;
 import org.json.JSONObject;
 
@@ -60,6 +61,7 @@ public class PickupLogic {
 		db = new Database(this);
 		Player.db = db;
 		Player.logic = this;
+		Bet.logic = this;
 
 		currentSeason = db.getCurrentSeason();
 		
@@ -413,6 +415,41 @@ public class PickupLogic {
 		}
 	}
 
+	public void cmdTopRich(int number) {
+		StringBuilder embed_rank = new StringBuilder();
+		StringBuilder embed_player = new StringBuilder();
+		StringBuilder embed_rich = new StringBuilder();
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Top 10 richest players";
+		embed.color = 7056881;
+
+		Map<Player, Integer> topRich = db.getTopRich(number);
+		if (topRich.isEmpty()) {
+			bot.sendMsg(bot.getLatestMessageChannel(), "None");
+		} else {
+			int rank = 1;
+			for (Map.Entry<Player, Integer> entry : topRich.entrySet()) {
+				String country;
+				if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+					country =  "<:puma:849287183474884628>";
+				}
+				else {
+					country = ":flag_" + entry.getKey().getCountry().toLowerCase() + ":";
+				}
+				embed_rank.append("**").append(rank).append("**\n");
+				embed_player.append(country).append(" \u200b \u200b  ").append(entry.getKey().getUrtauth()).append('\n');
+				JSONObject emoji = Bet.getCoinEmoji(entry.getValue());
+				embed_rich.append(entry.getValue() + " <:" + emoji.getString("name") + ":" + emoji.getString("id") + ">").append("\n");
+				rank++;
+			}
+			embed.addField("\u200b", embed_rank.toString(), true);
+			embed.addField("Player", embed_player.toString(), true);
+			embed.addField("Balance", embed_rich.toString(), true);
+
+			bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
+		}
+	}
+
 	public String cmdGetElo(Player p, Gametype gt) {
 		if (p == null) {
 			return "";
@@ -509,6 +546,9 @@ public class PickupLogic {
 		statsEmbed.title = country + " \u200b \u200b  " +  p.getUrtauth();
 		statsEmbed.thumbnail = p.getDiscordUser().getAvatarUrl();
 		statsEmbed.description = p.getRank().getEmoji() + " \u200b \u200b  **" + p.getElo() + "**  #" + p.getEloRank() + "\n\n``Season " + currentSeason.number + "``";
+
+		statsEmbed.footer_icon = "https://cdn.discordapp.com/emojis/" + Bet.getCoinEmoji(p.getCoins()).getString("id");
+		statsEmbed.footer = String.valueOf(p.getCoins());
 
 		if (stats.ts_wdl.getTotal() < 5){
 			statsEmbed.addField("\u200b", "**TS**: ``" + stats.ts_wdl.getTotal() + "/5`` placement games", false);
@@ -673,7 +713,17 @@ public class PickupLogic {
 		bot.sendMsg(bot.getLatestMessageChannel(), msg.toString());
 	}
 
-	public void cmdMapVote(Player player, Gametype gametype, String mapname) {
+	public void cmdMapVote(Player player, Gametype gametype, String mapname, int number) {
+		// Use boost if the player has it
+		boolean bonus = false;
+		if (number == 0){
+			if (player.getAdditionalMapVotes() == 0){
+				bot.sendNotice(player.getDiscordUser(), Config.no_additonal_vote);
+				return;
+			}
+			number = player.getAdditionalMapVotes();
+			bonus = true;
+		}
 		Match activeMatch = playerInActiveMatch(player);
 		Match m = null;
 		
@@ -714,8 +764,10 @@ public class PickupLogic {
 					bot.sendNotice(player.getDiscordUser(), Config.map_not_found);
 				} else if (lastMapPlayed.get(gametype).name.equals(map.name)) {
 					bot.sendNotice(player.getDiscordUser(), Config.map_played_last_game);
+				} else if (map.bannedUntil >= System.currentTimeMillis()) {
+					bot.sendNotice(player.getDiscordUser(), Config.map_banned.replace(".remaining.", String.valueOf(map.bannedUntil / 1000)));
 				} else {
-					m.voteMap(player, map); // handles sending a msg itself
+					m.voteMap(player, map, number, bonus); // handles sending a msg itself
 				}
 			}
 		}
@@ -2022,5 +2074,334 @@ public class PickupLogic {
 	public void cmdGetPingURL(Player player) {
 		bot.sendNotice(player.getDiscordUser(), Config.ftw_error_noping);
 		bot.sendMsg(player.getDiscordUser(), Config.ftw_dm_noping.replace(".url.", FtwglAPI.requestPingUrl(player)));
+	}
+
+	public void showBets(DiscordInteraction interaction, int matchId, String color, Player p){
+		Match match = null;
+		for (Match m : ongoingMatches){
+			if (m.getID() == matchId){
+				match = m;
+			}
+		}
+		if (match == null || !match.acceptBets()){
+			interaction.respond(Config.bets_notaccepting);
+			return;
+		}
+
+		String otherTeam = color.equals("red") ? "blue" : "red";
+		if (match.isInMatch(p) && match.getTeam(p).equals(otherTeam)){
+			interaction.respond(Config.bets_otherteam);
+			return;
+		}
+
+		ArrayList<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
+		JSONObject coinEmoji = Bet.getCoinEmoji(10);
+
+		if (p.getCoins() > 10){
+			DiscordButton button10 = new DiscordButton(DiscordButtonStyle.GREY);
+			button10.label = "10";
+			button10.custom_id = "bet_" + matchId + "_" + color + "_" + 10;
+			button10.emoji = coinEmoji;
+			buttons.add(button10);
+		}
+
+		if (p.getCoins() > 100){
+			DiscordButton button100 = new DiscordButton(DiscordButtonStyle.GREY);
+			button100.label = "100";
+			button100.custom_id = "bet_" + matchId + "_" + color + "_" + 100;
+			button100.emoji = coinEmoji;
+			buttons.add(button100);
+		}
+
+
+		if (p.getCoins() > 1000){
+			DiscordButton button1000 = new DiscordButton(DiscordButtonStyle.GREY);
+			button1000.label = "1000";
+			button1000.custom_id = "bet_" + matchId + "_" + color + "_" + 1000;
+			button1000.emoji = coinEmoji;
+			buttons.add(button1000);
+		}
+
+		coinEmoji = Bet.getCoinEmoji(p.getCoins());
+		DiscordButton buttonallin = new DiscordButton(DiscordButtonStyle.RED);
+		buttonallin.label = p.getCoins() + " (ALL IN)";
+		buttonallin.custom_id = "bet_" + matchId + "_" + color + "_-1";
+		buttonallin.emoji = coinEmoji;
+		buttons.add(buttonallin);
+
+		String msg = Config.bets_howmuch;
+		msg = msg.replace(".team.", color);
+		msg = msg.replace(".balance.", String.valueOf(p.getCoins()));
+		msg = msg.replace(".matchid.", String.valueOf(matchId));
+		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
+		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
+		interaction.respond(msg, null, buttons);
+	}
+
+	public void bet(DiscordInteraction interaction, int matchId, String color, int amount, Player p){
+		Match match = null;
+		for (Match m : ongoingMatches){
+			if (m.getID() == matchId){
+				match = m;
+			}
+		}
+		if (match == null || !match.acceptBets()){
+			interaction.respond(Config.bets_notaccepting);
+			return;
+		}
+
+		if (amount > p.getCoins()){
+			interaction.respond(Config.bets_insufficient);
+			return;
+		}
+
+		// All in
+		if (amount == -1){
+			amount = p.getCoins();
+		}
+
+		String otherTeam = color.equals("red") ? "blue" : "red";
+		if (match.isInMatch(p) && match.getTeam(p).equals(otherTeam)){
+			interaction.respond(Config.bets_otherteam);
+			return;
+		}
+		float odds = color.equals("red") ? match.getOdds(0) : match.getOdds(1);
+		Bet bet = new Bet(match.getID(), p, color, amount, odds);
+		match.bets.add(bet);
+		bet.place(match);
+
+		interaction.respond(null);
+	}
+
+	public void showBuys(DiscordInteraction interaction, Player p){
+		ArrayList<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
+
+		int price;
+		JSONObject emoji;
+		DiscordButton button;
+
+		// Elo boost
+		price = 1000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " Elo boost (2h)";
+		button.custom_id = "buy_eloboost";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		// Elo boost
+		price = 1000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " Additional map votes";
+		button.custom_id = "buy_showvoteoptions";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		// Elo boost
+		price = 10000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " Ban a map (2h)";
+		button.custom_id = "buy_banmap";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		JSONObject coinEmoji = Bet.getCoinEmoji(p.getCoins());
+		String msg = Config.buy_show;
+		msg = msg.replace(".balance.", String.valueOf(p.getCoins()));
+		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
+		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
+		interaction.respond(msg, null, buttons);
+	}
+
+	public void buyBoost(DiscordInteraction interaction, Player p){
+		int price = 1000;
+		JSONObject emoji  = Bet.getCoinEmoji(price);
+		if (p.getCoins() < price){
+			interaction.respond(Config.bets_insufficient);
+			return;
+		}
+
+		if (p.hasBoostActive()){
+			interaction.respond(Config.buy_boostactive.replace(".remaining.", String.valueOf(p.getEloBoost() / 1000)));
+			return;
+		}
+
+		p.setEloBoost((long) (System.currentTimeMillis() + 7.2e6)); // 2h
+		p.spendCoins(price);
+		p.saveWallet();
+		interaction.respond(null);
+
+		String msg = Config.buy_boostactivated;
+		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
+		msg = msg.replace(".price.", String.valueOf(price));
+		msg = msg.replace(".emojiname.", emoji.getString("name"));
+		msg = msg.replace(".emojiid.", emoji.getString("id"));
+		msg = msg.replace(".remaining.", String.valueOf(p.getEloBoost() / 1000));
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+	}
+
+	public void showAdditionalVoteOptions(DiscordInteraction interaction, Player p){
+		if (p.getAdditionalMapVotes() > 0){
+			interaction.respond(Config.buy_voteoptionsalready.replace(".vote.", String.valueOf(p.getAdditionalMapVotes())));
+			return;
+		}
+		ArrayList<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
+
+		int price;
+		JSONObject emoji;
+		DiscordButton button;
+
+		price = 1000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " 1 vote";
+		button.custom_id = "buy_additionalvote_1";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		price = 2000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " 2 votes";
+		button.custom_id = "buy_additionalvote_2";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		price = 4000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " 3 votes";
+		button.custom_id = "buy_additionalvote_3";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		price = 8000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " 4 votes";
+		button.custom_id = "buy_additionalvote_4";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		price = 16000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " 5 votes";
+		button.custom_id = "buy_additionalvote_5";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+
+		JSONObject coinEmoji = Bet.getCoinEmoji(p.getCoins());
+		String msg = Config.buy_showvoteoptions;
+		interaction.respond(msg, null, buttons);
+	}
+
+	public void buyAdditionalVotes(DiscordInteraction interaction, Player p, int number){
+		int price = 1000;
+		if (number == 2){
+			price = 2000;
+		} else if (number == 3){
+			price = 4000;
+		} else if (number == 4){
+			price = 8000;
+		}else if (number == 5){
+			price = 16000;
+		}
+		if (p.getAdditionalMapVotes() > 0){
+			interaction.respond(Config.buy_voteoptionsalready.replace(".vote.", String.valueOf(p.getAdditionalMapVotes())));
+			return;
+		}
+
+		JSONObject emoji  = Bet.getCoinEmoji(price);
+		if (p.getCoins() < price){
+			interaction.respond(Config.bets_insufficient);
+			return;
+		}
+
+		p.setAdditionalMapVotes(number);
+		p.spendCoins(price);
+		p.saveWallet();
+		interaction.respond("You can spend your additional votes by calling ``!addvote <map>``");
+
+		String msg = Config.buy_addvotesactivated;
+		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
+		msg = msg.replace(".price.", String.valueOf(price));
+		msg = msg.replace(".emojiname.", emoji.getString("name"));
+		msg = msg.replace(".emojiid.", emoji.getString("id"));
+		msg = msg.replace(".vote.", String.valueOf(p.getAdditionalMapVotes()));
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+	}
+
+	public void buyBanMap(DiscordInteraction interaction, Player p){
+		int price = 10000;
+
+		JSONObject emoji  = Bet.getCoinEmoji(price);
+		if (p.getCoins() < price){
+			interaction.respond(Config.bets_insufficient);
+			return;
+		}
+
+		p.setMapBans(p.getMapBans() + 1);
+		p.spendCoins(price);
+		p.saveWallet();
+		interaction.respond(null);
+
+		String msg = Config.buy_mapbanactivated;
+		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
+		msg = msg.replace(".price.", String.valueOf(price));
+		msg = msg.replace(".emojiname.", emoji.getString("name"));
+		msg = msg.replace(".emojiid.", emoji.getString("id"));
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+	}
+
+	public void cmdUseMapBan(Player p, String mapname){
+		if (p.getMapBans() == 0){
+			bot.sendNotice(p.getDiscordUser(), Config.no_map_ban);
+			return;
+		}
+
+		int counter = 0;
+		GameMap map = null;
+		for (GameMap xmap : mapList) {
+			if (xmap.name.toLowerCase().contains(mapname.toLowerCase())) {
+				counter++;
+				map = xmap;
+			}
+		}
+		if (counter > 1) {
+			bot.sendNotice(p.getDiscordUser(), Config.map_not_unique);
+			return;
+		} else if (counter == 0) {
+			bot.sendNotice(p.getDiscordUser(), Config.map_not_found);
+			return;
+		} else if (map.bannedUntil >= System.currentTimeMillis()) {
+			bot.sendNotice(p.getDiscordUser(), Config.map_already_banned.replace(".remaining.", String.valueOf(map.bannedUntil / 1000)));
+			return;
+		}
+
+		p.setMapBans(p.getMapBans() - 1);
+		map.bannedUntil = (long) (System.currentTimeMillis() + 7.2e6);
+		db.updateMapBan(map);
+
+		for (Gametype gt : curMatch.keySet()){
+			curMatch.get(gt).banMap(map);
+		}
+
+		String msg = Config.used_map_ban;
+		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
+		msg = msg.replace(".map.", map.name);
+		msg = msg.replace(".time.", String.valueOf(map.bannedUntil / 1000));
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 	}
 }

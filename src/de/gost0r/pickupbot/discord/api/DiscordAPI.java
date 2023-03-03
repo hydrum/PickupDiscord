@@ -621,4 +621,16 @@ public class DiscordAPI {
 		return false;
 	}
 
+	public static boolean createApplicationCommand(DiscordApplicationCommand app){
+		try {
+			String reply = sendPostRequest("/applications/" + DiscordBot.getApplicationId() + "/commands", app.getJSON());
+
+			return reply != null;
+		} catch (JSONException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+		return false;
+	}
+
 }
