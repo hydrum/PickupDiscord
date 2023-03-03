@@ -2107,6 +2107,11 @@ public class PickupLogic {
 			return;
 		}
 
+		if (p.getCoins() <= 0){
+			interaction.respond(Config.bets_nomoney);
+			return;
+		}
+
 		ArrayList<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
 		JSONObject coinEmoji = Bet.getCoinEmoji(10);
 

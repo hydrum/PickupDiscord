@@ -391,6 +391,7 @@ public class Config {
 	public static final String bets_won					= ".player. won his bet: ``+.amount.`` <:.emojiname.:.emojiid.>";
 	public static final String bets_refund				= ".player.'s bet was canceled and was refunded ``.amount.`` <:.emojiname.:.emojiid.>";
 	public static final String bets_otherteam			= "You can't bet against your team, have some faith!";
+	public static final String bets_nomoney				= "You can't bet, you are broke :'(";
 	public static final String bets_place				= ".player. bets ``.amount.`` <:.emojiname.:.emojiid.> on this game.";
 
 	public static final String buy_show					= "What perk would you like to purchase? \n*Current balance:* ``.balance.`` <:.emojiname.:.emojiid.>";
