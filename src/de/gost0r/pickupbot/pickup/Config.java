@@ -400,4 +400,6 @@ public class Config {
 	public static final String buy_voteoptionsalready	= "You already have a set of additional votes (currently ``.vote.`` votes). Use them to purchase another set.";
 	public static final String buy_addvotesactivated	= ".player. purchased ``.vote.`` additional votes for ``.price.`` <:.emojiname.:.emojiid.>";
 	public static final String buy_mapbanactivated		= ".player. purchased a map ban for ``.price.`` <:.emojiname.:.emojiid.>";
+	public static final String buy_addvote_purchased	= "You can spend your additional votes by calling ``!addvote <map>``";
+	public static final String buy_banmap_purchased		= "You can now ban a map for 2h by calling ``!banmap <map>``";
 }

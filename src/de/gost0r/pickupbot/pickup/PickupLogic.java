@@ -549,7 +549,12 @@ public class PickupLogic {
 		statsEmbed.color = 7056881;
 		statsEmbed.title = country + " \u200b \u200b  " +  p.getUrtauth();
 		statsEmbed.thumbnail = p.getDiscordUser().getAvatarUrl();
-		statsEmbed.description = p.getRank().getEmoji() + " \u200b \u200b  **" + p.getElo() + "**  #" + p.getEloRank() + "\n\n``Season " + currentSeason.number + "``";
+
+		String boostActive = "";
+		if (p.hasBoostActive()){
+			boostActive = "\n**ELO BOOST** (Expires <t:" + p.getEloBoost() / 1000 + ":R>)";
+		}
+		statsEmbed.description = p.getRank().getEmoji() + " \u200b \u200b  **" + p.getElo() + "**  #" + p.getEloRank() + boostActive + "\n\n``Season " + currentSeason.number + "``";
 
 		statsEmbed.footer_icon = "https://cdn.discordapp.com/emojis/" + Bet.getCoinEmoji(p.getCoins()).getString("id");
 		statsEmbed.footer = String.valueOf(p.getCoins());
@@ -2340,7 +2345,7 @@ public class PickupLogic {
 		p.setAdditionalMapVotes(number);
 		p.spendCoins(price);
 		p.saveWallet();
-		interaction.respond("You can spend your additional votes by calling ``!addvote <map>``");
+		interaction.respond(Config.buy_addvote_purchased);
 
 		String msg = Config.buy_addvotesactivated;
 		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
@@ -2363,7 +2368,7 @@ public class PickupLogic {
 		p.setMapBans(p.getMapBans() + 1);
 		p.spendCoins(price);
 		p.saveWallet();
-		interaction.respond(null);
+		interaction.respond(Config.buy_banmap_purchased);
 
 		String msg = Config.buy_mapbanactivated;
 		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
