@@ -292,4 +292,9 @@ public class FtwglAPI {
         }
         return -1;
     }
+
+    public static boolean hasLauncherOn(Player p){
+        String response = sendGetRequest("/connected/launcher/" + p.getDiscordUser().id, true);
+        return response != null;
+    }
 }

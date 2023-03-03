@@ -206,6 +206,7 @@ public class Config {
 
 	//------------------------------------------------------------------------------------//
 	public static final String pkup_lock				= "Pickup games are now locked. :lock:";
+	public static final String pkup_launcheroff			= "Please turn on your FTW launcher before adding. See <#1067227082372952084> for more details.";
 	public static final String pkup_map					= "You voted for .map. (``.count.``).";
 	public static final String pkup_map_list			= "**.gametype.**: .maplist.";
 //	public static final String pkup_signup				= "You can sign up again!";

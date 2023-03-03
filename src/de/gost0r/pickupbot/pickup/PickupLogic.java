@@ -106,6 +106,10 @@ public class PickupLogic {
 			cmdGetPingURL(player);
 			return;
 		}
+		if (player.getEnforceAC() && !FtwglAPI.hasLauncherOn(player)){
+			bot.sendNotice(player.getDiscordUser(), Config.pkup_launcheroff);
+			return;
+		}
 		
 		if (locked && !forced) {
 			bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
