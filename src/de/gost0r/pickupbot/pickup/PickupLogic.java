@@ -68,7 +68,8 @@ public class PickupLogic {
 		serverList = db.loadServers();
 		roles = db.loadRoles();
 		channels = db.loadChannels();
-		
+
+		awaitingServer = new LinkedList<Match>();
 		curMatch = new HashMap<Gametype, Match>();
 		teamsQueued = new HashMap<Team, Gametype>();
 		lastMapPlayed = new HashMap<Gametype, GameMap>();
@@ -87,8 +88,7 @@ public class PickupLogic {
 		banDuration = new HashMap<BanReason, String[]>();
 		banDuration.put(BanReason.NOSHOW, new String[] {"10m", "30m", "1h", "2h", "6h", "12h", "1d", "2d", "3d", "1w", "1w", "1w", "1M"});
 		banDuration.put(BanReason.RAGEQUIT, new String[] {"6h", "12h", "1d", "2d", "3d", "1w", "1w", "1w", "1w", "1w", "1w", "1w", "1M"});
-		
-		awaitingServer = new LinkedList<Match>();
+
 		
 		Server testGTV = new Server(0, "gtv.b00bs-clan.com", 709, "arkon4bmn", "SevenAndJehar", true, null);
 		gtvServerList = new ArrayList<Server>();
@@ -1302,6 +1302,10 @@ public class PickupLogic {
 						spawnMsg = spawnMsg.replace(".flag.", Country.getCountryFlag(bs.country));
 						spawnMsg = spawnMsg.replace(".city.", bs.city);
 						bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), spawnMsg);
+					}
+					else {
+						bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_go_pub_noserv);
+						m.reset();
 					}
 				}
 				else{

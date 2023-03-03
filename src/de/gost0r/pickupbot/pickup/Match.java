@@ -92,7 +92,7 @@ public class Match implements Runnable {
 
 	public Match(int id, long startTime, GameMap map, int[] score, int[] elo,
 			Map<String, List<Player>> teamList, MatchState state, Gametype gametype, Server server,
-			Map<Player, MatchStats> playerStats) {
+			Map<Player, MatchStats> playerStats, PickupLogic logic) {
 		this();
 		this.id = id;
 		this.startTime = startTime;
@@ -104,6 +104,12 @@ public class Match implements Runnable {
 		this.gametype = gametype;
 		this.server = server;
 		this.playerStats = playerStats;
+		this.logic = logic;
+
+		if (server == null){
+			abort();
+			return;
+		}
 		
 		if (!isOver()) {
 			server.startMonitoring(this);
@@ -356,7 +362,9 @@ public class Match implements Runnable {
 		for(Player p : playerStats.keySet()) {
 			p.resetVotes();
 		}
-		server.free();
+		if (server != null){
+			server.free();
+		}
 
 		logic.matchEnded();
 	}

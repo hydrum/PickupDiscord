@@ -643,8 +643,8 @@ public class Database {
 										state,
 										gametype,
 										server,
-										stats); 
-				match.setLogic(logic);
+										stats,
+										logic);
 			}
 			rs.close();
 		} catch (SQLException e) {

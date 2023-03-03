@@ -246,6 +246,7 @@ public class Config {
 	public static final String pkup_go_pub_pickjoin		= ".pick. joins the **.color.** team.";
 	public static final String pkup_go_pub_servspawn	= "**Spawning Server:** .flag. ``.city.`` (fairest server to all players)\n:hourglass: The ip will be send to all players when the server is spawned. ``Estimated wait time: 2min``";
 	public static final String pkup_go_pub_requestserver= "**Requesting Server:** .flag. ``.region.``";
+	public static final String pkup_go_pub_noserv		= "The server rental system is temporarilly unavailable, please try again later.";
 
 	public static final String pkup_aftermath_head		= "**.gametype.**: Aftermath #.gamenumber. (.map.):";
 	public static final String pkup_aftermath_result	= ".team. .result. (.score.) -";
