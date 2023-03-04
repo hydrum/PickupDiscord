@@ -637,6 +637,9 @@ public class Match implements Runnable {
 	}
 
 	public boolean isCaptainTurn(Player player) {
+		if (captains[captainTurn] == null){
+			return false;
+		}
 		return captains[captainTurn].getUrtauth().equals(player.getUrtauth());
 	}
 
