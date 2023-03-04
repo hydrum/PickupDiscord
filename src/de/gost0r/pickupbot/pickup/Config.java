@@ -25,6 +25,7 @@ public class Config {
 	public static final String CMD_PING					= "!ping";
 	public static final String CMD_ADDVOTE				= "!addvote";
 	public static final String CMD_BANMAP				= "!banmap";
+	public static final String CMD_WALLET				= "!wallet";
 
 	public static final String CMD_LOCK					= "!lock";
 	public static final String CMD_UNLOCK				= "!unlock";
@@ -54,6 +55,7 @@ public class Config {
 	public static final String CMD_TOP_COUNTRIES		= "!topcountries";
 	public static final String CMD_TOP_WDL				= "!topwin";
 	public static final String CMD_TOP_KDR				= "!topkdr";
+	public static final String CMD_TOP					= "!top";
 	public static final String CMD_TOP_RICH				= "!toprich";
 
 	public static final String CMD_MATCH				= "!match";
@@ -236,7 +238,7 @@ public class Config {
 	public static final String pkup_go_player_ac		= "Pickup starts now! Click the button below to join the server, choose positions and ready up!.";
 	public static final String pkup_go_captains			= "Pickup is about to start and you are **captain**! Please pick players in the recently created discord thread.";
 	public static final String pkup_go_pub_head			= "**.gametype.: Match #.gamenumber.** .region. (avg ELO: .elo.)";
-	public static final String pkup_go_pub_team			= ".team. team: .playerlist.";
+	public static final String pkup_go_pub_team			= "**.team.**  .playerlist.";
 	public static final String pkup_go_pub_map			= "Map: .map.";
 	public static final String pkup_go_pub_calm			= "**GTV**: connect gtv.b00bs-clan.com:709; password SevenAndJehar"; // temporarily hard coded
 	public static final String pkup_go_pub_calm_notavi	= "GTV: not available";
@@ -403,4 +405,5 @@ public class Config {
 	public static final String buy_mapbanactivated		= ".player. purchased a map ban for ``.price.`` <:.emojiname.:.emojiid.>";
 	public static final String buy_addvote_purchased	= "You can spend your additional votes by calling ``!addvote <map>``";
 	public static final String buy_banmap_purchased		= "You can now ban a map for 2h by calling ``!banmap <map>``";
+	public static final String buy_show_wallet			= "Current balance: ``.balance.`` <:.emojiname.:.emojiid.>";
 }

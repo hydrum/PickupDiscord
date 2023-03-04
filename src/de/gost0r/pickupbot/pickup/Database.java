@@ -1176,6 +1176,9 @@ public class Database {
 			if (gt.getName().equals("CTF")){
 				limit = 10;
 				rating_query = "CAST (SUM(score.kills) AS FLOAT) / (COUNT(player_in_match.player_urtauth)/2 ) / 50";
+			} else if (gt.getName().equals("SKEET")){
+				limit = 0;
+				rating_query = "MAX(kills)";
 			}
 			String sql = "SELECT player.urtauth AS auth, COUNT(player_in_match.player_urtauth)/2 as matchcount, " + rating_query + " AS kdr FROM score INNER JOIN stats ON stats.score_1 = score.ID OR stats.score_2 = score.ID INNER JOIN player_in_match ON player_in_match.ID = stats.pim  INNER JOIN player ON player_in_match.player_userid = player.userid INNER JOIN match ON match.id = player_in_match.matchid WHERE player.active = \"true\" AND (match.state = 'Done' OR match.state = 'Surrender' OR match.state = 'Mercy') AND match.gametype = ? AND match.starttime > ? AND match.starttime < ? GROUP BY player_in_match.player_urtauth HAVING matchcount > ? ORDER BY kdr DESC LIMIT ?";
 			PreparedStatement pstmt = getPreparedStatement(sql);
@@ -1396,7 +1399,7 @@ public class Database {
 	public Map<Player, Integer> getTopRich(int number) {
 		Map<Player, Integer> toprich = new LinkedHashMap<Player, Integer>();
 		try {
-			String sql = "SELECT urtauth, coins FROM  player INNER JOIN bets ON (player.urtauth = bets.player_urtauth ) ORDER BY coins DESC LIMIT ?";
+			String sql = "SELECT urtauth, coins FROM  player INNER JOIN bets ON (player.urtauth = bets.player_urtauth ) GROUP BY urtauth ORDER BY coins DESC LIMIT ?";
 			PreparedStatement pstmt = getPreparedStatement(sql);
 			pstmt.setInt(1, number);
 			ResultSet rs = pstmt.executeQuery();

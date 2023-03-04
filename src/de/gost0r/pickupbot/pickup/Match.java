@@ -774,7 +774,7 @@ public class Match implements Runnable {
 				playernames.append(p.getDiscordUser().getMentionString());
 			}
 			msg = Config.pkup_go_pub_team;
-			msg = msg.replace(".team.", team);
+			msg = msg.replace(".team.", team.equals("Red") ? "<:rush_red:510982162263179275>   Red:" : "<:rush_blue:510067909628788736>  Blue:");
 			msg = msg.replace(".gametype.", gametype.getName());
 			msg = msg.replace(".playerlist.", playernames.toString());
 			fullmsg.append("\n").append(msg);
@@ -799,12 +799,12 @@ public class Match implements Runnable {
 
 			buttons = new ArrayList<DiscordComponent>();
 			JSONObject emojiRed = new JSONObject();
-			emojiRed.put("name", "rush_red");
-			emojiRed.put("id", "510982162263179275");
+			emojiRed.put("name", "helmet_red");
+			emojiRed.put("id", "900477396237549620");
 
 			JSONObject emojiBlue = new JSONObject();
-			emojiBlue.put("name", "rush_blue");
-			emojiBlue.put("id", "510067909628788736");
+			emojiBlue.put("name", "helmet_blue");
+			emojiBlue.put("id", "900477396573110282");
 
 			DiscordButton buttonBetRed = new DiscordButton(DiscordButtonStyle.GREY);
 			buttonBetRed.emoji = emojiRed;
@@ -1277,9 +1277,22 @@ public class Match implements Runnable {
 			refundBets();
 			return;
 		}
-
+		String betMsg = "";
 		for (Bet bet : bets){
 			bet.enterResult(bet.color.equals(winningTeam));
+			if (bet.won){
+				int wonAmount = Math.round(bet.amount * bet.odds);
+				JSONObject emoji = Bet.getCoinEmoji(wonAmount);
+				String msg = Config.bets_won;
+				msg = msg.replace(".player.", bet.player.getDiscordUser().getMentionString());
+				msg = msg.replace(".amount.", String.valueOf(wonAmount));
+				msg = msg.replace(".emojiname.", emoji.getString("name"));
+				msg = msg.replace(".emojiid.", emoji.getString("id"));
+				betMsg = betMsg + msg + '\n';
+			}
+		}
+		if (!betMsg.equals("")){
+			logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), betMsg);
 		}
 		bets.clear();
 	}

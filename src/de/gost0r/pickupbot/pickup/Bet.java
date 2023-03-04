@@ -50,13 +50,6 @@ public class Bet {
         if (won){
             int wonAmount = Math.round(amount * odds);
             player.addCoins(wonAmount);
-            JSONObject emoji = getCoinEmoji(wonAmount);
-            String msg = Config.bets_won;
-            msg = msg.replace(".player.", player.getDiscordUser().getMentionString());
-            msg = msg.replace(".amount.", String.valueOf(wonAmount));
-            msg = msg.replace(".emojiname.", emoji.getString("name"));
-            msg = msg.replace(".emojiid.", emoji.getString("id"));
-            logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), msg);
         }
         player.saveWallet();
         logic.db.createBet(this);

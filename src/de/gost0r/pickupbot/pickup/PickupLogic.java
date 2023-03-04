@@ -90,9 +90,9 @@ public class PickupLogic {
 		banDuration.put(BanReason.RAGEQUIT, new String[] {"6h", "12h", "1d", "2d", "3d", "1w", "1w", "1w", "1w", "1w", "1w", "1w", "1M"});
 
 		
-		Server testGTV = new Server(0, "gtv.b00bs-clan.com", 709, "arkon4bmn", "SevenAndJehar", true, null);
+		//Server testGTV = new Server(0, "gtv.b00bs-clan.com", 709, "arkon4bmn", "SevenAndJehar", true, null);
 		gtvServerList = new ArrayList<Server>();
-		gtvServerList.add(testGTV);
+		//gtvServerList.add(testGTV);
 	}
 
 	public void cmdAddPlayer(Player player, List<Gametype> modes, boolean forced) {
@@ -2421,5 +2421,14 @@ public class PickupLogic {
 		msg = msg.replace(".map.", map.name);
 		msg = msg.replace(".time.", String.valueOf(map.bannedUntil / 1000));
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+	}
+
+	public void cmdWallet(Player p) {
+		JSONObject coinEmoji = Bet.getCoinEmoji(p.getCoins());
+		String msg = Config.buy_show_wallet;
+		msg = msg.replace(".balance.", String.valueOf(p.getCoins()));
+		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
+		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
+		bot.sendNotice(p.getDiscordUser(), msg);
 	}
 }

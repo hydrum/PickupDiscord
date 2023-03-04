@@ -505,6 +505,7 @@ public class PickupBot extends DiscordBot {
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
 
+				case Config.CMD_TOP:
 				case Config.CMD_TOP_KDR: 
 					if (p != null)
 					{
@@ -712,6 +713,12 @@ public class PickupBot extends DiscordBot {
 				case Config.CMD_TOP_RICH:
 					if (p != null){
 						logic.cmdTopRich(10);
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
+				case Config.CMD_WALLET:
+					if (p != null){
+						logic.cmdWallet(p);
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
