@@ -774,7 +774,7 @@ public class Match implements Runnable {
 				playernames.append(p.getDiscordUser().getMentionString());
 			}
 			msg = Config.pkup_go_pub_team;
-			msg = msg.replace(".team.", team.equals("Red") ? "<:rush_red:510982162263179275>   Red:" : "<:rush_blue:510067909628788736>  Blue:");
+			msg = msg.replace(".team.", team.equals("Red") ? "<:rush_red:510982162263179275>  Red: " : "<:rush_blue:510067909628788736>  Blue:");
 			msg = msg.replace(".gametype.", gametype.getName());
 			msg = msg.replace(".playerlist.", playernames.toString());
 			fullmsg.append("\n").append(msg);
