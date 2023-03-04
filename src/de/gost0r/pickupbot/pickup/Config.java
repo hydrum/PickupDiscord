@@ -390,7 +390,7 @@ public class Config {
 	public static final String bets_notaccepting		= "This match is not accepting bets anymore.";
 	public static final String bets_howmuch				= "How much would you like to bet for team ``.team.``? \nTo bet a custom amount, use ``/bet .matchid. .team. <amount>``\n*Current balance:* ``.balance.`` <:.emojiname.:.emojiid.>";
 	public static final String bets_insufficient		= "Insufficient funds.";
-	public static final String bets_won					= ".player. won his bet: ``+.amount.`` <:.emojiname.:.emojiid.>";
+	public static final String bets_won					= ".player. won their bet: ``+.amount.`` <:.emojiname.:.emojiid.>";
 	public static final String bets_refund				= ".player.'s bet was canceled and was refunded ``.amount.`` <:.emojiname.:.emojiid.>";
 	public static final String bets_otherteam			= "You can't bet against your team, have some faith!";
 	public static final String bets_nomoney				= "You can't bet, you are broke :'(";

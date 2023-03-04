@@ -38,7 +38,6 @@ public class Bet {
         if (allIn){
             msg +=" **ALL IN!!**";
             logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), msg);
-            return;
         }
         logic.bot.sendMsg(match.threadChannels, msg);
     }
