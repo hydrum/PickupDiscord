@@ -388,22 +388,22 @@ public class Config {
 	public static final String team_no_scrim			= "**SCRIM**: No team signed up. Type ``!scrim <ts/ctf/2v2>`` to play.";
 
 	public static final String bets_notaccepting		= "This match is not accepting bets anymore.";
-	public static final String bets_howmuch				= "How much would you like to bet for team ``.team.``? \nTo bet a custom amount, use ``/bet .matchid. .team. <amount>``\n*Current balance:* ``.balance.`` <:.emojiname.:.emojiid.>";
+	public static final String bets_howmuch				= "How much would you like to bet for team ``.team.``? \nTo bet a custom amount, use ``/bet .matchid. .team. <amount>``\n*Current balance:* <:.emojiname.:.emojiid.> ``.balance.``";
 	public static final String bets_insufficient		= "Insufficient funds.";
-	public static final String bets_won					= ".player. won their bet: ``+.amount.`` <:.emojiname.:.emojiid.>";
-	public static final String bets_refund				= ".player.'s bet was canceled and was refunded ``.amount.`` <:.emojiname.:.emojiid.>";
+	public static final String bets_won					= ".player. won their bet: <:.emojiname.:.emojiid.> ``+.amount.``";
+	public static final String bets_refund				= ".player.'s bet was canceled and was refunded <:.emojiname.:.emojiid.> ``.amount.``";
 	public static final String bets_otherteam			= "You can't bet against your team, have some faith!";
 	public static final String bets_nomoney				= "You can't bet, you are broke :'(";
-	public static final String bets_place				= ".player. bets ``.amount.`` <:.emojiname.:.emojiid.> on this game.";
+	public static final String bets_place				= ".player. bets <:.emojiname.:.emojiid.> ``.amount.`` on this game.";
 
-	public static final String buy_show					= "What perk would you like to purchase? \n*Current balance:* ``.balance.`` <:.emojiname.:.emojiid.>";
+	public static final String buy_show					= "What perk would you like to purchase? \n*Current balance:* <:.emojiname.:.emojiid.> ``.balance.``";
 	public static final String buy_boostactive			= "You already have an active elo boost. (Expires <t:.remaining.:R> )";
-	public static final String buy_boostactivated		= ".player. purchased an elo boost for ``.price.`` <:.emojiname.:.emojiid.> (Expires <t:.remaining.:R> )";
+	public static final String buy_boostactivated		= ".player. purchased an elo boost for <:.emojiname.:.emojiid.> ``.price.`` (Expires <t:.remaining.:R> )";
 	public static final String buy_showvoteoptions		= "How many map votes would you like to purchase?";
 	public static final String buy_voteoptionsalready	= "You already have a set of additional votes (currently ``.vote.`` votes). Use them to purchase another set.";
-	public static final String buy_addvotesactivated	= ".player. purchased ``.vote.`` additional votes for ``.price.`` <:.emojiname.:.emojiid.>";
-	public static final String buy_mapbanactivated		= ".player. purchased a map ban for ``.price.`` <:.emojiname.:.emojiid.>";
+	public static final String buy_addvotesactivated	= ".player. purchased ``.vote.`` additional votes for <:.emojiname.:.emojiid.> ``.price.``";
+	public static final String buy_mapbanactivated		= ".player. purchased a map ban for <:.emojiname.:.emojiid.> ``.price.``";
 	public static final String buy_addvote_purchased	= "You can spend your additional votes by calling ``!addvote <map>``";
 	public static final String buy_banmap_purchased		= "You can now ban a map for 2h by calling ``!banmap <map>``";
-	public static final String buy_show_wallet			= "Current balance: ``.balance.`` <:.emojiname.:.emojiid.>";
+	public static final String buy_show_wallet			= "Current balance of **.player.**: <:.emojiname.:.emojiid.> ``.balance.``";
 }

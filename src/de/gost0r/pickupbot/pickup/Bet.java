@@ -12,9 +12,16 @@ public class Bet {
     public boolean won;
 
     public static PickupLogic logic;
-    public static JSONObject coinEmoji = new JSONObject().put("name", "pugcoin").put("id", "1079910771342979092");
-    public static JSONObject blueCoinEmoji = new JSONObject().put("name", "pugcoin_blue").put("id", "1079910838330208339");
-    public static JSONObject purpleCoinEmoji = new JSONObject().put("name", "pugcoin_purple").put("id", "1079910887541973042");
+    public static JSONObject bronzeEmoji = new JSONObject().put("name", "pugcoin_bronze").put("id", "1081604558381400064");
+    public static JSONObject silverEmoji = new JSONObject().put("name", "pugcoin_silver").put("id", "1081604664568578128");
+    public static JSONObject goldEmoji = new JSONObject().put("name", "pugcoin_gold").put("id", "1081604760249053296");
+    public static JSONObject amberEmoji = new JSONObject().put("name", "pugcoin_amber").put("id", "1081605085450219623");
+    public static JSONObject rubyEmoji = new JSONObject().put("name", "pugcoin_ruby").put("id", "1081605151598583848");
+    public static JSONObject pearlEmoji = new JSONObject().put("name", "pugcoin_pearl").put("id", "1081605198071480451");
+    public static JSONObject amethystEmoji = new JSONObject().put("name", "pugcoin_amethyst").put("id", "1081605266535108739");
+    public static JSONObject diamondEmoji = new JSONObject().put("name", "pugcoin_diamond").put("id", "1081605316262772826");
+    public static JSONObject smaragdEmoji = new JSONObject().put("name", "pugcoin_smaragd").put("id", "1081605371367534672");
+    public static JSONObject prismaEmoji = new JSONObject().put("name", "pugcoin_prisma").put("id", "1081605422764527768");
 
     public Bet(int matchid, Player p, String color, int amount, float odds){
         this.matchid = matchid;
@@ -67,12 +74,25 @@ public class Bet {
     }
 
     public static JSONObject getCoinEmoji(int amount){
-        if (amount <= 9999){
-            return coinEmoji;
+        if (amount < 500){
+            return bronzeEmoji;
+        } else if (amount < 1000){
+            return silverEmoji;
+        } else if (amount < 10000){
+            return goldEmoji;
+        } else if (amount < 25000){
+            return amberEmoji;
+        } else if (amount < 50000){
+            return rubyEmoji;
+        } else if (amount < 100000){
+            return pearlEmoji;
+        } else if (amount < 250000){
+            return amethystEmoji;
+        } else if (amount < 500000){
+            return diamondEmoji;
+        } else if (amount < 1000000){
+            return smaragdEmoji;
         }
-        else if (amount <= 99999){
-            return blueCoinEmoji;
-        }
-        return purpleCoinEmoji;
+        return prismaEmoji;
     }
 }

@@ -81,7 +81,8 @@ public class FtwglAPI {
         JSONObject obj = new JSONObject(response);
 
         if (!obj.has("server") || !obj.getJSONObject("server").has("config")){
-            spawnDynamicServer(playerList);
+            // spawnDynamicServer(playerList);
+            LOGGER.warning("CAN'T SPAWN: " + response);
             return null;
         }
 

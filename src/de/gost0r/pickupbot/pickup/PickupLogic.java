@@ -119,7 +119,7 @@ public class PickupLogic {
 			bot.sendMsg(bot.getLatestMessageChannel(), printBanInfo(player));
 			return;
 		}
-		if (playerInActiveMatch(player) != null) {
+		if (playerInActiveMatch(player) != null && playerInActiveMatch(player).getGametype().getTeamSize() > 2) {
 			bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
 			return;
 		}
@@ -443,7 +443,7 @@ public class PickupLogic {
 				embed_rank.append("**").append(rank).append("**\n");
 				embed_player.append(country).append(" \u200b \u200b  ").append(entry.getKey().getUrtauth()).append('\n');
 				JSONObject emoji = Bet.getCoinEmoji(entry.getValue());
-				embed_rich.append(entry.getValue() + " <:" + emoji.getString("name") + ":" + emoji.getString("id") + ">").append("\n");
+				embed_rich.append("<:" + emoji.getString("name") + ":" + emoji.getString("id") + "> " + entry.getValue()).append("\n");
 				rank++;
 			}
 			embed.addField("\u200b", embed_rank.toString(), true);
@@ -2431,9 +2431,10 @@ public class PickupLogic {
 	public void cmdWallet(Player p) {
 		JSONObject coinEmoji = Bet.getCoinEmoji(p.getCoins());
 		String msg = Config.buy_show_wallet;
+		msg = msg.replace(".player.", p.getDiscordUser().username);
 		msg = msg.replace(".balance.", String.valueOf(p.getCoins()));
 		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
 		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
-		bot.sendNotice(p.getDiscordUser(), msg);
+		bot.sendMsg(bot.getLatestMessageChannel(), msg);
 	}
 }

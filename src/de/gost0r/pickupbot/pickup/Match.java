@@ -325,6 +325,7 @@ public class Match implements Runnable {
 		state = MatchState.Done;
 		if (server.getServerMonitor().noMercyIssued){
 			state = MatchState.Mercy;
+			payWin = 75;
 		}
 		cleanUp();
 
@@ -398,10 +399,10 @@ public class Match implements Runnable {
 			}
 			if (gametype.getTeamSize() > 0){
 				if (score[i] > score[opp]) {
-					msg.append(" Team reward: ``" + payWin + "`` <:pugcoin:1079910771342979092> ");
+					msg.append(" Team reward: <:pugcoin_bronze:1081604558381400064> ``" + payWin + "``");
 				}
 				else{
-					msg.append(" Team reward: ``" + payLose + "`` <:pugcoin:1079910771342979092> ");
+					msg.append(" Team reward: <:pugcoin_bronze:1081604558381400064> ``" + payLose + "``");
 				}
 			}
 
@@ -460,7 +461,13 @@ public class Match implements Runnable {
 
 			for (Player player : getPlayerList()) {				
 				for (Match m : logic.playerInMatch(player)) {
-					if (m == this) continue;
+					if (m == this || (gametype.getTeamSize() <= 2 && m.getGametype().getTeamSize() > 2)){
+						continue;
+					}
+					if (gametype.getTeamSize() > 2 && m.getGametype().getTeamSize() <= 2 && m.state == MatchState.Live){
+						m.reset();
+						continue;
+					}
 					m.removePlayer(player, false);
 				}
 			}

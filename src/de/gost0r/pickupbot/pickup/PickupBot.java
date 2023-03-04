@@ -718,7 +718,30 @@ public class PickupBot extends DiscordBot {
 					break;
 				case Config.CMD_WALLET:
 					if (p != null){
-						logic.cmdWallet(p);
+						if (data.length == 1){
+							logic.cmdWallet(p);
+						}
+
+						else if (data.length == 2)
+						{
+							Player pOther;
+							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
+							if (u != null)
+							{
+								pOther = Player.get(u);
+							}
+							else
+							{
+								pOther = Player.get(data[1].toLowerCase());
+							}
+
+							if (pOther != null)
+							{
+								logic.cmdWallet(pOther);
+							}
+							else sendNotice(msg.user, Config.player_not_found);
+						}
+
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
