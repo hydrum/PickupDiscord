@@ -242,7 +242,7 @@ public class Player {
 		if (getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), PlayerRank.LEET.getRole()) && elorank > 5){
 			logic.bot.removeUserRole(getDiscordUser(), PlayerRank.LEET.getRole());
 		}
-		if (!getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), PlayerRank.LEET.getRole()) && elorank <=> 5){
+		if (!getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), PlayerRank.LEET.getRole()) && elorank <= 5){
 			logic.bot.addUserRole(getDiscordUser(), PlayerRank.LEET.getRole());
 		}
 		if (!getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), currentRank.getRole())){
