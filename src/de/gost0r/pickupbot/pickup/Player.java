@@ -215,9 +215,7 @@ public class Player {
 	}
 
 	private PlayerRank getRank(int elo) {
-		if (elorank <= 5){
-			return PlayerRank.LEET;
-		} else if (elo >= 1600) {
+		if (elo >= 1600) {
 			return PlayerRank.DIAMOND;
 		} else if (elo >= 1400) {
 			return PlayerRank.PLATINUM;
@@ -243,6 +241,9 @@ public class Player {
 		}
 		if (getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), PlayerRank.LEET.getRole()) && elorank > 5){
 			logic.bot.removeUserRole(getDiscordUser(), PlayerRank.LEET.getRole());
+		}
+		if (!getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), PlayerRank.LEET.getRole()) && elorank <=> 5){
+			logic.bot.addUserRole(getDiscordUser(), PlayerRank.LEET.getRole());
 		}
 		if (!getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), currentRank.getRole())){
 			logic.bot.addUserRole(getDiscordUser(), currentRank.getRole());

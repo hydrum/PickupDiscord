@@ -804,7 +804,7 @@ public class Match implements Runnable {
 		fullmsg.append("\n").append(msg);
 
 		ArrayList<DiscordComponent> buttons = null;
-		if (gametype.getTeamSize() > 0){
+		if (gametype.getTeamSize() > 2){
 			computeOdds();
 
 			buttons = new ArrayList<DiscordComponent>();
@@ -1308,6 +1308,9 @@ public class Match implements Runnable {
 	}
 
 	public boolean acceptBets(){
+		if (gametype.getTeamSize() <= 2){
+			return false;
+		}
 		if (state != MatchState.Live && state != MatchState.AwaitingServer){
 			return false;
 		}
