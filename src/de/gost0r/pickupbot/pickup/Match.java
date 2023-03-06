@@ -1261,6 +1261,7 @@ public class Match implements Runnable {
 	}
 
 	public void payPlayers(){
+
 		String winningTeam = "";
 		int redPay = payLose;
 		int bluePay = payLose;
@@ -1273,6 +1274,12 @@ public class Match implements Runnable {
 			bluePay = payWin;
 		}
 
+		// If game result was corrupted and created a draw
+		if (winningTeam.equals("")){
+			refundBets();
+			return;
+		}
+
 		for (Player redP : teamList.get("red")){
 			redP.addCoins(redPay);
 			redP.saveWallet();
@@ -1282,11 +1289,6 @@ public class Match implements Runnable {
 			blueP.saveWallet();
 		}
 
-		// If game result was corrupted and created a draw
-		if (winningTeam.equals("")){
-			refundBets();
-			return;
-		}
 		String betMsg = "";
 		for (Bet bet : bets){
 			bet.enterResult(bet.color.equals(winningTeam));
@@ -1346,6 +1348,7 @@ public class Match implements Runnable {
 	public void refundBets(){
 		for (Bet bet : bets){
 			bet.refund(this);
+			bet.player.saveWallet();
 		}
 		bets.clear();
 	}
