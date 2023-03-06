@@ -745,6 +745,39 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
+				case Config.CMD_DONATE:
+					if (p != null){
+						if (data.length == 3){
+
+							Player pOther;
+							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
+							if (u != null)
+							{
+								pOther = Player.get(u);
+							}
+							else
+							{
+								pOther = Player.get(data[1].toLowerCase());
+							}
+
+							if (pOther != null)
+							{
+								int amount;
+								try {
+									amount = Integer.parseInt(data[2]);
+									pOther.setLastPublicChannel(msg.channel);
+									logic.cmdDonate(p, pOther, amount);
+								} catch (NumberFormatException nfe) {
+									sendNotice(p.getDiscordUser(), Config.donate_incorrect_amount);
+								}
+							}
+							else sendNotice(msg.user, Config.player_not_found);
+						}
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_DONATE));
+
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
 			}
 		}
 
@@ -1393,6 +1426,10 @@ public class PickupBot extends DiscordBot {
 		if (p == null) {
 			interaction.respond(Config.user_not_registered);
 			return;
+		}
+
+		if (interaction.message != null && interaction.message.channel != null){
+			p.setLastPublicChannel(interaction.message.channel);
 		}
 
 		String[] data = interaction.custom_id.split("_");

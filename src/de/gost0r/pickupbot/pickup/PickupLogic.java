@@ -2190,6 +2190,13 @@ public class PickupLogic {
 		}
 		float odds = color.equals("red") ? match.getOdds(0) : match.getOdds(1);
 		Bet bet = new Bet(match.getID(), p, color, amount, odds);
+		for (Bet matchBet : match.bets){
+			if (matchBet.player.equals(p) && color.equals(matchBet.color)){
+				matchBet.amount += amount;
+				bet.place(match);
+				return;
+			}
+		}
 		match.bets.add(bet);
 		bet.place(match);
 
@@ -2436,5 +2443,29 @@ public class PickupLogic {
 		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
 		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
 		bot.sendMsg(bot.getLatestMessageChannel(), msg);
+	}
+
+	public void cmdDonate(Player p, Player destP, int amount) {
+		if (amount <= 0){
+			bot.sendNotice(p.getDiscordUser(), Config.donate_incorrect_amount);
+			return;
+		} else if(amount > p.getCoins()){
+			bot.sendNotice(p.getDiscordUser(), Config.bets_insufficient);
+			return;
+		}
+
+		p.spendCoins(amount);
+		p.saveWallet();
+		destP.addCoins(amount);
+		destP.saveWallet();
+
+		JSONObject coinEmoji = Bet.getCoinEmoji(amount);
+		String msg = Config.donate_processed;
+		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
+		msg = msg.replace(".otherplayer.", destP.getDiscordUser().getMentionString());
+		msg = msg.replace(".amount.", String.valueOf(amount));
+		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
+		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 	}
 }

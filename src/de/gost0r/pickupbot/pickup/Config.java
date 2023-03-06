@@ -26,6 +26,7 @@ public class Config {
 	public static final String CMD_ADDVOTE				= "!addvote";
 	public static final String CMD_BANMAP				= "!banmap";
 	public static final String CMD_WALLET				= "!wallet";
+	public static final String CMD_DONATE				= "!donate";
 
 	public static final String CMD_LOCK					= "!lock";
 	public static final String CMD_UNLOCK				= "!unlock";
@@ -178,6 +179,8 @@ public class Config {
 	public static final String USE_CMD_TEAM				= "!team <@user1> <@user2> <...>";
 	public static final String USE_CMD_LEAVETEAM		= "!leaveteam removes you from your current team";
 	public static final String USE_CMD_TEAMS			= "!teams lists the active teams";
+
+	public static final String USE_CMD_DONATE			= "!donate <player> <amount>";
 
 	//------------------------------------------------------------------------------------//
 	
@@ -406,4 +409,6 @@ public class Config {
 	public static final String buy_addvote_purchased	= "You can spend your additional votes by calling ``!addvote <map>``";
 	public static final String buy_banmap_purchased		= "You can now ban a map for 2h by calling ``!banmap <map>``";
 	public static final String buy_show_wallet			= "Current balance of **.player.**: <:.emojiname.:.emojiid.> ``.balance.``";
+	public static final String donate_incorrect_amount	= "Incorrect amount of coin to donate.";
+	public static final String donate_processed			= ".player. donated <:.emojiname.:.emojiid.> ``.amount.`` to .otherplayer.";
 }
