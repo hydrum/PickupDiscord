@@ -778,6 +778,35 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
+				case Config.CMD_BETHISTORY:
+					if (p != null){
+						if (data.length == 1){
+							logic.cmdBetHistory(p);
+						}
+
+						else if (data.length == 2)
+						{
+							Player pOther;
+							DiscordUser u = DiscordUser.getUser(data[1].replaceAll("[^\\d.]", ""));
+							if (u != null)
+							{
+								pOther = Player.get(u);
+							}
+							else
+							{
+								pOther = Player.get(data[1].toLowerCase());
+							}
+
+							if (pOther != null)
+							{
+								logic.cmdBetHistory(pOther);
+							}
+							else sendNotice(msg.user, Config.player_not_found);
+						}
+
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
 			}
 		}
 

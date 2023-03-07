@@ -27,6 +27,7 @@ public class Config {
 	public static final String CMD_BANMAP				= "!banmap";
 	public static final String CMD_WALLET				= "!wallet";
 	public static final String CMD_DONATE				= "!donate";
+	public static final String CMD_BETHISTORY			= "!bethistory";
 
 	public static final String CMD_LOCK					= "!lock";
 	public static final String CMD_UNLOCK				= "!unlock";

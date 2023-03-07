@@ -2468,4 +2468,47 @@ public class PickupLogic {
 		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 	}
+
+	public void cmdBetHistory(Player p) {
+		ArrayList<Bet> betList = db.getBetHistory(p);
+
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Last 10 bets of " + p.getDiscordUser().username;
+		embed.color = 7056881;
+		if (betList.size() == 0){
+			embed.description = "No bets yet";
+			bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
+			return;
+		}
+
+		String matchIdField = "";
+		String amountField = "";
+		String resultField = "";
+
+		boolean firstBet = true;
+		for (Bet bet : betList){
+			String linebreak = "\n";
+			if (firstBet){
+				linebreak = "";
+				firstBet = false;
+			}
+			matchIdField += linebreak + bet.matchid;
+
+			JSONObject amountEmoji = Bet.getCoinEmoji(bet.amount);
+			amountField += linebreak + "<:" + amountEmoji.get("name") + ":" + amountEmoji.get("id") + "> " +  bet.amount;
+
+			if (bet.won){
+				JSONObject wonEmoji = Bet.getCoinEmoji(Math.round(bet.amount * bet.odds));
+				resultField += linebreak + "Won <:" + wonEmoji.get("name") + ":" + wonEmoji.get("id") + "> " +  Math.round(bet.amount * bet.odds);
+			}
+			else {
+				resultField += linebreak + "Lost";
+			}
+		}
+		embed.addField("Match id", matchIdField, true);
+		embed.addField("Amount", amountField, true);
+		embed.addField("Result", resultField, true);
+
+		bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
+	}
 }

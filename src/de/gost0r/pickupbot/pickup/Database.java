@@ -1427,4 +1427,27 @@ public class Database {
 		}
 
 	}
+
+	public ArrayList<Bet> getBetHistory(Player p){
+		ArrayList<Bet> betList = new ArrayList<Bet>();
+		try {
+			String sql = "SELECT * from bets WHERE bets.player_urtauth = ? ORDER BY bets.ID DESC LIMIT 10;";
+			PreparedStatement pstmt = getPreparedStatement(sql);
+			pstmt.setString(1, p.getUrtauth());
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				int matchid = rs.getInt("matchid");
+				String color = rs.getInt("team") == 0 ? "red" : "blue";
+				int amount = rs.getInt("amount");
+				float odds = rs.getFloat("odds");
+				Bet bet = new Bet(matchid, p, color, amount, odds);
+				bet.won = Boolean.parseBoolean(rs.getString("won"));
+				betList.add(bet);
+			}
+			rs.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+		}
+		return betList;
+	}
 }
