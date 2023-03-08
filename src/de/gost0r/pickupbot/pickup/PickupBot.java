@@ -1501,22 +1501,22 @@ public class PickupBot extends DiscordBot {
 			logic.bet(interaction, Integer.parseInt(data[1]), data[2], Integer.parseInt(data[3]), p);
 			break;
 
-		case Config.INT_BUY:
-			switch(data[1]){
-				case Config.INT_BUY_BOOST:
-					logic.buyBoost(interaction, p);
-					break;
-				case Config.INT_BUY_SHOWVOTEOPTIONS:
-					logic.showAdditionalVoteOptions(interaction, p);
-					break;
-				case Config.INT_BUY_ADDVOTES:
-					logic.buyAdditionalVotes(interaction, p, Integer.parseInt(data[2]));
-					break;
-				case Config.INT_BUY_MAPBAN:
-					logic.buyBanMap(interaction, p);
-					break;
-			}
-			break;
+//		case Config.INT_BUY:
+//			switch(data[1]){
+//				case Config.INT_BUY_BOOST:
+//					logic.buyBoost(interaction, p);
+//					break;
+//				case Config.INT_BUY_SHOWVOTEOPTIONS:
+//					logic.showAdditionalVoteOptions(interaction, p);
+//					break;
+//				case Config.INT_BUY_ADDVOTES:
+//					logic.buyAdditionalVotes(interaction, p, Integer.parseInt(data[2]));
+//					break;
+//				case Config.INT_BUY_MAPBAN:
+//					logic.buyBanMap(interaction, p);
+//					break;
+//			}
+//			break;
 		}
 	}
 
@@ -1536,9 +1536,9 @@ public class PickupBot extends DiscordBot {
 			logic.bet(interaction, Integer.parseInt(interaction.options.get(0).value), interaction.options.get(1).value, Integer.parseInt(interaction.options.get(2).value), p);
 			break;
 
-		case Config.APP_BUY:
-			logic.showBuys(interaction, p);
-			break;
+//		case Config.APP_BUY:
+//			logic.showBuys(interaction, p);
+//			break;
 		}
 	}
 
