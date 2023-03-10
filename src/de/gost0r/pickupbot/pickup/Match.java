@@ -219,7 +219,7 @@ public class Match implements Runnable {
 	}
 
 	public void voteSurrender(Player player) {
-		long timeUntilSurrender = (startTime + 300000L) - System.currentTimeMillis(); // 5min in milliseconds
+		long timeUntilSurrender = (startTime + 180000L) - System.currentTimeMillis(); // 3min in milliseconds
 		if (timeUntilSurrender < 0) {
 			if (!player.hasVotedSurrender()) {
 				player.voteSurrender();
