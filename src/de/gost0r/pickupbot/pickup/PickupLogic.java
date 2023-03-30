@@ -2449,6 +2449,9 @@ public class PickupLogic {
 		if (amount <= 0){
 			bot.sendNotice(p.getDiscordUser(), Config.donate_incorrect_amount);
 			return;
+		} else if(amount > 10000){
+			bot.sendNotice(p.getDiscordUser(), Config.donate_above_limit);
+			return;
 		} else if(amount > p.getCoins()){
 			bot.sendNotice(p.getDiscordUser(), Config.bets_insufficient);
 			return;
