@@ -2157,6 +2157,7 @@ public class PickupLogic {
 	}
 
 	public void bet(DiscordInteraction interaction, int matchId, String color, int amount, Player p){
+		boolean allIn = false;
 		Match match = null;
 		for (Match m : ongoingMatches){
 			if (m.getID() == matchId){
@@ -2178,9 +2179,15 @@ public class PickupLogic {
 			return;
 		}
 
+		if (amount > 1000000){
+			interaction.respond(Config.bets_above_limit);
+			return;
+		}
+
 		// All in
 		if (amount == -1){
 			amount = p.getCoins();
+			allIn = true;
 		}
 
 		String otherTeam = color.equals("red") ? "blue" : "red";
@@ -2192,6 +2199,10 @@ public class PickupLogic {
 		Bet bet = new Bet(match.getID(), p, color, amount, odds);
 		for (Bet matchBet : match.bets){
 			if (matchBet.player.equals(p) && color.equals(matchBet.color)){
+				if (!allIn && amount + matchBet.amount > 1000000){
+					interaction.respond(Config.bets_above_limit);
+					return;
+				}
 				matchBet.amount += amount;
 				bet.place(match);
 				return;
