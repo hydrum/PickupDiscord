@@ -1418,11 +1418,14 @@ public class PickupLogic {
 		}
 		
 		for (Player p : playerList) {
-			//long latestAFKmsg = p.getDiscordUser().statusChangeTime > p.getLastMessage() ? p.getDiscordUser().statusChangeTime : p.getLastMessage();
+			if (playerInActiveMatch(p) != null) {
+				continue;
+			}
+			
 			long latestAFKmsg = p.getLastMessage();
 			long afkKickTime = latestAFKmsg + 20 * 60 * 1000;
 			long afkReminderTime = latestAFKmsg + 17 * 60 * 1000;
-			
+
 			if (afkKickTime < System.currentTimeMillis()) {
 				LOGGER.info("AFK: REMOVE - " + p.getUrtauth() + ": " + afkKickTime + " > " + System.currentTimeMillis());
 				cmdRemovePlayer(p, null);
