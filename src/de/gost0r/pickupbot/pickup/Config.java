@@ -413,5 +413,5 @@ public class Config {
 	public static final String buy_show_wallet			= "Current balance of **.player.**: <:.emojiname.:.emojiid.> ``.balance.``";
 	public static final String donate_incorrect_amount	= "Incorrect amount of coin to donate.";
 	public static final String donate_processed			= ".player. donated <:.emojiname.:.emojiid.> ``.amount.`` to .otherplayer.";
-	public static final String donate_above_limit		= "You can't donate more than ``10000`` coins.";
+	public static final String donate_above_limit		= "You can't donate more than ``10,000`` coins.";
 }

@@ -443,7 +443,7 @@ public class PickupLogic {
 				embed_rank.append("**").append(rank).append("**\n");
 				embed_player.append(country).append(" \u200b \u200b  ").append(entry.getKey().getUrtauth()).append('\n');
 				JSONObject emoji = Bet.getCoinEmoji(entry.getValue());
-				embed_rich.append("<:" + emoji.getString("name") + ":" + emoji.getString("id") + "> " + entry.getValue()).append("\n");
+				embed_rich.append("<:" + emoji.getString("name") + ":" + emoji.getString("id") + "> " + String.format("%,d", entry.getValue())).append("\n");
 				rank++;
 			}
 			embed.addField("\u200b", embed_rank.toString(), true);
@@ -2116,9 +2116,9 @@ public class PickupLogic {
 		}
 
 		ArrayList<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
-		JSONObject coinEmoji = Bet.getCoinEmoji(10);
 
 		if (p.getCoins() > 10){
+			JSONObject coinEmoji = Bet.getCoinEmoji(10);
 			DiscordButton button10 = new DiscordButton(DiscordButtonStyle.GREY);
 			button10.label = "10";
 			button10.custom_id = "bet_" + matchId + "_" + color + "_" + 10;
@@ -2127,6 +2127,7 @@ public class PickupLogic {
 		}
 
 		if (p.getCoins() > 100){
+			JSONObject coinEmoji = Bet.getCoinEmoji(100);
 			DiscordButton button100 = new DiscordButton(DiscordButtonStyle.GREY);
 			button100.label = "100";
 			button100.custom_id = "bet_" + matchId + "_" + color + "_" + 100;
@@ -2136,16 +2137,44 @@ public class PickupLogic {
 
 
 		if (p.getCoins() > 1000){
+			JSONObject coinEmoji = Bet.getCoinEmoji(1000);
 			DiscordButton button1000 = new DiscordButton(DiscordButtonStyle.GREY);
-			button1000.label = "1000";
+			button1000.label = String.format("%,d", 1000);
 			button1000.custom_id = "bet_" + matchId + "_" + color + "_" + 1000;
 			button1000.emoji = coinEmoji;
 			buttons.add(button1000);
 		}
 
-		coinEmoji = Bet.getCoinEmoji(p.getCoins());
+		if (p.getCoins() > 10000){
+			JSONObject coinEmoji = Bet.getCoinEmoji(10000);
+			DiscordButton button10000 = new DiscordButton(DiscordButtonStyle.GREY);
+			button10000.label = String.format("%,d", 10000);
+			button10000.custom_id = "bet_" + matchId + "_" + color + "_" + 10000;
+			button10000.emoji = coinEmoji;
+			buttons.add(button10000);
+		}
+
+		if (p.getCoins() > 100000){
+			JSONObject coinEmoji = Bet.getCoinEmoji(100000);
+			DiscordButton button100000 = new DiscordButton(DiscordButtonStyle.GREY);
+			button100000.label = String.format("%,d", 100000);
+			button100000.custom_id = "bet_" + matchId + "_" + color + "_" + 100000;
+			button100000.emoji = coinEmoji;
+			buttons.add(button100000);
+		}
+
+		if (p.getCoins() > 1000000){
+			JSONObject coinEmoji = Bet.getCoinEmoji(1000000);
+			DiscordButton button1000000 = new DiscordButton(DiscordButtonStyle.GREY);
+			button1000000.label = String.format("%,d", 1000000);
+			button1000000.custom_id = "bet_" + matchId + "_" + color + "_" + 1000000;
+			button1000000.emoji = coinEmoji;
+			buttons.add(button1000000);
+		}
+
+		JSONObject coinEmoji = Bet.getCoinEmoji(p.getCoins());
 		DiscordButton buttonallin = new DiscordButton(DiscordButtonStyle.RED);
-		buttonallin.label = p.getCoins() + " (ALL IN)";
+		buttonallin.label = String.format("%,d", p.getCoins()) + " (ALL IN)";
 		buttonallin.custom_id = "bet_" + matchId + "_" + color + "_-1";
 		buttonallin.emoji = coinEmoji;
 		buttons.add(buttonallin);
@@ -2256,7 +2285,7 @@ public class PickupLogic {
 
 		JSONObject coinEmoji = Bet.getCoinEmoji(p.getCoins());
 		String msg = Config.buy_show;
-		msg = msg.replace(".balance.", String.valueOf(p.getCoins()));
+		msg = msg.replace(".balance.", String.format("%,d", p.getCoins()));
 		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
 		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
 		interaction.respond(msg, null, buttons);
@@ -2453,7 +2482,7 @@ public class PickupLogic {
 		JSONObject coinEmoji = Bet.getCoinEmoji(p.getCoins());
 		String msg = Config.buy_show_wallet;
 		msg = msg.replace(".player.", p.getDiscordUser().username);
-		msg = msg.replace(".balance.", String.valueOf(p.getCoins()));
+		msg = msg.replace(".balance.", String.format("%,d", p.getCoins()));
 		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
 		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
 		bot.sendMsg(bot.getLatestMessageChannel(), msg);
@@ -2480,7 +2509,7 @@ public class PickupLogic {
 		String msg = Config.donate_processed;
 		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
 		msg = msg.replace(".otherplayer.", destP.getDiscordUser().getMentionString());
-		msg = msg.replace(".amount.", String.valueOf(amount));
+		msg = msg.replace(".amount.", String.format("%,d", amount));
 		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
 		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
@@ -2512,11 +2541,11 @@ public class PickupLogic {
 			matchIdField += linebreak + bet.matchid;
 
 			JSONObject amountEmoji = Bet.getCoinEmoji(bet.amount);
-			amountField += linebreak + "<:" + amountEmoji.get("name") + ":" + amountEmoji.get("id") + "> " +  bet.amount;
+			amountField += linebreak + "<:" + amountEmoji.get("name") + ":" + amountEmoji.get("id") + "> " +  String.format("%,d", bet.amount);
 
 			if (bet.won){
 				JSONObject wonEmoji = Bet.getCoinEmoji(Math.round(bet.amount * bet.odds));
-				resultField += linebreak + "Won <:" + wonEmoji.get("name") + ":" + wonEmoji.get("id") + "> " +  Math.round(bet.amount * bet.odds);
+				resultField += linebreak + "Won <:" + wonEmoji.get("name") + ":" + wonEmoji.get("id") + "> " +  String.format("%,d", Math.round(bet.amount * bet.odds));
 			}
 			else {
 				resultField += linebreak + "Lost";

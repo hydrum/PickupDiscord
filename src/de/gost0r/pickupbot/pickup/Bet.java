@@ -38,7 +38,7 @@ public class Bet {
         JSONObject emoji = getCoinEmoji(amount);
         String msg = Config.bets_place;
         msg = msg.replace(".player.", player.getDiscordUser().getMentionString());
-        msg = msg.replace(".amount.", String.valueOf(amount));
+        msg = msg.replace(".amount.", String.format("%,d", amount));
         msg = msg.replace(".emojiname.", emoji.getString("name"));
         msg = msg.replace(".emojiid.", emoji.getString("id"));
 
@@ -67,7 +67,7 @@ public class Bet {
         String msg = Config.bets_refund;
         JSONObject emoji = getCoinEmoji(amount);
         msg = msg.replace(".player.", player.getDiscordUser().getMentionString());
-        msg = msg.replace(".amount.", String.valueOf(amount));
+        msg = msg.replace(".amount.", String.format("%,d", amount));
         msg = msg.replace(".emojiname.", emoji.getString("name"));
         msg = msg.replace(".emojiid.", emoji.getString("id"));
         logic.bot.sendMsg(match.threadChannels, msg);

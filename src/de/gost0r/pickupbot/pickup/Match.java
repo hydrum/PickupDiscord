@@ -1297,7 +1297,7 @@ public class Match implements Runnable {
 				JSONObject emoji = Bet.getCoinEmoji(wonAmount);
 				String msg = Config.bets_won;
 				msg = msg.replace(".player.", bet.player.getDiscordUser().getMentionString());
-				msg = msg.replace(".amount.", String.valueOf(wonAmount));
+				msg = msg.replace(".amount.", String.format("%,d", wonAmount));
 				msg = msg.replace(".emojiname.", emoji.getString("name"));
 				msg = msg.replace(".emojiid.", emoji.getString("id"));
 				betMsg = betMsg + msg + '\n';
