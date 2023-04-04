@@ -1457,7 +1457,7 @@ public class PickupBot extends DiscordBot {
 			return;
 		}
 
-		if (interaction.message != null && interaction.message.channel != null){
+		if (interaction.message != null && interaction.message.channel != null && isChannel(PickupChannelType.PUBLIC, interaction.message.channel)){
 			p.setLastPublicChannel(interaction.message.channel);
 		}
 

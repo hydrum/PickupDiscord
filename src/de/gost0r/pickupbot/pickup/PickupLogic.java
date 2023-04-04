@@ -1421,7 +1421,7 @@ public class PickupLogic {
 			if (playerInActiveMatch(p) != null) {
 				continue;
 			}
-			
+
 			long latestAFKmsg = p.getLastMessage();
 			long afkKickTime = latestAFKmsg + 20 * 60 * 1000;
 			long afkReminderTime = latestAFKmsg + 17 * 60 * 1000;
