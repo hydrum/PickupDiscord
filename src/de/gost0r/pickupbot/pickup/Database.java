@@ -1176,7 +1176,7 @@ public class Database {
 			if (gt.getName().equals("CTF")){
 				limit = 10;
 				rating_query = "CAST (SUM(score.kills) AS FLOAT) / (COUNT(player_in_match.player_urtauth)/2 ) / 50";
-			} else if (gt.getName().equals("SKEET") || gt.getName().equals("aim")){
+			} else if (gt.getName().equals("SKEET") || gt.getName().equals("AIM")){
 				limit = 0;
 				rating_query = "MAX(kills)";
 			}
