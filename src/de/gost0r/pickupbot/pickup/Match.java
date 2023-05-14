@@ -804,7 +804,7 @@ public class Match implements Runnable {
 		fullmsg.append("\n").append(msg);
 
 		ArrayList<DiscordComponent> buttons = null;
-		if (gametype.getTeamSize() > 2){
+		if (gametype.getTeamSize() > 1){
 			computeOdds();
 
 			buttons = new ArrayList<DiscordComponent>();
