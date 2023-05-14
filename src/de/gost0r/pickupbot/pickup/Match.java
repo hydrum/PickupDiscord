@@ -1310,7 +1310,7 @@ public class Match implements Runnable {
 	}
 
 	public boolean acceptBets(){
-		if (gametype.getTeamSize() <= 2){
+		if (gametype.getTeamSize() <= 1){
 			return false;
 		}
 		if (state != MatchState.Live && state != MatchState.AwaitingServer){
