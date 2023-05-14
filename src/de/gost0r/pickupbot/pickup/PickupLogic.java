@@ -1945,10 +1945,10 @@ public class PickupLogic {
 		cmdRemovePlayer(playerToRemove, null);
 	}
 
-	public void cmdAddTeam(Player player, Gametype gt){
+	public void cmdAddTeam(Player player, Gametype gt, boolean forced){
 		Team team = null;
 		for (Team activeTeam : activeTeams){
-			if (activeTeam.getCaptain().equals(player)){
+			if (activeTeam.getCaptain().equals(player) || (forced && activeTeam.isInTeam(player))){
 				team = activeTeam;
 				break;
 			}
@@ -2556,5 +2556,9 @@ public class PickupLogic {
 		embed.addField("Result", resultField, true);
 
 		bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
+	}
+
+	public List<Team> getActiveTeams(){
+		return activeTeams;
 	}
 }

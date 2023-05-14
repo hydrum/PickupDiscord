@@ -290,6 +290,12 @@ public class PickupBot extends DiscordBot {
 									}
 								}
 								if (gametypes.size() > 0) {
+									for (Team activeTeam : logic.getActiveTeams()){
+										if (activeTeam.isInTeam(playerToAdd)){
+											logic.cmdAddTeam(playerToAdd, gametypes.get(0), true);
+											return;
+										}
+									}
 									logic.cmdAddPlayer(playerToAdd, gametypes, true);
 								} else {
 									sendNotice(msg.user, Config.no_gt_found);
@@ -697,7 +703,7 @@ public class PickupBot extends DiscordBot {
 								return;
 							}
 
-							logic.cmdAddTeam(p, gt);
+							logic.cmdAddTeam(p, gt, false);
 						}
 						else {
 							sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_SCRIM));
