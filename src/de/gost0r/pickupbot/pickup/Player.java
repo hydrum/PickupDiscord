@@ -42,7 +42,7 @@ public class Player {
 	
 	private String country = "NOT_DEFINED";
 
-	private int coins;
+	private long coins;
 	private long eloBoost;
 	private int additionalMapVotes;
 	private int mapBans;
@@ -349,13 +349,13 @@ public class Player {
 		return db.getRankForPlayer(this);
 	}
 
-	public int getCoins() {return coins;}
-	public void setCoins(int coins) {this.coins = coins ;}
+	public long getCoins() {return coins;}
+	public void setCoins(long coins) {this.coins = coins ;}
 
-	public void addCoins(int amount) {
+	public void addCoins(long amount) {
 		coins += amount ;
 	}
-	public void spendCoins(int amount) {
+	public void spendCoins(long amount) {
 		coins -= amount ;
 	}
 	public void saveWallet(){

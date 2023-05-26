@@ -6,7 +6,7 @@ public class Bet {
     public int matchid;
     public Player player;
     public String color;
-    public int amount;
+    public long amount;
     public float odds;
     public boolean open;
     public boolean won;
@@ -23,7 +23,7 @@ public class Bet {
     public static JSONObject smaragdEmoji = new JSONObject().put("name", "pugcoin_smaragd").put("id", "1081605371367534672");
     public static JSONObject prismaEmoji = new JSONObject().put("name", "pugcoin_prisma").put("id", "1081605422764527768");
 
-    public Bet(int matchid, Player p, String color, int amount, float odds){
+    public Bet(int matchid, Player p, String color, long amount, float odds){
         this.matchid = matchid;
         this.player = p;
         this.color = color;
@@ -73,7 +73,7 @@ public class Bet {
         logic.bot.sendMsg(match.threadChannels, msg);
     }
 
-    public static JSONObject getCoinEmoji(int amount){
+    public static JSONObject getCoinEmoji(long amount){
         if (amount < 500){
             return bronzeEmoji;
         } else if (amount < 1000){

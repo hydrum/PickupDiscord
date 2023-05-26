@@ -427,12 +427,12 @@ public class PickupLogic {
 		embed.title = "Top 10 richest players";
 		embed.color = 7056881;
 
-		Map<Player, Integer> topRich = db.getTopRich(number);
+		Map<Player, Long> topRich = db.getTopRich(number);
 		if (topRich.isEmpty()) {
 			bot.sendMsg(bot.getLatestMessageChannel(), "None");
 		} else {
 			int rank = 1;
-			for (Map.Entry<Player, Integer> entry : topRich.entrySet()) {
+			for (Map.Entry<Player, Long> entry : topRich.entrySet()) {
 				String country;
 				if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
 					country =  "<:puma:849287183474884628>";
@@ -2188,7 +2188,7 @@ public class PickupLogic {
 		interaction.respond(msg, null, buttons);
 	}
 
-	public void bet(DiscordInteraction interaction, int matchId, String color, int amount, Player p){
+	public void bet(DiscordInteraction interaction, int matchId, String color, long amount, Player p){
 		boolean allIn = false;
 		Match match = null;
 		for (Match m : ongoingMatches){

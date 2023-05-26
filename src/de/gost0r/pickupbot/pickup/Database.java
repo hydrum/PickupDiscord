@@ -715,7 +715,7 @@ public class Database {
 				player.setActive(Boolean.parseBoolean(rs.getString("active")));
 				player.setEnforceAC(Boolean.parseBoolean(rs.getString("enforce_ac")));
 				player.setCountry(rs.getString("country"));
-				player.setCoins(rs.getInt("coins"));
+				player.setCoins(rs.getLong("coins"));
 				player.setEloBoost(rs.getLong("eloboost"));
 				player.setAdditionalMapVotes(rs.getInt("mapvote"));
 				player.setMapBans(rs.getInt("mapban"));
@@ -1354,7 +1354,7 @@ public class Database {
 		try{
 			String sql = "UPDATE player SET coins=? WHERE userid=? AND urtauth=?";
 			PreparedStatement pstmt = getPreparedStatement(sql);
-			pstmt.setInt(1, player.getCoins());
+			pstmt.setLong(1, player.getCoins());
 			pstmt.setString(2, player.getDiscordUser().id);
 			pstmt.setString(3, player.getUrtauth());
 			pstmt.executeUpdate();
@@ -1387,7 +1387,7 @@ public class Database {
 			pstmt.setInt(3, bet.matchid);
 			pstmt.setInt(4, bet.color.equals("red") ? 0 : 1);
 			pstmt.setString(5, String.valueOf(bet.won));
-			pstmt.setInt(6, bet.amount);
+			pstmt.setLong(6, bet.amount);
 			pstmt.setFloat(7, bet.odds);
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
@@ -1396,8 +1396,8 @@ public class Database {
 		}
 	}
 
-	public Map<Player, Integer> getTopRich(int number) {
-		Map<Player, Integer> toprich = new LinkedHashMap<Player, Integer>();
+	public Map<Player, Long> getTopRich(int number) {
+		Map<Player, Long> toprich = new LinkedHashMap<Player, Long>();
 		try {
 			String sql = "SELECT urtauth, coins FROM  player INNER JOIN bets ON (player.urtauth = bets.player_urtauth ) GROUP BY urtauth ORDER BY coins DESC LIMIT ?";
 			PreparedStatement pstmt = getPreparedStatement(sql);
@@ -1406,7 +1406,7 @@ public class Database {
 			while (rs.next()) {
 				Player p = Player.get(rs.getString("urtauth"));
 				LOGGER.info(p.getUrtauth());
-				toprich.put(p, rs.getInt("coins"));
+				toprich.put(p, rs.getLong("coins"));
 			}
 			rs.close();
 		} catch (SQLException e) {
