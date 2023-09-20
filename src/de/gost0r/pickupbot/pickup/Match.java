@@ -1083,13 +1083,16 @@ public class Match implements Runnable {
 	
 	public DiscordEmbed getMatchEmbed(boolean forceNoDynamic) {
 		ServerState serverState = null;
-		if (server.isTaken()) {
+		if (server != null && server.isTaken()) {
 			serverState = server.getServerMonitor().getState();
 		}
 		
 		DiscordEmbed embed = new DiscordEmbed();
 
-		String region_flag = server.getRegionFlag(logic.getDynamicServers() || gametype.getTeamSize() == 0, forceNoDynamic);
+		String region_flag = ":globe_with_meridians:";
+		if (server != null) {
+			region_flag = server.getRegionFlag(logic.getDynamicServers() || gametype.getTeamSize() == 0, forceNoDynamic);
+		}
 		
 		if (serverState == ServerState.LIVE && state == MatchState.Live && server != null) {
 			embed.title  = region_flag + " Match #" + id + " (" + server.getServerMonitor().getGameTime() + ")";

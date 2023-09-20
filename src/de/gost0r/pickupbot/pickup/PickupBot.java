@@ -1508,6 +1508,10 @@ public class PickupBot extends DiscordBot {
 			logic.showSeasonList(interaction, Player.get(data[1]));
 			break;
 
+		case Config.INT_LASTMATCHPLAYER:
+			logic.showLastMatchPlayer(interaction, Player.get(data[1]));
+			break;
+
 		case Config.INT_SEASONSELECTED:
 			logic.showSeasonStats(interaction, Player.get(data[1]), Integer.parseInt(interaction.values.get(0)));
 			break;

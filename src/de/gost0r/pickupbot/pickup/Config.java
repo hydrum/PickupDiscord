@@ -193,6 +193,7 @@ public class Config {
 	public static final String INT_SEASONSTATS			= "seasonstats";
 	public static final String INT_SEASONLIST			= "seasonlist";
 	public static final String INT_SEASONSELECTED		= "seasonselected";
+	public static final String INT_LASTMATCHPLAYER 		= "lastgameplayer";
 	public static final String INT_SHOWBET				= "showbet";
 	public static final String INT_BET					= "bet";
 	public static final String INT_BUY					= "buy";

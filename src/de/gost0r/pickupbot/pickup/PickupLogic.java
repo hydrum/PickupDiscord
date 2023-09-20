@@ -1,10 +1,7 @@
 package de.gost0r.pickupbot.pickup;
 
 import java.io.*;
-import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,7 +19,6 @@ import de.gost0r.pickupbot.discord.api.DiscordAPI;
 import de.gost0r.pickupbot.ftwgl.FtwglAPI;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
-import de.gost0r.pickupbot.pickup.server.ServerMonitor;
 import io.sentry.Sentry;
 import org.json.JSONObject;
 
@@ -500,6 +496,10 @@ public class PickupLogic {
 		buttonAlltime.custom_id = Config.INT_SEASONSTATS + "_" + p.getUrtauth() + "_0";
 		buttonAlltime.label = "All-time stats";
 		buttons.add(buttonAlltime);
+		DiscordButton buttomLastGame = new DiscordButton(DiscordButtonStyle.GREY);
+		buttomLastGame.custom_id = Config.INT_LASTMATCHPLAYER + "_" + p.getUrtauth();
+		buttomLastGame.label = "Last game";
+		buttons.add(buttomLastGame);
 
 		bot.sendMsgToEdit(bot.getLatestMessageChannel(), null, statsEmbed, buttons);
 	}
@@ -1215,6 +1215,10 @@ public class PickupLogic {
 	}
 
 	public void cmdDisplayLastMatch() {
+		if (!ongoingMatches.isEmpty()){
+			bot.sendMsg(bot.getLatestMessageChannel(), "Can't display the match when a game is active.");
+			return;
+		}
 		try {
 			Match match = db.loadLastMatch(); 
 			if (match != null) {
@@ -1230,6 +1234,10 @@ public class PickupLogic {
 	}
 
 	public void cmdDisplayLastMatchPlayer(Player p) {
+		if (!ongoingMatches.isEmpty()){
+			bot.sendMsg(bot.getLatestMessageChannel(), "Can't display the match when a game is active.");
+			return;
+		}
 		try {
 			Match match = db.loadLastMatchPlayer(p); 
 			if (match != null) {
@@ -1242,6 +1250,21 @@ public class PickupLogic {
 			Sentry.capture(e);
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
+	}
+
+	public void showLastMatchPlayer(DiscordInteraction interaction, Player p) {
+		try {
+			Match match = db.loadLastMatchPlayer(p);
+			if (match != null) {
+				interaction.respond(null, match.getMatchEmbed(true));
+				return;
+			}
+
+		} catch (NumberFormatException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+		interaction.respond("Match not found.");
 	}
 
 	public void cmdResetElo(){
