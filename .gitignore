@@ -1,3 +1,17 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
 # Compiled class file
 *.class
 
@@ -32,9 +46,10 @@ hs_err_pid*
 gradle/
 
 #IntelliJ
-.idea/
-build/
-target/
+.idea
+*.iws
+*.iml
+*.ipr
 
 #Database
 *.db
