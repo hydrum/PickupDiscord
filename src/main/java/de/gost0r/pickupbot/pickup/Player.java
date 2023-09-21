@@ -1,386 +1,405 @@
 package de.gost0r.pickupbot.pickup;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import de.gost0r.pickupbot.discord.DiscordChannel;
 import de.gost0r.pickupbot.discord.DiscordGuild;
 import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.pickup.stats.WinDrawLoss;
 
-import javax.swing.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Player {
-	
-	public static Database db;
-	public static PickupLogic logic;
-	
-	private DiscordUser user;
-	private String urtauth;
-	
-	private Map<Gametype, GameMap> votedMap = new HashMap<Gametype, GameMap>();
-	private int elo = 1000;
-	private int eloChange = 0;
-	private int elorank = 0;
-	
-	private float kdr = 0.0f;
-	
-	public PlayerStats stats;
-	
-	private List<PlayerBan> bans = new ArrayList<PlayerBan>();
-		
-	private boolean active = true;
-	private boolean enforceAC = false;
-	
-	private boolean surrender = false;
-	
-	private long lastMessage = -1L;
-	private boolean afkReminderSent = false;
-	private DiscordChannel lastPublicChannel;
-	
-	private String country = "NOT_DEFINED";
 
-	private long coins;
-	private long eloBoost;
-	private int additionalMapVotes;
-	private int mapBans;
+    public static Database db;
+    public static PickupLogic logic;
 
-	public Player(DiscordUser user, String urtauth) {
-		this.user = user;
-		this.setUrtauth(urtauth);
-		playerList.add(this);
-	}
+    private final DiscordUser user;
+    private String urtauth;
 
-	public void voteMap(Gametype gametype, GameMap map) {
-		votedMap.put(gametype, map);
-	}
+    private final Map<Gametype, GameMap> votedMap = new HashMap<Gametype, GameMap>();
+    private int elo = 1000;
+    private int eloChange = 0;
+    private int elorank = 0;
 
-	public void voteSurrender() {
-		surrender = true;
-	}
+    private float kdr = 0.0f;
 
-	public void resetVotes() {
-		for (Gametype gt : votedMap.keySet()) {
-			votedMap.put(gt, null);
-		}
-		surrender = false;
-	}	
+    public PlayerStats stats;
 
-	public void addElo(int elochange) {
-		this.elo += elochange;
-		this.eloChange = elochange;
-		
-		// db update done by servermonitor
-	}
+    private final List<PlayerBan> bans = new ArrayList<PlayerBan>();
 
-	public void afkCheck() {
-		lastMessage = System.currentTimeMillis();
-		afkReminderSent = false;
-	}
+    private boolean active = true;
+    private boolean enforceAC = false;
 
-	public long getLastMessage() {
-		return lastMessage;
-	}
-	
-	public void setLastMessage(long lastMessage) {
-		this.lastMessage = lastMessage;
-	}
+    private boolean surrender = false;
 
-	public boolean getAfkReminderSent() {
-		return afkReminderSent;
-	}
+    private long lastMessage = -1L;
+    private boolean afkReminderSent = false;
+    private DiscordChannel lastPublicChannel;
 
-	public void setAfkReminderSent(boolean value) {
-		afkReminderSent = value;
-	}
+    private String country = "NOT_DEFINED";
 
-	public GameMap getVotedMap(Gametype gametype) {
-		if (votedMap.containsKey(gametype)) {
-			return votedMap.get(gametype);
-		}
-		return null;
-	}
+    private long coins;
+    private long eloBoost;
+    private int additionalMapVotes;
+    private int mapBans;
 
-	public boolean hasVotedSurrender() {
-		return surrender;
-	}
+    public Player(DiscordUser user, String urtauth) {
+        this.user = user;
+        this.setUrtauth(urtauth);
+        playerList.add(this);
+    }
 
-	public DiscordUser getDiscordUser() {
-		return user;
-	}
+    public void voteMap(Gametype gametype, GameMap map) {
+        votedMap.put(gametype, map);
+    }
 
-	public int getElo() {
-		return elo;
-	}
+    public void voteSurrender() {
+        surrender = true;
+    }
 
-	public void setElo(int elo) {
-		if (elo <= 0) {
-			this.elo = 1000;
-		} else {
-			this.elo = elo;
-		}
-	}
-	
-	public float getKdr() {
-		return kdr;
-	}
+    public void resetVotes() {
+        for (Gametype gt : votedMap.keySet()) {
+            votedMap.put(gt, null);
+        }
+        surrender = false;
+    }
 
-	public void setKdr(float kdr) {
-		this.kdr = kdr;
-	}
+    public void addElo(int elochange) {
+        this.elo += elochange;
+        this.eloChange = elochange;
 
-	public int getEloChange() {
-		return eloChange;
-	}
+        // db update done by servermonitor
+    }
 
-	public void setEloChange(int eloChange) {
-		this.eloChange = eloChange;
-	}
+    public void afkCheck() {
+        lastMessage = System.currentTimeMillis();
+        afkReminderSent = false;
+    }
 
-	public String getUrtauth() {
-		return urtauth;
-	}
+    public long getLastMessage() {
+        return lastMessage;
+    }
 
-	public void setUrtauth(String urtauth) {
-		this.urtauth = urtauth;
-	}
+    public void setLastMessage(long lastMessage) {
+        this.lastMessage = lastMessage;
+    }
 
-	public boolean getActive() {
-		return active;
-	}
+    public boolean getAfkReminderSent() {
+        return afkReminderSent;
+    }
 
-	public void setActive(boolean active) {
-		this.active = active;
-	}
+    public void setAfkReminderSent(boolean value) {
+        afkReminderSent = value;
+    }
 
-	public void addBan(PlayerBan ban) {
-		bans.add(ban);
-	}
+    public GameMap getVotedMap(Gametype gametype) {
+        if (votedMap.containsKey(gametype)) {
+            return votedMap.get(gametype);
+        }
+        return null;
+    }
 
-	public void forgiveBan() {
-		for (PlayerBan ban : bans) {
-			ban.forgiven = true;
-		}
-		
-		db.forgiveBan(this);
-	}
+    public boolean hasVotedSurrender() {
+        return surrender;
+    }
 
-	public PlayerBan getLatestBan() {
-		PlayerBan current = null;
-		for (PlayerBan ban : bans) {
-			if (current == null) {
-				current = ban;
-				continue;
-			}
-			if ((ban.startTime > current.startTime) && !ban.forgiven) {
-				current = ban;
-			}
-		}
-		return current;
-	}
+    public DiscordUser getDiscordUser() {
+        return user;
+    }
 
-	public int getPlayerBanCountSince(long time) {
-		int i = 0;
-		for (PlayerBan ban : bans) {
-			if (ban.startTime >= time) {
-				++i;
-			}
-		}
-		return i;
-	}
+    public int getElo() {
+        return elo;
+    }
 
-	public ArrayList<PlayerBan> getPlayerBanListSince(long time) {
-		ArrayList<PlayerBan> banList= new ArrayList<PlayerBan>();
-		for (PlayerBan ban : bans) {
-			if (ban.startTime >= time) {
-				banList.add(ban);
-			}
-		}
-		return banList;
-	}
+    public void setElo(int elo) {
+        if (elo <= 0) {
+            this.elo = 1000;
+        } else {
+            this.elo = elo;
+        }
+    }
 
-	public boolean isBanned() {
-		for (PlayerBan ban : bans) {
-			if (!ban.forgiven && ban.endTime > System.currentTimeMillis()) {
-				return true;
-			}
-		}
-		return false;
-	}
+    public float getKdr() {
+        return kdr;
+    }
 
-	public PlayerRank getRank() {
-		return getRank(elo);
-	}
+    public void setKdr(float kdr) {
+        this.kdr = kdr;
+    }
 
-	private PlayerRank getRank(int elo) {
-		if (elo >= 1600) {
-			return PlayerRank.DIAMOND;
-		} else if (elo >= 1400) {
-			return PlayerRank.PLATINUM;
-		} else if (elo >= 1200) {
-			return PlayerRank.GOLD;
-		} else if (elo >= 1000) {
-			return PlayerRank.SILVER;
-		} else if (elo >= 800) {
-			return PlayerRank.BRONZE;
-		} else {
-			return PlayerRank.WOOD;
-		}
-	}
+    public int getEloChange() {
+        return eloChange;
+    }
 
-	public boolean didChangeRank() {
-		PlayerRank currentRank = getRank(elo);
-		PlayerRank previousRank = getRank(elo-eloChange);
+    public void setEloChange(int eloChange) {
+        this.eloChange = eloChange;
+    }
 
-		// Update roles
-		// TODO make it work for different servers
-		if (currentRank != previousRank){
-			logic.bot.removeUserRole(getDiscordUser(), previousRank.getRole());
-		}
-		if (getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), PlayerRank.LEET.getRole()) && elorank > 5){
-			logic.bot.removeUserRole(getDiscordUser(), PlayerRank.LEET.getRole());
-		}
-		if (!getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), PlayerRank.LEET.getRole()) && elorank <= 5){
-			logic.bot.addUserRole(getDiscordUser(), PlayerRank.LEET.getRole());
-		}
-		if (!getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), currentRank.getRole())){
-			logic.bot.addUserRole(getDiscordUser(), currentRank.getRole());
-		}
+    public String getUrtauth() {
+        return urtauth;
+    }
 
-		return currentRank != previousRank;
-	}
+    public void setUrtauth(String urtauth) {
+        this.urtauth = urtauth;
+    }
 
-	private static List<Player> playerList = new ArrayList<Player>();
-	public static Player get(String urtauth) {
-		for (Player player : playerList) {
-			if (player.getUrtauth().equals(urtauth) && player.getActive())
-				return player;
-		}
-		Player p = db.loadPlayer(urtauth); // can be valid or null
-		return p;
-	}
+    public boolean getActive() {
+        return active;
+    }
 
-	public static Player get(DiscordUser user) {
-		for (Player player : playerList) {
-			if (player.getDiscordUser().equals(user) && player.getActive())
-				return player;
-		}
-		Player p = db.loadPlayer(user); // can be valid or null
-		return p; 
-	}
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
-	public static Player get(DiscordUser user, String urtauth) {
-		for (Player player : playerList) {
-			if (player.getUrtauth().equals(urtauth) && player.getDiscordUser().equals(user))
-				return player;
-		}
-		Player p = db.loadPlayer(user, urtauth, false); // can be valid or null
-		return p;
-	}
+    public void addBan(PlayerBan ban) {
+        bans.add(ban);
+    }
 
-	@Override
-	public boolean equals(Object o) {
-		if (o instanceof Player) {
-			Player player = (Player) o;
-			return player.getDiscordUser().equals(this.getDiscordUser()) && player.urtauth == this.urtauth;
-		}
-		return false;
-	}
+    public void forgiveBan() {
+        for (PlayerBan ban : bans) {
+            ban.forgiven = true;
+        }
 
-	@Override
-	public String toString() {
-		return this.urtauth;
-	}
+        db.forgiveBan(this);
+    }
 
-	public Region getRegion() {
-		if(this.country.equalsIgnoreCase("NOT_DEFINED")) {
-			return Region.WORLD;
-		}
-		else {
-			String continent = Country.getContinent(this.country);
-			
-			return Region.valueOf(continent);
-		}
-	}
+    public PlayerBan getLatestBan() {
+        PlayerBan current = null;
+        for (PlayerBan ban : bans) {
+            if (current == null) {
+                current = ban;
+                continue;
+            }
+            if ((ban.startTime > current.startTime) && !ban.forgiven) {
+                current = ban;
+            }
+        }
+        return current;
+    }
 
-	public String getCountry() {
-		return this.country;
-	}
+    public int getPlayerBanCountSince(long time) {
+        int i = 0;
+        for (PlayerBan ban : bans) {
+            if (ban.startTime >= time) {
+                ++i;
+            }
+        }
+        return i;
+    }
 
-	public void setCountry(String country) {
-		this.country = country;
-	}
+    public ArrayList<PlayerBan> getPlayerBanListSince(long time) {
+        ArrayList<PlayerBan> banList = new ArrayList<PlayerBan>();
+        for (PlayerBan ban : bans) {
+            if (ban.startTime >= time) {
+                banList.add(ban);
+            }
+        }
+        return banList;
+    }
 
-	public static void remove(Player player) {
-		if (playerList.contains(player)) {
-			playerList.remove(player);
-		}
-	}
+    public boolean isBanned() {
+        for (PlayerBan ban : bans) {
+            if (!ban.forgiven && ban.endTime > System.currentTimeMillis()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	public DiscordChannel getLastPublicChannel() { return lastPublicChannel; }
+    public PlayerRank getRank() {
+        return getRank(elo);
+    }
 
-	public void setLastPublicChannel(DiscordChannel channel){
-		lastPublicChannel = channel;
-	}
+    private PlayerRank getRank(int elo) {
+        if (elo >= 1600) {
+            return PlayerRank.DIAMOND;
+        } else if (elo >= 1400) {
+            return PlayerRank.PLATINUM;
+        } else if (elo >= 1200) {
+            return PlayerRank.GOLD;
+        } else if (elo >= 1000) {
+            return PlayerRank.SILVER;
+        } else if (elo >= 800) {
+            return PlayerRank.BRONZE;
+        } else {
+            return PlayerRank.WOOD;
+        }
+    }
 
-	public boolean getEnforceAC() { return this.enforceAC; }
+    public boolean didChangeRank() {
+        PlayerRank currentRank = getRank(elo);
+        PlayerRank previousRank = getRank(elo - eloChange);
 
-	public void setEnforceAC(boolean enforceAC) { this.enforceAC = enforceAC; }
+        // Update roles
+        // TODO make it work for different servers
+        if (currentRank != previousRank) {
+            logic.bot.removeUserRole(getDiscordUser(), previousRank.getRole());
+        }
+        if (getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), PlayerRank.LEET.getRole()) && elorank > 5) {
+            logic.bot.removeUserRole(getDiscordUser(), PlayerRank.LEET.getRole());
+        }
+        if (!getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), PlayerRank.LEET.getRole()) && elorank <= 5) {
+            logic.bot.addUserRole(getDiscordUser(), PlayerRank.LEET.getRole());
+        }
+        if (!getDiscordUser().hasRole(new DiscordGuild("117622053061787657"), currentRank.getRole())) {
+            logic.bot.addUserRole(getDiscordUser(), currentRank.getRole());
+        }
 
-	public float getCaptainScore(Gametype gt){
-		WinDrawLoss wdl = stats.ts_wdl;
-		float kdr = stats.kdr;
-		if (gt.getName().equals("CTF")){
-			wdl = stats.ctf_wdl;
-			kdr = stats.ctf_rating;
-		}
-		if (wdl.getTotal() < 5){
-			return (float) elo;
-		}
-		return (float) (elo + (kdr * 500 + wdl.calcWinRatio() * 500.0) / 4);
-	}
+        return currentRank != previousRank;
+    }
 
-	public void setRank(int rank){
-		this.elorank = rank;
-	}
-	public int getEloRank(){
-		return db.getRankForPlayer(this);
-	}
+    private static final List<Player> playerList = new ArrayList<Player>();
 
-	public long getCoins() {return coins;}
-	public void setCoins(long coins) {this.coins = coins ;}
+    public static Player get(String urtauth) {
+        for (Player player : playerList) {
+            if (player.getUrtauth().equals(urtauth) && player.getActive())
+                return player;
+        }
+        Player p = db.loadPlayer(urtauth); // can be valid or null
+        return p;
+    }
 
-	public void addCoins(long amount) {
-		coins += amount ;
-	}
-	public void spendCoins(long amount) {
-		coins -= amount ;
-	}
-	public void saveWallet(){
-		db.updatePlayerCoins(this);
-	}
+    public static Player get(DiscordUser user) {
+        for (Player player : playerList) {
+            if (player.getDiscordUser().equals(user) && player.getActive())
+                return player;
+        }
+        Player p = db.loadPlayer(user); // can be valid or null
+        return p;
+    }
 
-	public long getEloBoost() {return eloBoost;}
-	public void setEloBoost(long eloBoost) {
-		this.eloBoost = eloBoost ;
-		db.updatePlayerBoost(this);
-	}
+    public static Player get(DiscordUser user, String urtauth) {
+        for (Player player : playerList) {
+            if (player.getUrtauth().equals(urtauth) && player.getDiscordUser().equals(user))
+                return player;
+        }
+        Player p = db.loadPlayer(user, urtauth, false); // can be valid or null
+        return p;
+    }
 
-	public boolean hasBoostActive(){
-		return eloBoost >= System.currentTimeMillis();
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Player) {
+            Player player = (Player) o;
+            return player.getDiscordUser().equals(this.getDiscordUser()) && player.urtauth == this.urtauth;
+        }
+        return false;
+    }
 
-	public int getAdditionalMapVotes() {return additionalMapVotes;}
-	public void setAdditionalMapVotes(int mapVotes) {
-		this.additionalMapVotes = mapVotes ;
-		db.updatePlayerBoost(this);
-	}
+    @Override
+    public String toString() {
+        return this.urtauth;
+    }
 
-	public int getMapBans() {return mapBans;}
-	public void setMapBans(int mapBans) {
-		this.mapBans = mapBans ;
-		db.updatePlayerBoost(this);
-	}
+    public Region getRegion() {
+        if (this.country.equalsIgnoreCase("NOT_DEFINED")) {
+            return Region.WORLD;
+        } else {
+            String continent = Country.getContinent(this.country);
+
+            return Region.valueOf(continent);
+        }
+    }
+
+    public String getCountry() {
+        return this.country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public static void remove(Player player) {
+        playerList.remove(player);
+    }
+
+    public DiscordChannel getLastPublicChannel() {
+        return lastPublicChannel;
+    }
+
+    public void setLastPublicChannel(DiscordChannel channel) {
+        lastPublicChannel = channel;
+    }
+
+    public boolean getEnforceAC() {
+        return this.enforceAC;
+    }
+
+    public void setEnforceAC(boolean enforceAC) {
+        this.enforceAC = enforceAC;
+    }
+
+    public float getCaptainScore(Gametype gt) {
+        WinDrawLoss wdl = stats.ts_wdl;
+        float kdr = stats.kdr;
+        if (gt.getName().equals("CTF")) {
+            wdl = stats.ctf_wdl;
+            kdr = stats.ctf_rating;
+        }
+        if (wdl.getTotal() < 5) {
+            return (float) elo;
+        }
+        return (float) (elo + (kdr * 500 + wdl.calcWinRatio() * 500.0) / 4);
+    }
+
+    public void setRank(int rank) {
+        this.elorank = rank;
+    }
+
+    public int getEloRank() {
+        return db.getRankForPlayer(this);
+    }
+
+    public long getCoins() {
+        return coins;
+    }
+
+    public void setCoins(long coins) {
+        this.coins = coins;
+    }
+
+    public void addCoins(long amount) {
+        coins += amount;
+    }
+
+    public void spendCoins(long amount) {
+        coins -= amount;
+    }
+
+    public void saveWallet() {
+        db.updatePlayerCoins(this);
+    }
+
+    public long getEloBoost() {
+        return eloBoost;
+    }
+
+    public void setEloBoost(long eloBoost) {
+        this.eloBoost = eloBoost;
+        db.updatePlayerBoost(this);
+    }
+
+    public boolean hasBoostActive() {
+        return eloBoost >= System.currentTimeMillis();
+    }
+
+    public int getAdditionalMapVotes() {
+        return additionalMapVotes;
+    }
+
+    public void setAdditionalMapVotes(int mapVotes) {
+        this.additionalMapVotes = mapVotes;
+        db.updatePlayerBoost(this);
+    }
+
+    public int getMapBans() {
+        return mapBans;
+    }
+
+    public void setMapBans(int mapBans) {
+        this.mapBans = mapBans;
+        db.updatePlayerBoost(this);
+    }
 }

@@ -12,7 +12,7 @@ public class DiscordCommandOption {
     public boolean required;
     public ArrayList<DiscordCommandOptionChoice> choices;
 
-    public DiscordCommandOption(DiscordCommandOptionType type, String name, String description){
+    public DiscordCommandOption(DiscordCommandOptionType type, String name, String description) {
         this.type = type;
         this.name = name;
         this.description = description;
@@ -20,23 +20,23 @@ public class DiscordCommandOption {
         this.choices = new ArrayList<DiscordCommandOptionChoice>();
     }
 
-    public void addChoice(DiscordCommandOptionChoice choice){
+    public void addChoice(DiscordCommandOptionChoice choice) {
         choices.add(choice);
     }
 
-    public JSONObject getJSON(){
+    public JSONObject getJSON() {
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("type", type.ordinal());
         jsonObj.put("name", name);
         jsonObj.put("description", description);
 
-        if (required){
+        if (required) {
             jsonObj.put("required", required);
         }
 
-        if (choices.size() > 0){
+        if (choices.size() > 0) {
             List<JSONObject> choiceList = new ArrayList<JSONObject>();
-            for (DiscordCommandOptionChoice choice : choices){
+            for (DiscordCommandOptionChoice choice : choices) {
                 choiceList.add(choice.getJSON());
             }
             jsonObj.put("choices", choiceList);
