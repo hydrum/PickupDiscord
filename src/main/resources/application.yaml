@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    driverClassName: 'org.sqlite.JDBC'
+  jpa:
+    database-platform: 'org.hibernate.community.dialect.SQLiteDialect'
+hibernate:
+  hbm2ddl:
+    auto: verify
+  show_sql: true
