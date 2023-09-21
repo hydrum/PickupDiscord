@@ -34,6 +34,7 @@ gradle/
 #IntelliJ
 .idea/
 build/
+target/
 
 #Database
 *.db

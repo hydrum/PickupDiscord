@@ -10,8 +10,8 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Build with Maven
+        run: echo 'todo' # TODO
       - name: Deploy jar to server
         uses: garygrossgarten/github-action-scp@release
         with:

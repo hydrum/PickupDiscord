@@ -27,11 +27,12 @@ public class PickupBotDiscordMain {
 	public static void main(String[] args) {
 		Locale.setDefault(new Locale("en", "EN"));
 		try {
-			dotenv = Dotenv.configure().filename(".prod.env").load();
-			env = "prod";
 			if (args.length > 0 && args[0].equals("dev")){
 				dotenv = Dotenv.configure().filename(".dev.env").load();
 				env = "dev";
+			} else {
+				dotenv = Dotenv.configure().filename(".prod.env").load();
+				env = "prod";
 			}
 
 			setupLogger();
@@ -59,16 +60,16 @@ public class PickupBotDiscordMain {
 
 		System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s - %2$s(): %5$s%6$s%n");
 		Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-		logger.setLevel(Level.WARNING);
+		logger.setLevel(Level.INFO);
 
 		logger.setUseParentHandlers(false);
 		ConsoleHandler handler = new ConsoleHandler();
-		handler.setLevel(Level.WARNING);
+		handler.setLevel(Level.INFO);
 		logger.addHandler(handler);
 
 		FileHandler logfile = new FileHandler("bot.log");
 		logfile.setFormatter(new SimpleFormatter());
-		logfile.setLevel(Level.WARNING);
+		logfile.setLevel(Level.INFO);
 		logger.addHandler(logfile);
 
 		Sentry.init(dotenv.get("SENTRY_DSN") + "?environment=" + env);
