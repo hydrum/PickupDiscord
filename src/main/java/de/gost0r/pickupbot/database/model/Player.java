@@ -2,6 +2,7 @@ package de.gost0r.pickupbot.database.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,6 +10,9 @@ import java.io.Serializable;
 
 @Entity
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @IdClass(Player.PlayerId.class)
 @Table(name = "player")
 public class Player {
@@ -24,8 +28,8 @@ public class Player {
     @Column(name = "elo")
     private int elo;
 
-    @Column(name = "eloChange")
-    private int eloChange;
+    @Column(name = "elochange")
+    private int eloChange = 0;
 
     @Column(name = "active")
     private String active;
@@ -37,16 +41,16 @@ public class Player {
     private String enforceAc;
 
     @Column(name = "coins")
-    private int coins;
+    private int coins = 0;
 
     @Column(name = "eloboost")
-    private int eloBoost;
+    private int eloBoost = 0;
 
     @Column(name = "mapvote")
-    private int mapVote;
+    private int mapVote = 0;
 
     @Column(name = "mapban")
-    private int mapBan;
+    private int mapBan = 0;
 
     @Data
     @NoArgsConstructor

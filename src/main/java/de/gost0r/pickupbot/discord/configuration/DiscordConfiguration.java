@@ -2,12 +2,8 @@ package de.gost0r.pickupbot.discord.configuration;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.events.GenericEvent;
-import net.dv8tion.jda.api.events.session.ReadyEvent;
-import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +25,6 @@ public class DiscordConfiguration {
     public JDA jda(List<ListenerAdapter> listeners) throws InterruptedException {
         JDA jda = JDABuilder.createDefault(this.token)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
-                .addEventListeners(new ReadyListener())
                 .build();
 
         listeners.forEach(jda::addEventListener);
@@ -37,14 +32,5 @@ public class DiscordConfiguration {
         jda.awaitReady();
 
         return jda;
-    }
-
-    private static class ReadyListener implements EventListener {
-
-        @Override
-        public void onEvent(@NotNull GenericEvent event) {
-            if (event instanceof ReadyEvent)
-                System.out.println("API is ready!");
-        }
     }
 }
