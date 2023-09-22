@@ -2,9 +2,13 @@ package de.gost0r.pickupbot.discord;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.function.LongFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.sentry.Sentry;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,26 +21,29 @@ public class DiscordBot  {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	
 	private static String token = "";
-	private static DiscordGuild guild;
+	private static String application_id = "";
+	private static List<DiscordGuild> guilds;
 	
 	protected DiscordUser self = null;
 		
 	private DiscordGateway gateway = null;
 	private WsClientEndPoint endpoint = null;
+	private String env;
 	
 	public DiscordBot() {
 	}
 	
-	public void init() {
+	public void init(String env) {
 		reconnect();
 		self = DiscordUser.getUser("@me");
-		guild = DiscordGuild.getGuild("117622053061787657");
+		guilds = DiscordAPI.getBotGuilds();
+		this.env = env;
 	}
 	
 	public void reconnect() {
 		try {
 			if (endpoint == null) {
-				endpoint = new WsClientEndPoint(this, new URI("wss://gateway.discord.gg/?encoding=json&v=6"));
+				endpoint = new WsClientEndPoint(this, new URI("wss://gateway.discord.gg/?encoding=json&v=9"));
 			} else {
 				endpoint.reconnect();
 			}
@@ -48,11 +55,12 @@ public class DiscordBot  {
 			endpoint.addMessageHandler(gateway);
 		} catch (URISyntaxException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		} catch (Exception e) {
 			// we can trigger a handshake exception for endpoint. if that's the case, simply try again.
 			// TODO: need to check that this is really working
 			LOGGER.log(Level.SEVERE, "Exception: ", e);
-			init();
+			init(env);
 		}
 	}
 	
@@ -66,6 +74,41 @@ public class DiscordBot  {
 								DiscordChannel.findChannel(obj.getString("channel_id")),
 								obj.getString("content"));
 				recvMessage(msg);
+				break;
+			case INTERACTION_CREATE:
+				DiscordMessage message = null;
+				if (obj.has("message")){
+					message = new DiscordMessage(obj.getJSONObject("message").getString("id"),
+							DiscordUser.getUser(obj.getJSONObject("message").getJSONObject("author")),
+							DiscordChannel.findChannel(obj.getJSONObject("message").getString("channel_id")),
+							obj.getJSONObject("message").getString("content"));
+				}
+
+				if (obj.has("member")){
+					user = DiscordUser.getUser(obj.getJSONObject("member").getJSONObject("user"));
+				}
+				else{
+					user = DiscordUser.getUser(obj.getJSONObject("user"));
+				}
+				JSONArray values = null;
+				if (obj.getJSONObject("data").has("values")){
+					values = obj.getJSONObject("data").getJSONArray("values");
+				}
+				DiscordInteraction interaction = new DiscordInteraction(obj.getString("id"), 
+												obj.getString("token"), 
+												obj.getJSONObject("data"),
+												user,
+												message,
+												values);
+				if (obj.getJSONObject("data").has("custom_id")){
+					recvInteraction(interaction);
+				}
+				else if (obj.getJSONObject("data").has("name")){
+					if (obj.getJSONObject("data").has("options")){
+						interaction.getOptions(obj.getJSONObject("data").optJSONArray("options"));
+					}
+					recvApplicationCommand(interaction);
+				}
 				break;
 			case GUILD_MEMBER_UPDATE:
 				user = DiscordUser.findUser(obj.getJSONObject("user").getString("id"));
@@ -86,6 +129,7 @@ public class DiscordBot  {
 			}
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		tick();
 	}
@@ -98,12 +142,37 @@ public class DiscordBot  {
 		
 	}
 	
+	protected void recvInteraction(DiscordInteraction interaction) {
+		
+	}
+
+	protected void recvApplicationCommand(DiscordInteraction interaction) {
+
+	}
+	
 	public void sendMsg(DiscordChannel channel, String msg) {
 		DiscordAPI.sendMessage(channel, msg);
 	}
 	
+	public void sendMsg(DiscordChannel channel, String msg, DiscordEmbed embed) {
+		DiscordAPI.sendMessage(channel, msg, embed);
+	}
+	
+	
 	public void sendMsg(DiscordUser user, String msg) {
 		sendMsg(user.getDMChannel(), msg);
+	}
+	
+	public void sendMsg(DiscordUser user, String msg, DiscordEmbed embed) {
+		sendMsg(user.getDMChannel(), msg, embed);
+	}
+	
+	public DiscordMessage sendMsgToEdit(DiscordChannel channel, String msg, DiscordEmbed embed, List<DiscordComponent> components) {
+		return DiscordAPI.sendMessageToEdit(channel, msg, embed, components);
+	}
+	
+	public DiscordChannel createThread(DiscordChannel channel, String name) {
+		return DiscordAPI.createThread(channel, name);
 	}
 
 	public static String getToken() {
@@ -114,17 +183,29 @@ public class DiscordBot  {
 		DiscordBot.token = token;
 	}
 
-	public static DiscordGuild getGuild() {
-		return guild;
+	public static String getApplicationId() {
+		return application_id;
 	}
 
-	public static void setGuild(DiscordGuild guild) {
-		DiscordBot.guild = guild;
+	public static void setApplicationId(String application_id) {
+		DiscordBot.application_id = application_id;
+	}
+
+	public static List<DiscordGuild> getGuilds() {
+		return guilds;
 	}
 
 	public DiscordUser parseMention(String string) {
 		string = string.replaceAll("[^\\d]", "" );
 		return DiscordUser.getUser(string);
+	}
+
+	public boolean addUserRole(DiscordUser user, DiscordRole role){
+		return DiscordAPI.addUserRole(user, role);
+	}
+
+	public boolean removeUserRole(DiscordUser user, DiscordRole role){
+		return DiscordAPI.removeUserRole(user, role);
 	}
 
 }

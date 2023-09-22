@@ -3,6 +3,7 @@ package de.gost0r.pickupbot.discord.web;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.sentry.Sentry;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,6 +38,7 @@ public class DiscordPacket {
 			return msg.toString();
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return null;		
 	}

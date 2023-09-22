@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.sentry.Sentry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
+import de.gost0r.pickupbot.pickup.PickupBot;
 
 public class DiscordUser {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -40,9 +42,10 @@ public class DiscordUser {
 			this.id = user.getString("id");
 			this.username = user.getString("username");
 			this.discriminator = user.getString("discriminator");
-			this.avatar = user.getString("avatar");
+			this.avatar = user.isNull("avatar") ? null : user.getString("avatar");
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -65,26 +68,54 @@ public class DiscordUser {
 			roles.put(guild, roleList);
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception for " + array.toString() + ": ", e);
+			Sentry.capture(e);
 		}
 	}
 	
-	public List<DiscordRole> getRoles(DiscordGuild guild) {
-		if (roles.containsKey(guild)) {
-			return roles.get(guild);
-		} else {
+	public List<DiscordRole> getRoles(List<DiscordGuild> guilds) {
+		List<DiscordRole> list = new ArrayList<DiscordRole>();
+		for (DiscordGuild guild : guilds) {
+			if (roles.containsKey(guild)){
+				list.addAll(roles.get(guild));
+				continue;
+			}
+
 			JSONArray ar = DiscordAPI.requestUserGuildRoles(guild.id, this.id);
-			List<DiscordRole> list = new ArrayList<DiscordRole>();
+			if (ar == null){ // If the user is not a member of this guild
+				continue;
+			}
+
 			for (int i = 0; i < ar.length(); ++i) {
 				try {
 					DiscordRole role = DiscordRole.getRole(ar.getString(i));
 					list.add(role);
 				} catch (JSONException e) {
 					LOGGER.log(Level.WARNING, "Exception: ", e);
+					Sentry.capture(e);
 				}
 			}
 			roles.put(guild, list);
-			return list;
 		}
+		return list;
+	}
+
+	public boolean hasRole(DiscordGuild guild, DiscordRole role){
+		JSONArray ar = DiscordAPI.requestUserGuildRoles(guild.id, this.id);
+		if (ar == null){ // If the user is not a member of this guild
+			return false;
+		}
+
+		for (int i = 0; i < ar.length(); ++i) {
+			try {
+				if (role.id.equals(ar.getString(i))){
+					return true;
+				}
+			} catch (JSONException e) {
+				LOGGER.log(Level.WARNING, "Exception: ", e);
+				Sentry.capture(e);
+			}
+		}
+		return false;
 	}
 	
 	public DiscordChannel getDMChannel() {
@@ -95,10 +126,9 @@ public class DiscordUser {
 				this.channel = channel;
 			}
 			return channel;
-		} catch (JSONException e) {
+		} catch (JSONException | NullPointerException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
-		} catch (NullPointerException e) {
-			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return null;
 	}
@@ -115,11 +145,12 @@ public class DiscordUser {
 			return newUser;
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return null;
 	}
 	public static DiscordUser getUser(String id) {
-		if (id.matches("[0-9]+")) {
+		if (id.matches("[0-9]+") && id.length() > 10) {
 			if (userList.containsKey(id)) {
 				return userList.get(id);
 			}
@@ -142,6 +173,32 @@ public class DiscordUser {
 		return null;
 	}
 	
+	public boolean hasAdminRights() {
+		List<DiscordRole> roleList = this.getRoles(DiscordBot.getGuilds());
+		List<DiscordRole> adminList = PickupBot.logic.getAdminList();
+		for (DiscordRole s : roleList) {
+			for (DiscordRole r : adminList) {
+				if (s.equals(r)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean hasSuperAdminRights() {
+		List<DiscordRole> roleList = this.getRoles(DiscordBot.getGuilds());
+		List<DiscordRole> adminList = PickupBot.logic.getSuperAdminList();
+		for (DiscordRole s : roleList) {
+			for (DiscordRole r : adminList) {
+				if (s.equals(r)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof DiscordUser) {
@@ -149,6 +206,10 @@ public class DiscordUser {
 			return user.id == this.id;
 		}
 		return false;
+	}
+	
+	public String getAvatarUrl() {
+		return "https://cdn.discordapp.com/avatars/" + id + "/" + avatar + ".png";
 	}
 
 }

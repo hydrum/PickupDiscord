@@ -7,5 +7,6 @@ public enum MatchState {
 	Done,
 	Abort,
 	Abandon,
-	Surrender
+	Surrender,
+	Mercy
 }

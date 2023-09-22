@@ -4,6 +4,7 @@ import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.sentry.Sentry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,7 +48,18 @@ public class DiscordGateway implements MessageHandler {
 			
 			// Parse to packet
 			int op = jsonObj.getInt("op");
-			JSONObject d = jsonObj.isNull("d") ? null : new JSONObject(jsonObj.getString("d"));
+			
+			JSONObject d;
+			
+			if (jsonObj.isNull("d"))
+			{
+				d = null;
+			}
+			else
+			{
+				d = jsonObj.getJSONObject("d");
+			}
+			   
 			int s = jsonObj.isNull("s") ? -1 : jsonObj.getInt("s") ;
 			String t = jsonObj.isNull("t") ? null : jsonObj.getString("t");
 			DiscordPacket incPak = new DiscordPacket(DiscordGatewayOpcode.values()[op], d, s, t);
@@ -60,6 +72,7 @@ public class DiscordGateway implements MessageHandler {
 			
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception for '" + message + "': ", e);
+			Sentry.capture(e);
 		}
 	}
 	
@@ -83,6 +96,7 @@ public class DiscordGateway implements MessageHandler {
 			heartbeatTimer.scheduleAtFixedRate(heartbeatTask, interval/2, interval);			
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		
 		// sending identify
@@ -108,12 +122,15 @@ public class DiscordGateway implements MessageHandler {
 			presence.put("afk", false);
 			msg.put("presence", presence);
 			
+			msg.put("intents", 32365);
+			
 			DiscordPacket outP = new DiscordPacket(DiscordGatewayOpcode.Identify, msg, -1, "__null__");
 			
 			sendMessage(outP.toSend());
 			
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		
 	}

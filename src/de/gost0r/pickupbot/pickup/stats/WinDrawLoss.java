@@ -17,4 +17,8 @@ public class WinDrawLoss {
 		return (d_win + d_draw * 0.5d) / (d_total);
 	}
 
+	public int getTotal(){
+		return win + draw + loss;
+	}
+
 }

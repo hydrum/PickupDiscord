@@ -16,6 +16,6 @@ public class RconPlayersParsed {
 	public String roundtime;
 	public String half;
 	
-	public List<ServerPlayer> players = new ArrayList<>();
+	public List<ServerPlayer> players = new ArrayList<ServerPlayer>();
 	
 }

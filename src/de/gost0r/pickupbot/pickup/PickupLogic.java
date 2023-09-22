@@ -1,9 +1,10 @@
 package de.gost0r.pickupbot.pickup;
 
+import java.io.*;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -12,105 +13,166 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import de.gost0r.pickupbot.discord.DiscordChannel;
-import de.gost0r.pickupbot.discord.DiscordRole;
-import de.gost0r.pickupbot.discord.DiscordUser;
-import de.gost0r.pickupbot.discord.DiscordUserStatus;
+import de.gost0r.pickupbot.PickupBotDiscordMain;
+import de.gost0r.pickupbot.discord.*;
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
+import de.gost0r.pickupbot.ftwgl.FtwglAPI;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
+import io.sentry.Sentry;
+import org.json.JSONObject;
 
 public class PickupLogic {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-	
+	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
 	public PickupBot bot;
 	public Database db;
-	
+
 	private List<Server> serverList;
+	private List<Server> gtvServerList;
 	private List<GameMap> mapList;
 
 	private Map<PickupRoleType, List<DiscordRole>> roles;
 	private Map<PickupChannelType, List<DiscordChannel>> channels;
 	
 	private List<Match> ongoingMatches; // ongoing matches (live)
+	private List<Team> activeTeams;
 	
 	private Queue<Match> awaitingServer;
 	
 	private Map<Gametype, Match> curMatch;
+	private Map<Team, Gametype> teamsQueued;
 	
 	private boolean locked;
+	private boolean dynamicServers;
 	
 	private Map<BanReason, String[]> banDuration;
+	private Map<Gametype, GameMap> lastMapPlayed;
+
+	public Season currentSeason;
 	
 	public PickupLogic(PickupBot bot) {
 		this.bot = bot;
 		
 		db = new Database(this);
 		Player.db = db;
-		// handle db stuff
-		
-//		db.resetStats();
+		Player.logic = this;
+		Bet.logic = this;
+
+		currentSeason = db.getCurrentSeason();
 		
 		serverList = db.loadServers();
 		roles = db.loadRoles();
 		channels = db.loadChannels();
-		
+
+		awaitingServer = new LinkedList<Match>();
 		curMatch = new HashMap<Gametype, Match>();
+		teamsQueued = new HashMap<Team, Gametype>();
+		lastMapPlayed = new HashMap<Gametype, GameMap>();
 		for (Gametype gt : db.loadGametypes()) {
 			if (gt.getActive()) {
 				curMatch.put(gt, null);
+				lastMapPlayed.put(getGametypeByString(gt.getName()), new GameMap("null"));
 			}
 		}
 		mapList = db.loadMaps(); // needs current gamemode list
 		ongoingMatches = db.loadOngoingMatches(); // need maps, servers and gamemodes
-
+		activeTeams = new ArrayList<Team>();
+		
 		createCurrentMatches();
 		
 		banDuration = new HashMap<BanReason, String[]>();
-		banDuration.put(BanReason.NOSHOW, new String[] {"10m", "2h", "12h", "1d", "3d", "1w", "2w", "1M", "3M", "1y"});
-		banDuration.put(BanReason.RAGEQUIT, new String[] {"12h", "1d", "3d", "1w", "2w", "1M", "3M", "1y"});
-		
-		awaitingServer = new LinkedList<Match>();
-	}
-	
-	public void cmdAddPlayer(Player player, List<Gametype> modes) {
+		banDuration.put(BanReason.NOSHOW, new String[] {"10m", "30m", "1h", "2h", "6h", "12h", "1d", "2d", "3d", "1w", "1w", "1w", "1M"});
+		banDuration.put(BanReason.RAGEQUIT, new String[] {"6h", "12h", "1d", "2d", "3d", "1w", "1w", "1w", "1w", "1w", "1w", "1w", "1M"});
 
-		if (locked) {
+		
+		//Server testGTV = new Server(0, "gtv.b00bs-clan.com", 709, "arkon4bmn", "SevenAndJehar", true, null);
+		gtvServerList = new ArrayList<Server>();
+		//gtvServerList.add(testGTV);
+	}
+
+	public void cmdAddPlayer(Player player, List<Gametype> modes, boolean forced) {
+		for (Gametype gt : modes) {
+			cmdAddPlayer(player, gt, forced);
+		}
+	}
+
+	public void cmdAddPlayer(Player player, Gametype gt, boolean forced) {
+		if ((dynamicServers || gt.getTeamSize() == 0) && !FtwglAPI.checkIfPingStored(player)){
+			cmdGetPingURL(player);
+			return;
+		}
+		if (player.getEnforceAC() && !FtwglAPI.hasLauncherOn(player)){
+			bot.sendNotice(player.getDiscordUser(), Config.pkup_launcheroff);
+			return;
+		}
+		
+		if (locked && !forced) {
 			bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
 			return;
 		}
-		if (player.isBanned()) {
+		if (player.isBanned() && !forced) {
 			bot.sendMsg(bot.getLatestMessageChannel(), printBanInfo(player));
 			return;
 		}
-		if (playerInActiveMatch(player) != null) {
+		if (playerInActiveMatch(player) != null && playerInActiveMatch(player).getGametype().getTeamSize() > 2) {
 			bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
 			return;
 		}
+		for (Team activeTeam: activeTeams){
+			if (activeTeam.isInTeam(player)){
+				bot.sendNotice(player.getDiscordUser(), Config.team_cant_soloqueue);
+				return;
+			}
+		}
 
-		String defmsg = "Unable to sign up for:";
-		String msg = defmsg;
-		for (Gametype gt : modes) {
-			if (gt != null && curMatch.keySet().contains(gt)) {
-				Match m = curMatch.get(gt);
-				if (m.getMatchState() != MatchState.Signup || m.isInMatch(player) || playerInActiveMatch(player) != null) {
-					msg += " " + gt.getName();
-				} else {
-					m.addPlayer(player);
-				}
+		if (gt.getName().equalsIgnoreCase("div1")){
+			int eloRank = player.getEloRank();
+			int minEloRank = 40;
+			int kdrRank = player.stats.kdrRank;
+			int minKdrRank = 20;
+			int winRank = player.stats.wdlRank;
+			int minWinRank = 20;
+			if (eloRank > minEloRank
+				&& (kdrRank > minKdrRank || kdrRank == -1)
+				&& (winRank > minWinRank || winRank == -1)) {
+				String errmsg = Config.player_notdiv1;
+				errmsg = errmsg.replace(".minrank.", String.valueOf(minEloRank));
+				errmsg = errmsg.replace(".rank.", String.valueOf(eloRank));
+				errmsg = errmsg.replace(".minkdrrank.", String.valueOf(minKdrRank));
+				errmsg = errmsg.replace(".kdrrank.", String.valueOf(kdrRank));
+				errmsg = errmsg.replace(".minwinrank.", String.valueOf(minWinRank));
+				errmsg = errmsg.replace(".winrank.", String.valueOf(winRank));
+				bot.sendNotice(player.getDiscordUser(), errmsg);
+				return;
+			}
+		}
+
+		if (forced) {
+			player.setLastMessage(System.currentTimeMillis());
+		}
+		
+		String defmsg = "You are already queued for:";
+		StringBuilder msg = new StringBuilder(defmsg);
+		
+		if (curMatch.containsKey(gt)) {
+			Match m = curMatch.get(gt);
+			if (m.getMatchState() != MatchState.Signup || m.isInMatch(player) || playerInActiveMatch(player) != null) {
+				msg.append(" ").append(gt.getName());
+			} else {
+				m.addPlayer(player);
 			}
 		}
 		
-		if (!msg.equals(defmsg)) {
-			bot.sendNotice(player.getDiscordUser(), msg);
+		if (!msg.toString().equals(defmsg)) {
+			bot.sendNotice(player.getDiscordUser(), msg.toString());
 		}
+
+		checkTeams();
 	}
-	
+
 	public void cmdRemovePlayer(Player player, List<Gametype> modes) {
-		if (locked) {
-			bot.sendNotice(player.getDiscordUser(), Config.pkup_lock);
-			return;
-		}
+		
 		if (playerInActiveMatch(player) != null) {
 			bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
 			return;
@@ -121,28 +183,41 @@ public class PickupLogic {
 			for (Match match : curMatch.values()) {
 				match.removePlayer(player, true);
 			}
+			cmdRemoveTeam(player, false);
+			checkTeams();
 			return;
 		}
 		
 		for (Gametype gt : modes) {
-			if (gt != null && curMatch.keySet().contains(gt)) {
+			if (gt != null && curMatch.containsKey(gt)) {
 				curMatch.get(gt).removePlayer(player, true); // conditions checked within function
 			}
 		}
+		cmdRemoveTeam(player, false);
+		checkTeams();
 	}
-	
-	public boolean cmdLock() {
+
+	public void cmdPick(DiscordInteraction interaction, Player player, int pick) {
+		for (Match match : ongoingMatches) {
+			if (!match.hasSquads() && match.isCaptainTurn(player)) {
+				interaction.respond(null);
+				match.pick(player, pick);
+				return;
+			}
+		}
+		interaction.respond(Config.player_not_captain);
+	}
+
+	public void cmdLock() {
 		locked = true;
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.lock_enable);
-		return true;
 	}
-	
-	public boolean cmdUnlock() {
+
+	public void cmdUnlock() {
 		locked = false;
 		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.lock_disable);
-		return true;
 	}
-	
+
 	public void cmdRegisterPlayer(DiscordUser user, String urtauth, String msgid) {
 		// check whether the user and the urtauth aren't taken
 		if (Player.get(user) == null) {
@@ -153,6 +228,11 @@ public class PickupLogic {
 						p.setElo(db.getAvgElo());
 						db.createPlayer(p);
 						bot.sendNotice(user, Config.auth_success);
+						bot.sendMsg(user.getDMChannel(), Config.ac_enforced);
+						String admin_msg = Config.auth_success_admin;
+						admin_msg = admin_msg.replace(".user.", user.getMentionString());
+						admin_msg = admin_msg.replace(".urtauth.", urtauth);
+						bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), admin_msg);
 					} else {
 						DiscordAPI.deleteMessage(bot.getLatestMessageChannel(), msgid);
 						bot.sendNotice(user, Config.auth_sent_key);
@@ -167,7 +247,7 @@ public class PickupLogic {
 			bot.sendNotice(user, Config.auth_taken_user);
 		}
 	}
-	
+
 	public boolean cmdUnregisterPlayer(Player player) {
 		List<Match> matches = playerInMatch(player);
 		for (Match m : matches) {
@@ -178,59 +258,490 @@ public class PickupLogic {
 		return true;
 	}
 
+	public boolean cmdEnforcePlayerAC(Player player) {
+		boolean oldEnforceAC = player.getEnforceAC();
+		player.setEnforceAC(!oldEnforceAC);
+		db.enforcePlayerAC(player);
+		return !oldEnforceAC;
+	}
+
+	public void cmdSetPlayerCountry(DiscordUser user, String str_country) {
+		
+			// check if user is already registered
+			if (Player.get(user) != null) {
+				Player p = db.loadPlayer(user);
+				
+				if(p.getCountry().equalsIgnoreCase("NOT_DEFINED") || user.hasAdminRights()) {
+					
+					if(Country.isValid(str_country))
+					{
+						db.updatePlayerCountry(p, str_country);
+						Player.get(user).setCountry(str_country);
+						bot.sendNotice(user, Config.country_added);
+					}
+					else
+					{
+						bot.sendNotice(user, "Unknown county code. Check: <https://datahub.io/core/country-list/r/0.html>");
+					}
+				}
+				else {
+					// Region has been set by user, need an admin 
+					bot.sendNotice(user, "Your country is already set. Corresponding region: " + p.getRegion().toString());
+				}
+			} 
+			else {
+				// send register first notice
+				bot.sendNotice(user, Config.user_not_registered);
+			}
+		
+	}
+
+	public void cmdChangePlayerCountry(Player p, String str_country) {
+		
+		if(Country.isValid(str_country))
+		{
+			db.updatePlayerCountry(p, str_country);
+			p.setCountry(str_country);
+			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), "Country code updated to " + str_country);
+		}
+		else
+		{
+			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), "Unknown county code. Check: <https://datahub.io/core/country-list/r/0.html>");
+		}	
+	}
+
 	public void cmdTopElo(int number) {
-		String msg = Config.pkup_top5_header;
+		StringBuilder embed_rank = new StringBuilder();
+		StringBuilder embed_player = new StringBuilder();
+		StringBuilder embed_elo = new StringBuilder();
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Top 10 players";
+		embed.color = 7056881;
+		int rank = 1;
 		
 		List<Player> players = db.getTopPlayers(number);
 		if (players.isEmpty()) {
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg + "  None");
+			bot.sendMsg(bot.getLatestMessageChannel(), "None");
 		} else {
 			for (Player p : players) {
-				msg += "\n" + cmdGetElo(p, false);
+				String country;
+				if( p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+					country =  "<:puma:849287183474884628>";
+				}
+				else {
+					country = ":flag_" + p.getCountry().toLowerCase() + ":";
+				}
+				embed_rank.append("**").append(rank).append("**\n");
+				embed_player.append(country).append(" \u200b \u200b  ").append(p.getUrtauth()).append('\n');
+				embed_elo.append(p.getRank().getEmoji()).append(" \u200b \u200b  ").append(p.getElo()).append("\n");
+				rank++;
 			}
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+			embed.addField("\u200b", embed_rank.toString(), true);
+			embed.addField("Player", embed_player.toString(), true);
+			embed.addField("Elo", embed_elo.toString(), true);
+			
+			bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
 		}
 	}
 
-	public String cmdGetElo(Player p) {
-		return cmdGetElo(p, true);
+	public void cmdTopWDL(int number, Gametype gt) {
+		StringBuilder embed_rank = new StringBuilder();
+		StringBuilder embed_player = new StringBuilder();
+		StringBuilder embed_wdl = new StringBuilder();
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Top 10 win rate " + gt.getName();
+		embed.description = "``Season " + currentSeason.number + "``";
+		embed.color = 7056881;
+		
+		
+		Map<Player, Float> topwdl = db.getTopWDL(number, gt, currentSeason);
+		if (topwdl.isEmpty()) {
+			bot.sendMsg(bot.getLatestMessageChannel(), "None");
+		} else {
+			int rank = 1;
+			for (Map.Entry<Player, Float> entry : topwdl.entrySet()) {
+				String country;
+				if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+					country =  ":puma:";
+				}
+				else {
+					country = ":flag_" + entry.getKey().getCountry().toLowerCase() + ":";
+				}
+				embed_rank.append("**").append(rank).append("**\n");
+				embed_player.append(country).append(" \u200b \u200b  ").append(entry.getKey().getUrtauth()).append('\n');
+				embed_wdl.append(Math.round(entry.getValue() * 100d)).append(" %\n");
+				rank++;
+			}
+			embed.addField("\u200b", embed_rank.toString(), true);
+			embed.addField("Player", embed_player.toString(), true);
+			embed.addField("Win rate", embed_wdl.toString(), true);
+			
+			bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
+		}
 	}
 
-	public String cmdGetElo(Player p, boolean sendMsg) {
+	public void cmdTopKDR(int number, Gametype gt) {
+		StringBuilder embed_rank = new StringBuilder();
+		StringBuilder embed_player = new StringBuilder();
+		StringBuilder embed_wdl = new StringBuilder();
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Top 10 kill death ratio " + gt.getName();
+		embed.description = "``Season " + currentSeason.number + "``";
+		embed.color = 7056881;
+		
+		Map<Player, Float> topkdr = db.getTopKDR(number, gt, currentSeason);
+		if (topkdr.isEmpty()) {
+			bot.sendMsg(bot.getLatestMessageChannel(), "None");
+		} else {
+			int rank = 1;
+			for (Map.Entry<Player, Float> entry : topkdr.entrySet()) {
+				String country;
+				if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+					country =  "<:puma:849287183474884628>";
+				}
+				else {
+					country = ":flag_" + entry.getKey().getCountry().toLowerCase() + ":";
+				}
+				embed_rank.append("**").append(rank).append("**\n");
+				embed_player.append(country).append(" \u200b \u200b  ").append(entry.getKey().getUrtauth()).append('\n');
+				embed_wdl.append(String.format("%.02f", entry.getValue())).append("\n");
+				rank++;
+			}
+			embed.addField("\u200b", embed_rank.toString(), true);
+			embed.addField("Player", embed_player.toString(), true);
+			embed.addField("KDR", embed_wdl.toString(), true);
+			
+			bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
+		}
+	}
+
+	public void cmdTopRich(int number) {
+		StringBuilder embed_rank = new StringBuilder();
+		StringBuilder embed_player = new StringBuilder();
+		StringBuilder embed_rich = new StringBuilder();
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Top 10 richest players";
+		embed.color = 7056881;
+
+		Map<Player, Long> topRich = db.getTopRich(number);
+		if (topRich.isEmpty()) {
+			bot.sendMsg(bot.getLatestMessageChannel(), "None");
+		} else {
+			int rank = 1;
+			for (Map.Entry<Player, Long> entry : topRich.entrySet()) {
+				String country;
+				if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+					country =  "<:puma:849287183474884628>";
+				}
+				else {
+					country = ":flag_" + entry.getKey().getCountry().toLowerCase() + ":";
+				}
+				embed_rank.append("**").append(rank).append("**\n");
+				embed_player.append(country).append(" \u200b \u200b  ").append(entry.getKey().getUrtauth()).append('\n');
+				JSONObject emoji = Bet.getCoinEmoji(entry.getValue());
+				embed_rich.append("<:" + emoji.getString("name") + ":" + emoji.getString("id") + "> " + String.format("%,d", entry.getValue())).append("\n");
+				rank++;
+			}
+			embed.addField("\u200b", embed_rank.toString(), true);
+			embed.addField("Player", embed_player.toString(), true);
+			embed.addField("Balance", embed_rich.toString(), true);
+
+			bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
+		}
+	}
+
+	public String cmdGetElo(Player p, Gametype gt) {
 		if (p == null) {
 			return "";
 		}
 		String msg = Config.pkup_getelo;
 		msg = msg.replace(".urtauth.", p.getUrtauth());
 		msg = msg.replace(".elo.", String.valueOf(p.getElo()));
-		msg = msg.replace(".wdl.", String.valueOf(Math.round(db.getWDLForPlayer(p).calcWinRatio() * 100d)));
-		msg = msg.replace(".position.", String.valueOf(db.getRankForPlayer(p)));
-		msg = msg.replace(".rank.", p.getRank().getEmoji());
-		if (sendMsg) {
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+		if (gt.getName().equals("CTF")){
+			msg = msg.replace(".wdl.", String.format("%.02f", p.stats.ctf_wdl.calcWinRatio() * 100d));
+			msg = msg.replace(".kdr.", String.format("%.02f", p.stats.ctf_rating));
 		}
+		else {
+			msg = msg.replace(".wdl.", String.format("%.02f", p.stats.ts_wdl.calcWinRatio() * 100d));
+			msg = msg.replace(".kdr.", String.format("%.02f", p.stats.kdr));
+		}
+
+		msg = msg.replace(".position.", String.valueOf(p.getEloRank()));
+		msg = msg.replace(".rank.", p.getRank().getEmoji());
+
+		
+		if( p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+			msg = msg.replace(".country.", "<:puma:849287183474884628>");
+		}
+		else {
+			msg = msg.replace(".country.", ":flag_" + p.getCountry().toLowerCase() + ":");
+		}
+
 		return msg;
 	}
-	
-	public void cmdGetMaps() {
-		String msg = "None";
-		for (Gametype gametype : curMatch.keySet()) {
-			if (msg.equals("None")) {
-				msg = "";
+
+	public void cmdGetStats(Player p) {
+		if (p == null) {
+			return;
+		}
+		
+		DiscordEmbed statsEmbed = getStatsEmbed(p);
+
+		List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
+		DiscordButton buttonSeason = new DiscordButton(DiscordButtonStyle.GREY);
+		buttonSeason.custom_id = Config.INT_SEASONLIST + "_" + p.getUrtauth();
+		buttonSeason.label = "Select season";
+		buttons.add(buttonSeason);
+		DiscordButton buttonAlltime = new DiscordButton(DiscordButtonStyle.BLURPLE);
+		buttonAlltime.custom_id = Config.INT_SEASONSTATS + "_" + p.getUrtauth() + "_0";
+		buttonAlltime.label = "All-time stats";
+		buttons.add(buttonAlltime);
+		DiscordButton buttomLastGame = new DiscordButton(DiscordButtonStyle.GREY);
+		buttomLastGame.custom_id = Config.INT_LASTMATCHPLAYER + "_" + p.getUrtauth();
+		buttomLastGame.label = "Last game";
+		buttons.add(buttomLastGame);
+
+		bot.sendMsgToEdit(bot.getLatestMessageChannel(), null, statsEmbed, buttons);
+	}
+
+	public void showSeasonList(DiscordInteraction interaction, Player p){
+		if (p == null) {
+			return;
+		}
+		ArrayList<DiscordSelectOption> options = new ArrayList<DiscordSelectOption>();
+		for (int i = 1 ; i <= currentSeason.number ; i++){
+			DiscordSelectOption option = new DiscordSelectOption("Season " + i, String.valueOf(i));
+			options.add(option);
+		}
+
+		ArrayList<DiscordComponent> components = new ArrayList<DiscordComponent>();
+		DiscordSelectMenu seasonMenu = new DiscordSelectMenu(options);
+		seasonMenu.custom_id = Config.INT_SEASONSELECTED + "_" + p.getUrtauth();
+		components.add(seasonMenu);
+		interaction.respond(null, null, components);
+	}
+
+	public void showSeasonStats(DiscordInteraction interaction, Player p, int seasonnumber){
+		if (p == null) {
+			return;
+		}
+
+		Season season;
+		if (seasonnumber == 0){
+			season = Season.AllTimeSeason();
+		}
+		else{
+			season = db.getSeason(seasonnumber);
+		}
+
+		DiscordEmbed statsEmbed = getDetailedStatsEmbed(p, season);
+		interaction.respond(null, statsEmbed);
+	}
+
+	public DiscordEmbed getStatsEmbed(Player p){
+		PlayerStats stats = db.getPlayerStats(p, currentSeason);
+		String country = "<:puma:849287183474884628>";
+		if(!p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+			country = ":flag_" + p.getCountry().toLowerCase() + ":";
+		}
+
+		DiscordEmbed statsEmbed = new DiscordEmbed();
+		statsEmbed.color = 7056881;
+		statsEmbed.title = country + " \u200b \u200b  " +  p.getUrtauth();
+		statsEmbed.thumbnail = p.getDiscordUser().getAvatarUrl();
+
+		String boostActive = "";
+		if (p.hasBoostActive()){
+			boostActive = "\n**ELO BOOST** (Expires <t:" + p.getEloBoost() / 1000 + ":R>)";
+		}
+		statsEmbed.description = p.getRank().getEmoji() + " \u200b \u200b  **" + p.getElo() + "**  #" + p.getEloRank() + boostActive + "\n\n``Season " + currentSeason.number + "``";
+
+		statsEmbed.footer_icon = "https://cdn.discordapp.com/emojis/" + Bet.getCoinEmoji(p.getCoins()).getString("id");
+		statsEmbed.footer = String.valueOf(p.getCoins());
+
+		if (stats.ts_wdl.getTotal() < 5){
+			statsEmbed.addField("\u200b", "**TS**: ``" + stats.ts_wdl.getTotal() + "/5`` placement games", false);
+		}
+		else{
+			statsEmbed.addField("\u200b", "TS <:lr:401457276478554112>", false);
+			statsEmbed.addField("Played", String.valueOf(stats.ts_wdl.getTotal()), true);
+			if (stats.kdrRank == -1) {
+				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr), true);
+
 			} else {
-				msg += "\n";
+				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr) + " (#" + stats.kdrRank + ")", true);
+			}
+			if (p.stats.wdlRank == -1) {
+				statsEmbed.addField("Win %", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
+
+			} else {
+				statsEmbed.addField("Win %", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
+			}
+		}
+
+		if (stats.ctf_wdl.getTotal() < 5) {
+			statsEmbed.addField("\u200b", "**CTF**: ``" + stats.ctf_wdl.getTotal() + "/5`` placement games", false);
+		}
+		else{
+			statsEmbed.addField("\u200b", "CTF <:red_flag:400778174415503371>", false);
+			statsEmbed.addField("Played", String.valueOf(stats.ctf_wdl.getTotal()), true);
+			if (stats.ctfRank == -1) {
+				statsEmbed.addField("Rating", String.format("%.02f", stats.ctf_rating), true);
+
+			} else {
+				statsEmbed.addField("Rating", String.format("%.02f", stats.ctf_rating) + " (#" + stats.ctfRank + ")", true);
+			}
+
+			if (stats.ctfWdlRank == -1) {
+				statsEmbed.addField("Win %", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
+
+			} else {
+				statsEmbed.addField("Win %", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "% (#" + stats.ctfWdlRank + ")", true);
+			}
+		}
+
+		return statsEmbed;
+	}
+
+	public DiscordEmbed getDetailedStatsEmbed(Player p, Season season){
+		PlayerStats stats = db.getPlayerStats(p, season);
+		String country = "<:puma:849287183474884628>";
+		if(!p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+			country = ":flag_" + p.getCountry().toLowerCase() + ":";
+		}
+
+		DiscordEmbed statsEmbed = new DiscordEmbed();
+		statsEmbed.color = 7056881;
+		statsEmbed.title = country + " \u200b \u200b  " +  p.getUrtauth();
+		statsEmbed.thumbnail = p.getDiscordUser().getAvatarUrl();
+		statsEmbed.description = "Season " + season.number + " (from <t:" + season.startdate / 1000 + ":d> to <t:" + season.enddate / 1000 + ":d>)";
+		if (season.startdate == 0){
+			statsEmbed.description = "Season " + season.number + " (until <t:" + season.enddate / 1000 + ":d>)";
+		}
+		if (season.number == 0){
+			statsEmbed.description = "All time stats";
+		}
+		if (stats.ts_wdl.getTotal() == 0){
+			statsEmbed.addField("\u200b", "*No TS games this season*", false);
+		}
+		else{
+			statsEmbed.addField("\u200b", "``Team Survivor``", false);
+			statsEmbed.addField("Kills / Assists", stats.kills + "/" + stats.assists, true);
+			statsEmbed.addField("Deaths", String.valueOf(stats.deaths), true);
+			if (stats.kdrRank == -1) {
+				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr), true);
+
+			} else {
+				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr) + " (#" + stats.kdrRank + ")", true);
+			}
+
+			statsEmbed.addField("Wins", String.valueOf(stats.ts_wdl.win), true);
+			statsEmbed.addField("Defeats", String.valueOf(stats.ts_wdl.loss), true);
+			if (stats.wdlRank == -1) {
+				statsEmbed.addField("Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
+
+			} else {
+				statsEmbed.addField("Win rate", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
+			}
+		}
+		if (stats.ctf_wdl.getTotal() == 0){
+			statsEmbed.addField("\u200b", "*No CTF games this season*", false);
+		}
+		else {
+			statsEmbed.addField("\u200b", "``Capture the Flag``", false);
+			statsEmbed.addField("Caps", String.valueOf(stats.caps), true);
+			statsEmbed.addField("Returns", String.valueOf(stats.returns), true);
+			if (stats.ctfRank == -1) {
+				statsEmbed.addField("Rating", String.format("%.02f", stats.ctf_rating), true);
+
+			} else {
+				statsEmbed.addField("Rating", String.format("%.02f", stats.ctf_rating) + " (#" + stats.ctfRank + ")", true);
+			}
+			statsEmbed.addField("FC kills", String.valueOf(stats.fckills), true);
+			statsEmbed.addField("Stopped caps", String.valueOf(stats.stopcaps), true);
+			statsEmbed.addField("Protected flags", String.valueOf(stats.protflag), true);
+			statsEmbed.addField("Wins", String.valueOf(stats.ctf_wdl.win), true);
+			statsEmbed.addField("Defeats", String.valueOf(stats.ctf_wdl.loss), true);
+			if (stats.ctfWdlRank == -1) {
+				statsEmbed.addField("Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "%", true);
+
+			} else {
+				statsEmbed.addField("Win rate", Math.round(stats.ctf_wdl.calcWinRatio() * 100d) + "% (#" + stats.ctfWdlRank + ")", true);
+			}
+		}
+
+		return statsEmbed;
+	}
+
+	public void cmdTopCountries(int number) {
+		StringBuilder msg = new StringBuilder(Config.pkup_top5_header);
+		
+		ArrayList<CountryRank> countries = db.getTopCountries(number);
+		if (countries.isEmpty()) {
+			bot.sendMsg(bot.getLatestMessageChannel(), msg + "  None");
+		} else {
+			
+			for(int i = 0; i < countries.size(); i++) {
+				String ranking = Config.pkup_getelo_country;
+				
+				ranking = ranking.replace(".position.", Integer.toString(i + 1));
+				ranking = ranking.replace(".country.", Country.getCountryFlag(countries.get(i).country));
+				ranking = ranking.replace(".elo.", countries.get(i).elo.toString());
+				
+				msg.append("\n").append(ranking);
+			}
+			
+			bot.sendMsg(bot.getLatestMessageChannel(), msg.toString());
+		}
+	}
+
+	public void cmdGetMaps(Player player, boolean showZeroVote) {
+		Match activeMatch = playerInActiveMatch(player);
+		if (activeMatch != null){
+			String msg = Config.pkup_map_list;
+			msg = msg.replace(".gametype.", activeMatch.getGametype().getName());
+			msg = msg.replace(".maplist.", activeMatch.getMapVotes(true));
+			bot.sendMsg(bot.getLatestMessageChannel(), msg);
+			return;
+		}
+		StringBuilder msg = new StringBuilder("None");
+		for (Gametype gametype : curMatch.keySet()) {
+			if (gametype.getName().startsWith("SCRIM") && curMatch.get(gametype).getPlayerCount() == 0){
+				continue;
+			}
+			if (msg.toString().equals("None")) {
+				msg = new StringBuilder();
+			} else {
+				msg.append("\n");
 			}
 			String mapString = Config.pkup_map_list;
 			mapString = mapString.replace(".gametype.", gametype.getName());
-			mapString = mapString.replace(".maplist.", curMatch.get(gametype).getMapVotes(false));
-			msg += mapString;
+			mapString = mapString.replace(".maplist.", curMatch.get(gametype).getMapVotes(!showZeroVote));
+			msg.append(mapString);
 		}
-		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+		bot.sendMsg(bot.getLatestMessageChannel(), msg.toString());
 	}
 
-
-	public void cmdMapVote(Player player, Gametype gametype, String mapname) {
-		if (gametype == null) {
+	public void cmdMapVote(Player player, Gametype gametype, String mapname, int number) {
+		// Use boost if the player has it
+		boolean bonus = false;
+		if (number == 0){
+			if (player.getAdditionalMapVotes() == 0){
+				bot.sendNotice(player.getDiscordUser(), Config.no_additonal_vote);
+				return;
+			}
+			number = player.getAdditionalMapVotes();
+			bonus = true;
+		}
+		Match activeMatch = playerInActiveMatch(player);
+		Match m = null;
+		
+		if (activeMatch != null) {
+			m = activeMatch;
+			gametype = m.getGametype();
+		}
+		
+		else if (gametype == null) {
 			List<Match> matches = playerInMatch(player);
 			if (matches.size() == 1) {
 				gametype = matches.get(0).getGametype();
@@ -242,8 +753,11 @@ public class PickupLogic {
 				return;
 			}
 		}
-		if (curMatch.containsKey(gametype)) {
-			Match m = curMatch.get(gametype);
+		if (curMatch.containsKey(gametype) || m != null) {
+			if (m == null) {
+				m = curMatch.get(gametype);
+			}
+			
 			if (m.getMatchState() == MatchState.Signup || m.getMatchState() == MatchState.AwaitingServer) {
 				int counter = 0;
 				GameMap map = null;
@@ -257,30 +771,46 @@ public class PickupLogic {
 					bot.sendNotice(player.getDiscordUser(), Config.map_not_unique);
 				} else if (counter == 0) {
 					bot.sendNotice(player.getDiscordUser(), Config.map_not_found);
+				} else if (lastMapPlayed.get(gametype).name.equals(map.name)) {
+					bot.sendNotice(player.getDiscordUser(), Config.map_played_last_game);
+				} else if (map.bannedUntil >= System.currentTimeMillis()) {
+					bot.sendNotice(player.getDiscordUser(), Config.map_banned.replace(".remaining.", String.valueOf(map.bannedUntil / 1000)));
 				} else {
-					m.voteMap(player, map); // handles sending a msg itself
+					m.voteMap(player, map, number, bonus); // handles sending a msg itself
 				}
 			}
 		}
 	}
-	
+
 	public void cmdStatus() {
 		if (curMatch.isEmpty()) {
-			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_match_unavi);
+			bot.sendMsg(bot.getLatestMessageChannel(), Config.pkup_match_unavi);
 			return;
 		}
-		String msg = "None";
+		StringBuilder msg = new StringBuilder("None");
+		boolean scrimEmpty = true;
 		for (Match m : curMatch.values()) {
-			if (msg.equals("None")) {
-				msg = "";
-			} else {
-				msg += "\n";
+			if (m.getGametype().getName().startsWith("SCRIM")) {
+				if (m.getPlayerCount() > 0){
+					scrimEmpty = false;
+				}
+				else{
+					continue;
+				}
 			}
-			msg += cmdStatus(m, null, false);
+			if (msg.toString().equals("None")) {
+				msg = new StringBuilder();
+			} else {
+				msg.append("\n");
+			}
+			msg.append(cmdStatus(m, null, false));
 		}
-		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+		if (scrimEmpty){
+			msg.append("\n" + Config.team_no_scrim);
+		}
+		bot.sendMsg(bot.getLatestMessageChannel(), msg.toString());
 	}
-	
+
 	public String cmdStatus(Match match, Player player, boolean shouldSend) {
 		String msg = "";
 		int playerCount = match.getPlayerCount();
@@ -288,38 +818,49 @@ public class PickupLogic {
 			msg = Config.pkup_status_noone;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 			msg = msg.replace("<gametype>", match.getGametype().getName().toLowerCase());
-		} else if (match.getMatchState() == MatchState.Signup){
+		} else if (match.getMatchState() == MatchState.Signup || match.getMatchState() == MatchState.AwaitingServer){
 			msg = Config.pkup_status_signup;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
 			msg = msg.replace(".playernumber.", String.valueOf(playerCount));
-			msg = msg.replace(".maxplayer.", String.valueOf(match.getGametype().getTeamSize() * 2));
+			int maxplayer = match.getGametype().getTeamSize() == 0 ? 1 : match.getGametype().getTeamSize() * 2;
+			msg = msg.replace(".maxplayer.", String.valueOf(maxplayer));
 
-			String playernames = "None";
+			StringBuilder playernames = new StringBuilder("None");
 			if (player == null) {
 				for (Player p : match.getPlayerList()) {
-					if (playernames.equals("None")) {
-						playernames = p.getUrtauth();
+					if (playernames.toString().equals("None")) {
+						playernames = new StringBuilder(p.getUrtauth());
 					} else {
-						playernames += " " + p.getUrtauth();
+						playernames.append(" ").append(p.getUrtauth());
+					}
+				}
+				for (Team teamQueued : teamsQueued.keySet()){
+					if (teamsQueued.get(teamQueued).equals(match.getGametype())){
+						playernames.append("\n__Awaiting team__: ");
+						playernames.append(teamQueued.getTeamStringNoMention());
 					}
 				}
 			} else {
-				playernames = player.getDiscordUser().getMentionString();
-				playernames += (match.isInMatch(player)) ? " added." : " removed.";
+				playernames = new StringBuilder(player.getDiscordUser().getMentionString());
+				playernames.append((match.isInMatch(player)) ? " added." : " removed.");
 			}
 			
-			msg = msg.replace(".playerlist.", playernames);
+			msg = msg.replace(".playerlist.", playernames.toString());
 			
-		} else if (match.getMatchState() == MatchState.AwaitingServer){
+		} 
+		if (shouldSend) {
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+		}
+		if (match.getMatchState() == MatchState.AwaitingServer && shouldSend && match.getGametype().getTeamSize() > 1) {
 			msg = Config.pkup_status_server;
 			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
-		}
-		if (shouldSend) {
+			msg = msg.replace(".votes.", match.getMapVotes(true));
+			
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 		}
 		return msg;
 	}
-	
+
 	public void cmdSurrender(Player player) {
 		Match match = playerInActiveMatch(player);
 		if (match != null && match.getMatchState() == MatchState.Live) {
@@ -328,16 +869,14 @@ public class PickupLogic {
 		else bot.sendNotice(player.getDiscordUser(), Config.player_not_in_match);
 	}
 
-	public boolean cmdReset(String cmd) {
-		return cmdReset(cmd, null);
+	public void cmdReset(String cmd) {
+		cmdReset(cmd, null);
 	}
 
-	public boolean cmdReset(String cmd, String mode) {
+	public void cmdReset(String cmd, String mode) {
 		if (cmd.equals("all")) {
-			Iterator<Match> iter = ongoingMatches.iterator();
 			List<Match> toRemove = new ArrayList<Match>();
-			while (iter.hasNext()) {
-				Match match = iter.next();
+			for (Match match : ongoingMatches) {
 				match.reset();
 				toRemove.add(match);
 			}
@@ -347,7 +886,6 @@ public class PickupLogic {
 				createCurrentMatches();
 			}
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_reset_all);
-			return true;
 		} else if (cmd.equals("cur")) {
 			Gametype gt = getGametypeByString(mode);
 			if (gt != null) {
@@ -360,7 +898,6 @@ public class PickupLogic {
 				createCurrentMatches();
 			}
 			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_reset_cur);
-			return true;
 		} else {
 			Gametype gt = getGametypeByString(cmd);
 			if (gt != null) {
@@ -369,46 +906,36 @@ public class PickupLogic {
 				bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_reset_type.replace(".gametype.", gt.getName()));
 			} else {
 				try {
-					int idx = Integer.valueOf(cmd);
-					Iterator<Match> iter = ongoingMatches.iterator();
-					while (iter.hasNext()) {
-						Match match = iter.next();
+					int idx = Integer.parseInt(cmd);
+					for (Match match : ongoingMatches) {
 						if (match.getID() == idx) {
 							match.reset();
 							ongoingMatches.remove(match);
 							bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_reset_id.replace(".id.", cmd));
-							return true;
 						}
 					}
-					
 				} catch (NumberFormatException e) {
 					LOGGER.log(Level.WARNING, "Exception: ", e);
+					Sentry.capture(e);
 				}
 			}
 		}
-		return false;
 	}
-	
-	public boolean cmdGetData(DiscordUser user, String id) {
-		String msg = "Match not found.";
-		try {
-			int i_id = Integer.valueOf(id);
-			for (Match match : ongoingMatches) {
-				if (match.getID() == i_id) {
-					msg = Config.pkup_pw;
-					msg = msg.replace(".server.", match.getServer().getAddress());
-					msg = msg.replace(".password.", match.getServer().password);
-					bot.sendMsg(user, msg);
-					return true;
-				}
-			}
-		} catch (NumberFormatException e) {
-			LOGGER.log(Level.WARNING, "Exception: ", e);
+
+	public void cmdGetData(DiscordChannel channel) {
+		if (ongoingMatches.isEmpty()){
+			String msg = "No active matches.";
+			bot.sendMsg(channel, msg);
 		}
-		bot.sendMsg(user, msg);
-		return false;
+
+		for (Match match : ongoingMatches) {
+			String msg = "**" + match.getGametype().getName() + " Match #" + String.valueOf(match.getID()) + "** " +  Config.pkup_pw + " RCON: " + match.getServer().rconpassword + " Server #" + match.getServer().id;
+			msg = msg.replace(".server.", match.getServer().getAddress());
+			msg = msg.replace(".password.", match.getServer().password);
+			bot.sendMsg(channel, msg);
+		}
 	}
-	
+
 	public boolean cmdEnableMap(String mapname, String gametype) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
@@ -431,7 +958,7 @@ public class PickupLogic {
 		}
 		return true;
 	}
-	
+
 	public boolean cmdDisableMap(String mapname, String gametype) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
@@ -445,14 +972,13 @@ public class PickupLogic {
 		}
 		return false;
 	}
-	
+
 	public boolean cmdEnableGametype(String gametype, String teamSize) {
 		try {
-			int i_teamSize = Integer.valueOf(teamSize);
+			int i_teamSize = Integer.parseInt(teamSize);
 			Gametype gt = getGametypeByString(gametype);
 			if (gt == null) {
 				gt = new Gametype(gametype.toUpperCase(), i_teamSize, true);
-				db.loadGameConfig(gt);
 			}
 			gt.setTeamSize(i_teamSize);
 			gt.setActive(true);
@@ -466,10 +992,11 @@ public class PickupLogic {
 			return true;
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 			return false;
 		}
 	}
-	
+
 	public boolean cmdDisableGametype(String gametype) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
@@ -480,17 +1007,16 @@ public class PickupLogic {
 		curMatch.remove(gt);
 		return true;
 	}
-	
+
 	public boolean cmdAddGameConfig(String gametype, String command) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
 		
 		gt.addConfig(command);
-		
-		db.updateGametype(gt);
+
 		return true;
 	}
-	
+
 	public boolean cmdRemoveGameConfig(String gametype, String command) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
@@ -500,56 +1026,59 @@ public class PickupLogic {
 		db.updateGametype(gt);
 		return true;
 	}
-	
+
 	public boolean cmdListGameConfig(DiscordChannel channel, String gametype) {
 		Gametype gt = getGametypeByString(gametype);
 		if (gt == null) return false;
 		
-		String configlist = "";
+		StringBuilder configlist = new StringBuilder();
 		for (String config : gt.getConfig()) {
-			if (!configlist.isEmpty()) {
-				configlist += "\n";
+			if (configlist.length() > 0) {
+				configlist.append("\n");
 			}
-			configlist += config;
+			configlist.append(config);
 		}
 		
 		String msg = Config.pkup_config_list;
 		msg = msg.replace(".gametype.", gt.getName());
-		msg = msg.replace(".configlist.", configlist);
+		msg = msg.replace(".configlist.", configlist.toString());
 		bot.sendMsg(channel, msg);
 		
 		return true;
-//		return !configlist.isEmpty(); // we sent the info anyways, so its fine
 	}
-	
-	public boolean cmdAddServer(String serveraddr, String rcon) {
+
+	public boolean cmdAddServer(String serveraddr, String rcon, String str_region) {
 		try {
 			String ip = serveraddr;
 			int port = 27960;
 			if (serveraddr.contains(":")) {
 				String[] servers = serveraddr.split(":");
 				ip = servers[0];
-				port = Integer.valueOf(servers[1]);
+				port = Integer.parseInt(servers[1]);
 			}
 			for (Server s : serverList) {
 				if (s.IP.equals(ip) && s.port == port) {
 					return false;
 				}
 			}
-			Server server = new Server(-1, ip, port, rcon, "???", true);
+			
+			Region region = Region.valueOf(str_region);
+			Server server = new Server(-1, ip, port, rcon, "???", true, region);
+
 			db.createServer(server);
 			serverList.add(server);
 			checkServer();
 			return true;
-		} catch (NumberFormatException e) {
+		} catch (IllegalArgumentException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 			return false;
 		}
 	}
 
 	public boolean cmdServerActivation(String id, boolean active) {
 		try {
-			int idx = Integer.valueOf(id);
+			int idx = Integer.parseInt(id);
 			for (Server server : serverList) {
 				if (server.id == idx && !server.isTaken() && server.active != active) {
 					server.active = active;
@@ -560,13 +1089,14 @@ public class PickupLogic {
 			}
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return false;
 	}
 
 	public boolean cmdServerChangeRcon(String id, String rcon) {
 		try {
-			int idx = Integer.valueOf(id);
+			int idx = Integer.parseInt(id);
 			for (Server server : serverList) {
 				if (server.id == idx) {
 					server.rconpassword = rcon;
@@ -576,13 +1106,14 @@ public class PickupLogic {
 			}
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return false;
 	}
 
 	public boolean cmdServerSendRcon(String id, String rconString) {
 		try {
-			int idx = Integer.valueOf(id);
+			int idx = Integer.parseInt(id);
 			for (Server server : serverList) {
 				if (server.id == idx) {
 					server.sendRcon(rconString);
@@ -591,87 +1122,163 @@ public class PickupLogic {
 			}
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		return false;
 	}
-	
-	public boolean cmdServerList(DiscordChannel channel) {
-		String msg = "None";
+
+	public void cmdServerList(DiscordChannel channel) {
+		StringBuilder msg = new StringBuilder("None");
 		for (Server server : serverList) {
-			if (msg.equals("None")) {
-				msg = server.toString();
+			if (msg.toString().equals("None")) {
+				msg = new StringBuilder(server.toString());
 			} else {
-				msg += "\n" + server.toString();
+				msg.append("\n").append(server.toString());
 			}
 		}
-		bot.sendMsg(channel, msg);
-		return true;
+		bot.sendMsg(channel, msg.toString());
 	}
-	
-	public boolean cmdMatchList(DiscordChannel channel) {
-		String msg = "None";
+
+	public void cmdMatchList(DiscordChannel channel) {
+		StringBuilder msg = new StringBuilder("None");
 		for (Match match : curMatch.values()) {
-			if (msg.equals("None")) {
-				msg = match.toString();
+			if (msg.toString().equals("None")) {
+				msg = new StringBuilder(match.toString());
 			} else {
-				msg += "\n" + match.toString();
+				msg.append("\n").append(match.toString());
 			}
 		}
 		for (Match match : ongoingMatches) {
-			if (msg.equals("None")) {
-				msg = match.toString();
+			if (msg.toString().equals("None")) {
+				msg = new StringBuilder(match.toString());
 			} else {
-				msg += "\n" + match.toString();
+				msg.append("\n").append(match.toString());
 			}
 		}
-		bot.sendMsg(channel, msg);
-		return true;
+		bot.sendMsg(channel, msg.toString());
 	}
-	
-	public boolean cmdLive() {
+
+	public void cmdLive(DiscordChannel channel) {
 		String msg = "No live matches found.";
+		DiscordEmbed scoreBoardLinkEmbed = new DiscordEmbed();
 		for (Match match : ongoingMatches) {
-			if (msg.equals("No live matches found.")) {
-				msg = match.getMatchInfo();
-			} else {
-				msg += "\n" + match.getMatchInfo();
+			msg = match.getMatchInfo();
+			if (match.getMatchState() == MatchState.AwaitingServer || match.getServer().getServerMonitor() == null || match.liveScoreMsgs.isEmpty()) {
+				bot.sendMsg(bot.getLatestMessageChannel(), msg);
+			} 
+			else {
+				String scoreBoardLink = "";
+				for (DiscordMessage liveScoreMsg : match.liveScoreMsgs){
+					if(liveScoreMsg.channel.parent_id.equals(channel.id)){
+						scoreBoardLink = "[Live scoreboard](https://discord.com/channels/" + liveScoreMsg.channel.guild_id + "/" + liveScoreMsg.channel.id + "/" + liveScoreMsg.id + ")";
+						break;
+					}
+				}
+				StringBuilder embedDescription = new StringBuilder(scoreBoardLink);
+
+				scoreBoardLinkEmbed.color = 7056881;
+				
+				if (match.getGtvServer() != null) {
+					embedDescription.append("\n").append(Config.pkup_go_pub_calm);
+				}
+
+				scoreBoardLinkEmbed.description = embedDescription.toString();
+				bot.sendMsg(bot.getLatestMessageChannel(), msg, scoreBoardLinkEmbed);
 			}
 		}
-		bot.sendMsg(bot.getLatestMessageChannel(), msg);
-		return true;
+		
+		if (msg.equals("No live matches found.")) {
+			bot.sendMsg(bot.getLatestMessageChannel(), msg);
+		}
 	}
-	
-	public boolean cmdDisplayMatch(String matchid) {
+
+	public void cmdDisplayMatch(String matchid) {
 		try {
-			int idx = Integer.valueOf(matchid);
+			int idx = Integer.parseInt(matchid);
 			for (Match match : ongoingMatches) {
 				if (match.getID() == idx) {
 					bot.sendMsg(bot.getLatestMessageChannel(), match.getMatchInfo());
-					return true;
+					return;
 				}
 			}
 			
 			Match match = db.loadMatch(idx); // TODO: cache?
 			if (match != null) {
-				bot.sendMsg(bot.getLatestMessageChannel(), match.getMatchInfo());
-				return true;
+				bot.sendMsg(bot.getLatestMessageChannel(), null, match.getMatchEmbed(true));
+				return;
+			}			
+		
+		} catch (NumberFormatException e) {
+			bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
+		}
+		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
+	}
+
+	public void cmdDisplayLastMatch() {
+		if (!ongoingMatches.isEmpty()){
+			bot.sendMsg(bot.getLatestMessageChannel(), "Can't display the match when a game is active.");
+			return;
+		}
+		try {
+			Match match = db.loadLastMatch(); 
+			if (match != null) {
+				bot.sendMsg(bot.getLatestMessageChannel(), null, match.getMatchEmbed(true));
+				return;
 			}			
 		
 		} catch (NumberFormatException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
-		return false;
 	}
-	
+
+	public void cmdDisplayLastMatchPlayer(Player p) {
+		if (!ongoingMatches.isEmpty()){
+			bot.sendMsg(bot.getLatestMessageChannel(), "Can't display the match when a game is active.");
+			return;
+		}
+		try {
+			Match match = db.loadLastMatchPlayer(p); 
+			if (match != null) {
+				bot.sendMsg(bot.getLatestMessageChannel(), null, match.getMatchEmbed(true));
+				return;
+			}			
+		
+		} catch (NumberFormatException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+		bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
+	}
+
+	public void showLastMatchPlayer(DiscordInteraction interaction, Player p) {
+		try {
+			Match match = db.loadLastMatchPlayer(p);
+			if (match != null) {
+				interaction.respond(null, match.getMatchEmbed(true));
+				return;
+			}
+
+		} catch (NumberFormatException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+		interaction.respond("Match not found.");
+	}
+
+	public void cmdResetElo(){
+		db.resetElo();
+	}
+
 	// Matchcreation
-	
+
 	private void createCurrentMatches() {
 		for (Gametype gametype : curMatch.keySet()) {
 			createMatch(gametype);
 		}
 	}
-	
+
 	private void createMatch(Gametype gametype) {
 		List<GameMap> gametypeMapList = new ArrayList<GameMap>();
 		for (GameMap map : mapList) {
@@ -690,10 +1297,11 @@ public class PickupLogic {
 			checkServer();
 		}
 	}
-	
+
 	public void cancelRequestServer(Match match) {
-		if (awaitingServer.contains(match)) {
-			awaitingServer.remove(match);
+		awaitingServer.remove(match);
+		if (match.getServer() != null && match.getServer().isTaken()){
+			match.getServer().free();
 		}
 	}
 
@@ -702,31 +1310,86 @@ public class PickupLogic {
 		ongoingMatches.add(match);
 	}
 
-	public void matchEnded(Match match) {
+	public void matchEnded() {
 //		matchRemove(match); // dont remove as this can be called while in a loop
 		checkServer();
 	}
 	
 	public void matchRemove(Match match) {
-		if (ongoingMatches.contains(match)) {
-			ongoingMatches.remove(match);
-		}
+		ongoingMatches.remove(match);
 	}
 
 	private void checkServer() {
-		for (Server server : serverList) {
-			if (server.active && !server.isTaken() && !awaitingServer.isEmpty()) {
-				Match m = awaitingServer.poll();
-				if (m != null && m.getMatchState() == MatchState.AwaitingServer) {
-					m.launch(server);
+		if(!awaitingServer.isEmpty())
+		{
+			Match m = awaitingServer.poll();
+			
+			if(m != null)
+			{
+				Server bs;
+				if (dynamicServers || m.getGametype().getTeamSize() == 0){
+					bs = FtwglAPI.spawnDynamicServer(m.getPlayerList());
+					if (bs != null) {
+						String spawnMsg = Config.pkup_go_pub_servspawn;
+						spawnMsg = spawnMsg.replace(".flag.", Country.getCountryFlag(bs.country));
+						spawnMsg = spawnMsg.replace(".city.", bs.city);
+						bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), spawnMsg);
+					}
+					else {
+						bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.pkup_go_pub_noserv);
+						m.reset();
+					}
+				}
+				else{
+					bs = getBestServer(m.getPreferredServerRegion());
+					if (bs != null){
+						String spawnMsg = Config.pkup_go_pub_requestserver;
+						spawnMsg = spawnMsg.replace(".flag.", bs.getRegionFlag(false, false));
+						spawnMsg = spawnMsg.replace(".region.", bs.region.name());
+						bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), spawnMsg);
+					}
+				}
+				
+				if(bs != null && m.getMatchState() == MatchState.AwaitingServer)
+				{
+					m.launch(bs);
+				}
+				else
+				{
+					for (Server server : serverList) { // Use NAE server by default when the best region is not avi
+						if (server.active && !server.isTaken() && server.isOnline() && m.getMatchState() == MatchState.AwaitingServer && server.region == Region.NAE) {
+								m.launch(server);
+								return;
+						}
+					}
+					for (Server server : serverList) { // If no NAE servers are avi take the first avi
+						if (server.active && !server.isTaken() && server.isOnline() && m.getMatchState() == MatchState.AwaitingServer) {
+							m.launch(server);
+							return;
+						}
+					}
 				}
 			}
 		}
 	}
-	
-	
+
+	private Server getBestServer(Region r)
+	{
+		Server bestServer = null;
+		
+		for (Server server : serverList) {
+			if (server.region == r && server.active && !server.isTaken() && server.isOnline()) {
+				bestServer = server;
+				break;
+			}
+		}
+		
+		return bestServer;
+	}
+
+
 	// ROLES & CHANNEL
-	
+
 	public boolean addRole(PickupRoleType type, DiscordRole role) {
 		if (!roles.containsKey(type)) {
 			roles.put(type, new ArrayList<DiscordRole>());
@@ -738,7 +1401,7 @@ public class PickupLogic {
 		}
 		return false;
 	}
-	
+
 	public boolean removeRole(PickupRoleType type, DiscordRole role) {
 		if (roles.containsKey(type)) {
 			roles.get(type).remove(role);
@@ -747,7 +1410,7 @@ public class PickupLogic {
 		}
 		return false;
 	}
-	
+
 	public boolean addChannel(PickupChannelType type, DiscordChannel channel) {
 		if (!channels.containsKey(type)) {
 			channels.put(type, new ArrayList<DiscordChannel>());
@@ -759,7 +1422,7 @@ public class PickupLogic {
 		}
 		return false;
 	}
-	
+
 	public boolean removeChannel(PickupChannelType type, DiscordChannel channel) {
 		if (channels.containsKey(type)) {
 			channels.get(type).remove(channel);
@@ -770,7 +1433,7 @@ public class PickupLogic {
 	}
 	
 	// AFK CHECK
-	
+
 	public void afkCheck() {
 		Set<Player> playerList = new HashSet<Player>();
 		for (Match m : curMatch.values()) {			
@@ -778,27 +1441,54 @@ public class PickupLogic {
 		}
 		
 		for (Player p : playerList) {
-			long latestAFKmsg = p.getDiscordUser().statusChangeTime > p.getLastMessage() ? p.getDiscordUser().statusChangeTime : p.getLastMessage();
-			long afkKickTime = latestAFKmsg + 30 * 60 * 1000;
-			long afkReminderTime = latestAFKmsg + 25 * 60 * 1000;
-			if (afkKickTime < System.currentTimeMillis() && isPlayerStatusAFK(p)) {
+			if (playerInActiveMatch(p) != null) {
+				continue;
+			}
+
+			long latestAFKmsg = p.getLastMessage();
+			long afkKickTime = latestAFKmsg + 20 * 60 * 1000;
+			long afkReminderTime = latestAFKmsg + 17 * 60 * 1000;
+
+			if (afkKickTime < System.currentTimeMillis()) {
 				LOGGER.info("AFK: REMOVE - " + p.getUrtauth() + ": " + afkKickTime + " > " + System.currentTimeMillis());
 				cmdRemovePlayer(p, null);
-			} else if (afkReminderTime < System.currentTimeMillis() && !p.getAfkReminderSent() && isPlayerStatusAFK(p)) {
+			} else if (afkReminderTime < System.currentTimeMillis() && !p.getAfkReminderSent()) {
 				p.setAfkReminderSent(true);
 				LOGGER.info("AFK: REMINDER - " + p.getUrtauth() + ": " + afkKickTime + " > " + System.currentTimeMillis());
 				String msg = Config.afk_reminder;
 				msg = msg.replace(".user.", p.getDiscordUser().getMentionString());
 				bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
-				
+			}
+		}
+		
+		for (Match m :ongoingMatches) {
+			if (m.getMatchState() != MatchState.AwaitingServer) {
+				continue;
+			}
+			
+			long lastPickTime = m.getTimeLastPick();
+			long pickKickTime = lastPickTime + 3 * 60 * 1000;
+			long pickReminderTime = lastPickTime + 2 * 60 * 1000;
+			
+			if (pickKickTime < System.currentTimeMillis()) {
+				String msg = Config.pick_reset;
+				msg = msg.replace(".matchid.", String.valueOf(db.getLastMatchID() + 1));
+				msg = msg.replace(".user.", m.getCaptainsTurn().getDiscordUser().getMentionString());
+				bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+				autoBanPlayer(m.getCaptainsTurn(), BanReason.NOSHOW);
+				m.reset();
+				ongoingMatches.remove(m);
+			} else if (pickReminderTime < System.currentTimeMillis() && !m.getPickReminderSent()) {
+				m.setPickReminderSent(true);
+				LOGGER.info("PICK: REMINDER - " + m.getCaptainsTurn().getUrtauth() + ": " + pickKickTime + " > " + System.currentTimeMillis());
+				String msg = Config.pick_reminder;
+				msg = msg.replace(".user.", m.getCaptainsTurn().getDiscordUser().getMentionString());
+				bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
 			}
 		}
 	}
-	
-	private boolean isPlayerStatusAFK(Player player) {
-		return player.getDiscordUser().status != DiscordUserStatus.online;
-	}
-	
+
+
 	public void autoBanPlayer(Player player, BanReason reason) {
 		String[] durationString = banDuration.get(reason);
 		PlayerBan latestBan = player.getLatestBan();
@@ -806,7 +1496,7 @@ public class PickupLogic {
 		int strength = 0;
 		if (latestBan != null) {
 			long latestBanDuration = latestBan.endTime - latestBan.startTime;
-			latestBanDuration = Math.max(latestBanDuration * 2, parseDurationFromString("1w"));
+			latestBanDuration = Math.max(latestBanDuration * 2, parseDurationFromString("1M"));
 			strength = player.getPlayerBanCountSince(System.currentTimeMillis() - latestBanDuration);
 			strength = Math.min(strength, durationString.length - 1);
 		}
@@ -814,11 +1504,11 @@ public class PickupLogic {
 		
 		banPlayer(player, reason, duration);
 	}
-	
+
 	public void banPlayer(Player player, BanReason reason, long duration) {
 		
 		// add reminaing bantime to the new ban
-		long endTime = -1L;
+		long endTime;
 		if (player.isBanned()) {
 			endTime = player.getLatestBan().endTime + duration;
 		} else {
@@ -840,38 +1530,89 @@ public class PickupLogic {
 			match.removePlayer(player, true);
 		}
 	}
-	
+
+	public void UnbanPlayer(Player player) {
+			
+			if (player.isBanned()) {
+				
+				player.forgiveBan();
+				
+				bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), printUnbanInfo(player));
+				bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), printUnbanInfo(player));
+			} else {
+				// Player is not banned 
+				bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), printPlayerNotBannedInfo(player));
+			}
+	}
+
+
 	public String printBanInfo(Player player) {
 		PlayerBan ban = player.getLatestBan();
-		
-		if (ban == null || ban.endTime <= System.currentTimeMillis()) {
-			String msg = Config.not_banned;
+
+		String msg = Config.not_banned;
+		if (ban == null || ban.endTime <= System.currentTimeMillis() || ban.forgiven) {
 			msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
 			msg = msg.replace(".urtauth.", player.getUrtauth());
+		}
+		else{
+			String time = parseStringFromDuration(ban.endTime - System.currentTimeMillis());
+
+			msg = Config.is_banned;
+			msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
+			msg = msg.replace(".urtauth.", player.getUrtauth());
+			msg = msg.replace(".reason.", ban.reason.name());
+			msg = msg.replace(".time.", time);
+		}
+
+		ArrayList<PlayerBan> past_bans = player.getPlayerBanListSince(System.currentTimeMillis() - parseDurationFromString("2M"));
+		if (past_bans.size() == 0){
 			return msg;
 		}
-		
-		String time = parseStringFromDuration(ban.endTime - System.currentTimeMillis());
-		
-		String msg = Config.is_banned;
+
+		msg = msg + "\n\n";
+		msg = msg + Config.ban_history;
+		String ban_item;
+		for (PlayerBan past_ban : past_bans){
+			ban_item = '\n' + Config.ban_history_item;
+
+			ban_item = ban_item.replace(".date.", String.valueOf(past_ban.startTime / 1000));
+			ban_item = ban_item.replace(".duration.", parseStringFromDuration(past_ban.endTime - past_ban.startTime));
+			ban_item = ban_item.replace(".reason.", past_ban.reason.name());
+
+			if (past_ban.forgiven){
+				ban_item = ban_item + " *(forgiven)*";
+			}
+			msg = msg + ban_item;
+		}
+
+		return msg;
+	}
+
+	public String printUnbanInfo(Player player) {
+		String msg = Config.is_unbanned;
 		msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
 		msg = msg.replace(".urtauth.", player.getUrtauth());
-		msg = msg.replace(".reason.", ban.reason.name());
-		msg = msg.replace(".time.", time);
+		return msg;
+	}
+
+	public String printPlayerNotBannedInfo(Player player) {
+		String msg = Config.is_notbanned;
+		msg = msg.replace(".user.", player.getDiscordUser().getMentionString());
+		msg = msg.replace(".urtauth.", player.getUrtauth());
 		return msg;
 	}
 	
 	// HELPER
-	
+
 	public static long parseDurationFromString(String string) {
 		long total = 0;
 		
-		String curDuration = "";
+		StringBuilder curDuration = new StringBuilder();
 		for (int i = 0; i < string.length(); ++i) {
 			if (Character.isDigit(string.charAt(i))) {
-				curDuration += String.valueOf(string.charAt(i));
+				curDuration.append(string.charAt(i));
 			} else {
-				long duration = Long.valueOf(curDuration);
+				long duration = Long.parseLong(curDuration.toString());
 				switch (string.charAt(i)) {
 				case 'y': duration *= 12;
 				case 'M': duration *= 4;
@@ -882,12 +1623,12 @@ public class PickupLogic {
 				case 's': duration *= 1000;
 				}
 				total += duration;
-				curDuration = "";
+				curDuration = new StringBuilder();
 			}
 		}
 		return total;
 	}
-	
+
 	public static String parseStringFromDuration(long duration) {
 		String string = "";
 		
@@ -903,12 +1644,12 @@ public class PickupLogic {
 		long year = month * 12;
 		
 		long curAmount;
-		if ((curAmount = duration / year) > 0 && acc > 0) {
+		if ((curAmount = duration / year) > 0) {
 			string += curAmount + "y";
 			duration = duration % year;
 			--acc;
 		}		
-		if ((curAmount = duration / month) > 0 && acc > 0) {
+		if ((curAmount = duration / month) > 0) {
 			string += curAmount + "M";
 			duration = duration % month;
 			--acc;
@@ -935,10 +1676,8 @@ public class PickupLogic {
 		}
 		if ((curAmount = duration / second) > 0 && acc > 0) {
 			string += curAmount + "s";
-			duration = duration % second;
 			--acc;
 		}
-		
 		
 		return string;
 	}
@@ -951,7 +1690,7 @@ public class PickupLogic {
 		}
 		return null;
 	}
-	
+
 	public List<Match> playerInMatch(Player player) {
 		List<Match> matchlist = new ArrayList<Match>();
 		for (Gametype gt : curMatch.keySet()) {
@@ -962,7 +1701,7 @@ public class PickupLogic {
 		}
 		return matchlist;
 	}
-	
+
 	public Match playerInActiveMatch(Player player) {
 		for (Match m : ongoingMatches) {
 			if (m.isInMatch(player)) {
@@ -971,7 +1710,7 @@ public class PickupLogic {
 		}
 		return null;
 	}
-	
+
 	public Match playerInMatch(Gametype gametype, Player player) {
 		if (curMatch.containsKey(gametype)) {
 			if (curMatch.get(gametype).isInMatch(player)) {
@@ -979,10 +1718,6 @@ public class PickupLogic {
 			}
 		}
 		return null;
-	}
-	
-	public boolean isLocked() {
-		return locked;
 	}
 
 	public List<DiscordRole> getAdminList() {
@@ -995,7 +1730,7 @@ public class PickupLogic {
 		}
 		return list;
 	}
-	
+
 	public List<DiscordRole> getSuperAdminList() {
 		List<DiscordRole> list = new ArrayList<DiscordRole>();
 		if (roles.containsKey(PickupRoleType.SUPERADMIN)) {
@@ -1010,7 +1745,7 @@ public class PickupLogic {
 		}
 		return new ArrayList<DiscordRole>();
 	}
-	
+
 	public List<DiscordChannel> getChannelByType(PickupChannelType type) {
 		if (channels.containsKey(type)) {
 			return channels.get(type);
@@ -1044,4 +1779,809 @@ public class PickupLogic {
 		return null;
 	}
 
+	public void setLastMapPlayed(Gametype gt, GameMap map) {
+		lastMapPlayed.remove(gt);
+		lastMapPlayed.put(gt, map);
+	}
+
+	public void removeLastMapPlayed(Gametype gt){
+		lastMapPlayed.remove(gt);
+	}
+
+	public GameMap getLastMapPlayed(Gametype gt) {
+		return lastMapPlayed.get(gt);
+	}
+
+	public Server setupGTV() {
+		for (Server gtv : gtvServerList) {
+			if (!gtv.isTaken()) {
+				gtv.take();
+				return gtv;
+			}
+		}
+		return null;
+	}
+
+	public void restartApplication() throws URISyntaxException, IOException
+	{
+		final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+		final File currentJar = new File(PickupBotDiscordMain.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+
+		/* is it a jar file? */
+		if(!currentJar.getName().endsWith(".jar"))
+		return;
+
+		/* Build command: java -jar application.jar */
+		final ArrayList<String> command = new ArrayList<String>();
+		command.add(javaBin);
+		command.add("-jar");
+		command.add(currentJar.getPath());
+
+		final ProcessBuilder builder = new ProcessBuilder(command);
+		builder.start();
+		System.exit(0);
+	}
+
+	public void cmdLaunchAC(DiscordInteraction interaction, Player player, int matchId, String ip, String password){
+		for (Match match : ongoingMatches) {
+			if (match.getID() == matchId) {
+				for (Player playerInMatch : match.getPlayerList()){
+					if (playerInMatch.equals(player)){
+						String response = FtwglAPI.launchAC(player, ip, password);
+						interaction.respond(response);
+						return;
+					}
+				}
+				interaction.respond(Config.ftw_playernotinmatch);
+				return;
+			}
+		}
+
+		interaction.respond(Config.ftw_matchnotfound);
+	}
+
+	public void invitePlayersToTeam(Player captain, List<Player> invitedPlayers) {
+		Team team = null;
+		for (Team activeTeam : activeTeams){
+			if (activeTeam.getCaptain().equals(captain)){
+				team = activeTeam;
+				break;
+			}
+			else if (activeTeam.isInTeam(captain)){
+				bot.sendNotice(captain.getDiscordUser(), Config.team_involved_other);
+				return;
+			}
+		}
+		if (team == null){
+			team = new Team(this, captain);
+			activeTeams.add(team);
+		}
+
+		for (Player invitedPlayer : invitedPlayers){
+			if (team.isFull()){
+				bot.sendNotice(captain.getDiscordUser(), Config.team_is_full);
+				return;
+			}
+			if (team.isInTeam(invitedPlayer)){
+				bot.sendNotice(captain.getDiscordUser(), Config.team_already_in.replace(".auth.", invitedPlayer.getUrtauth()));
+				continue;
+			}
+			if (team.isInvitedToTeam(invitedPlayer)){
+				bot.sendNotice(captain.getDiscordUser(), Config.team_already_invited.replace(".auth.", invitedPlayer.getUrtauth()));
+				continue;
+			}
+			boolean alreadyInvolved = false;
+			for (Team activeTeam : activeTeams) {
+				if (activeTeam.isInTeam(invitedPlayer)) {
+					alreadyInvolved = true;
+					break;
+				}
+			}
+			if (alreadyInvolved){
+				bot.sendNotice(captain.getDiscordUser(), Config.team_already_involved.replace(".auth.", invitedPlayer.getUrtauth()));
+				continue;
+			}
+			team.invitePlayer(invitedPlayer);
+		}
+		cmdRemovePlayer(captain, null);
+	}
+
+	public void leaveTeam(Player player){
+		for (Team activeTeam : activeTeams){
+			if (activeTeam.getCaptain().equals(player)){
+				activeTeams.remove(activeTeam);
+				activeTeam.archive();
+				bot.sendNotice(player.getDiscordUser(), Config.team_leave_captain);
+
+				cmdRemovePlayer(player, null);
+				return;
+			}
+			else if (activeTeam.isInTeam(player)){
+				activeTeam.removePlayer(player);
+				bot.sendNotice(player.getDiscordUser(), Config.team_leave.replace(".captain.", activeTeam.getCaptain().getUrtauth()));
+				cmdRemovePlayer(player, null);
+				return;
+			}
+		}
+		bot.sendNotice(player.getDiscordUser(), Config.team_noteam);
+	}
+
+	public void answerTeamInvite(DiscordInteraction interaction, Player player, int answer, Player captain, Player invitedPlayer){
+		Team team = null;
+		for (Team activeTeam : activeTeams) {
+			if (activeTeam.getCaptain().equals(captain)) {
+				team = activeTeam;
+			}
+		}
+		if (team == null){
+			interaction.respond(Config.team_error_active);
+			interaction.message.delete();
+			return;
+		}
+
+		if (player.equals(captain) && answer == 2){
+			team.cancelInvitation(invitedPlayer);
+			interaction.respond(null);
+			interaction.message.delete();
+			return;
+		}
+		if (!player.equals(invitedPlayer)){
+			interaction.respond(Config.team_error_invite.replace(".player.", invitedPlayer.getUrtauth()));
+			return;
+		}
+
+		if (answer == 1){
+			if (team.isFull()){
+				interaction.respond(Config.team_is_full);
+				return;
+			}
+			team.acceptInvitation(invitedPlayer);
+
+		}
+		else{
+			team.declineInvitation(invitedPlayer);
+		}
+		interaction.respond(null);
+		interaction.message.delete();
+	}
+
+	public void removeTeamMember(DiscordInteraction interaction, Player player, Player captain, Player playerToRemove){
+		if (!player.equals(playerToRemove) && !player.equals(captain)){
+			interaction.respond(Config.team_error_remove);
+			return;
+		}
+
+		Team team = null;
+		for (Team activeTeam : activeTeams) {
+			if (activeTeam.getCaptain().equals(captain)) {
+				team = activeTeam;
+			}
+		}
+		if (team == null){
+			interaction.respond(Config.team_error_active);
+			return;
+		}
+
+		team.removePlayer(playerToRemove);
+		interaction.respond(null);
+		interaction.message.delete();
+		cmdRemovePlayer(playerToRemove, null);
+	}
+
+	public void cmdAddTeam(Player player, Gametype gt, boolean forced){
+		Team team = null;
+		for (Team activeTeam : activeTeams){
+			if (activeTeam.getCaptain().equals(player) || (forced && activeTeam.isInTeam(player))){
+				team = activeTeam;
+				break;
+			}
+		}
+		if (team == null){
+			bot.sendNotice(player.getDiscordUser(), Config.team_noteam_captain);
+			return;
+		}
+
+//		if (gt.getTeamSize() < 2){
+//			bot.sendNotice(player.getDiscordUser(), Config.team_error_wrong_gt);
+//			return;
+//		}
+
+		if (team.getPlayers().size() != gt.getTeamSize()){
+			bot.sendNotice(player.getDiscordUser(), Config.team_error_teamsize.replace(".teamsize.", String.valueOf(gt.getTeamSize())));
+			return;
+		}
+
+		Match m = curMatch.get(gt);
+
+		for (Player teamPlayer : team.getPlayers()){
+			if (teamPlayer.isBanned()) {
+				bot.sendMsg(bot.getLatestMessageChannel(), printBanInfo(teamPlayer));
+				return;
+			}
+			if (playerInActiveMatch(teamPlayer) != null) {
+				bot.sendNotice(teamPlayer.getDiscordUser(), Config.player_already_match);
+				return;
+			}
+			if (curMatch.containsKey(gt)) {
+				if (m.getMatchState() != MatchState.Signup || m.isInMatch(teamPlayer) || playerInActiveMatch(teamPlayer) != null) {
+					m.removePlayer(teamPlayer, false);
+				}
+			}
+		}
+
+		teamsQueued.put(team, gt);
+
+		String addedMsg = Config.team_added;
+		addedMsg = addedMsg.replace(".gamemode.", gt.getName());
+		addedMsg = addedMsg.replace(".team.", team.getTeamString());
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), addedMsg);
+		checkTeams();
+	}
+
+	public void checkTeams(){
+		for (Team queuedTeam : teamsQueued.keySet()) {
+			Gametype gt = teamsQueued.get(queuedTeam);
+			Match m = curMatch.get(gt);
+			if (curMatch.containsKey(gt)) {
+				if (m.getPlayerCount() <= gt.getTeamSize()) {
+					m.addSquad(queuedTeam);
+					teamsQueued.remove(queuedTeam);
+					for (Player teamPlayer : queuedTeam.getPlayers()) {
+						m.addPlayer(teamPlayer);
+						teamPlayer.afkCheck();
+					}
+				}
+			}
+		}
+	}
+
+	public void cmdRemoveTeam(Player player, boolean shouldSpam){
+		Team team = null;
+		for (Team activeTeam : activeTeams){
+			if (activeTeam.isInTeam(player)){
+				team = activeTeam;
+				break;
+			}
+		}
+		if (team == null){
+			if (shouldSpam){
+				bot.sendNotice(player.getDiscordUser(), Config.team_noteam);
+			}
+			return;
+		}
+
+		if (playerInActiveMatch(player) != null) {
+			if (shouldSpam) {
+				bot.sendNotice(player.getDiscordUser(), Config.player_already_match);
+			}
+			return;
+		}
+
+		teamsQueued.remove(team);
+
+		for (Match match : curMatch.values()) {
+			for (Player teamPlayer : team.getPlayers()){
+				match.removePlayer(teamPlayer, shouldSpam);
+			}
+			match.removeSquad(team);
+		}
+
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), Config.team_removed_queue.replace(".team.", team.getTeamString()));
+	}
+
+	public void cmdPrintTeam(Player player){
+		Team team = null;
+		for (Team activeTeam : activeTeams){
+			if (activeTeam.isInTeam(player)){
+				team = activeTeam;
+				break;
+			}
+		}
+		if (team == null){
+			bot.sendNotice(player.getDiscordUser(), Config.team_noteam);
+			return;
+		}
+
+		bot.sendNotice(player.getDiscordUser(), Config.team_print_info.replace(".team.", team.getTeamStringNoMention()));
+	}
+
+	public void cmdPrintTeams(Player player){
+		String msg = Config.team_print_all;
+		for (Team activeTeam : activeTeams){
+			msg = msg + "\n" + activeTeam.getTeamStringNoMention();
+		}
+		if (msg.equals(Config.team_print_all)){
+			bot.sendMsg(player.getLastPublicChannel(), Config.team_print_noteam);
+			return;
+		}
+
+		bot.sendMsg(player.getLastPublicChannel(), msg);
+	}
+
+	public void cmdEnableDynamicServer(){
+		dynamicServers = true;
+	}
+
+	public void cmdDisableDynamicServer(){
+		dynamicServers = false;
+	}
+
+	public boolean getDynamicServers(){
+		return dynamicServers;
+	}
+
+	public void cmdGetPingURL(Player player) {
+		bot.sendNotice(player.getDiscordUser(), Config.ftw_error_noping);
+		bot.sendMsg(player.getDiscordUser(), Config.ftw_dm_noping.replace(".url.", FtwglAPI.requestPingUrl(player)));
+	}
+
+	public void showBets(DiscordInteraction interaction, int matchId, String color, Player p){
+		Match match = null;
+		for (Match m : ongoingMatches){
+			if (m.getID() == matchId){
+				match = m;
+			}
+		}
+		if (match == null || !match.acceptBets()){
+			interaction.respond(Config.bets_notaccepting);
+			return;
+		}
+
+		String otherTeam = color.equals("red") ? "blue" : "red";
+		if (match.isInMatch(p) && match.getTeam(p).equals(otherTeam)){
+			interaction.respond(Config.bets_otherteam);
+			return;
+		}
+
+		if (p.getCoins() <= 0){
+			interaction.respond(Config.bets_nomoney);
+			return;
+		}
+
+		ArrayList<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
+
+		if (p.getCoins() > 10){
+			JSONObject coinEmoji = Bet.getCoinEmoji(10);
+			DiscordButton button10 = new DiscordButton(DiscordButtonStyle.GREY);
+			button10.label = "10";
+			button10.custom_id = "bet_" + matchId + "_" + color + "_" + 10;
+			button10.emoji = coinEmoji;
+			buttons.add(button10);
+		}
+
+		if (p.getCoins() > 100){
+			JSONObject coinEmoji = Bet.getCoinEmoji(100);
+			DiscordButton button100 = new DiscordButton(DiscordButtonStyle.GREY);
+			button100.label = "100";
+			button100.custom_id = "bet_" + matchId + "_" + color + "_" + 100;
+			button100.emoji = coinEmoji;
+			buttons.add(button100);
+		}
+
+
+		if (p.getCoins() > 1000){
+			JSONObject coinEmoji = Bet.getCoinEmoji(1000);
+			DiscordButton button1000 = new DiscordButton(DiscordButtonStyle.GREY);
+			button1000.label = String.format("%,d", 1000);
+			button1000.custom_id = "bet_" + matchId + "_" + color + "_" + 1000;
+			button1000.emoji = coinEmoji;
+			buttons.add(button1000);
+		}
+
+		if (p.getCoins() > 10000){
+			JSONObject coinEmoji = Bet.getCoinEmoji(10000);
+			DiscordButton button10000 = new DiscordButton(DiscordButtonStyle.GREY);
+			button10000.label = String.format("%,d", 10000);
+			button10000.custom_id = "bet_" + matchId + "_" + color + "_" + 10000;
+			button10000.emoji = coinEmoji;
+			buttons.add(button10000);
+		}
+
+		if (p.getCoins() > 100000){
+			JSONObject coinEmoji = Bet.getCoinEmoji(100000);
+			DiscordButton button100000 = new DiscordButton(DiscordButtonStyle.GREY);
+			button100000.label = String.format("%,d", 100000);
+			button100000.custom_id = "bet_" + matchId + "_" + color + "_" + 100000;
+			button100000.emoji = coinEmoji;
+			buttons.add(button100000);
+		}
+
+		if (p.getCoins() > 1000000){
+			JSONObject coinEmoji = Bet.getCoinEmoji(1000000);
+			DiscordButton button1000000 = new DiscordButton(DiscordButtonStyle.GREY);
+			button1000000.label = String.format("%,d", 1000000);
+			button1000000.custom_id = "bet_" + matchId + "_" + color + "_" + 1000000;
+			button1000000.emoji = coinEmoji;
+			buttons.add(button1000000);
+		}
+
+		JSONObject coinEmoji = Bet.getCoinEmoji(p.getCoins());
+		DiscordButton buttonallin = new DiscordButton(DiscordButtonStyle.RED);
+		buttonallin.label = String.format("%,d", p.getCoins()) + " (ALL IN)";
+		buttonallin.custom_id = "bet_" + matchId + "_" + color + "_-1";
+		buttonallin.emoji = coinEmoji;
+		buttons.add(buttonallin);
+
+		String msg = Config.bets_howmuch;
+		msg = msg.replace(".team.", color);
+		msg = msg.replace(".balance.", String.valueOf(p.getCoins()));
+		msg = msg.replace(".matchid.", String.valueOf(matchId));
+		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
+		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
+		interaction.respond(msg, null, buttons);
+	}
+
+	public void bet(DiscordInteraction interaction, int matchId, String color, long amount, Player p){
+		boolean allIn = false;
+		Match match = null;
+		for (Match m : ongoingMatches){
+			if (m.getID() == matchId){
+				match = m;
+			}
+		}
+		if (match == null || !match.acceptBets()){
+			interaction.respond(Config.bets_notaccepting);
+			return;
+		}
+
+		if (amount > p.getCoins()){
+			interaction.respond(Config.bets_insufficient);
+			return;
+		}
+
+		if (p.getCoins() <= 0){
+			interaction.respond(Config.bets_nomoney);
+			return;
+		}
+
+		if (amount > 1000000){
+			interaction.respond(Config.bets_above_limit);
+			return;
+		}
+
+		// All in
+		if (amount == -1){
+			amount = p.getCoins();
+			allIn = true;
+		}
+
+		String otherTeam = color.equals("red") ? "blue" : "red";
+		if (match.isInMatch(p) && match.getTeam(p).equals(otherTeam)){
+			interaction.respond(Config.bets_otherteam);
+			return;
+		}
+		float odds = color.equals("red") ? match.getOdds(0) : match.getOdds(1);
+		Bet bet = new Bet(match.getID(), p, color, amount, odds);
+		for (Bet matchBet : match.bets){
+			if (matchBet.player.equals(p) && color.equals(matchBet.color)){
+				if (!allIn && amount + matchBet.amount > 1000000){
+					interaction.respond(Config.bets_above_limit);
+					return;
+				}
+				matchBet.amount += amount;
+				bet.place(match);
+				return;
+			}
+		}
+		match.bets.add(bet);
+		bet.place(match);
+
+		interaction.respond(null);
+	}
+
+	public void showBuys(DiscordInteraction interaction, Player p){
+		ArrayList<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
+
+		int price;
+		JSONObject emoji;
+		DiscordButton button;
+
+		// Elo boost
+		price = 1000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " Elo boost (2h)";
+		button.custom_id = "buy_eloboost";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		// Elo boost
+		price = 1000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " Additional map votes";
+		button.custom_id = "buy_showvoteoptions";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		// Elo boost
+		price = 10000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " Ban a map (2h)";
+		button.custom_id = "buy_banmap";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		JSONObject coinEmoji = Bet.getCoinEmoji(p.getCoins());
+		String msg = Config.buy_show;
+		msg = msg.replace(".balance.", String.format("%,d", p.getCoins()));
+		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
+		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
+		interaction.respond(msg, null, buttons);
+	}
+
+	public void buyBoost(DiscordInteraction interaction, Player p){
+		int price = 1000;
+		JSONObject emoji  = Bet.getCoinEmoji(price);
+		if (p.getCoins() < price){
+			interaction.respond(Config.bets_insufficient);
+			return;
+		}
+
+		if (p.hasBoostActive()){
+			interaction.respond(Config.buy_boostactive.replace(".remaining.", String.valueOf(p.getEloBoost() / 1000)));
+			return;
+		}
+
+		p.setEloBoost((long) (System.currentTimeMillis() + 7.2e6)); // 2h
+		p.spendCoins(price);
+		p.saveWallet();
+		interaction.respond(null);
+
+		String msg = Config.buy_boostactivated;
+		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
+		msg = msg.replace(".price.", String.valueOf(price));
+		msg = msg.replace(".emojiname.", emoji.getString("name"));
+		msg = msg.replace(".emojiid.", emoji.getString("id"));
+		msg = msg.replace(".remaining.", String.valueOf(p.getEloBoost() / 1000));
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+	}
+
+	public void showAdditionalVoteOptions(DiscordInteraction interaction, Player p){
+		if (p.getAdditionalMapVotes() > 0){
+			interaction.respond(Config.buy_voteoptionsalready.replace(".vote.", String.valueOf(p.getAdditionalMapVotes())));
+			return;
+		}
+		ArrayList<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
+
+		int price;
+		JSONObject emoji;
+		DiscordButton button;
+
+		price = 1000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " 1 vote";
+		button.custom_id = "buy_additionalvote_1";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		price = 2000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " 2 votes";
+		button.custom_id = "buy_additionalvote_2";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		price = 4000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " 3 votes";
+		button.custom_id = "buy_additionalvote_3";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		price = 8000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " 4 votes";
+		button.custom_id = "buy_additionalvote_4";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+		price = 16000;
+		emoji = Bet.getCoinEmoji(price);
+		button = new DiscordButton(DiscordButtonStyle.GREY);
+		button.label = price + " 5 votes";
+		button.custom_id = "buy_additionalvote_5";
+		button.emoji = emoji;
+		button.disabled = p.getCoins() < price;
+		buttons.add(button);
+
+
+		JSONObject coinEmoji = Bet.getCoinEmoji(p.getCoins());
+		String msg = Config.buy_showvoteoptions;
+		interaction.respond(msg, null, buttons);
+	}
+
+	public void buyAdditionalVotes(DiscordInteraction interaction, Player p, int number){
+		int price = 1000;
+		if (number == 2){
+			price = 2000;
+		} else if (number == 3){
+			price = 4000;
+		} else if (number == 4){
+			price = 8000;
+		}else if (number == 5){
+			price = 16000;
+		}
+		if (p.getAdditionalMapVotes() > 0){
+			interaction.respond(Config.buy_voteoptionsalready.replace(".vote.", String.valueOf(p.getAdditionalMapVotes())));
+			return;
+		}
+
+		JSONObject emoji  = Bet.getCoinEmoji(price);
+		if (p.getCoins() < price){
+			interaction.respond(Config.bets_insufficient);
+			return;
+		}
+
+		p.setAdditionalMapVotes(number);
+		p.spendCoins(price);
+		p.saveWallet();
+		interaction.respond(Config.buy_addvote_purchased);
+
+		String msg = Config.buy_addvotesactivated;
+		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
+		msg = msg.replace(".price.", String.valueOf(price));
+		msg = msg.replace(".emojiname.", emoji.getString("name"));
+		msg = msg.replace(".emojiid.", emoji.getString("id"));
+		msg = msg.replace(".vote.", String.valueOf(p.getAdditionalMapVotes()));
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+	}
+
+	public void buyBanMap(DiscordInteraction interaction, Player p){
+		int price = 10000;
+
+		JSONObject emoji  = Bet.getCoinEmoji(price);
+		if (p.getCoins() < price){
+			interaction.respond(Config.bets_insufficient);
+			return;
+		}
+
+		p.setMapBans(p.getMapBans() + 1);
+		p.spendCoins(price);
+		p.saveWallet();
+		interaction.respond(Config.buy_banmap_purchased);
+
+		String msg = Config.buy_mapbanactivated;
+		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
+		msg = msg.replace(".price.", String.valueOf(price));
+		msg = msg.replace(".emojiname.", emoji.getString("name"));
+		msg = msg.replace(".emojiid.", emoji.getString("id"));
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+	}
+
+	public void cmdUseMapBan(Player p, String mapname){
+		if (p.getMapBans() == 0){
+			bot.sendNotice(p.getDiscordUser(), Config.no_map_ban);
+			return;
+		}
+
+		int counter = 0;
+		GameMap map = null;
+		for (GameMap xmap : mapList) {
+			if (xmap.name.toLowerCase().contains(mapname.toLowerCase())) {
+				counter++;
+				map = xmap;
+			}
+		}
+		if (counter > 1) {
+			bot.sendNotice(p.getDiscordUser(), Config.map_not_unique);
+			return;
+		} else if (counter == 0) {
+			bot.sendNotice(p.getDiscordUser(), Config.map_not_found);
+			return;
+		} else if (map.bannedUntil >= System.currentTimeMillis()) {
+			bot.sendNotice(p.getDiscordUser(), Config.map_already_banned.replace(".remaining.", String.valueOf(map.bannedUntil / 1000)));
+			return;
+		}
+
+		p.setMapBans(p.getMapBans() - 1);
+		map.bannedUntil = (long) (System.currentTimeMillis() + 7.2e6);
+		db.updateMapBan(map);
+
+		for (Gametype gt : curMatch.keySet()){
+			curMatch.get(gt).banMap(map);
+		}
+
+		String msg = Config.used_map_ban;
+		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
+		msg = msg.replace(".map.", map.name);
+		msg = msg.replace(".time.", String.valueOf(map.bannedUntil / 1000));
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+	}
+
+	public void cmdWallet(Player p) {
+		JSONObject coinEmoji = Bet.getCoinEmoji(p.getCoins());
+		String msg = Config.buy_show_wallet;
+		msg = msg.replace(".player.", p.getDiscordUser().username);
+		msg = msg.replace(".balance.", String.format("%,d", p.getCoins()));
+		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
+		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
+		bot.sendMsg(bot.getLatestMessageChannel(), msg);
+	}
+
+	public void cmdDonate(Player p, Player destP, int amount) {
+		if (amount <= 0){
+			bot.sendNotice(p.getDiscordUser(), Config.donate_incorrect_amount);
+			return;
+		} else if(amount > 10000){
+			bot.sendNotice(p.getDiscordUser(), Config.donate_above_limit);
+			return;
+		} else if(amount > p.getCoins()){
+			bot.sendNotice(p.getDiscordUser(), Config.bets_insufficient);
+			return;
+		}
+
+		p.spendCoins(amount);
+		p.saveWallet();
+		destP.addCoins(amount);
+		destP.saveWallet();
+
+		JSONObject coinEmoji = Bet.getCoinEmoji(amount);
+		String msg = Config.donate_processed;
+		msg = msg.replace(".player.", p.getDiscordUser().getMentionString());
+		msg = msg.replace(".otherplayer.", destP.getDiscordUser().getMentionString());
+		msg = msg.replace(".amount.", String.format("%,d", amount));
+		msg = msg.replace(".emojiname.", coinEmoji.getString("name"));
+		msg = msg.replace(".emojiid.", coinEmoji.getString("id"));
+		bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+	}
+
+	public void cmdBetHistory(Player p) {
+		ArrayList<Bet> betList = db.getBetHistory(p);
+
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Last 10 bets of " + p.getDiscordUser().username;
+		embed.color = 7056881;
+		if (betList.size() == 0){
+			embed.description = "No bets yet";
+			bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
+			return;
+		}
+
+		String matchIdField = "";
+		String amountField = "";
+		String resultField = "";
+
+		boolean firstBet = true;
+		for (Bet bet : betList){
+			String linebreak = "\n";
+			if (firstBet){
+				linebreak = "";
+				firstBet = false;
+			}
+			matchIdField += linebreak + bet.matchid;
+
+			JSONObject amountEmoji = Bet.getCoinEmoji(bet.amount);
+			amountField += linebreak + "<:" + amountEmoji.get("name") + ":" + amountEmoji.get("id") + "> " +  String.format("%,d", bet.amount);
+
+			if (bet.won){
+				JSONObject wonEmoji = Bet.getCoinEmoji(Math.round(bet.amount * bet.odds));
+				resultField += linebreak + "Won <:" + wonEmoji.get("name") + ":" + wonEmoji.get("id") + "> " +  String.format("%,d", Math.round(bet.amount * bet.odds));
+			}
+			else {
+				resultField += linebreak + "Lost";
+			}
+		}
+		embed.addField("Match id", matchIdField, true);
+		embed.addField("Amount", amountField, true);
+		embed.addField("Result", resultField, true);
+
+		bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
+	}
+
+	public List<Team> getActiveTeams(){
+		return activeTeams;
+	}
 }

@@ -1,5 +1,7 @@
 package de.gost0r.pickupbot.discord;
 
+import de.gost0r.pickupbot.discord.api.DiscordAPI;
+
 public class DiscordMessage {
 	
 	public String id;
@@ -12,5 +14,14 @@ public class DiscordMessage {
 		this.user = user;
 		this.channel = channel;
 		this.content = content;
+	}
+	
+	public void edit(String content, DiscordEmbed embed) {
+		DiscordAPI.editMessage(this, content, embed);
+		this.content = content;
+	}
+	
+	public void delete() {
+		DiscordAPI.deleteMessage(channel, id);
 	}
 }

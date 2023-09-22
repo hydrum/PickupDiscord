@@ -6,10 +6,12 @@ import java.util.Map;
 public class GameMap {
 	
 	public String name;
+	public long bannedUntil;
 	public Map<Gametype, Boolean> gametypeList = new HashMap<Gametype, Boolean>();
 
 	public GameMap(String name) {
 		this.name = name;
+		this.bannedUntil = 0;
 	}
 	
 	public void setGametype(Gametype gametype, boolean active) {
