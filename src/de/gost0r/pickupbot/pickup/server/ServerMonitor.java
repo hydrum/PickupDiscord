@@ -493,8 +493,10 @@ public class ServerMonitor implements Runnable {
 				player.state = ServerPlayerState.Disconnected;
 				player.timeDisconnect = System.currentTimeMillis();
 				CTF_Stats backup_stats = backupStats.get(player.auth);
-				backup_stats.add(player.ctfstats);
-				backupStats.put(player.auth, backup_stats);
+				if (backup_stats != null){
+					backup_stats.add(player.ctfstats);
+					backupStats.put(player.auth, backup_stats);
+				}
 				LOGGER.info("Player " + player.name + " (" + player.auth + ") disconnected.");
 			}
 		}
