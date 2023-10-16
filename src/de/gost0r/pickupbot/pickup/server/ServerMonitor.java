@@ -127,7 +127,6 @@ public class ServerMonitor implements Runnable {
 				}
 				playerlist += player.getUrtauth();
 				noshowPlayers.add(player);
-				noshowPlayers.add(player);
 			}
 		}
 		
