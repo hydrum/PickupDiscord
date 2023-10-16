@@ -106,7 +106,7 @@ public class FtwglAPI {
 
         Server server = new Server(obj.getJSONObject("server").getInt("id"), null, port, serverObj.getString("rcon"), serverObj.getString("password"), true, region);
         server.country = country;
-        server.city = serverLocationObj.getString("name");
+        server.city = serverLocationObj.getString("city");
         server.playerPing = playerPing;
         return server;
     }

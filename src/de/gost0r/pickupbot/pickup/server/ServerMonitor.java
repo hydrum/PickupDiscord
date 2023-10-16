@@ -29,9 +29,10 @@ public class ServerMonitor implements Runnable {
 	
 	private boolean stopped;
 	
-	int score[][] = new int[2][2]; 
-	
-	
+	int score[][] = new int[2][2];
+	int backupScore[][] = new int[2][2];
+
+
 	private List<ServerPlayer> players;
 	private Map<String, CTF_Stats> backupStats;
 	private List<ServerPlayer> leavers;
@@ -125,6 +126,7 @@ public class ServerMonitor implements Runnable {
 					playerlist += "^3, ^1";
 				}
 				playerlist += player.getUrtauth();
+				noshowPlayers.add(player);
 				noshowPlayers.add(player);
 			}
 		}
@@ -261,8 +263,13 @@ public class ServerMonitor implements Runnable {
 
 	private void saveStats(int[] scorex, RconPlayersParsed rpp) throws Exception {
 		int half = firstHalf ? 0 : 1;
-		
+
+		if (scorex[0] < backupScore[half][0] || scorex[1] < backupScore[half][1]){
+			scorex = backupScore[half];
+			Sentry.capture("Score bug happened");
+		}
 		score[half] = scorex;
+		backupScore = score;
 		
 		// reset matchstats to previous
 		for (ServerPlayer sp : rpp.players) {
@@ -397,7 +404,7 @@ public class ServerMonitor implements Runnable {
 				LOGGER.info("SWITCHED LIVE -> SCORE");
 			}
 			checkNoMercy(rpp);
-			//backUpScores(rpp);
+			backUpScores(rpp);
 			saveStats(rpp.scores, rpp);
 			match.updateScoreEmbed();
 		}
@@ -486,9 +493,9 @@ public class ServerMonitor implements Runnable {
 			if (player.state != ServerPlayerState.Disconnected) {
 				player.state = ServerPlayerState.Disconnected;
 				player.timeDisconnect = System.currentTimeMillis();
-//				CTF_Stats backup_stats = backupStats.get(player.auth);
-//				backup_stats.add(player.ctfstats);
-//				backupStats.put(player.auth, backup_stats);
+				CTF_Stats backup_stats = backupStats.get(player.auth);
+				backup_stats.add(player.ctfstats);
+				backupStats.put(player.auth, backup_stats);
 				LOGGER.info("Player " + player.name + " (" + player.auth + ") disconnected.");
 			}
 		}
