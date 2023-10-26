@@ -216,7 +216,6 @@ public class Database {
 			pstmt.setString(1, player.getDiscordUser().id);
 			pstmt.setString(2, player.getUrtauth());
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			if (!rs.next()) {				
 				sql = "INSERT INTO player (userid, urtauth, elo, elochange, active, country) VALUES (?, ?, ?, ?, ?, ?)";
 				pstmt = c.prepareStatement(sql);
@@ -227,7 +226,6 @@ public class Database {
 				pstmt.setString(5, String.valueOf(true));
 				pstmt.setString(6, player.getCountry());
 				pstmt.executeUpdate();
-				pstmt.close();
 			} else {
 				sql = "UPDATE player SET active=? WHERE userid=? AND urtauth=?";
 				pstmt = c.prepareStatement(sql);
@@ -235,9 +233,9 @@ public class Database {
 				pstmt.setString(2, player.getDiscordUser().id);
 				pstmt.setString(3, player.getUrtauth());
 				pstmt.executeUpdate();
-				pstmt.close();
 			}
 			rs.close();
+			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 			Sentry.capture(e);
@@ -397,10 +395,10 @@ public class Database {
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, player.getUrtauth());
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			rs.next();
 			int count = rs.getInt("count");
 			rs.close();
+			pstmt.close();
 			return count;
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
@@ -585,7 +583,6 @@ public class Database {
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setInt(1, id);
 			rs = pstmt.executeQuery();
-			pstmt.close();
 			if (rs.next()) {
 			
 				Map<Player, MatchStats> stats = new HashMap<Player, MatchStats>();
@@ -598,7 +595,7 @@ public class Database {
 				pstmt = c.prepareStatement(sql);
 				pstmt.setInt(1, id);
 				rs1 = pstmt.executeQuery();
-				pstmt.close();
+
 				while (rs1.next()) {
 					int pidmid = rs1.getInt("ID");
 					String userid = rs1.getString("player_userid"); // not needed as we potentially load the player via loadPlayer(urtauth)
@@ -610,7 +607,6 @@ public class Database {
 					pstmt = c.prepareStatement(sql);
 					pstmt.setInt(1, pidmid);
 					rs2 = pstmt.executeQuery();
-					pstmt.close();
 					rs2.next();
 					
 					int[] scoreid = new int[] { rs2.getInt("score_1"), rs2.getInt("score_2") };
@@ -625,7 +621,6 @@ public class Database {
 						pstmt = c.prepareStatement(sql);
 						pstmt.setInt(1, scoreid[i]);
 						rs3 = pstmt.executeQuery();
-						pstmt.close();
 						rs3.next();
 						
 						scores[i] = new Score();
@@ -637,13 +632,16 @@ public class Database {
 						scores[i].fc_kills = rs3.getInt("fckills");
 						scores[i].stop_caps = rs3.getInt("stopcaps");
 						scores[i].protect_flag = rs3.getInt("protflag");
+						rs3.close();
 					}
 						
 					// assemble stats
 					Player player = Player.get(DiscordUser.getUser(userid), urtauth);
 					stats.put(player, new MatchStats(scores[0], scores[1], ip, status));
 					teamList.get(team).add(player);
+					rs2.close();
 				}
+				rs1.close();
 					
 				Gametype gametype = logic.getGametypeByString(rs.getString("gametype"));
 				Server server = logic.getServerByID(rs.getInt("server"));
@@ -662,6 +660,7 @@ public class Database {
 										logic);
 			}
 			rs.close();
+			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 			Sentry.capture(e);
@@ -693,11 +692,11 @@ public class Database {
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, p.getUrtauth());
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			if (rs.next()) {
 				match = loadMatch(rs.getInt("matchid"));
 			}
 			rs.close();
+			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 			Sentry.capture(e);
@@ -724,7 +723,6 @@ public class Database {
 			pstmt.setString(2, urtauth == null ? "%" : urtauth);
 			pstmt.setString(3, onlyActive ? String.valueOf(true) : "%");
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			if (rs.next()) {
 				player = new Player(DiscordUser.getUser(rs.getString("userid")), rs.getString("urtauth"));
 				player.setElo(rs.getInt("elo"));
@@ -742,7 +740,6 @@ public class Database {
 				banstmt.setString(1, player.getDiscordUser().id);
 				banstmt.setString(2, player.getUrtauth());
 				ResultSet banSet = banstmt.executeQuery();
-				banstmt.close();
 				while (banSet.next()) {
 					PlayerBan ban = new PlayerBan();
 					ban.player = player;
@@ -756,8 +753,10 @@ public class Database {
 				player.setRank(getRankForPlayer(player));
 				player.stats = getPlayerStats(player, logic.currentSeason);
 				banSet.close();
+				banstmt.close();
 			}
 			rs.close();
+			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 			Sentry.capture(e);
@@ -808,7 +807,6 @@ public class Database {
 			pstmt.setString(1, map.name);
 			pstmt.setString(2, gametype.getName());
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			if (!rs.next()) {
 				createMap(map, gametype);
 				return;
@@ -833,13 +831,11 @@ public class Database {
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, channel.id);
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			if (!rs.next()) {
 				sql = "INSERT INTO channels (channel) VALUES (?)";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setString(1, channel.id);
 				pstmt.executeUpdate();
-				pstmt.close();
 			}			
 			sql = "UPDATE channels SET type=? WHERE channel=?";
 			pstmt = c.prepareStatement(sql);
@@ -860,13 +856,11 @@ public class Database {
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, role.id);
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			if (!rs.next()) {
 				sql = "INSERT INTO roles (role) VALUES (?)";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setString(1, role.id);
 				pstmt.executeUpdate();
-				pstmt.close();
 			}			
 			sql = "UPDATE roles SET type=? WHERE role=?";
 			pstmt = c.prepareStatement(sql);
@@ -894,7 +888,6 @@ public class Database {
 			pstmt.setInt(3, match.getScoreBlue());
 			pstmt.setInt(4, match.getID());
 			pstmt.executeUpdate();
-			pstmt.close();
 			
 			for (Player player : match.getPlayerList()) {
 				// get ids
@@ -904,7 +897,6 @@ public class Database {
 				pstmt.setString(2, player.getDiscordUser().id);
 				pstmt.setString(3, player.getUrtauth());
 				rs = pstmt.executeQuery();
-				pstmt.close();
 				rs.next();
 				int pim = rs.getInt("ID");
 				
@@ -912,7 +904,6 @@ public class Database {
 				pstmt = c.prepareStatement(sql);
 				pstmt.setInt(1, pim);
 				rs = pstmt.executeQuery();
-				pstmt.close();
 				rs.next();
 				int[] scoreid = new int[] { rs.getInt("score_1"), rs.getInt("score_2") };
 				
@@ -923,7 +914,6 @@ public class Database {
 				pstmt.setString(2, match.getStats(player).getStatus().name());
 				pstmt.setInt(3, pim);
 				pstmt.executeUpdate();
-				pstmt.close();
 				
 				// update playerscore
 				sql = "UPDATE score SET kills=?, deaths=?, assists=?, caps=?, returns=?, fckills=?, stopcaps=?, protflag=? WHERE ID=?";
@@ -939,7 +929,6 @@ public class Database {
 					pstmt.setInt(8, match.getStats(player).score[i].protect_flag);
 					pstmt.setInt(9, scoreid[i]);
 					pstmt.executeUpdate();
-					pstmt.close();
 				}
 				
 				// update elo change
@@ -966,13 +955,11 @@ public class Database {
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, gt.getName());
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			if (!rs.next()) {
 				sql = "INSERT INTO gametype (gametype) VALUES (?)";
 				pstmt = c.prepareStatement(sql);
 				pstmt.setString(1, gt.getName());
 				pstmt.executeUpdate();
-				pstmt.close();
 			}
 			sql = "UPDATE gametype SET teamsize=?, active=? WHERE gametype=?";
 			pstmt = c.prepareStatement(sql);
@@ -1070,11 +1057,11 @@ public class Database {
 			pstmt.setString(2, player.getDiscordUser().id);
 			pstmt.setString(3, player.getUrtauth());
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			if (rs.next()) {
 				rank = rs.getInt("rank") + 1;
 			}
 			rs.close();
+			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 			Sentry.capture(e);
@@ -1104,13 +1091,13 @@ public class Database {
 			pstmt.setString(4, player.getUrtauth());
 			pstmt.setString(5, player.getDiscordUser().id);
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			if (rs.next()) {
 				wdl.win = rs.getInt("win");
 				wdl.draw = rs.getInt("draw");
 				wdl.loss = rs.getInt("loss");
 			}
 			rs.close();
+			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -1135,11 +1122,11 @@ public class Database {
 			pstmt.setInt(4, limit);
 			pstmt.setString(5, player.getUrtauth());
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			if (rs.next()) {
 				rank = rs.getInt("rowIndex");
 			}
 			rs.close();
+			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -1167,11 +1154,11 @@ public class Database {
 			pstmt.setInt(4, limit);
 			pstmt.setString(5, player.getUrtauth());
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			if (rs.next()) {
 				rank = rs.getInt("rowIndex");
 			}
 			rs.close();
+			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -1305,7 +1292,6 @@ public class Database {
 			pstmt.setLong(3, season.startdate);
 			pstmt.setLong(4, season.enddate);
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			if (rs.next()) {
 				float kdr = ((float) rs.getInt("sumkills") + (float) rs.getInt("sumassists") / 2) / (float) rs.getInt("sumdeaths");
 				player.setKdr(kdr);
@@ -1322,7 +1308,6 @@ public class Database {
 			pstmt.setLong(2, season.startdate);
 			pstmt.setLong(3, season.enddate);
 			rs = pstmt.executeQuery();
-			pstmt.close();
 			if (rs.next()) {
 				stats.ctf_rating = rs.getFloat("ctfrating");
 				stats.caps = rs.getInt("sumcaps");
@@ -1332,6 +1317,7 @@ public class Database {
 				stats.protflag = rs.getInt("sumprotflag");
 			}
 			rs.close();
+			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
@@ -1484,7 +1470,6 @@ public class Database {
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, p.getUrtauth());
 			ResultSet rs = pstmt.executeQuery();
-			pstmt.close();
 			while (rs.next()) {
 				int matchid = rs.getInt("matchid");
 				String color = rs.getInt("team") == 0 ? "red" : "blue";
@@ -1495,6 +1480,7 @@ public class Database {
 				betList.add(bet);
 			}
 			rs.close();
+			pstmt.close();
 		} catch (SQLException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
