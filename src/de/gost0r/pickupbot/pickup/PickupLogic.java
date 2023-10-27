@@ -1786,6 +1786,7 @@ public class PickupLogic {
 
 	public void removeLastMapPlayed(Gametype gt){
 		lastMapPlayed.remove(gt);
+		lastMapPlayed.put(gt, new GameMap("null"));
 	}
 
 	public GameMap getLastMapPlayed(Gametype gt) {
