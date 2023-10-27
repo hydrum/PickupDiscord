@@ -89,6 +89,10 @@ public class Config {
 	public static final String CMD_REMOVEROLE			= "!removerole";
 
 	public static final String CMD_RESETELO				= "!resetelo";
+	public static final String CMD_SHOWROLES 			= "!showroles";
+	public static final String CMD_SHOWKNOWNROLES 		= "!showknownroles";
+	public static final String CMD_SHOWKNOWNCHANNELS	= "!showknownchannels";
+	public static final String CMD_GODROLE				= "!godrole";
 
 	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_MAP + " " + CMD_MATCH + " " 
 	+ CMD_LAST + " " + CMD_LIVE + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS 

@@ -1397,71 +1397,83 @@ public class PickupBot extends DiscordBot {
 						} else sendNotice(msg.user, "invalid options");
 					} else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
 					break;
-			}
-		}
 
-		// Any channel
-		else
-		{
-			if (data[0].equalsIgnoreCase("!showroles"))
-			{
-				DiscordUser u = msg.user;
-				if (data.length == 2)
-				{
-					DiscordUser testUser = super.parseMention(data[1]);
-					if (testUser != null)
-					{
-						u = testUser;
-					}
-				}
-				List<DiscordRole> list = u.getRoles(DiscordBot.getGuilds());
-				StringBuilder message = new StringBuilder();
-				for (DiscordRole role : list)
-				{
-					message.append(role.getMentionString()).append(" ");
-				}
-				sendNotice(u, message.toString());
-			}
 
-			if (data[0].equalsIgnoreCase("!showknownroles"))
-			{
-				StringBuilder message = new StringBuilder("Roles: ");
-				for (PickupRoleType type : logic.getRoleTypes()) {
-					message.append("\n**").append(type.name()).append("**:");
-
-					for (DiscordRole role : logic.getRoleByType(type))
-					{
-						message.append(" ").append(role.getMentionString()).append(" ");
-					}
-				}
-				sendMsg(msg.channel, message.toString());
-			}
-
-			if (data[0].equalsIgnoreCase("!showknownchannels"))
-			{
-				StringBuilder message = new StringBuilder("Channels: ");
-				for (PickupChannelType type : logic.getChannelTypes()) {
-					message.append("\n**").append(type.name()).append("**:");
-
-					for (DiscordChannel channel : logic.getChannelByType(type))
-					{
-						message.append(" ").append(channel.getMentionString()).append(" ");
-					}
-				}
-				sendMsg(msg.channel, message.toString());
-			}
-
-			if (data[0].equalsIgnoreCase("!godrole")) {
-				if (logic.getRoleByType(PickupRoleType.SUPERADMIN).size() == 0) {
-					if (data.length == 2) {
-						DiscordRole role = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
-						if (role != null) {
-							logic.addRole(PickupRoleType.SUPERADMIN, role);
-							sendNotice(msg.user, "*" + role.getMentionString() + " set as SUPERADMIN role*");
+				case Config.CMD_SHOWROLES:
+					if (msg.user.hasSuperAdminRights()) {
+						DiscordUser u = msg.user;
+						if (data.length == 2)
+						{
+							DiscordUser testUser = super.parseMention(data[1]);
+							if (testUser != null)
+							{
+								u = testUser;
+							}
 						}
-					}
-				}
-				else sendNotice(msg.user, "A DiscordRole is already set as SUPERADMIN, check the DB.");
+						List<DiscordRole> list = u.getRoles(DiscordBot.getGuilds());
+						StringBuilder message = new StringBuilder();
+						for (DiscordRole role : list)
+						{
+							if (msg.channel.type == DiscordChannelType.DM){
+								message.append(role.getMentionString()).append(" ");
+							}
+							else{
+								message.append(role.getMentionString()).append(" ");
+							}
+						}
+						sendNotice(u, message.toString());
+					} else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
+					break;
+
+
+				case Config.CMD_SHOWKNOWNROLES:
+					if (msg.user.hasSuperAdminRights()) {
+						StringBuilder message = new StringBuilder("Roles: ");
+						for (PickupRoleType type : logic.getRoleTypes()) {
+							message.append("\n**").append(type.name()).append("**:");
+
+							for (DiscordRole role : logic.getRoleByType(type))
+							{
+								if (msg.channel.type == DiscordChannelType.DM){
+									message.append(role.getMentionString() + " (``" + role.id + "``)").append(" ");
+								}
+								else{
+									message.append(role.getMentionString()).append(" ");
+								}
+							}
+						}
+						sendMsg(msg.channel, message.toString());
+					} else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
+				break;
+
+				case Config.CMD_SHOWKNOWNCHANNELS:
+					if (msg.user.hasSuperAdminRights()) {
+						StringBuilder message = new StringBuilder("Channels: ");
+						for (PickupChannelType type : logic.getChannelTypes()) {
+							message.append("\n**").append(type.name()).append("**:");
+
+							for (DiscordChannel channel : logic.getChannelByType(type))
+							{
+								message.append(" ").append(channel.getMentionString()).append(" ");
+							}
+						}
+						sendMsg(msg.channel, message.toString());
+					} else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
+				break;
+
+				case Config.CMD_GODROLE:
+				if (msg.user.hasSuperAdminRights()) {
+					if (logic.getRoleByType(PickupRoleType.SUPERADMIN).isEmpty()) {
+						if (data.length == 2) {
+							DiscordRole role = DiscordRole.getRole(data[1].replaceAll("[^\\d.]", ""));
+							if (role != null) {
+								logic.addRole(PickupRoleType.SUPERADMIN, role);
+								sendNotice(msg.user, "*" + role.getMentionString() + " set as SUPERADMIN role*");
+							}
+						}
+					} else sendNotice(msg.user, "A DiscordRole is already set as SUPERADMIN, check the DB.");
+				} else sendNotice(msg.user, "You need SuperAdmin rights to use this.");
+				break;
 			}
 		}
 	}
