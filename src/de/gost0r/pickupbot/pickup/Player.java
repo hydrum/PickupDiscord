@@ -10,8 +10,6 @@ import de.gost0r.pickupbot.discord.DiscordGuild;
 import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.pickup.stats.WinDrawLoss;
 
-import javax.swing.*;
-
 public class Player {
 	
 	public static Database db;
@@ -33,6 +31,7 @@ public class Player {
 		
 	private boolean active = true;
 	private boolean enforceAC = false;
+	private boolean proctf = false;
 	
 	private boolean surrender = false;
 	
@@ -328,6 +327,10 @@ public class Player {
 	public boolean getEnforceAC() { return this.enforceAC; }
 
 	public void setEnforceAC(boolean enforceAC) { this.enforceAC = enforceAC; }
+
+	public boolean getProctf() { return this.proctf; }
+
+	public void setProctf(boolean proctf) { this.proctf = proctf; }
 
 	public float getCaptainScore(Gametype gt){
 		WinDrawLoss wdl = stats.ts_wdl;

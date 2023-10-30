@@ -8,6 +8,7 @@ public class Config {
 	public static final String CMD_1v1					= "!1v1";
 	public static final String CMD_2v2					= "!2v2";
 	public static final String CMD_DIV1					= "!div1";
+	public static final String CMD_PROCTF 				= "!proctf";
 	public static final String CMD_SKEET				= "!skeet";
 	public static final String CMD_AIM					= "!aim";
 	public static final String CMD_REMOVE				= "!remove";
@@ -82,6 +83,7 @@ public class Config {
 
 	public static final String CMD_UNREGISTER			= "!unregister";
 	public static final String CMD_ENFORCEAC			= "!enforceac";
+	public static final String CMD_SETPROCTF 			= "!setproctf";
 
 	public static final String CMD_ADDCHANNEL			= "!addchannel";
 	public static final String CMD_REMOVECHANNEL		= "!removechannel";
@@ -116,9 +118,10 @@ public class Config {
 	public static final String USE_CMD_1v1				= "!1v1 <map>";
 	public static final String USE_CMD_2v2				= "!2v2 <map>";
 	public static final String USE_CMD_DIV1				= "!div1 <map>";
-	public static final String USE_CMD_MAPS				= "!maps displays the map list for each gametype.";
+	public static final String USE_CMD_PROCTF 			= "!proctf <map>";
 	public static final String USE_CMD_MAP				= "!map <gametype> <mapname>";
-	public static final String USE_CMD_ADDVOTE			= "!addvote <gametype> <mapname>";
+	public static final String USE_CMD_MAPS				= "!maps <gametype>";
+	public static final String USE_CMD_ADDVOTE			= "!addvote <gametype>";
 	public static final String USE_CMD_BANMAP			= "!banmap <map>";
 	public static final String USE_CMD_STATUS			= "Type !status to get information on the queues.";
 	public static final String USE_CMD_HELP				= "!help <command>";
@@ -174,7 +177,7 @@ public class Config {
 
 	public static final String USE_CMD_UNREGISTER		= "!unregister <urtauth>";
 	public static final String USE_CMD_ENFORCEAC		= "!enforceac <urtauth>";
-
+	public static final String USE_CMD_SETPROCTF 		= "!setproctf <urtauth>";
 	public static final String USE_CMD_ADDCHANNEL		= "!addchannel <#name> <public/admin>";
 	public static final String USE_CMD_REMOVECHANNEL	= "!removechannel <#name> <public/admin>";
 	public static final String USE_CMD_ADDROLE			= "!addrole <@role> <admin/superadmin>";
@@ -317,7 +320,7 @@ public class Config {
 	public static final String player_already_match		= "You are already in a match.";
 	public static final String player_not_admin			= "You must be an admin to use this command.";
 	public static final String player_notdiv1			= "Hi <:puma:849287183474884628>, you need to be in either the Top ``.minrank.``  **ELO** (#``.rank.``) *OR* Top ``.minkdrrank.``  **KDR** (#``.kdrrank.``) *OR* Top ``.minwinrank.``  **Win Rate** (#``.winrank.``) to add to the **div1** queue. Keep practicing on Sexy CTF.";
-
+	public static final String player_not_proctf 		= "You are not in the pro ctf group, contact an admin if you think this is an error.";
 	public static final String player_not_captain		= "You can't pick a player. You are not captain or it is not your turn to pick.";
 
 	public static final String player_already_surrender	= "You already surrendered.";
@@ -356,6 +359,10 @@ public class Config {
 	public static final String wait_testing_server		= "Testing server list. This can take a while...";
 	public static final String admin_enforce_ac_on		= ":white_check_mark: The anticheat is now enforced for the player ``.urtauth.``";
 	public static final String admin_enforce_ac_off		= ":negative_squared_cross_mark: The anticheat is **no longer** enforced for the player ``.urtauth.``";
+
+	public static final String admin_proctf_on 			= ":white_check_mark: The player ``.urtauth.`` is now in the pro ctf group.";
+	public static final String admin_proctf_off 		= ":negative_squared_cross_mark: The player ``.urtauth.`` is no longer in the pro ctf group.";
+	public static final String proctf_dm 				= "You have been added to the ``pro ctf`` pickup group. You can now queue for the pro ctf games by using ``!proctf <map>``.";
 	
 	public static final String bot_online				= "The bot is back online!";
 

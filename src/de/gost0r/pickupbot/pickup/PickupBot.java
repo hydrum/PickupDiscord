@@ -188,6 +188,22 @@ public class PickupBot extends DiscordBot {
 					}
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;
+				case Config.CMD_PROCTF:
+					if (p != null)
+					{
+						Gametype gt = logic.getGametypeByString("proctf");
+						if (gt != null) {
+							logic.cmdAddPlayer(p, gt, false);
+
+							if (data.length > 1) {
+								logic.cmdMapVote(p, gt, data[1], 1);
+							}
+						} else {
+							sendNotice(msg.user, Config.no_gt_found);
+						}
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
 
 				case Config.CMD_SKEET:
 					if (p != null)
@@ -308,14 +324,21 @@ public class PickupBot extends DiscordBot {
 					break;
 
 				case Config.CMD_MAPS:
+					if (p != null)
+					{
+						if (data.length == 2)
+						{
+							Gametype gt = logic.getGametypeByString(data[1]);
+							logic.cmdGetMapsGt(p, gt);
+						}
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_MAPS));
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;
 				case Config.CMD_MAP:
 					if (p != null)
 					{
-						if (data.length == 1)
-						{
-							logic.cmdGetMaps(p, true);
-						}
-						else if (data.length == 2)
+						if (data.length == 2)
 						{
 							logic.cmdMapVote(p, null, data[1], 1);
 						}
@@ -1036,6 +1059,25 @@ public class PickupBot extends DiscordBot {
 						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ENFORCEAC));
 						break;
 
+					case Config.CMD_SETPROCTF:
+						if (data.length >= 2)
+						{
+							for (int i = 1; i < data.length; i ++) {
+								Player player = Player.get(data[i].toLowerCase());
+								if (player != null)
+								{
+									if (logic.cmdSetProctf(player))
+									{
+										super.sendMsg(msg.channel, Config.admin_proctf_on.replace(".urtauth.", player.getUrtauth()));
+									}
+									else super.sendMsg(msg.channel, Config.admin_proctf_off.replace(".urtauth.", player.getUrtauth()));
+								}
+								else sendMsg(msg.channel, Config.player_not_found);
+							}
+						}
+						else super.sendMsg(msg.channel, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_SETPROCTF));
+						break;
+
 					case Config.CMD_ADDBAN:
 						if (data.length == 4)
 						{
@@ -1273,6 +1315,9 @@ public class PickupBot extends DiscordBot {
 								break;
 							case Config.CMD_DIV1:
 								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_DIV1));
+								break;
+							case Config.CMD_PROCTF:
+								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_PROCTF));
 								break;
 							case Config.CMD_VOTES:
 								super.sendMsg(msg.channel, Config.help_prefix.replace(".cmd.", Config.USE_CMD_VOTES));

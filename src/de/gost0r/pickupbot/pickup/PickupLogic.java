@@ -147,6 +147,10 @@ public class PickupLogic {
 				return;
 			}
 		}
+		else if (gt.getName().equalsIgnoreCase("proctf") && !player.getProctf()){
+			bot.sendNotice(player.getDiscordUser(), Config.player_not_proctf);
+			return;
+		}
 
 		if (forced) {
 			player.setLastMessage(System.currentTimeMillis());
@@ -263,6 +267,16 @@ public class PickupLogic {
 		player.setEnforceAC(!oldEnforceAC);
 		db.enforcePlayerAC(player);
 		return !oldEnforceAC;
+	}
+
+	public boolean cmdSetProctf(Player player) {
+		boolean oldProctf = player.getProctf();
+		player.setProctf(!oldProctf);
+		db.setProctfPlayer(player);
+		if (!oldProctf){
+			bot.sendMsg(player.getDiscordUser().getDMChannel(), Config.proctf_dm);
+		}
+		return !oldProctf;
 	}
 
 	public void cmdSetPlayerCountry(DiscordUser user, String str_country) {
@@ -704,9 +718,48 @@ public class PickupLogic {
 			bot.sendMsg(bot.getLatestMessageChannel(), msg);
 			return;
 		}
-		StringBuilder msg = new StringBuilder("None");
+		StringBuilder msg = new StringBuilder();
+		StringBuilder emptyModes = new StringBuilder();
 		for (Gametype gametype : curMatch.keySet()) {
 			if (gametype.getName().startsWith("SCRIM") && curMatch.get(gametype).getPlayerCount() == 0){
+				continue;
+			}
+			String votes = curMatch.get(gametype).getMapVotes(!showZeroVote);
+			if (votes.equals("None")){
+				if (emptyModes.length() == 0){
+					emptyModes.append(gametype.getName());
+				}
+				else{
+					emptyModes.append(", ").append(gametype.getName());
+				}
+				continue;
+			}
+			if (msg.toString().isEmpty()) {
+				msg = new StringBuilder();
+			} else {
+				msg.append("\n");
+			}
+
+			String mapString = Config.pkup_map_list;
+			mapString = mapString.replace(".gametype.", gametype.getName());
+			mapString = mapString.replace(".maplist.", votes);
+			msg.append(mapString);
+		}
+		if (emptyModes.length() > 0){
+			msg.append("\n");
+			String mapString = Config.pkup_map_list;
+			mapString = mapString.replace(".gametype.", emptyModes);
+			mapString = mapString.replace(".maplist.", "No votes");
+			msg.append(mapString);
+		}
+		bot.sendMsg(bot.getLatestMessageChannel(), msg.toString());
+	}
+
+	public void cmdGetMapsGt(Player player, Gametype gt) {
+
+		StringBuilder msg = new StringBuilder("None");
+		for (Gametype gametype : curMatch.keySet()) {
+			if (!gametype.equals(gt)){
 				continue;
 			}
 			if (msg.toString().equals("None")) {
@@ -716,7 +769,7 @@ public class PickupLogic {
 			}
 			String mapString = Config.pkup_map_list;
 			mapString = mapString.replace(".gametype.", gametype.getName());
-			mapString = mapString.replace(".maplist.", curMatch.get(gametype).getMapVotes(!showZeroVote));
+			mapString = mapString.replace(".maplist.", curMatch.get(gametype).getMapVotes(false));
 			msg.append(mapString);
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), msg.toString());

@@ -78,6 +78,7 @@ public class Database {
 													+ "eloboost INTEGER DEFAULT 0,"
 													+ "mapvote INTEGER DEFAULT 0,"
 													+ "mapban INTEGER DEFAULT 0,"
+													+ "proctf TEXT DEFAULT 'true',"
 													+ "PRIMARY KEY (userid, urtauth) )";
 			stmt.executeUpdate(sql);
 			
@@ -734,6 +735,7 @@ public class Database {
 				player.setEloBoost(rs.getLong("eloboost"));
 				player.setAdditionalMapVotes(rs.getInt("mapvote"));
 				player.setMapBans(rs.getInt("mapban"));
+				player.setProctf(Boolean.parseBoolean(rs.getString("proctf")));
 
 				sql = "SELECT start, end, reason, pardon, forgiven FROM banlist WHERE player_userid=? AND player_urtauth=?";
 				PreparedStatement banstmt = c.prepareStatement(sql);
@@ -995,6 +997,21 @@ public class Database {
 			String sql = "UPDATE player SET enforce_ac=? WHERE userid=? AND urtauth=?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, String.valueOf(player.getEnforceAC()));
+			pstmt.setString(2, player.getDiscordUser().id);
+			pstmt.setString(3, player.getUrtauth());
+			pstmt.executeUpdate();
+			pstmt.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+	}
+
+	public void setProctfPlayer(Player player) {
+		try {
+			String sql = "UPDATE player SET proctf=? WHERE userid=? AND urtauth=?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, String.valueOf(player.getProctf()));
 			pstmt.setString(2, player.getDiscordUser().id);
 			pstmt.setString(3, player.getUrtauth());
 			pstmt.executeUpdate();
