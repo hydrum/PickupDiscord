@@ -25,12 +25,12 @@ public class Player {
 	
 	private float kdr = 0.0f;
 	
-	public PlayerStats stats;
+	public PlayerStats stats = new PlayerStats();
 	
 	private List<PlayerBan> bans = new ArrayList<PlayerBan>();
 		
 	private boolean active = true;
-	private boolean enforceAC = false;
+	private boolean enforceAC = true;
 	private boolean proctf = false;
 	
 	private boolean surrender = false;
@@ -41,10 +41,10 @@ public class Player {
 	
 	private String country = "NOT_DEFINED";
 
-	private long coins;
-	private long eloBoost;
-	private int additionalMapVotes;
-	private int mapBans;
+	private long coins = 1000;
+	private long eloBoost = 0;
+	private int additionalMapVotes = 0;
+	private int mapBans = 0;
 
 	public Player(DiscordUser user, String urtauth) {
 		this.user = user;
