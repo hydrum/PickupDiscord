@@ -96,16 +96,18 @@ public class Config {
 	public static final String CMD_SHOWKNOWNCHANNELS	= "!showknownchannels";
 	public static final String CMD_GODROLE				= "!godrole";
 
-	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_MAP + " " + CMD_MATCH + " " 
-	+ CMD_LAST + " " + CMD_LIVE + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS 
-	+ " " + CMD_TOP_COUNTRIES + " " + CMD_TOP_KDR + " " + CMD_TOP_WDL + " " + CMD_COUNTRY + " " + CMD_SURRENDER + " " + CMD_BANINFO 
-	+ " " + CMD_VOTES + " " + CMD_LAST + " " + CMD_TEAM + " " + CMD_LEAVETEAM + " " + CMD_SCRIM + " " + CMD_REMOVETEAM + " " + CMD_TEAMS;
+	public static final String PUB_LIST = "" CMD_REGISTER + " " + CMD_COUNTRY + " " + CMD_PING + " " + CMD_ADD + " " + CMD_REMOVE 
+	+ " " + CMD_MAPS + " " + CMD_MAP + " " + CMD_MATCH + " " + CMD_LAST + " " + CMD_LIVE + " " + CMD_STATUS + " " + CMD_HELP 
+	+ " " + CMD_GETELO + " " + CMD_GETSTATS + " " + CMD_TOP_PLAYERS + " " + CMD_TOP_COUNTRIES + " " + CMD_TOP_KDR + " " + CMD_TOP_WDL 
+	+ " " + CMD_SURRENDER + " " + CMD_BANINFO + " " + CMD_VOTES + " " + CMD_LAST + " " + CMD_TEAM + " " + CMD_LEAVETEAM + " " + CMD_SCRIM 
+	+ " " + CMD_REMOVETEAM + " " + CMD_TEAMS + " " + CMD_WALLET + " " + CMD_DONATE + " " + CMD_BETHISTORY + " " + CMD_TOP_RICH;
 	
 	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " " + CMD_ENABLEMAP 
-	+ " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE + " " 
-	+ CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_ADDBAN + " " + CMD_REMOVEBAN 
-	+ " " + CMD_SHOWMATCHES + " " + CMD_UNREGISTER + " " + CMD_ADDROLE + " " + CMD_REMOVEROLE + " " + CMD_ADDCHANNEL + " " + CMD_REMOVECHANNEL 
-	+ " " + CMD_FORCEADD + " " + CMD_REBOOT;
+	+ " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWMATCHES + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE 
+	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_ADDBAN + " " + CMD_REMOVEBAN 
+	+ " " + CMD_SHOWMATCHES + " " + CMD_UNREGISTER + " " + CMD_SHOWKNOWNROLES + " " + CMD_SHOWKNOWNCHANNELS + " " + CMD_ADDROLE 
+	+ " " + CMD_REMOVEROLE + " " + CMD_ADDCHANNEL + " " + CMD_REMOVECHANNEL + " " + CMD_FORCEADD + " " + CMD_REBOOT + " " + CMD_SETPROCTF 
+	+ " " + CMD_ENFORCEAC + " " + CMD_RESETELO;
 
 //------------------------------------------------------------------------------------//
 
@@ -307,7 +309,7 @@ public class Config {
 	public static final String auth_taken_user			= "You have already registered an account.";
 	public static final String auth_invalid				= "Your **urtauth** seems to be invalid.";
 	public static final String auth_success				= "Your **urtauth** has been linked to your account.";
-	public static final String auth_success_admin		= "The user .user. registered using the auth ``.urtauth.``.";
+	public static final String auth_success_admin		= ":new: **The user .user. registered using the auth ``.urtauth.``.**";
 	public static final String auth_sent_key			= "You have to register your auth name and not your auth key!!!";
 
 	public static final String ac_enforced				= ":warning: **From now on the anticheat (AC) will be mandatory for you to play pickup games.**\n\n If the AC is new to you, check out the channel below for information on how to set it up: https://discord.com/channels/117622053061787657/1067227082372952084/1067227082372952084 If you run into any kind of issue, don't hesitate to ask for support in **#help** or by DM to ``@solitary#5004``\n\nYou will now need to press the green **Connect to server** button in the **#pickup** channel to join.";
@@ -320,12 +322,12 @@ public class Config {
 	public static final String player_already_match		= "You are already in a match.";
 	public static final String player_not_admin			= "You must be an admin to use this command.";
 	public static final String player_notdiv1			= "Hi <:puma:849287183474884628>, you need to be in either the Top ``.minrank.``  **ELO** (#``.rank.``) *OR* Top ``.minkdrrank.``  **KDR** (#``.kdrrank.``) *OR* Top ``.minwinrank.``  **Win Rate** (#``.winrank.``) to add to the **div1** queue. Keep practicing on Sexy CTF.";
-	public static final String player_not_proctf 		= "You are not in the pro ctf group, contact an admin if you think this is an error.";
+	public static final String player_not_proctf 		= "You can't join this queue, contact an admin if you think this is an error.";
 	public static final String player_not_captain		= "You can't pick a player. You are not captain or it is not your turn to pick.";
 
 	public static final String player_already_surrender	= "You already surrendered.";
 
-	public static final String afk_reminder				= "**[AFK]** .user. will be removed in 3 minutes. Write something in the channel to stay in queue.";
+	public static final String afk_reminder				= "**[AFK]** .user. will be removed in 3 minutes. Write something in the channel to stay in queue. :writing_hand:";
 	public static final String pick_reminder			= "**[CAPTAIN PICK]** .user. you have 1 min to pick a player in the game thread channel.";
 	public static final String pick_reset				= "**[CAPTAIN PICK]** The match **.matchid.** has been reset. .user. did not pick a player in time and was punished accordingly.";
 
@@ -360,11 +362,11 @@ public class Config {
 	public static final String admin_enforce_ac_on		= ":white_check_mark: The anticheat is now enforced for the player ``.urtauth.``";
 	public static final String admin_enforce_ac_off		= ":negative_squared_cross_mark: The anticheat is **no longer** enforced for the player ``.urtauth.``";
 
-	public static final String admin_proctf_on 			= ":white_check_mark: The player ``.urtauth.`` is now in the pro ctf group.";
-	public static final String admin_proctf_off 		= ":negative_squared_cross_mark: The player ``.urtauth.`` is no longer in the pro ctf group.";
-	public static final String proctf_dm 				= "You have been added to the ``pro ctf`` pickup group. You can now queue for the pro ctf games by using ``!proctf <map>``.";
+	public static final String admin_proctf_on 			= ":white_check_mark: The player ``.urtauth.`` can now join the pro ctf queue.";
+	public static final String admin_proctf_off 		= ":negative_squared_cross_mark: The player ``.urtauth.`` can no longer join the pro ctf queue.";
+	public static final String proctf_dm 				= "You have been granted access to the ``pro ctf`` queue. You can now use ``!proctf <map>`` to play some more serious CTF games.";
 	
-	public static final String bot_online				= "The bot is back online!";
+	public static final String bot_online				= "**The bot is back online.**";
 
 	public static final String elo_reset				= "The elo has been reset! Don't forget to reboot the bot and remove all rank roles manually.";
 
@@ -373,7 +375,7 @@ public class Config {
 	public static final String ftw_success				= "Game launched";
 	public static final String ftw_notconnected			= "User not connected to the FTW launcher";
 	public static final String ftw_error				= "Unknown error";
-	public static final String ftw_error_noping			= "Check your dms and click on the link to register your ping in the different server locations.";
+	public static final String ftw_error_noping			= "Check your DMs and click on the link to calculate your ping with the different server locations.";
 	public static final String ftw_dm_noping			= "Please click here to register your ping in the different server locations: .url.";
 
 	public static final String team_involved_other		= "You are already involved in an active team. Leave it by sending ``!leaveteam``.";
