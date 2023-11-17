@@ -129,20 +129,20 @@ public class PickupLogic {
 		if (gt.getName().equalsIgnoreCase("div1")){
 			int eloRank = player.getEloRank();
 			int minEloRank = 40;
-			int kdrRank = player.stats.kdrRank;
-			int minKdrRank = 20;
-			int winRank = player.stats.wdlRank;
-			int minWinRank = 20;
+			float kdr = player.stats.kdr;
+			float minKdr = 1.2f;
+			double win = player.stats.ts_wdl.calcWinRatio() * 100d;
+			double minWin = 55;
 			if (eloRank > minEloRank
-				&& (kdrRank > minKdrRank || kdrRank == -1)
-				&& (winRank > minWinRank || winRank == -1)) {
+				&& (kdr < minKdr || Float.isNaN(kdr))
+				&& (win < minWin)) {
 				String errmsg = Config.player_notdiv1;
 				errmsg = errmsg.replace(".minrank.", String.valueOf(minEloRank));
 				errmsg = errmsg.replace(".rank.", String.valueOf(eloRank));
-				errmsg = errmsg.replace(".minkdrrank.", String.valueOf(minKdrRank));
-				errmsg = errmsg.replace(".kdrrank.", String.valueOf(kdrRank));
-				errmsg = errmsg.replace(".minwinrank.", String.valueOf(minWinRank));
-				errmsg = errmsg.replace(".winrank.", String.valueOf(winRank));
+				errmsg = errmsg.replace(".minkdr.", String.format("%.02f", minKdr));
+				errmsg = errmsg.replace(".kdr.", String.format("%.02f", kdr));
+				errmsg = errmsg.replace(".minwin.", String.format("%.02f", minWin));
+				errmsg = errmsg.replace(".win.", String.format("%.02f", win));
 				bot.sendNotice(player.getDiscordUser(), errmsg);
 				return;
 			}

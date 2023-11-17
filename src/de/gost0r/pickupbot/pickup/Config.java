@@ -96,13 +96,13 @@ public class Config {
 	public static final String CMD_SHOWKNOWNCHANNELS	= "!showknownchannels";
 	public static final String CMD_GODROLE				= "!godrole";
 
-	public static final String PUB_LIST = "" CMD_REGISTER + " " + CMD_COUNTRY + " " + CMD_PING + " " + CMD_ADD + " " + CMD_REMOVE 
+	public static final String PUB_LIST = CMD_REGISTER + " " + CMD_COUNTRY + " " + CMD_PING + " " + CMD_ADD + " " + CMD_REMOVE
 	+ " " + CMD_MAPS + " " + CMD_MAP + " " + CMD_MATCH + " " + CMD_LAST + " " + CMD_LIVE + " " + CMD_STATUS + " " + CMD_HELP 
 	+ " " + CMD_GETELO + " " + CMD_GETSTATS + " " + CMD_TOP_PLAYERS + " " + CMD_TOP_COUNTRIES + " " + CMD_TOP_KDR + " " + CMD_TOP_WDL 
 	+ " " + CMD_SURRENDER + " " + CMD_BANINFO + " " + CMD_VOTES + " " + CMD_LAST + " " + CMD_TEAM + " " + CMD_LEAVETEAM + " " + CMD_SCRIM 
 	+ " " + CMD_REMOVETEAM + " " + CMD_TEAMS + " " + CMD_WALLET + " " + CMD_DONATE + " " + CMD_BETHISTORY + " " + CMD_TOP_RICH;
 	
-	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " " + CMD_ENABLEMAP 
+	public static final String ADMIN_LIST = CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " " + CMD_ENABLEMAP
 	+ " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWMATCHES + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE 
 	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_ADDBAN + " " + CMD_REMOVEBAN 
 	+ " " + CMD_SHOWMATCHES + " " + CMD_UNREGISTER + " " + CMD_SHOWKNOWNROLES + " " + CMD_SHOWKNOWNCHANNELS + " " + CMD_ADDROLE 
@@ -321,7 +321,7 @@ public class Config {
 	public static final String player_not_in_match		= "You are not added to any queue.";
 	public static final String player_already_match		= "You are already in a match.";
 	public static final String player_not_admin			= "You must be an admin to use this command.";
-	public static final String player_notdiv1			= "Hi <:puma:849287183474884628>, you need to be in either the Top ``.minrank.``  **ELO** (#``.rank.``) *OR* Top ``.minkdrrank.``  **KDR** (#``.kdrrank.``) *OR* Top ``.minwinrank.``  **Win Rate** (#``.winrank.``) to add to the **div1** queue. Keep practicing on Sexy CTF.";
+	public static final String player_notdiv1			= "Hi, you need to be in either the Top ``.minrank.``  **ELO** (#``.rank.``) *OR* have a minimum ``.minkdr.``  **KDR** (``.kdr.``) *OR* have a minimum ``.minwin.%``  **Win Rate** (``.win.%``) to add to the **div1** queue.";
 	public static final String player_not_proctf 		= "You can't join this queue, contact an admin if you think this is an error.";
 	public static final String player_not_captain		= "You can't pick a player. You are not captain or it is not your turn to pick.";
 
