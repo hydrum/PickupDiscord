@@ -66,7 +66,7 @@ public class ServerMonitor implements Runnable {
 		noMercyIssued = false;
 		
 		players = new ArrayList<ServerPlayer>();
-		backupStats = new HashMap<String, CTF_Stats>();
+		// backupStats = new HashMap<String, CTF_Stats>();
 		leavers = new ArrayList<ServerPlayer>();
 	}
 
@@ -285,15 +285,15 @@ public class ServerMonitor implements Runnable {
 			try {
 				if (player.player != null && match.isInMatch(player.player) && rpp.players.contains(player)) {
 					// player.ctfstats.add(backupStats.get(player.auth));
-					CTF_Stats backupstats = backupStats.get(player.auth);
-					match.getStats(player.player).score[half].score = player.ctfstats.score + backupstats.score;
-					match.getStats(player.player).score[half].deaths = player.ctfstats.deaths + backupstats.deaths;
-					match.getStats(player.player).score[half].assists = player.ctfstats.assists + backupstats.assists;
-					match.getStats(player.player).score[half].caps = player.ctfstats.caps + backupstats.caps;
-					match.getStats(player.player).score[half].returns = player.ctfstats.returns + backupstats.returns;
-					match.getStats(player.player).score[half].fc_kills = player.ctfstats.fc_kills + backupstats.fc_kills;
-					match.getStats(player.player).score[half].stop_caps = player.ctfstats.stop_caps + backupstats.stop_caps;
-					match.getStats(player.player).score[half].protect_flag = player.ctfstats.protect_flag + backupstats.protect_flag;
+					// CTF_Stats backupstats = backupStats.get(player.auth);
+					match.getStats(player.player).score[half].score = player.ctfstats.score;
+					match.getStats(player.player).score[half].deaths = player.ctfstats.deaths;
+					match.getStats(player.player).score[half].assists = player.ctfstats.assists;
+					match.getStats(player.player).score[half].caps = player.ctfstats.caps;
+					match.getStats(player.player).score[half].returns = player.ctfstats.returns;
+					match.getStats(player.player).score[half].fc_kills = player.ctfstats.fc_kills;
+					match.getStats(player.player).score[half].stop_caps = player.ctfstats.stop_caps;
+					match.getStats(player.player).score[half].protect_flag = player.ctfstats.protect_flag;
 				}
 			} catch (NumberFormatException e) {
 				LOGGER.log(Level.WARNING, "Exception: ", e);
@@ -379,10 +379,10 @@ public class ServerMonitor implements Runnable {
 				if (match.getGametype().getTeamSize() > 2){
 					match.getLogic().setLastMapPlayed(match.getGametype(), match.getMap());
 				}
-				backupStats.clear();
-				for (ServerPlayer p : players){
-					backupStats.put(p.auth, new CTF_Stats());
-				}
+//				backupStats.clear();
+//				for (ServerPlayer p : players){
+//					backupStats.put(p.auth, new CTF_Stats());
+//				}
 				LOGGER.info("SWITCHED WARMUP -> LIVE");
 			}
 			else if (!rpp.matchready[0] || !rpp.matchready[1])
@@ -860,23 +860,23 @@ public class ServerMonitor implements Runnable {
 		return state;
 	}
 
-	private void backUpScores(RconPlayersParsed rpp){
-		for (ServerPlayer p : rpp.players){
-			ServerPlayer oldP = null;
-			for (ServerPlayer prevP : prevRPP.players){
-				if (p.auth.equals(prevP.auth)){
-					oldP = prevP;
-					break;
-				}
-			}
-			if (oldP != null){
-				// + 4 in case of tks in between ticks
-				if (p.ctfstats.score + 4 < oldP.ctfstats.score || p.ctfstats.assists < oldP.ctfstats.assists || p.ctfstats.deaths < oldP.ctfstats.deaths){
-					CTF_Stats newStats = backupStats.get(p.auth);
-					newStats.add(oldP.ctfstats);
-					backupStats.put(oldP.auth, newStats);
-				}
-			}
-		}
-	}
+//	private void backUpScores(RconPlayersParsed rpp){
+//		for (ServerPlayer p : rpp.players){
+//			ServerPlayer oldP = null;
+//			for (ServerPlayer prevP : prevRPP.players){
+//				if (p.auth.equals(prevP.auth)){
+//					oldP = prevP;
+//					break;
+//				}
+//			}
+//			if (oldP != null){
+//				// + 4 in case of tks in between ticks
+//				if (p.ctfstats.score + 4 < oldP.ctfstats.score || p.ctfstats.assists < oldP.ctfstats.assists || p.ctfstats.deaths < oldP.ctfstats.deaths){
+//					CTF_Stats newStats = backupStats.get(p.auth);
+//					newStats.add(oldP.ctfstats);
+//					backupStats.put(oldP.auth, newStats);
+//				}
+//			}
+//		}
+//	}
 }
