@@ -1083,7 +1083,7 @@ public class Match implements Runnable {
 	
 	public DiscordEmbed getMatchEmbed(boolean forceNoDynamic) {
 		ServerState serverState = null;
-		if (server != null && server.isTaken()) {
+		if (server != null && server.getServerMonitor() != null && server.isTaken() ) {
 			serverState = server.getServerMonitor().getState();
 		}
 		
