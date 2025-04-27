@@ -141,7 +141,7 @@ public class ServerMonitor implements Runnable {
 				sendDiscordMsg(sendDiscordString);
 				if (state == ServerState.WARMUP || state == ServerState.LIVE) {
 					server.sendRcon("restart"); // restart map
-					server.sendRcon("startserverdemo all");
+					// server.sendRcon("startserverdemo all");
 				}
 			} else if (timeleft < -180000L) { // if noshow timer ran out twice
 				// we're way over time to accurately log a noshow, therefore simply abandon
@@ -187,7 +187,7 @@ public class ServerMonitor implements Runnable {
 			} else if (state == ServerState.WARMUP) {
 				timeleft = (earliestLeaver + 180000L) - System.currentTimeMillis(); // 3min
 				server.sendRcon("restart"); // restart map
-				server.sendRcon("startserverdemo all");
+				// server.sendRcon("startserverdemo all");
 			} else if (state == ServerState.LIVE) {
 				if (getRemainingSeconds() < 90 && isLastHalf()) {
 					LOGGER.warning(getRemainingSeconds() + "s remaining, don't report.");
@@ -214,7 +214,7 @@ public class ServerMonitor implements Runnable {
 				if (!hasPaused && shouldPause) {
 					if (!isPauseDetected) {
 						server.sendRcon("pause");
-						server.sendRcon("startserverdemo all");
+						// server.sendRcon("startserverdemo all");
 					}
 					hasPaused = true;
 				}
@@ -236,7 +236,7 @@ public class ServerMonitor implements Runnable {
 			if (hasPaused && isPauseDetected) {
 				if (state == ServerState.LIVE) {
 					server.sendRcon("pause");
-					server.sendRcon("startserverdemo all");
+					// server.sendRcon("startserverdemo all");
 				}
 				hasPaused = false;
 			}
