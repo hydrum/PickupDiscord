@@ -502,7 +502,7 @@ public class Database {
 			String sql = "SELECT gametype, teamsize, active FROM gametype";
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				Gametype gametype = new Gametype(rs.getString("gametype"), rs.getInt("teamsize"), Boolean.parseBoolean(rs.getString("active")));
+				Gametype gametype = new Gametype(rs.getString("gametype"), rs.getInt("teamsize"), Boolean.parseBoolean(rs.getString("active")), false);
 				LOGGER.config(gametype.getName() + " active=" + gametype.getActive());
 				gametypeList.add(gametype);
 			}
