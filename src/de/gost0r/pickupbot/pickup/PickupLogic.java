@@ -877,7 +877,12 @@ public class PickupLogic {
 			}
 		} else if (match.getMatchState() == MatchState.Signup || match.getMatchState() == MatchState.AwaitingServer){
 			msg = Config.pkup_status_signup;
-			msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
+			if (match.getGametype().getPrivate()) {
+				msg = msg.replace(".gametype.", ":lock:" + match.getGametype().getName().toUpperCase());
+			}
+			else {
+				msg = msg.replace(".gametype.", match.getGametype().getName().toUpperCase());
+			}
 			msg = msg.replace(".playernumber.", String.valueOf(playerCount));
 			int maxplayer = match.getGametype().getTeamSize() == 0 ? 1 : match.getGametype().getTeamSize() * 2;
 			msg = msg.replace(".maxplayer.", String.valueOf(maxplayer));
