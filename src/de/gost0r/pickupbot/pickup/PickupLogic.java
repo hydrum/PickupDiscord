@@ -712,7 +712,11 @@ public class PickupLogic {
 		Match activeMatch = playerInActiveMatch(player);
 		if (activeMatch != null){
 			String msg = Config.pkup_map_list;
-			msg = msg.replace(".gametype.", activeMatch.getGametype().getName());
+			if (activeMatch.getGametype().getPrivate()) {
+				msg = msg.replace(".gametype.", ":lock:" + activeMatch.getGametype().getName().toUpperCase());
+			} else {
+				msg = msg.replace(".gametype.", activeMatch.getGametype().getName().toUpperCase());
+			}
 			msg = msg.replace(".maplist.", activeMatch.getMapVotes(true));
 			bot.sendMsg(bot.getLatestMessageChannel(), msg);
 			return;
@@ -726,7 +730,11 @@ public class PickupLogic {
 			String votes = curMatch.get(gametype).getMapVotes(!showZeroVote);
 			if (votes.equals("None")){
 				if (emptyModes.length() == 0){
-					emptyModes.append(gametype.getName());
+					if (gametype.getPrivate()) {
+						emptyModes.append(":lock:" + gametype.getName().toUpperCase());
+					} else {
+						emptyModes.append(gametype.getName());
+					}
 				}
 				else{
 					emptyModes.append(", ").append(gametype.getName());
@@ -740,7 +748,11 @@ public class PickupLogic {
 			}
 
 			String mapString = Config.pkup_map_list;
-			mapString = mapString.replace(".gametype.", gametype.getName());
+			if (gametype.getPrivate()) {
+				mapString = mapString.replace(".gametype.", ":lock:" + gametype.getName().toUpperCase());
+			} else {
+				mapString = mapString.replace(".gametype.", gametype.getName());
+			}
 			mapString = mapString.replace(".maplist.", votes);
 			msg.append(mapString);
 		}
@@ -823,7 +835,7 @@ public class PickupLogic {
 					bot.sendNotice(player.getDiscordUser(), Config.map_not_unique);
 				} else if (counter == 0) {
 					bot.sendNotice(player.getDiscordUser(), Config.map_not_found);
-				} else if (lastMapPlayed.get(gametype).name.equals(map.name)) {
+				} else if (!gametype.getPrivate() && lastMapPlayed.get(gametype).name.equals(map.name)) {
 					bot.sendNotice(player.getDiscordUser(), Config.map_played_last_game);
 				} else if (map.bannedUntil >= System.currentTimeMillis()) {
 					bot.sendNotice(player.getDiscordUser(), Config.map_banned.replace(".remaining.", String.valueOf(map.bannedUntil / 1000)));
@@ -1344,7 +1356,11 @@ public class PickupLogic {
 	private void createMatch(Gametype gametype) {
 		List<GameMap> gametypeMapList = new ArrayList<GameMap>();
 		for (GameMap map : mapList) {
-			if (map.isActiveForGametype(gametype)) {
+			Gametype mapGt = gametype;
+			if (gametype.getPrivate()) {
+				mapGt = getGametypeByString(gametype.getName().split(" ")[0]);
+			}
+			if (map.isActiveForGametype(mapGt)) {
 				gametypeMapList.add(map);
 			}
 		}
@@ -1852,6 +1868,9 @@ public class PickupLogic {
 	}
 
 	public GameMap getLastMapPlayed(Gametype gt) {
+		if (gt.getPrivate()) {
+			return new GameMap("null");
+		}
 		return lastMapPlayed.get(gt);
 	}
 
@@ -2706,7 +2725,7 @@ public class PickupLogic {
 
 	}
 
-	private void dissolveGroup(PrivateGroup pvGroup) {
+	public void dissolveGroup(PrivateGroup pvGroup) {
 		curMatch.remove(pvGroup.gt);
 		privateGroups.remove(pvGroup);
 		String msg = Config.private_dissolved;

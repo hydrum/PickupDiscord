@@ -961,8 +961,12 @@ public class PickupBot extends DiscordBot {
 
 									if (pOther != null)
 									{
-										pvGroup.removePlayer(pOther);
-										changesMade = true;
+										if (pOther.equals(p)) {
+											logic.dissolveGroup(pvGroup);
+										} else {
+											pvGroup.removePlayer(pOther);
+											changesMade = true;
+										}
 									}
 									else sendNotice(msg.user, Config.player_not_found);
 								}
@@ -991,6 +995,10 @@ public class PickupBot extends DiscordBot {
 							PrivateGroup pvGroup = logic.getPrivateGroupMember(p);
 							logic.cmdAddPlayer(p, pvGroup.gt, false);
 							pvGroup.updateTimestamp();
+
+							if (data.length > 1) {
+								logic.cmdMapVote(p, pvGroup.gt, data[1], 1);
+							}
 						}
 						else sendNotice(msg.user, Config.player_no_group);
 					}
