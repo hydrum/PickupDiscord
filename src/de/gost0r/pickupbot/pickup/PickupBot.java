@@ -929,7 +929,7 @@ public class PickupBot extends DiscordBot {
 									else sendNotice(msg.user, Config.player_not_found);
 								}
 								if (changesMade) {
-									sendNotice(msg.user, Config.player_added_group, pvGroup.getEmbed());
+									sendNotice(msg.user, Config.player_added_group);
 								}
 							}
 							else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_ADD_PLAYER_PRIVATE));
@@ -971,7 +971,7 @@ public class PickupBot extends DiscordBot {
 									else sendNotice(msg.user, Config.player_not_found);
 								}
 								if (changesMade) {
-									sendNotice(msg.user, Config.player_removed_group, pvGroup.getEmbed());
+									sendNotice(msg.user, Config.player_removed_group);
 								}
 							}
 							else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_REMOVE_PLAYER_PRIVATE));

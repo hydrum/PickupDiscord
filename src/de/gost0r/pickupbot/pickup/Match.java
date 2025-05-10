@@ -252,7 +252,9 @@ public class Match implements Runnable {
 			if (surrender[i] <= 0) {
 				state = MatchState.Surrender;
 				try {
-					server.getServerMonitor().surrender(i);
+					if (server != null && server.getServerMonitor() != null) {
+						server.getServerMonitor().surrender(i);
+					}
 				} catch (Exception e) {
 					LOGGER.log(Level.WARNING, "Exception: ", e);
 					Sentry.capture(e);

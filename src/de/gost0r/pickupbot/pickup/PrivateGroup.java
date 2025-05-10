@@ -42,16 +42,21 @@ public class PrivateGroup {
         embed.color = 7056881;
 
         long epochSeconds = timestamp.plus(Duration.ofHours(1)).getEpochSecond();
-        embed.description = "This group will expire in <t:" + Long.toString(epochSeconds) +  ":R> if left inactive.";
+        embed.description = "**Captain**: " + captain.getDiscordUser().getMentionString() + "\nThis group will expire in <t:" + Long.toString(epochSeconds) +  ":R> if left inactive.";
 
-        StringBuilder playerString = new StringBuilder();
-        for (Player p : playerList) {
-            playerString.append(p.getDiscordUser().getMentionString());
-            playerString.append("\n");
+        int totalPlayers = playerList.size();
+        int columns = (int) Math.ceil(totalPlayers / 10.0); // max 10 players per column
+
+        for (int i = 0; i < columns; i++) {
+            StringBuilder playerChunk = new StringBuilder();
+            for (int j = i * 10; j < Math.min((i + 1) * 10, totalPlayers); j++) {
+                playerChunk.append(playerList.get(j).getDiscordUser().getMentionString()).append("\n");
+            }
+            String fieldTitle = (i == 0)
+                    ? "Players (" + totalPlayers + ")"
+                    : "\u200E"; // invisible character
+            embed.addField(fieldTitle, playerChunk.toString(), true);
         }
-
-        embed.addField("Captain", captain.getDiscordUser().getMentionString(), true);
-        embed.addField("Players (" + Integer.toString(playerList.size()) + ")", playerString.toString(), true);
         return embed;
     }
 
