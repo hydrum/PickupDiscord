@@ -1777,6 +1777,15 @@ public class PickupBot extends DiscordBot {
 			logic.bet(interaction, Integer.parseInt(interaction.options.get(0).value), interaction.options.get(1).value, Integer.parseInt(interaction.options.get(2).value), p);
 			break;
 
+		case Config.APP_PARDON:
+			Player pPardon = Player.get(DiscordUser.getUser(interaction.options.get(0).value));
+			if (pPardon == null) {
+				interaction.respond(Config.player_not_found);
+				return;
+			}
+			logic.pardonPlayer(interaction, pPardon, interaction.options.get(1).value, p);
+			break;
+
 //		case Config.APP_BUY:
 //			logic.showBuys(interaction, p);
 //			break;
@@ -1915,5 +1924,12 @@ public class PickupBot extends DiscordBot {
 
 		DiscordApplicationCommand appBuy = new DiscordApplicationCommand("buy", "Buy a perk with your coins.");
 		appBuy.create();
+
+		DiscordApplicationCommand appPardon = new DiscordApplicationCommand("pardon", "Unbans a player banned by the bot. Does not work on manual bans.");
+		DiscordCommandOption pardonOption1 = new DiscordCommandOption(DiscordCommandOptionType.USER, "player", "Player to unban.");
+		appPardon.addOption(pardonOption1);
+		DiscordCommandOption pardonOption2 = new DiscordCommandOption(DiscordCommandOptionType.STRING, "reason", "Reason for the unban.");
+		appPardon.addOption(pardonOption2);
+		appPardon.create();
 	}
 }

@@ -227,6 +227,7 @@ public class Config {
 
 	public static final String APP_BET = "bet";
 	public static final String APP_BUY = "buy";
+	public static final String APP_PARDON = "pardon";
 	
 	//------------------------------------------------------------------------------------//
 
@@ -295,6 +296,8 @@ public class Config {
 
 	public static final String is_banned				= ".user. (.urtauth.) is suspended .time. for .reason.";
 	public static final String is_unbanned				= ".user. (.urtauth.) is unbanned.";
+	public static final String is_pardonned				= ".user. (.urtauth.) is pardonned.";
+	public static final String is_pardonned_admin		= ".user. (.urtauth.) has been pardonned by .userAdmin.. Reason: ``.reason.``";
 	public static final String is_notbanned				= ".urtauth. is not banned (yet).";
 	public static final String not_banned				= "No active bans found for .urtauth.";
 	public static final String ban_history				= "**__Ban history:__** (Past 2 months)";

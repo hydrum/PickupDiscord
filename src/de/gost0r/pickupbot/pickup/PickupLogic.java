@@ -1623,6 +1623,31 @@ public class PickupLogic {
 			}
 	}
 
+	public void pardonPlayer(DiscordInteraction interaction, Player pPardon, String reason, Player pAdmin) {
+
+		if (pPardon.isBannedByBot()) {
+			interaction.respond(null);
+
+			pPardon.forgiveBotBan();
+
+			String msg = Config.is_pardonned;
+			msg = msg.replace(".user.", pPardon.getDiscordUser().getMentionString());
+			msg = msg.replace(".urtauth.", pPardon.getUrtauth());
+
+			String msgAdmin = Config.is_pardonned_admin;
+			msgAdmin = msgAdmin.replace(".user.", pPardon.getDiscordUser().getMentionString());
+			msg = msg.replace(".urtauth.", pPardon.getUrtauth());
+			msgAdmin = msgAdmin.replace(".userAdmin.", pAdmin.getUrtauth());
+			msgAdmin = msgAdmin.replace(".reason.", reason);
+
+			bot.sendMsg(getChannelByType(PickupChannelType.ADMIN), msgAdmin);
+			bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
+		} else {
+			// Player is not banned
+			interaction.respond(printPlayerNotBannedInfo(pPardon));
+		}
+	}
+
 
 	public String printBanInfo(Player player) {
 		PlayerBan ban = player.getLatestBan();

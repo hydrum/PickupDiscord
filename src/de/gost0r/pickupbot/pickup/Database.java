@@ -262,9 +262,24 @@ public class Database {
 	
 	public void forgiveBan(Player player) {
 		try {
-			String sql = "UPDATE banlist SET forgiven = 1 WHERE player_urtauth = ?";
+			String sql = "UPDATE banlist SET forgiven = 1 WHERE player_urtauth = ? AND end > ?";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, player.getUrtauth());
+			pstmt.setLong(2, System.currentTimeMillis());
+			pstmt.executeUpdate();
+			pstmt.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+	}
+
+	public void forgiveBotBan(Player player) {
+		try {
+			String sql = "UPDATE banlist SET forgiven = 1 WHERE player_urtauth = ? AND end > ? AND (reason = 'RAGEQUIT' OR reason = 'NOSHOW')";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, player.getUrtauth());
+			pstmt.setLong(2, System.currentTimeMillis());
 			pstmt.executeUpdate();
 			pstmt.close();
 		} catch (SQLException e) {
