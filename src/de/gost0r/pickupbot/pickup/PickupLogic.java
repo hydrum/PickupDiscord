@@ -367,12 +367,12 @@ public class PickupLogic {
 		embed.color = 7056881;
 		
 		
-		Map<Player, Float> topwdl = db.getTopWDL(number, gt, currentSeason);
+		Map<Player, String> topwdl = db.getTopWDL(number, gt, currentSeason);
 		if (topwdl.isEmpty()) {
 			bot.sendMsg(bot.getLatestMessageChannel(), "None");
 		} else {
 			int rank = 1;
-			for (Map.Entry<Player, Float> entry : topwdl.entrySet()) {
+			for (Map.Entry<Player, String> entry : topwdl.entrySet()) {
 				String country;
 				if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
 					country =  ":puma:";
@@ -382,12 +382,12 @@ public class PickupLogic {
 				}
 				embed_rank.append("**").append(rank).append("**\n");
 				embed_player.append(country).append(" \u200b \u200b  ").append(entry.getKey().getUrtauth()).append('\n');
-				embed_wdl.append(Math.round(entry.getValue() * 100d)).append(" %\n");
+				embed_wdl.append(entry.getValue()).append("\n");
 				rank++;
 			}
 			embed.addField("\u200b", embed_rank.toString(), true);
 			embed.addField("Player", embed_player.toString(), true);
-			embed.addField("Win rate", embed_wdl.toString(), true);
+			embed.addField("Win %", embed_wdl.toString(), true);
 			
 			bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
 		}

@@ -1197,8 +1197,8 @@ public class Database {
 		return rank;
 	}
 		
-	public Map<Player, Float> getTopWDL(int number, Gametype gt, Season season) {
-		Map<Player, Float> topwdl = new LinkedHashMap<Player, Float>();
+	public Map<Player, String> getTopWDL(int number, Gametype gt, Season season) {
+		Map<Player, String> topwdl = new LinkedHashMap<Player, String>();
 		try {
 			int limit = 20;
 			if (season.number == 0){
@@ -1217,7 +1217,8 @@ public class Database {
 			ResultSet rs = pstmt.executeQuery();
 			while (rs.next()) {
 				Player p = Player.get(rs.getString("urtauth"));
-				topwdl.put(p, rs.getFloat("winrate"));
+				String entry = Long.toString(Math.round(rs.getFloat("winrate") * 100d)) + "%  (*" + Integer.toString(rs.getInt("win") + rs.getInt("loss")) + "*)";
+				topwdl.put(p, entry);
 			}
 			rs.close();
 		} catch (SQLException e) {
