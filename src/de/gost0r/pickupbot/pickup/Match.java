@@ -1074,7 +1074,11 @@ public class Match implements Runnable {
 
 		String msg = Config.pkup_match_print_info;
 		msg = msg.replace(".gamenumber.", id == 0 ? String.valueOf(logic.db.getLastMatchID() + 1) : String.valueOf(id));
-		msg = msg.replace(".gametype.", gametype.getName());
+		if (gametype.getPrivate()) {
+			msg = msg.replace(".gametype.", ":lock:" + gametype.getName().toUpperCase());
+		} else {
+			msg = msg.replace(".gametype.", gametype.getName().toUpperCase());
+		}
 		msg = msg.replace(".map.", map != null ? map.name : "ut4_?");
 		msg = msg.replace(".redteam.", redplayers.toString());
 		msg = msg.replace(".blueteam.", blueplayers.toString());
@@ -1104,7 +1108,12 @@ public class Match implements Runnable {
 		}
 		
 		embed.color = 7056881;
-		embed.description = map != null ? "**" + gametype.getName() + "** - [" + map.name + "](https://maps.pugbot.net/q3ut4/" + map.name + ".pk3)" : "null";
+		if (gametype.getPrivate()) {
+			embed.description = map != null ? ":lock: **" + gametype.getName().toUpperCase() + "** - [" + map.name + "](https://maps.pugbot.net/q3ut4/" + map.name + ".pk3)" : "null";
+		} else {
+			embed.description = map != null ? "**" + gametype.getName() + "** - [" + map.name + "](https://maps.pugbot.net/q3ut4/" + map.name + ".pk3)" : "null";
+		}
+
 		
 		StringBuilder red_team_player_embed = new StringBuilder();
 		StringBuilder red_team_score_embed = new StringBuilder();

@@ -452,4 +452,5 @@ public class Config {
 	public static final String private_dissolved		= "**.player.**'s private group was dissolved.";
 	public static final String private_left				= "You successfully left **.player.**'s private group.";
 	public static final String private_none				= "There are currently no private groups. Do ``!createprivate`` to create one.";
+	public static final String div1_stats_blocked		= "Div 1 stats are currently hidden";
 }

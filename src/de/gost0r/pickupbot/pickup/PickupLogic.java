@@ -358,6 +358,10 @@ public class PickupLogic {
 	}
 
 	public void cmdTopWDL(int number, Gametype gt) {
+		if (gt.getName().equalsIgnoreCase("div1")) {
+			bot.sendMsg(bot.getLatestMessageChannel(), Config.div1_stats_blocked);
+			return;
+		}
 		StringBuilder embed_rank = new StringBuilder();
 		StringBuilder embed_player = new StringBuilder();
 		StringBuilder embed_wdl = new StringBuilder();
@@ -394,6 +398,11 @@ public class PickupLogic {
 	}
 
 	public void cmdTopKDR(int number, Gametype gt) {
+		if (gt.getName().equalsIgnoreCase("div1")) {
+			bot.sendMsg(bot.getLatestMessageChannel(), Config.div1_stats_blocked);
+			return;
+		}
+
 		StringBuilder embed_rank = new StringBuilder();
 		StringBuilder embed_player = new StringBuilder();
 		StringBuilder embed_wdl = new StringBuilder();
@@ -1636,7 +1645,7 @@ public class PickupLogic {
 
 			String msgAdmin = Config.is_pardonned_admin;
 			msgAdmin = msgAdmin.replace(".user.", pPardon.getDiscordUser().getMentionString());
-			msg = msg.replace(".urtauth.", pPardon.getUrtauth());
+			msgAdmin = msgAdmin.replace(".urtauth.", pPardon.getUrtauth());
 			msgAdmin = msgAdmin.replace(".userAdmin.", pAdmin.getUrtauth());
 			msgAdmin = msgAdmin.replace(".reason.", reason);
 
