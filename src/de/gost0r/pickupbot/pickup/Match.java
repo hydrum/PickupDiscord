@@ -1203,10 +1203,10 @@ public class Match implements Runnable {
 		}
 		float regionScore = euPlayers - gametype.getTeamSize() * ocPlayers;
 
-		if (ocPlayers > gametype.getTeamSize() * 2 * 0.7){
+		if (ocPlayers > gametype.getTeamSize() * 2 * 0.6){
 			return Region.OC;
 		}
-		else if (saPlayers > gametype.getTeamSize() * 2 * 0.7){
+		else if (saPlayers > gametype.getTeamSize() * 2 * 0.6){
 			return Region.SA;
 		}
 		else if (ocPlayers == 0 && ((euPlayers > gametype.getTeamSize() * 2 * 0.7) || (euPlayers > gametype.getTeamSize() * 2 * 0.6 && (saPlayers + ocPlayers) < 2))){
