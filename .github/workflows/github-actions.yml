@@ -1,7 +1,7 @@
 name: Build and deploy
 
 on: [push]
-workflow_dispatch:  #enables the Run workflow button
+  workflow_dispatch:  #enables the Run workflow button
 
 jobs:
   Build-and-deploy:
