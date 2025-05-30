@@ -16,8 +16,8 @@ jobs:
           distribution: 'adopt'
       - name: Build with Gradle
         run: ./gradlew build
-      - name: List contents of build/libs
-        run: ls -lh build/libs
+      - name: Check for jar in root
+        run: ls -lh PickupBot.jar
       - name: Upload JAR as artifact
         uses: actions/upload-artifact@v4
         with:
