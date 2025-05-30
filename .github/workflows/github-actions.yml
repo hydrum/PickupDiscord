@@ -1,5 +1,9 @@
 name: Build and deploy
-on: [push]
+
+on:
+  push:
+  workflow_dispatch:
+
 jobs:
   Build-and-deploy:
     runs-on: ubuntu-latest
@@ -12,11 +16,13 @@ jobs:
           distribution: 'adopt'
       - name: Build with Gradle
         run: ./gradlew build
+      - name: Check for jar in root
+        run: ls -lh PickupBot.jar
       - name: Upload JAR as artifact
         uses: actions/upload-artifact@v4
         with:
           name: PickupBot
-          path: build/libs/PickupBot.jar
+          path: PickupBot.jar
       - name: Deploy jar to server
         uses: garygrossgarten/github-action-scp@release
         with:
