@@ -63,6 +63,8 @@ public class PickupLogic {
 		Player.logic = this;
 		Bet.logic = this;
 
+		dynamicServers = true;
+
 		currentSeason = db.getCurrentSeason();
 		
 		serverList = db.loadServers();
