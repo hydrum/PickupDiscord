@@ -89,7 +89,7 @@ public class PickupLogic {
 		createCurrentMatches();
 		
 		banDuration = new HashMap<BanReason, String[]>();
-		banDuration.put(BanReason.NOSHOW, new String[] {"10m", "10m", "20m", "40m", "1h", "2h", "6h", "12h", "1d", "2d", "3d", "1w", "1M"});
+		banDuration.put(BanReason.NOSHOW, new String[] {"30m", "1h", "3h", "6h", "12h", "1d", "3d", "1w", "2w", "1M"});
 		banDuration.put(BanReason.RAGEQUIT, new String[] {"2h", "6h", "12h", "1d", "2d", "3d", "1w", "1w", "1w", "1w", "1w", "1w", "1M"});
 
 		
