@@ -838,6 +838,12 @@ public class PickupLogic {
 					if (xmap.name.toLowerCase().contains(mapname.toLowerCase())) {
 						counter++;
 						map = xmap;
+
+						// Hardcode to make sure !map b8 always votes for tohunga
+						if(mapname.equalsIgnoreCase("b8") && xmap.name.toLowerCase().contains("tohunga_b8")) {
+							counter = 1;
+							break;
+						}
 					}
 				}
 				if (counter > 1) {
