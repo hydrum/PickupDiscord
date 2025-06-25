@@ -87,7 +87,8 @@ public class FtwglAPI {
 
         LOGGER.warning(obj.toString());
 
-        JSONObject serverObj = obj.getJSONObject("server").getJSONObject("config");
+        JSONObject serverObj = obj.getJSONObject("server");
+        JSONObject serverConfigObj = obj.getJSONObject("server").getJSONObject("config");
         JSONObject serverLocationObj = obj.getJSONObject("server_location");
         JSONObject playerPingsObj = obj.getJSONObject("pings");
 
@@ -103,7 +104,7 @@ public class FtwglAPI {
             }
         }
 
-        Server server = new Server(obj.getJSONObject("server").getInt("id"), null, serverObj.getInt("port"), serverObj.getString("rcon"), serverObj.getString("password"), true, region);
+        Server server = new Server(serverObj.getInt("id"), null, serverObj.getInt("port"), serverConfigObj.getString("rcon"), serverConfigObj.getString("password"), true, region);
         server.country = country;
         server.city = serverLocationObj.getString("city");
         server.playerPing = playerPing;
