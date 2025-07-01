@@ -671,10 +671,10 @@ public class PickupLogic {
 			} else {
 				statsEmbed.addField("Win %", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
 			}
-			if (p.spree.containsKey(getGametypeByString("TS")) && p.spree.get(getGametypeByString("TS")) > 3){
+			if (p.spree.containsKey(getGametypeByString("TS")) && p.spree.get(getGametypeByString("TS")) >= 3){
 				statsEmbed.addField("Win Streak", p.spree.get(getGametypeByString("TS")) + " :fire:", true);
 			}
-			if (p.spree.containsKey(getGametypeByString("DIV1")) && p.spree.get(getGametypeByString("DIV1")) > 3){
+			if (p.spree.containsKey(getGametypeByString("DIV1")) && p.spree.get(getGametypeByString("DIV1")) >= 3){
 				statsEmbed.addField("Div1 Streak", p.spree.get(getGametypeByString("DIV1")) + " :fire:", true);
 			}
 		}

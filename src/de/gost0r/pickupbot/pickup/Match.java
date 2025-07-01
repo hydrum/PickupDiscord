@@ -349,8 +349,9 @@ public class Match implements Runnable {
 
 		sendAftermath();
 		logic.matchRemove(this);
-		updateSpree();
+
 		if (gametype.getTeamSize() > 0){
+			updateSpree();
 			payPlayers();
 		}
 	}
@@ -1293,7 +1294,7 @@ public class Match implements Runnable {
 	}
 
 	public void sendSpreeMsg(Player p){
-		if (p.spree.containsKey(gametype) && p.spree.get(gametype) > 3 && p.spree.get(gametype) < 6){
+		if (p.spree.containsKey(gametype) && p.spree.get(gametype) >= 3 && p.spree.get(gametype) < 6){
 			logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), p.getDiscordUser().getMentionString() + " is on a winning spree! :fire: " + p.spree.get(gametype));
 		}
 		else if (p.spree.containsKey(gametype) && p.spree.get(gametype) >= 6 && p.spree.get(gametype) < 10){
@@ -1423,7 +1424,7 @@ public class Match implements Runnable {
 			else {
 				player_string.append(" :flag_" + p.getCountry().toLowerCase() + ": ");
 			}
-			player_string.append(p.getUrtauth() + "\n");
+			player_string.append("``").append(p.getUrtauth()).append("``\n");
 			lobby_players_string.append(player_string.toString());
 
 			String wdl = "";
@@ -1438,7 +1439,7 @@ public class Match implements Runnable {
 				rating = String.format("%.02f", playerRatings.get(p));
 			}
 
-			rating_wdl_string.append("``").append(rating).append(" | ").append(wdl).append("``\n");
+			rating_wdl_string.append("``").append(rating).append("`` | ``").append(wdl).append("``\n");
 
 			String ping = String.valueOf(server.playerPing.get(p) + " ms");
 			ping_string.append("``").append(ping).append("``\n");
