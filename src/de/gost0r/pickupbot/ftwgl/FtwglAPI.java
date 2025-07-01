@@ -180,6 +180,65 @@ public class FtwglAPI {
         }
     }
 
+    public static Map<Player, Float> getPlayerRatings(List<Player> players){
+        if (players == null || players.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        JSONObject requestObj = new JSONObject();
+        List<Long> discordIdList = new ArrayList<Long>();
+        for (Player player : players) {
+            discordIdList.add(Long.parseLong(player.getDiscordUser().id));
+        }
+        requestObj.put("discord_ids", discordIdList);
+        
+        String response = sendPostRequest("/ratings", requestObj);
+        
+        Map<Player, Float> playerRatings = new HashMap<>();
+        
+        if (response == null){
+            LOGGER.warning("Failed to get ratings for player list");
+            // Return map with all players having 0.0f rating
+            for (Player player : players) {
+                playerRatings.put(player, 0.0f);
+            }
+            return playerRatings;
+        }
+        
+        try {
+            JSONObject obj = new JSONObject(response);
+            // The response structure is: {"ratings": {"402540351216156695": 1.42, "123456789": 2.15}}
+            if (obj.has("ratings")) {
+                JSONObject ratingsObj = obj.getJSONObject("ratings");
+                
+                for (Player player : players) {
+                    String discordId = player.getDiscordUser().id;
+                    if (ratingsObj.has(discordId)) {
+                        playerRatings.put(player, (float) ratingsObj.getDouble(discordId));
+                    } else {
+                        LOGGER.warning("No rating found for player: " + player.getDiscordUser().username);
+                        playerRatings.put(player, 0.0f);
+                    }
+                }
+            } else {
+                LOGGER.warning("No 'ratings' field found in response for player list");
+                // Return map with all players having 0.0f rating
+                for (Player player : players) {
+                    playerRatings.put(player, 0.0f);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Exception parsing rating response: ", e);
+            Sentry.capture(e);
+            // Return map with all players having 0.0f rating
+            for (Player player : players) {
+                playerRatings.put(player, 0.0f);
+            }
+        }
+        
+        return playerRatings;
+    }
+
     private static synchronized String sendPostRequest(String request, JSONObject content) {
         try {
             byte[] postData       = content.toString().getBytes( StandardCharsets.UTF_8 );

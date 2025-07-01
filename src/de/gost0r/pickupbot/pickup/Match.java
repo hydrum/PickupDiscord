@@ -535,20 +535,13 @@ public class Match implements Runnable {
 			String captainAnnouncement = Config.pkup_go_pub_captains;
 			captainAnnouncement = captainAnnouncement.replace(".captain1.", captains[0].getDiscordUser().getMentionString());
 			captainAnnouncement = captainAnnouncement.replace(".captain2.", captains[1].getDiscordUser().getMentionString());
-			// List players stats
-			for (Player p : sortedPlayers){
-				captainAnnouncement += "\n" + logic.cmdGetElo(p, gametype);
-				if (logic.getDynamicServers()){
-					captainAnnouncement += " " + String.valueOf("\t " + server.playerPing.get(p)) + "ms";
-				}
-			}
 			if (logic.getDynamicServers()){
 				captainAnnouncement +="\n**Server:** " + Country.getCountryFlag(server.country) + "``" + server.city + "``";
 			}
 			else{
 				captainAnnouncement +="\n**Server:** " + server.getRegionFlag(false, false) + "``" + server.region.name() + "``";
 			}
-			logic.bot.sendMsg(threadChannels, captainAnnouncement);
+			logic.bot.sendMsg(threadChannels, captainAnnouncement, getLobbyEmbed());
 
 			String captainDm = Config.pkup_go_captains;
 			logic.bot.sendMsg(captains[0].getDiscordUser(), captainDm);
@@ -1408,5 +1401,53 @@ public class Match implements Runnable {
 		if (getMapList().contains(map)){
 			mapVotes.put(map, 0);
 		}
+	}
+
+	private DiscordEmbed getLobbyEmbed(){
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Lobby";
+		embed.color = 7056881;
+
+		StringBuilder lobby_players_string = new StringBuilder();
+		StringBuilder rating_wdl_string = new StringBuilder();
+		StringBuilder ping_string = new StringBuilder();
+
+		Map<Player, Float> playerRatings = FtwglAPI.getPlayerRatings(sortedPlayers);
+
+		for (Player p : sortedPlayers){
+			StringBuilder player_string = new StringBuilder();
+			player_string.append(p.getRank().getEmoji());
+			if( p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+				player_string.append(" :flag_white: ");
+			}
+			else {
+				player_string.append(" :flag_" + p.getCountry().toLowerCase() + ": ");
+			}
+			player_string.append(+ p.getUrtauth() + "\n");
+			lobby_players_string.append(player_string.toString());
+
+			String rating_wdl = String.format("%.02f", p.getRatingWDL());
+			String kdr = String.format("%.02f", FtwglAPI.getPlayerRating(p));
+
+			if (gametype.getName().equals("CTF")){
+				wdl = String.format("%.02f", p.stats.ctf_wdl.calcWinRatio() * 100d);
+				rating = String.format("%.02f", p.stats.ctf_rating);
+			}
+			else {
+				wdl = String.format("%.02f", p.stats.ts_wdl.calcWinRatio() * 100d);
+				rating = playerRatings.get(p);
+			}
+
+			rating_wdl_string.append(wdl).append(" | ").append(rating).append("\n");
+
+			String ping = String.valueOf(server.playerPing.get(p) + " ms");
+			ping_string.append(ping).append("\n");
+		}
+
+		embed.addField("Players", lobby_players_string.toString(), true);
+		embed.addField("Win% | Rating", rating_wdl_string.toString(), true);
+		embed.addField("Ping", ping_string.toString(), true);
+
+		return embed;
 	}
 }
