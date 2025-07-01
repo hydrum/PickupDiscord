@@ -1435,7 +1435,7 @@ public class Match implements Runnable {
 			}
 			else {
 				wdl = String.format("%.02f", p.stats.ts_wdl.calcWinRatio() * 100d);
-				rating = playerRatings.get(p);
+				rating = String.format("%.02f", playerRatings.get(p));
 			}
 
 			rating_wdl_string.append(wdl).append(" | ").append(rating).append("\n");
