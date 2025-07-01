@@ -452,7 +452,7 @@ public class PickupLogic {
 		embed.description = "``Season " + currentSeason.number + "``";
 		embed.color = 7056881;
 		
-		Map<Player, Integer> topSpree = db.getTopSpreeAllTime(number, gt);
+		Map<Player, Integer> topSpree = db.getTopSpreeAllTime(gt, number);
 		if (topSpree.isEmpty()) {
 			bot.sendMsg(bot.getLatestMessageChannel(), "None");
 		} else {
@@ -476,7 +476,7 @@ public class PickupLogic {
 
 			embed.addField("\u200b", "Top 3 current", false);
 
-			Map<Player, Integer> topSpreeCurrent = db.getTopSpree(3, gt);
+			Map<Player, Integer> topSpreeCurrent = db.getTopSpree(gt, 3);
 			rank = 1;
 			for (Map.Entry<Player, Integer> entry : topSpreeCurrent.entrySet()) {
 				String country;
