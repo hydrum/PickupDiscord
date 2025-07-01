@@ -1426,8 +1426,8 @@ public class Match implements Runnable {
 			player_string.append(+ p.getUrtauth() + "\n");
 			lobby_players_string.append(player_string.toString());
 
-			String rating_wdl = String.format("%.02f", p.getRatingWDL());
-			String kdr = String.format("%.02f", FtwglAPI.getPlayerRating(p));
+			String wdl = "";
+			String rating = "";
 
 			if (gametype.getName().equals("CTF")){
 				wdl = String.format("%.02f", p.stats.ctf_wdl.calcWinRatio() * 100d);
