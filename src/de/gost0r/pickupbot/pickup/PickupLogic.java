@@ -1008,9 +1008,9 @@ public class PickupLogic {
 			if (player == null) {
 				for (Player p : match.getPlayerList()) {
 					if (playernames.toString().equals("None")) {
-						playernames = new StringBuilder(p.getUrtauth());
+						playernames = new StringBuilder(getPlayerCountryAuth(p));
 					} else {
-						playernames.append(" ").append(p.getUrtauth());
+						playernames.append(" ").append(getPlayerCountryAuth(p));
 					}
 				}
 				for (Team teamQueued : teamsQueued.keySet()){
