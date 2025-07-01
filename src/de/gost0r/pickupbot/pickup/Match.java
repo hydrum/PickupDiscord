@@ -1289,12 +1289,14 @@ public class Match implements Runnable {
 			return;
 		}
 
-		for (Player redP : teamList.get("red"))
+		for (Player redP : teamList.get("red")) {
 			redP.saveSpree(gametype, winningTeam.equals("red"));
 			sendSpreeMsg(redP);
-		for (Player blueP : teamList.get("blue"))
+		}
+		for (Player blueP : teamList.get("blue")) {
 			blueP.saveSpree(gametype, winningTeam.equals("blue"));
 			sendSpreeMsg(blueP);
+		}
 	}
 
 	public void sendSpreeMsg(Player p){
