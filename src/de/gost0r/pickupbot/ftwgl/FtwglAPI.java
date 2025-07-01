@@ -159,13 +159,18 @@ public class FtwglAPI {
         
         try {
             JSONObject obj = new JSONObject(response);
-            // Assuming the response contains ratings for each discord_id
-            // The response might be something like: {"154063250735104000": 1500.5, "539403413071331328": 1600.2}
-            String discordId = p.getDiscordUser().id;
-            if (obj.has(discordId)) {
-                return (float) obj.getDouble(discordId);
+            // The response structure is: {"ratings": {"402540351216156695": 1.42}}
+            if (obj.has("ratings")) {
+                JSONObject ratingsObj = obj.getJSONObject("ratings");
+                String discordId = p.getDiscordUser().id;
+                if (ratingsObj.has(discordId)) {
+                    return (float) ratingsObj.getDouble(discordId);
+                } else {
+                    LOGGER.warning("No rating found for player: " + p.getDiscordUser().username);
+                    return 0.0f;
+                }
             } else {
-                LOGGER.warning("No rating found for player: " + p.getDiscordUser().username);
+                LOGGER.warning("No 'ratings' field found in response for player: " + p.getDiscordUser().username);
                 return 0.0f;
             }
         } catch (Exception e) {
