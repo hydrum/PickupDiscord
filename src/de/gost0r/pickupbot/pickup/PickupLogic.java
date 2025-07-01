@@ -956,11 +956,6 @@ public class PickupLogic {
 					continue;
 				}
 			}
-			if (msg.toString().equals("None")) {
-				msg = new StringBuilder();
-			} else {
-				msg.append("\n");
-			}
 			if (m.getPlayerCount() == 0){
 				emptyGametype += "**" + m.getGametype().getName() + "** ";
 				continue;
@@ -968,6 +963,12 @@ public class PickupLogic {
 			if (m.getGametype().getTeamSize() == 0){
 				continue;
 			}
+			if (msg.toString().equals("None")) {
+				msg = new StringBuilder();
+			} else {
+				msg.append("\n");
+			}
+
 			msg.append(cmdStatus(m, null, false));
 		}
 		if (scrimEmpty){
@@ -1393,10 +1394,10 @@ public class PickupLogic {
 	}
 
 	public void cmdDisplayLastMatch() {
-		if (!ongoingMatches.isEmpty()){
-			bot.sendMsg(bot.getLatestMessageChannel(), "Can't display the match when a game is active.");
-			return;
-		}
+		// if (!ongoingMatches.isEmpty()){
+		// 	bot.sendMsg(bot.getLatestMessageChannel(), "Can't display the match when a game is active.");
+		// 	return;
+		// }
 		try {
 			Match match = db.loadLastMatch(); 
 			if (match != null) {
@@ -1412,10 +1413,10 @@ public class PickupLogic {
 	}
 
 	public void cmdDisplayLastMatchPlayer(Player p) {
-		if (!ongoingMatches.isEmpty()){
-			bot.sendMsg(bot.getLatestMessageChannel(), "Can't display the match when a game is active.");
-			return;
-		}
+		// if (!ongoingMatches.isEmpty()){
+		// 	bot.sendMsg(bot.getLatestMessageChannel(), "Can't display the match when a game is active.");
+		// 	return;
+		// }
 		try {
 			Match match = db.loadLastMatchPlayer(p); 
 			if (match != null) {
