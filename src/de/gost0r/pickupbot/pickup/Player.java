@@ -28,6 +28,7 @@ public class Player {
 	public PlayerStats stats = new PlayerStats();
 	
 	private List<PlayerBan> bans = new ArrayList<PlayerBan>();
+	public Map<Gametype, Integer> spree = new HashMap<Gametype, Integer>();
 		
 	private boolean active = true;
 	private boolean enforceAC = true;
@@ -404,5 +405,16 @@ public class Player {
 	public void setMapBans(int mapBans) {
 		this.mapBans = mapBans ;
 		db.updatePlayerBoost(this);
+	}
+
+	public void saveSpree(Gametype gametype, boolean won) {
+		if (this.spree.containsKey(gametype)) {
+			this.spree.put(gametype, won ? this.spree.get(gametype) + 1 : 0);
+			db.updateSpree(this, gametype, this.spree.get(gametype));
+		}
+		else {
+			this.spree.put(gametype, won ? 1 : 0);
+			db.createSpree(this, gametype, this.spree.get(gametype));
+		}
 	}
 }

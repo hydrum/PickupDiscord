@@ -199,6 +199,16 @@ public class Database {
 					+ "FOREIGN KEY (matchid) REFERENCES match(ID), "
 					+ "FOREIGN KEY (player_userid, player_urtauth) REFERENCES player(userid, urtauth) )";
 			stmt.executeUpdate(sql);
+
+			sql = "CREATE TABLE IF NOT EXISTS spree (ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+					+ "player_userid TEXT,"
+					+ "player_urtauth TEXT,"
+					+ "gametype TEXT,"
+					+ "spree INTEGER DEFAULT 0,"
+					+ "personal_best INTEGER DEFAULT 0,"
+					+ "FOREIGN KEY (gametype) REFERENCES gametype(gametype), "
+					+ "FOREIGN KEY (player_userid, player_urtauth) REFERENCES player(userid, urtauth) )";
+			stmt.executeUpdate(sql);
 			
 			stmt.close();
 		} catch (SQLException e) {
@@ -751,6 +761,7 @@ public class Database {
 				player.setAdditionalMapVotes(rs.getInt("mapvote"));
 				player.setMapBans(rs.getInt("mapban"));
 				player.setProctf(Boolean.parseBoolean(rs.getString("proctf")));
+				loadSpree(player);
 
 				sql = "SELECT start, end, reason, pardon, forgiven FROM banlist WHERE player_userid=? AND player_urtauth=?";
 				PreparedStatement banstmt = c.prepareStatement(sql);
@@ -1518,5 +1529,105 @@ public class Database {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
 		}
 		return betList;
+	}
+
+	public void createSpree(Player player, Gametype gametype, int spree) {
+		try {
+			String sql = "INSERT INTO spree (player_userid, player_urtauth, gametype, spree) VALUES (?, ?, ?, ?)";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, player.getDiscordUser().id);
+			pstmt.setString(2, player.getUrtauth());
+			pstmt.setString(3, gametype.getName());
+			pstmt.setInt(4, spree);
+			pstmt.executeUpdate();
+			pstmt.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+	}
+
+	public void updateSpree(Player player, Gametype gametype, int spree) {
+		try {
+			String sql = "UPDATE spree SET spree = ?, personal_best = CASE WHEN ? > personal_best THEN ? ELSE personal_best END WHERE player_urtauth = ? AND gametype = ?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setInt(1, spree);
+			pstmt.setInt(2, spree);
+			pstmt.setInt(3, spree);
+			pstmt.setString(4, player.getUrtauth());
+			pstmt.setString(5, gametype.getName());
+			pstmt.executeUpdate();
+			pstmt.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+	}
+	
+	public void loadSpree(Player player){
+		try {
+			String sql = "SELECT * FROM spree WHERE player_urtauth = ?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, player.getUrtauth());
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				String gametype = rs.getString("gametype");
+				int spree = rs.getInt("spree");
+				Gametype gt = logic.getGametypeByString(gametype);
+				if (gt != null) {
+					player.spree.put(gt, spree);
+				}
+			}
+			rs.close();
+			pstmt.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+	}
+
+	public Map<Player, Integer> getTopSpreeAllTime(Gametype gametype, int number){
+		Map<Player, Integer> topSpree = new LinkedHashMap<Player, Integer>();
+		try {
+			String sql = "SELECT * FROM spree WHERE gametype = ? ORDER BY personal_best DESC LIMIT ?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, gametype.getName());
+			pstmt.setInt(2, number);	
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				String urtauth = rs.getString("player_urtauth");
+				int spree = rs.getInt("personal_best");
+				Player p = Player.get(urtauth);
+				topSpree.put(p, spree);
+			}
+			rs.close();
+			pstmt.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+		return topSpree;
+	}
+	public Map<Player, Integer> getTopSpree(Gametype gametype, int number){
+		Map<Player, Integer> topSpree = new LinkedHashMap<Player, Integer>();
+		try {
+			String sql = "SELECT * FROM spree WHERE gametype = ? ORDER BY spree DESC LIMIT ?";
+			PreparedStatement pstmt = c.prepareStatement(sql);
+			pstmt.setString(1, gametype.getName());
+			pstmt.setInt(2, number);	
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				String urtauth = rs.getString("player_urtauth");
+				int spree = rs.getInt("spree");
+				Player p = Player.get(urtauth);
+				topSpree.put(p, spree);
+			}
+			rs.close();
+			pstmt.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		}
+		return topSpree;
 	}
 }

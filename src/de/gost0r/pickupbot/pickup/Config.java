@@ -61,6 +61,7 @@ public class Config {
 	public static final String CMD_TOP_KDR				= "!topkdr";
 	public static final String CMD_TOP					= "!top";
 	public static final String CMD_TOP_RICH				= "!toprich";
+	public static final String CMD_SPREE				= "!topspree";
 
 	public static final String CMD_MATCH				= "!match";
 	public static final String CMD_LAST					= "!last";
@@ -166,6 +167,7 @@ public class Config {
 	public static final String USE_CMD_TOP_COUNTRIES	= "!topcountries ordered by average ELO";
 	public static final String USE_CMD_TOP_WDL			= "!topwin <gametype>: players with the best win ratio for a specific gamemode";
 	public static final String USE_CMD_TOP_KDR			= "!topkdr <gametype>: players with the best KDR for a specific gamemode";
+	public static final String USE_CMD_TOP_SPREE		= "!topspree <gametype>: players with the best winning spree for a specific gamemode";
 
 	public static final String USE_CMD_MATCH			= "!match <id>";
 	public static final String USE_CMD_LAST				= "!last </@User|urtauth/>";

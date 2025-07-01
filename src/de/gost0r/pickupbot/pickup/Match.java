@@ -349,6 +349,7 @@ public class Match implements Runnable {
 
 		sendAftermath();
 		logic.matchRemove(this);
+		updateSpree();
 		if (gametype.getTeamSize() > 0){
 			payPlayers();
 		}
@@ -1272,6 +1273,40 @@ public class Match implements Runnable {
 
 	public boolean hasSquads(){
 		return squadList.size() > 0;
+	}
+
+	public void updateSpree(){
+		String winningTeam = "";
+		if (score[0] > score[1]){
+			winningTeam = "red";
+		}
+		else if (score[1] > score[0]){
+			winningTeam = "blue";
+		}
+
+		// If game result was corrupted and created a draw
+		if (winningTeam.equals("")){
+			return;
+		}
+
+		for (Player redP : teamList.get("red"))
+			redP.saveSpree(gametype, winningTeam.equals("red"));
+			sendSpreeMsg(redP);
+		for (Player blueP : teamList.get("blue"))
+			blueP.saveSpree(gametype, winningTeam.equals("blue"));
+			sendSpreeMsg(blueP);
+	}
+
+	public void sendSpreeMsg(Player p){
+		if (p.spree.containsKey(gametype) && p.spree.get(gametype) > 3 && p.spree.get(gametype) < 6){
+			logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), p.getDiscordUser().getMentionString() + " is on a winning spree! :fire: " + p.spree.get(gametype));
+		}
+		else if (p.spree.containsKey(gametype) && p.spree.get(gametype) >= 6 && p.spree.get(gametype) < 10){
+			logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), p.getDiscordUser().getMentionString() + " is on a **rampage**! :fire: " + p.spree.get(gametype));
+		}
+		else if (p.spree.containsKey(gametype) && p.spree.get(gametype) >= 10){
+			logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), p.getDiscordUser().getMentionString() + " IS **GODLIKE**! :fire: " + p.spree.get(gametype));
+		}
 	}
 
 	public void payPlayers(){

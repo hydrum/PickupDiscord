@@ -567,6 +567,24 @@ public class PickupBot extends DiscordBot {
 					else sendNotice(msg.user, Config.user_not_registered);
 					break;	
 
+				case Config.CMD_SPREE: 
+					if (p != null)
+					{
+						if (data.length == 2)
+						{
+							Gametype gt = logic.getGametypeByString(data[1]);
+							if (gt != null) {
+								logic.cmdTopSpree(10, gt);
+							}
+							else {
+								sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_TOP_SPREE));
+							}
+						}
+						else sendNotice(msg.user, Config.wrong_argument_amount.replace(".cmd.", Config.USE_CMD_TOP_SPREE));
+					}
+					else sendNotice(msg.user, Config.user_not_registered);
+					break;	
+
 				case Config.CMD_REGISTER:
 					if (data.length == 2)
 					{

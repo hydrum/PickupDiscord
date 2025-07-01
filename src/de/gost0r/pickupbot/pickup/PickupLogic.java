@@ -439,6 +439,66 @@ public class PickupLogic {
 		}
 	}
 
+	public void cmdTopSpree(int number, Gametype gt) {
+
+		StringBuilder embed_rank = new StringBuilder();
+		StringBuilder embed_player = new StringBuilder();
+		StringBuilder embed_spree = new StringBuilder();
+		StringBuilder embed_current_rank = new StringBuilder();
+		StringBuilder embed_spree_current = new StringBuilder();
+		StringBuilder embed_current_player = new StringBuilder();
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Top 10 winning spree " + gt.getName();
+		embed.description = "``Season " + currentSeason.number + "``";
+		embed.color = 7056881;
+		
+		Map<Player, Integer> topSpree = db.getTopSpreeAllTime(number, gt);
+		if (topSpree.isEmpty()) {
+			bot.sendMsg(bot.getLatestMessageChannel(), "None");
+		} else {
+			int rank = 1;
+			for (Map.Entry<Player, Integer> entry : topSpree.entrySet()) {
+				String country;
+				if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+					country =  ":flag_white:";
+				}
+				else {
+					country = ":flag_" + entry.getKey().getCountry().toLowerCase() + ":";
+				}
+				embed_rank.append("**").append(rank).append("**\n");
+				embed_player.append(country).append(" \u200b \u200b  ").append(entry.getKey().getUrtauth()).append('\n');
+				embed_spree.append(entry.getValue()).append("\n");
+				rank++;
+			}
+			embed.addField("\u200b", embed_rank.toString(), true);
+			embed.addField("Player", embed_player.toString(), true);
+			embed.addField("Spree", embed_spree.toString(), true);
+
+			embed.addField("\u200b", "Top 3 current", false);
+
+			Map<Player, Integer> topSpreeCurrent = db.getTopSpree(3, gt);
+			rank = 1;
+			for (Map.Entry<Player, Integer> entry : topSpreeCurrent.entrySet()) {
+				String country;
+				if( entry.getKey().getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+					country =  ":flag_white:";
+				}
+				else {
+					country = ":flag_" + entry.getKey().getCountry().toLowerCase() + ":";
+				}
+				embed_current_rank.append("**").append(rank).append("**\n");
+				embed_spree_current.append(entry.getValue()).append("\n");
+				embed_current_player.append(country).append(" \u200b \u200b  ").append(entry.getKey().getUrtauth()).append('\n');
+				rank++;
+			}
+			embed.addField("\u200b", embed_current_rank.toString(), true);
+			embed.addField("Player", embed_current_player.toString(), true);
+			embed.addField("Spree", embed_spree_current.toString(), true);
+			
+			bot.sendMsg(bot.getLatestMessageChannel(), null, embed);
+		}
+	}
+
 	public void cmdTopRich(int number) {
 		StringBuilder embed_rank = new StringBuilder();
 		StringBuilder embed_player = new StringBuilder();
@@ -487,7 +547,7 @@ public class PickupLogic {
 		}
 		else {
 			msg = msg.replace(".wdl.", String.format("%.02f", p.stats.ts_wdl.calcWinRatio() * 100d));
-			msg = msg.replace(".kdr.", String.format("%.02f", p.stats.kdr));
+			msg = msg.replace(".kdr.", String.format("%.02f", FtwglAPI.getPlayerRating(p)));
 		}
 
 		msg = msg.replace(".position.", String.valueOf(p.getEloRank()));
@@ -495,13 +555,22 @@ public class PickupLogic {
 
 		
 		if( p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
-			msg = msg.replace(".country.", "<:puma:849287183474884628>");
+			msg = msg.replace(".country.", ":flag_white:");
 		}
 		else {
 			msg = msg.replace(".country.", ":flag_" + p.getCountry().toLowerCase() + ":");
 		}
 
 		return msg;
+	}
+
+	public String getPlayerCountryAuth(Player p){
+		if (p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+			return ":flag_white: " + p.getUrtauth();
+		}
+		else {
+			return ":flag_" + p.getCountry().toLowerCase() + ": " + p.getUrtauth();
+		}
 	}
 
 	public void cmdGetStats(Player p) {
@@ -589,17 +658,24 @@ public class PickupLogic {
 		else{
 			statsEmbed.addField("\u200b", "TS <:lr:401457276478554112>", false);
 			statsEmbed.addField("Played", String.valueOf(stats.ts_wdl.getTotal()), true);
-			if (stats.kdrRank == -1) {
-				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr), true);
+			// if (stats.kdrRank == -1) {
+			// 	statsEmbed.addField("KDR", String.format("%.02f", stats.kdr), true);
 
-			} else {
-				statsEmbed.addField("KDR", String.format("%.02f", stats.kdr) + " (#" + stats.kdrRank + ")", true);
-			}
+			// } else {
+			// 	statsEmbed.addField("KDR", String.format("%.02f", stats.kdr) + " (#" + stats.kdrRank + ")", true);
+			// }
+			statsEmbed.addField("Rating", String.format("%.02f", FtwglAPI.getPlayerRating(p)), true);
 			if (p.stats.wdlRank == -1) {
 				statsEmbed.addField("Win %", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "%", true);
 
 			} else {
 				statsEmbed.addField("Win %", Math.round(stats.ts_wdl.calcWinRatio() * 100d) + "% (#" + stats.wdlRank + ")", true);
+			}
+			if (p.spree.containsKey(getGametypeByString("TS")) && p.spree.get(getGametypeByString("TS")) > 3){
+				statsEmbed.addField("Win Streak", p.spree.get(getGametypeByString("TS")) + " :fire:", true);
+			}
+			if (p.spree.containsKey(getGametypeByString("DIV1")) && p.spree.get(getGametypeByString("DIV1")) > 3){
+				statsEmbed.addField("Div1 Streak", p.spree.get(getGametypeByString("DIV1")) + " :fire:", true);
 			}
 		}
 
@@ -870,6 +946,7 @@ public class PickupLogic {
 		}
 		StringBuilder msg = new StringBuilder("None");
 		boolean scrimEmpty = true;
+		String emptyGametype = "";
 		for (Match m : curMatch.values()) {
 			if (m.getGametype().getName().startsWith("SCRIM")) {
 				if (m.getPlayerCount() > 0){
@@ -884,10 +961,20 @@ public class PickupLogic {
 			} else {
 				msg.append("\n");
 			}
+			if (m.getPlayerCount() == 0){
+				emptyGametype += "**" + m.getGametype().getName() + "** ";
+				continue;
+			}
+			if (m.getGametype().getTeamSize() == 0){
+				continue;
+			}
 			msg.append(cmdStatus(m, null, false));
 		}
 		if (scrimEmpty){
 			msg.append("\n" + Config.team_no_scrim);
+		}
+		if (emptyGametype.length() > 0){
+			msg.append("\n" + emptyGametype + " Nobody signed up.");
 		}
 		bot.sendMsg(bot.getLatestMessageChannel(), msg.toString());
 	}

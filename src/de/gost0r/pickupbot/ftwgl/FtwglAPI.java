@@ -144,6 +144,37 @@ public class FtwglAPI {
         return server;
     }
 
+    public static float getPlayerRating(Player p){
+        JSONObject requestObj = new JSONObject();
+        List<Long> discordIdList = new ArrayList<Long>();
+        discordIdList.add(Long.parseLong(p.getDiscordUser().id));
+        requestObj.put("discord_ids", discordIdList);
+        
+        String response = sendPostRequest("/ratings", requestObj);
+        
+        if (response == null){
+            LOGGER.warning("Failed to get rating for player: " + p.getDiscordUser().username);
+            return 0.0f;
+        }
+        
+        try {
+            JSONObject obj = new JSONObject(response);
+            // Assuming the response contains ratings for each discord_id
+            // The response might be something like: {"154063250735104000": 1500.5, "539403413071331328": 1600.2}
+            String discordId = p.getDiscordUser().id;
+            if (obj.has(discordId)) {
+                return (float) obj.getDouble(discordId);
+            } else {
+                LOGGER.warning("No rating found for player: " + p.getDiscordUser().username);
+                return 0.0f;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Exception parsing rating response: ", e);
+            Sentry.capture(e);
+            return 0.0f;
+        }
+    }
+
     private static synchronized String sendPostRequest(String request, JSONObject content) {
         try {
             byte[] postData       = content.toString().getBytes( StandardCharsets.UTF_8 );
