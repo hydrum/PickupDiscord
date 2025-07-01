@@ -1533,12 +1533,13 @@ public class Database {
 
 	public void createSpree(Player player, Gametype gametype, int spree) {
 		try {
-			String sql = "INSERT INTO spree (player_userid, player_urtauth, gametype, spree) VALUES (?, ?, ?, ?)";
+			String sql = "INSERT INTO spree (player_userid, player_urtauth, gametype, spree, personal_best) VALUES (?, ?, ?, ?, ?)";
 			PreparedStatement pstmt = c.prepareStatement(sql);
 			pstmt.setString(1, player.getDiscordUser().id);
 			pstmt.setString(2, player.getUrtauth());
 			pstmt.setString(3, gametype.getName());
 			pstmt.setInt(4, spree);
+			pstmt.setInt(5, spree);
 			pstmt.executeUpdate();
 			pstmt.close();
 		} catch (SQLException e) {
