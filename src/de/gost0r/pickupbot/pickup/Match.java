@@ -1438,14 +1438,14 @@ public class Match implements Runnable {
 				rating = String.format("%.02f", playerRatings.get(p));
 			}
 
-			rating_wdl_string.append(wdl).append(" | ").append(rating).append("\n");
+			rating_wdl_string.append("``").append(rating).append(" | ").append(wdl).append("``\n");
 
 			String ping = String.valueOf(server.playerPing.get(p) + " ms");
-			ping_string.append(ping).append("\n");
+			ping_string.append("``").append(ping).append("``\n");
 		}
 
 		embed.addField("Players", lobby_players_string.toString(), true);
-		embed.addField("Win% | Rating", rating_wdl_string.toString(), true);
+		embed.addField("Rating | Win%", rating_wdl_string.toString(), true);
 		embed.addField("Ping", ping_string.toString(), true);
 
 		return embed;
