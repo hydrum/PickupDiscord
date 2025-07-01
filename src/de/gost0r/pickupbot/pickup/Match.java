@@ -1423,7 +1423,7 @@ public class Match implements Runnable {
 			else {
 				player_string.append(" :flag_" + p.getCountry().toLowerCase() + ": ");
 			}
-			player_string.append(+ p.getUrtauth() + "\n");
+			player_string.append(p.getUrtauth() + "\n");
 			lobby_players_string.append(player_string.toString());
 
 			String wdl = "";
