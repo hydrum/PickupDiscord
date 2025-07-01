@@ -1430,11 +1430,11 @@ public class Match implements Runnable {
 			String rating = "";
 
 			if (gametype.getName().equals("CTF")){
-				wdl = String.format("%.02f", p.stats.ctf_wdl.calcWinRatio() * 100d);
+				wdl = String.valueOf(Math.round(p.stats.ctf_wdl.calcWinRatio() * 100d));
 				rating = String.format("%.02f", p.stats.ctf_rating);
 			}
 			else {
-				wdl = String.format("%.02f", p.stats.ts_wdl.calcWinRatio() * 100d);
+				wdl = String.valueOf(Math.round(p.stats.ts_wdl.calcWinRatio() * 100d));
 				rating = String.format("%.02f", playerRatings.get(p));
 			}
 
