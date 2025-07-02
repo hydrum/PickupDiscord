@@ -331,28 +331,24 @@ public class Match implements Runnable {
 		}
 		cleanUp();
 
-		logic.db.saveMatch(this);
-		// Update player stats
-		for (Player p : playerStats.keySet()){
-			p.stats = logic.db.getPlayerStats(p, logic.currentSeason);
-			p.setRank(logic.db.getRankForPlayer(p));
-		}
-
-//		for (DiscordChannel threadChannel : threadChannels){
-//			threadChannel.archive();
-//		}
-		
-		if (gtvServer != null) {
-			gtvServer.free();
-			gtvServer.sendRcon("gtv_disconnect 1");
-		}
-
 		sendAftermath();
 		logic.matchRemove(this);
 
 		if (gametype.getTeamSize() > 0){
 			updateSpree();
 			payPlayers();
+		}
+
+		logic.db.saveMatch(this);
+		// Update player stats
+		for (Player p : playerStats.keySet()){
+			p.stats = logic.db.getPlayerStats(p, logic.currentSeason);
+			p.setRank(logic.db.getRankForPlayer(p));
+		}
+		
+		if (gtvServer != null) {
+			gtvServer.free();
+			gtvServer.sendRcon("gtv_disconnect 1");
 		}
 	}
 
