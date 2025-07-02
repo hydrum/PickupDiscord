@@ -51,6 +51,8 @@ public class ServerMonitor implements Runnable {
 	
 	private RconPlayersParsed prevRPP = new RconPlayersParsed();
 
+	public List<String> streamer_auths = new ArrayList<String>();
+
 	public ServerMonitor(Server server, Match match) {
 		this.server = server;
 		this.match = match;
@@ -459,7 +461,7 @@ public class ServerMonitor implements Runnable {
 		
 		for (ServerPlayer player : rpp.players) {
 			
-			if (player.state == ServerPlayerState.Connecting || player.name.equals("GTV-b00bs")) continue; // ignore connecting players
+			if (player.state == ServerPlayerState.Connecting || player.name.equals("GTV-b00bs") || streamer_auths.contains(player.auth)) continue; // ignore connecting players
 			
 			if (player.auth.equals("---")) {
 				requestAuth(player);

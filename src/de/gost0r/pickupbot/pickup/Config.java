@@ -193,8 +193,8 @@ public class Config {
 	public static final String USE_CMD_SETPROCTF 		= "!setproctf <urtauth>";
 	public static final String USE_CMD_ADDCHANNEL		= "!addchannel <#name> <public/admin>";
 	public static final String USE_CMD_REMOVECHANNEL	= "!removechannel <#name> <public/admin>";
-	public static final String USE_CMD_ADDROLE			= "!addrole <@role> <admin/superadmin>";
-	public static final String USE_CMD_REMOVEROLE		= "!removerole <@role> <admin/superadmin>";
+	public static final String USE_CMD_ADDROLE			= "!addrole <@role> <admin/superadmin/streamer>";
+	public static final String USE_CMD_REMOVEROLE		= "!removerole <@role> <admin/superadmin/streamer>";
 
 	public static final String USE_CMD_SCRIM			= "!scrim <ts/ctf/2v2>";
 	public static final String USE_CMD_REMOVETEAM		= "!removeteam <gametype>";
@@ -390,6 +390,7 @@ public class Config {
 
 	public static final String ftw_playernotinmatch		= "Player not in match";
 	public static final String ftw_matchnotfound		= "Match not found";
+	public static final String ftw_servernotready		= "Server not ready, try again in a few seconds.";
 	public static final String ftw_success				= "Game launched";
 	public static final String ftw_notconnected			= "User not connected to the FTW launcher";
 	public static final String ftw_error				= "Unknown error";

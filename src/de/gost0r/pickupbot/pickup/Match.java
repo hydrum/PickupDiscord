@@ -1447,4 +1447,12 @@ public class Match implements Runnable {
 
 		return embed;
 	}
+
+	public boolean addStreamerAuth(String auth){
+		if (server != null && server.getServerMonitor() != null){
+			server.getServerMonitor().streamer_auths.add(auth);
+			return true;
+		}
+		return false;
+	}
 }

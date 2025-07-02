@@ -1921,6 +1921,14 @@ public class PickupLogic {
 		return null;
 	}
 
+	public List<DiscordRole> getStreamerList() {
+		List<DiscordRole> list = new ArrayList<DiscordRole>();
+		if (roles.containsKey(PickupRoleType.STREAMER)) {
+			list.addAll(roles.get(PickupRoleType.STREAMER));
+		}
+		return list;
+	}
+
 	public List<DiscordRole> getAdminList() {
 		List<DiscordRole> list = new ArrayList<DiscordRole>();
 		if (roles.containsKey(PickupRoleType.ADMIN)) {
@@ -2036,6 +2044,16 @@ public class PickupLogic {
 						interaction.respond(response);
 						return;
 					}
+				}
+				if (player.getDiscordUser().hasStreamerRights() || player.getDiscordUser().hasAdminRights()){
+					boolean success = match.addStreamerAuth(player.getUrtauth());
+					if (!success){
+						interaction.respond(Config.ftw_servernotready);
+						return;
+					}
+					String response = FtwglAPI.launchAC(player, ip, password);
+					interaction.respond(response);
+					return;
 				}
 				interaction.respond(Config.ftw_playernotinmatch);
 				return;
