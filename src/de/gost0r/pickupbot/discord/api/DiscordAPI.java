@@ -23,6 +23,11 @@ public class DiscordAPI {
 	public static final String api_url = "https://discordapp.com/api/";
 	public static final String api_version = "v9";
 	
+	// Single reusable HttpClient instance to prevent thread leaks
+	private static final HttpClient httpClient = HttpClient.newBuilder()
+		.version(HttpClient.Version.HTTP_2)
+		.build();
+	
 	public static boolean sendMessage(DiscordChannel channel, String msg) {
 		try {
 			String reply = sendPostRequest("/channels/"+ channel.id + "/messages", new JSONObject().put("content", msg));
@@ -309,10 +314,6 @@ public class DiscordAPI {
 			URL url = new URL(api_url + api_version + request);
 			HttpURLConnection c = (HttpURLConnection) url.openConnection();
 			
-			HttpClient httpClient = HttpClient.newBuilder()
-                    .version(HttpClient.Version.HTTP_2)
-                    .build();
-			
 			HttpRequest patchRequest = HttpRequest.newBuilder()
 					.uri(URI.create(api_url + api_version + request))
 					.method("PATCH", HttpRequest.BodyPublishers.ofString(content.toString()))
@@ -321,7 +322,7 @@ public class DiscordAPI {
 					.header("Content-Type", "application/json")
 					.build();
 			
-			HttpResponse response = httpClient.send(patchRequest,HttpResponse.BodyHandlers.ofString());
+			HttpResponse response = httpClient.send(patchRequest, HttpResponse.BodyHandlers.ofString());
 
 			if (response.statusCode() != 200 && response.statusCode() != 201 && response.statusCode() != 204) {
 				if (response.statusCode() == 429 || response.statusCode() == 502) {
