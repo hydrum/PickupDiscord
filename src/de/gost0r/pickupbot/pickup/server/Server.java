@@ -158,7 +158,17 @@ public class Server {
 	public void stopMonitoring() {
 		if (monitor != null) {
 			this.monitor.stop();
+			
+			if (monitorThread != null) {
+				try {
+					monitorThread.join(5000); 
+				} catch (InterruptedException e) {
+					LOGGER.log(Level.WARNING, "Interrupted while waiting for monitor thread to stop", e);
+				}
+			}
+			
 			this.monitor = null;
+			this.monitorThread = null; 
 		}
 	}
 
