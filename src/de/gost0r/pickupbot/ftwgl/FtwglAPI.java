@@ -85,8 +85,6 @@ public class FtwglAPI {
             return null;
         }
 
-        LOGGER.warning(obj.toString());
-
         JSONObject serverObj = obj.getJSONObject("server");
         JSONObject serverConfigObj = obj.getJSONObject("server").getJSONObject("config");
         JSONObject serverLocationObj = obj.getJSONObject("server_location");
