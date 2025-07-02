@@ -1027,7 +1027,7 @@ public class Match implements Runnable {
 
 	public String getIngameInfo() {
 		String info;
-		if (state == MatchState.AwaitingServer || server.getServerMonitor() == null) {
+		if (state == MatchState.AwaitingServer || server == null || server.getServerMonitor() == null) {
 			info = "Captains's pick";
 		} else if (state == MatchState.Live) {
 			ServerState serverState = server.getServerMonitor().getState();

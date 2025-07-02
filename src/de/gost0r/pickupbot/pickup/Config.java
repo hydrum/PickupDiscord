@@ -273,7 +273,7 @@ public class Config {
 	public static final String pkup_go_pub_map			= "Map: .map.";
 	public static final String pkup_go_pub_calm			= "**GTV**: connect gtv.b00bs-clan.com:709; password SevenAndJehar"; // temporarily hard coded
 	public static final String pkup_go_pub_calm_notavi	= "GTV: not available";
-	public static final String pkup_go_pub_sent			= "**.gametype.**: Server info has been sent. If you didn't get a DM try **!lostpass**.";
+	public static final String pkup_go_pub_sent			= "**.gametype.**: Server info has been sent.";
 	public static final String pkup_go_pub_threadtitle	= "Match .ID.";
 	public static final String pkup_go_pub_captains		= "The captains are .captain1. (**red**) and .captain2. (**blue**). Player stats:";
 	public static final String pkup_go_pub_pick			= ".captain. pick a player:";
