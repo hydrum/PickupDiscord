@@ -93,9 +93,19 @@ public class DiscordGateway implements MessageHandler {
 			}
 			heartbeatTask = new HeartbeatTask(this);			
 			long interval = p.d.getLong("heartbeat_interval");
+			
+			// Cancel existing timer before creating a new one
+			if (heartbeatTimer != null) {
+				heartbeatTimer.cancel();
+				heartbeatTimer = new Timer();
+			}
+			
 			heartbeatTimer.scheduleAtFixedRate(heartbeatTask, interval/2, interval);			
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Unexpected exception in handlePacketHello: ", e);
 			Sentry.capture(e);
 		}
 		
@@ -130,6 +140,9 @@ public class DiscordGateway implements MessageHandler {
 			
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Unexpected exception in identify: ", e);
 			Sentry.capture(e);
 		}
 		
