@@ -949,7 +949,6 @@ public class PickupLogic {
 		for (Match m : curMatch.values()) {
 			if (m.getGametype().getName().startsWith("SCRIM")) {
 				if (m.getPlayerCount() == 0){
-					emptyGametype += "**SCRIM** ";
 					continue;
 				}
 			}
