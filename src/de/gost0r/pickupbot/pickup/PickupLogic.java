@@ -944,15 +944,12 @@ public class PickupLogic {
 			bot.sendMsg(bot.getLatestMessageChannel(), Config.pkup_match_unavi);
 			return;
 		}
-		StringBuilder msg = new StringBuilder("None");
-		boolean scrimEmpty = true;
+		StringBuilder msg = new StringBuilder("");
 		String emptyGametype = "";
 		for (Match m : curMatch.values()) {
 			if (m.getGametype().getName().startsWith("SCRIM")) {
-				if (m.getPlayerCount() > 0){
-					scrimEmpty = false;
-				}
-				else{
+				if (m.getPlayerCount() == 0){
+					emptyGametype += "**SCRIM** ";
 					continue;
 				}
 			}
@@ -970,9 +967,6 @@ public class PickupLogic {
 			}
 
 			msg.append(cmdStatus(m, null, false));
-		}
-		if (scrimEmpty){
-			msg.append("\n" + Config.team_no_scrim);
 		}
 		if (emptyGametype.length() > 0){
 			msg.append("\n" + emptyGametype + " Nobody signed up.");
