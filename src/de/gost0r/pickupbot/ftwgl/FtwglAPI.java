@@ -115,7 +115,6 @@ public class FtwglAPI {
         if (response == null){
             return null;
         }
-        LOGGER.warning(response);
 
         JSONObject obj = new JSONObject(response);
         JSONObject serverObj = obj.getJSONObject("config");
