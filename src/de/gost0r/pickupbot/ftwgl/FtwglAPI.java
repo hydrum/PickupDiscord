@@ -28,7 +28,6 @@ public class FtwglAPI {
 
     private static String api_url;
     private static String api_key;
-    private static final int port = 27960;
 
     public static void setupCredentials(String url, String key){
         FtwglAPI.api_url = url;
@@ -86,9 +85,8 @@ public class FtwglAPI {
             return null;
         }
 
-        LOGGER.warning(obj.toString());
-
-        JSONObject serverObj = obj.getJSONObject("server").getJSONObject("config");
+        JSONObject serverObj = obj.getJSONObject("server");
+        JSONObject serverConfigObj = obj.getJSONObject("server").getJSONObject("config");
         JSONObject serverLocationObj = obj.getJSONObject("server_location");
         JSONObject playerPingsObj = obj.getJSONObject("pings");
 
@@ -104,9 +102,9 @@ public class FtwglAPI {
             }
         }
 
-        Server server = new Server(obj.getJSONObject("server").getInt("id"), null, port, serverObj.getString("rcon"), serverObj.getString("password"), true, region);
+        Server server = new Server(serverObj.getInt("id"), null, serverObj.getInt("port"), serverConfigObj.getString("rcon"), serverConfigObj.getString("password"), true, region);
         server.country = country;
-        server.city = serverLocationObj.getString("name");
+        server.city = serverLocationObj.getString("city");
         server.playerPing = playerPing;
         return server;
     }
@@ -117,7 +115,6 @@ public class FtwglAPI {
         if (response == null){
             return null;
         }
-        LOGGER.warning(response);
 
         JSONObject obj = new JSONObject(response);
         JSONObject serverObj = obj.getJSONObject("config");
@@ -142,6 +139,101 @@ public class FtwglAPI {
         }
 
         return server;
+    }
+
+    public static float getPlayerRating(Player p){
+        JSONObject requestObj = new JSONObject();
+        List<Long> discordIdList = new ArrayList<Long>();
+        discordIdList.add(Long.parseLong(p.getDiscordUser().id));
+        requestObj.put("discord_ids", discordIdList);
+        
+        String response = sendPostRequest("/ratings", requestObj);
+        
+        if (response == null){
+            LOGGER.warning("Failed to get rating for player: " + p.getDiscordUser().username);
+            return 0.0f;
+        }
+        
+        try {
+            JSONObject obj = new JSONObject(response);
+            // The response structure is: {"ratings": {"402540351216156695": 1.42}}
+            if (obj.has("ratings")) {
+                JSONObject ratingsObj = obj.getJSONObject("ratings");
+                String discordId = p.getDiscordUser().id;
+                if (ratingsObj.has(discordId)) {
+                    return (float) ratingsObj.getDouble(discordId);
+                } else {
+                    LOGGER.warning("No rating found for player: " + p.getDiscordUser().username);
+                    return 0.0f;
+                }
+            } else {
+                LOGGER.warning("No 'ratings' field found in response for player: " + p.getDiscordUser().username);
+                return 0.0f;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Exception parsing rating response: ", e);
+            Sentry.capture(e);
+            return 0.0f;
+        }
+    }
+
+    public static Map<Player, Float> getPlayerRatings(List<Player> players){
+        if (players == null || players.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        JSONObject requestObj = new JSONObject();
+        List<Long> discordIdList = new ArrayList<Long>();
+        for (Player player : players) {
+            discordIdList.add(Long.parseLong(player.getDiscordUser().id));
+        }
+        requestObj.put("discord_ids", discordIdList);
+        
+        String response = sendPostRequest("/ratings", requestObj);
+        
+        Map<Player, Float> playerRatings = new HashMap<>();
+        
+        if (response == null){
+            LOGGER.warning("Failed to get ratings for player list");
+            // Return map with all players having 0.0f rating
+            for (Player player : players) {
+                playerRatings.put(player, 0.0f);
+            }
+            return playerRatings;
+        }
+        
+        try {
+            JSONObject obj = new JSONObject(response);
+            // The response structure is: {"ratings": {"402540351216156695": 1.42, "123456789": 2.15}}
+            if (obj.has("ratings")) {
+                JSONObject ratingsObj = obj.getJSONObject("ratings");
+                
+                for (Player player : players) {
+                    String discordId = player.getDiscordUser().id;
+                    if (ratingsObj.has(discordId)) {
+                        playerRatings.put(player, (float) ratingsObj.getDouble(discordId));
+                    } else {
+                        LOGGER.warning("No rating found for player: " + player.getDiscordUser().username);
+                        playerRatings.put(player, 0.0f);
+                    }
+                }
+            } else {
+                LOGGER.warning("No 'ratings' field found in response for player list");
+                // Return map with all players having 0.0f rating
+                for (Player player : players) {
+                    playerRatings.put(player, 0.0f);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Exception parsing rating response: ", e);
+            Sentry.capture(e);
+            // Return map with all players having 0.0f rating
+            for (Player player : players) {
+                playerRatings.put(player, 0.0f);
+            }
+        }
+        
+        return playerRatings;
     }
 
     private static synchronized String sendPostRequest(String request, JSONObject content) {

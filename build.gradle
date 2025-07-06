@@ -36,9 +36,11 @@ jar {
         attributes 'Main-Class' : 'de.gost0r.pickupbot.PickupBotDiscordMain'
     }
     destinationDirectory.set(file("$rootDir/"))
-    archiveName 'PickupBot.jar'
+    archiveBaseName = 'PickupBot'
+    archiveVersion = ''
+    archiveClassifier = ''
 
     from {
-        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }

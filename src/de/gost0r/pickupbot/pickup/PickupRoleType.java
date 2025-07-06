@@ -4,5 +4,6 @@ public enum PickupRoleType {
 	NONE,
 	PLAYER,
 	ADMIN,
-	SUPERADMIN
+	SUPERADMIN,
+	STREAMER
 }

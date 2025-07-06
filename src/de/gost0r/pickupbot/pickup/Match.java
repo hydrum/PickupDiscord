@@ -252,7 +252,9 @@ public class Match implements Runnable {
 			if (surrender[i] <= 0) {
 				state = MatchState.Surrender;
 				try {
-					server.getServerMonitor().surrender(i);
+					if (server != null && server.getServerMonitor() != null) {
+						server.getServerMonitor().surrender(i);
+					}
 				} catch (Exception e) {
 					LOGGER.log(Level.WARNING, "Exception: ", e);
 					Sentry.capture(e);
@@ -329,26 +331,24 @@ public class Match implements Runnable {
 		}
 		cleanUp();
 
+		sendAftermath();
+		logic.matchRemove(this);
+
+		if (gametype.getTeamSize() > 0){
+			updateSpree();
+			payPlayers();
+		}
+
 		logic.db.saveMatch(this);
 		// Update player stats
 		for (Player p : playerStats.keySet()){
 			p.stats = logic.db.getPlayerStats(p, logic.currentSeason);
 			p.setRank(logic.db.getRankForPlayer(p));
 		}
-
-//		for (DiscordChannel threadChannel : threadChannels){
-//			threadChannel.archive();
-//		}
 		
 		if (gtvServer != null) {
 			gtvServer.free();
 			gtvServer.sendRcon("gtv_disconnect 1");
-		}
-
-		sendAftermath();
-		logic.matchRemove(this);
-		if (gametype.getTeamSize() > 0){
-			payPlayers();
 		}
 	}
 
@@ -532,20 +532,13 @@ public class Match implements Runnable {
 			String captainAnnouncement = Config.pkup_go_pub_captains;
 			captainAnnouncement = captainAnnouncement.replace(".captain1.", captains[0].getDiscordUser().getMentionString());
 			captainAnnouncement = captainAnnouncement.replace(".captain2.", captains[1].getDiscordUser().getMentionString());
-			// List players stats
-			for (Player p : sortedPlayers){
-				captainAnnouncement += "\n" + logic.cmdGetElo(p, gametype);
-				if (logic.getDynamicServers()){
-					captainAnnouncement += " " + String.valueOf("\t " + server.playerPing.get(p)) + "ms";
-				}
-			}
 			if (logic.getDynamicServers()){
 				captainAnnouncement +="\n**Server:** " + Country.getCountryFlag(server.country) + "``" + server.city + "``";
 			}
 			else{
 				captainAnnouncement +="\n**Server:** " + server.getRegionFlag(false, false) + "``" + server.region.name() + "``";
 			}
-			logic.bot.sendMsg(threadChannels, captainAnnouncement);
+			logic.bot.sendMsg(threadChannels, captainAnnouncement, getLobbyEmbed());
 
 			String captainDm = Config.pkup_go_captains;
 			logic.bot.sendMsg(captains[0].getDiscordUser(), captainDm);
@@ -1034,7 +1027,7 @@ public class Match implements Runnable {
 
 	public String getIngameInfo() {
 		String info;
-		if (state == MatchState.AwaitingServer || server.getServerMonitor() == null) {
+		if (state == MatchState.AwaitingServer || server == null || server.getServerMonitor() == null) {
 			info = "Captains's pick";
 		} else if (state == MatchState.Live) {
 			ServerState serverState = server.getServerMonitor().getState();
@@ -1072,7 +1065,11 @@ public class Match implements Runnable {
 
 		String msg = Config.pkup_match_print_info;
 		msg = msg.replace(".gamenumber.", id == 0 ? String.valueOf(logic.db.getLastMatchID() + 1) : String.valueOf(id));
-		msg = msg.replace(".gametype.", gametype.getName());
+		if (gametype.getPrivate()) {
+			msg = msg.replace(".gametype.", ":lock:" + gametype.getName().toUpperCase());
+		} else {
+			msg = msg.replace(".gametype.", gametype.getName().toUpperCase());
+		}
 		msg = msg.replace(".map.", map != null ? map.name : "ut4_?");
 		msg = msg.replace(".redteam.", redplayers.toString());
 		msg = msg.replace(".blueteam.", blueplayers.toString());
@@ -1083,7 +1080,7 @@ public class Match implements Runnable {
 	
 	public DiscordEmbed getMatchEmbed(boolean forceNoDynamic) {
 		ServerState serverState = null;
-		if (server != null && server.isTaken()) {
+		if (server != null && server.getServerMonitor() != null && server.isTaken() ) {
 			serverState = server.getServerMonitor().getState();
 		}
 		
@@ -1102,7 +1099,12 @@ public class Match implements Runnable {
 		}
 		
 		embed.color = 7056881;
-		embed.description = map != null ? "**" + gametype.getName() + "** - [" + map.name + "](https://maps.pugbot.net/q3ut4/" + map.name + ".pk3)" : "null";
+		if (gametype.getPrivate()) {
+			embed.description = map != null ? ":lock: **" + gametype.getName().toUpperCase() + "** - [" + map.name + "](https://maps.pugbot.net/q3ut4/" + map.name + ".pk3)" : "null";
+		} else {
+			embed.description = map != null ? "**" + gametype.getName() + "** - [" + map.name + "](https://maps.pugbot.net/q3ut4/" + map.name + ".pk3)" : "null";
+		}
+
 		
 		StringBuilder red_team_player_embed = new StringBuilder();
 		StringBuilder red_team_score_embed = new StringBuilder();
@@ -1192,13 +1194,13 @@ public class Match implements Runnable {
 		}
 		float regionScore = euPlayers - gametype.getTeamSize() * ocPlayers;
 
-		if (ocPlayers > gametype.getTeamSize() * 2 * 0.7){
+		if (ocPlayers > gametype.getTeamSize() * 2 * 0.6){
 			return Region.OC;
 		}
-		else if (saPlayers > gametype.getTeamSize() * 2 * 0.7){
+		else if (saPlayers > gametype.getTeamSize() * 2 * 0.6){
 			return Region.SA;
 		}
-		else if (euPlayers > gametype.getTeamSize() * 2 * 0.7 || (euPlayers > gametype.getTeamSize() * 2 * 0.6 && (saPlayers + ocPlayers) < 2)){
+		else if (ocPlayers == 0 && ((euPlayers > gametype.getTeamSize() * 2 * 0.7) || (euPlayers > gametype.getTeamSize() * 2 * 0.6 && (saPlayers + ocPlayers) < 2))){
 			return Region.EU;
 		}
 		else if (regionScore < 0){
@@ -1261,6 +1263,42 @@ public class Match implements Runnable {
 
 	public boolean hasSquads(){
 		return squadList.size() > 0;
+	}
+
+	public void updateSpree(){
+		String winningTeam = "";
+		if (score[0] > score[1]){
+			winningTeam = "red";
+		}
+		else if (score[1] > score[0]){
+			winningTeam = "blue";
+		}
+
+		// If game result was corrupted and created a draw
+		if (winningTeam.equals("")){
+			return;
+		}
+
+		for (Player redP : teamList.get("red")) {
+			redP.saveSpree(gametype, winningTeam.equals("red"));
+			sendSpreeMsg(redP);
+		}
+		for (Player blueP : teamList.get("blue")) {
+			blueP.saveSpree(gametype, winningTeam.equals("blue"));
+			sendSpreeMsg(blueP);
+		}
+	}
+
+	public void sendSpreeMsg(Player p){
+		if (p.spree.containsKey(gametype) && p.spree.get(gametype) >= 3 && p.spree.get(gametype) < 6){
+			logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), p.getDiscordUser().getMentionString() + " is on a winning spree! :fire: " + p.spree.get(gametype));
+		}
+		else if (p.spree.containsKey(gametype) && p.spree.get(gametype) >= 6 && p.spree.get(gametype) < 10){
+			logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), p.getDiscordUser().getMentionString() + " is on a **rampage**! :fire: " + p.spree.get(gametype));
+		}
+		else if (p.spree.containsKey(gametype) && p.spree.get(gametype) >= 10){
+			logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), p.getDiscordUser().getMentionString() + " IS **GODLIKE**! :fire: " + p.spree.get(gametype));
+		}
 	}
 
 	public void payPlayers(){
@@ -1360,5 +1398,61 @@ public class Match implements Runnable {
 		if (getMapList().contains(map)){
 			mapVotes.put(map, 0);
 		}
+	}
+
+	private DiscordEmbed getLobbyEmbed(){
+		DiscordEmbed embed = new DiscordEmbed();
+		embed.title = "Lobby";
+		embed.color = 7056881;
+
+		StringBuilder lobby_players_string = new StringBuilder();
+		StringBuilder rating_wdl_string = new StringBuilder();
+		StringBuilder ping_string = new StringBuilder();
+
+		Map<Player, Float> playerRatings = FtwglAPI.getPlayerRatings(sortedPlayers);
+
+		for (Player p : sortedPlayers){
+			StringBuilder player_string = new StringBuilder();
+			player_string.append(p.getRank().getEmoji());
+			if( p.getCountry().equalsIgnoreCase("NOT_DEFINED")) {
+				player_string.append(" :flag_white: ");
+			}
+			else {
+				player_string.append(" :flag_" + p.getCountry().toLowerCase() + ": ");
+			}
+			player_string.append("``").append(p.getUrtauth()).append("``\n");
+			lobby_players_string.append(player_string.toString());
+
+			String wdl = "";
+			String rating = "";
+
+			if (gametype.getName().equals("CTF")){
+				wdl = String.valueOf(Math.round(p.stats.ctf_wdl.calcWinRatio() * 100d));
+				rating = String.format("%.02f", p.stats.ctf_rating);
+			}
+			else {
+				wdl = String.valueOf(Math.round(p.stats.ts_wdl.calcWinRatio() * 100d));
+				rating = String.format("%.02f", playerRatings.get(p));
+			}
+
+			rating_wdl_string.append("``").append(rating).append("`` | ``").append(wdl).append("``\n");
+
+			String ping = String.valueOf(server.playerPing.get(p) + " ms");
+			ping_string.append("``").append(ping).append("``\n");
+		}
+
+		embed.addField("Players", lobby_players_string.toString(), true);
+		embed.addField("Rating | Win%", rating_wdl_string.toString(), true);
+		embed.addField("Ping", ping_string.toString(), true);
+
+		return embed;
+	}
+
+	public boolean addStreamerAuth(String auth){
+		if (server != null && server.getServerMonitor() != null){
+			server.getServerMonitor().streamer_auths.add(auth);
+			return true;
+		}
+		return false;
 	}
 }

@@ -10,8 +10,6 @@ import de.gost0r.pickupbot.discord.DiscordGuild;
 import de.gost0r.pickupbot.discord.DiscordUser;
 import de.gost0r.pickupbot.pickup.stats.WinDrawLoss;
 
-import javax.swing.*;
-
 public class Player {
 	
 	public static Database db;
@@ -27,12 +25,14 @@ public class Player {
 	
 	private float kdr = 0.0f;
 	
-	public PlayerStats stats;
+	public PlayerStats stats = new PlayerStats();
 	
 	private List<PlayerBan> bans = new ArrayList<PlayerBan>();
+	public Map<Gametype, Integer> spree = new HashMap<Gametype, Integer>();
 		
 	private boolean active = true;
-	private boolean enforceAC = false;
+	private boolean enforceAC = true;
+	private boolean proctf = false;
 	
 	private boolean surrender = false;
 	
@@ -42,10 +42,10 @@ public class Player {
 	
 	private String country = "NOT_DEFINED";
 
-	private long coins;
-	private long eloBoost;
-	private int additionalMapVotes;
-	private int mapBans;
+	private long coins = 1000;
+	private long eloBoost = 0;
+	private int additionalMapVotes = 0;
+	private int mapBans = 0;
 
 	public Player(DiscordUser user, String urtauth) {
 		this.user = user;
@@ -161,10 +161,20 @@ public class Player {
 
 	public void forgiveBan() {
 		for (PlayerBan ban : bans) {
-			ban.forgiven = true;
+			if (ban.endTime > System.currentTimeMillis()) {
+				ban.forgiven = true;
+			}
 		}
-		
 		db.forgiveBan(this);
+	}
+
+	public void forgiveBotBan() {
+		for (PlayerBan ban : bans) {
+			if (ban.endTime > System.currentTimeMillis() && ( ban.reason == PlayerBan.BanReason.NOSHOW || ban.reason == PlayerBan.BanReason.RAGEQUIT)) {
+				ban.forgiven = true;
+			}
+		}
+		db.forgiveBotBan(this);
 	}
 
 	public PlayerBan getLatestBan() {
@@ -184,7 +194,7 @@ public class Player {
 	public int getPlayerBanCountSince(long time) {
 		int i = 0;
 		for (PlayerBan ban : bans) {
-			if (ban.startTime >= time) {
+			if (ban.startTime >= time && !ban.forgiven) {
 				++i;
 			}
 		}
@@ -204,6 +214,15 @@ public class Player {
 	public boolean isBanned() {
 		for (PlayerBan ban : bans) {
 			if (!ban.forgiven && ban.endTime > System.currentTimeMillis()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isBannedByBot() {
+		for (PlayerBan ban : bans) {
+			if (!ban.forgiven && ban.endTime > System.currentTimeMillis()  && ( ban.reason == PlayerBan.BanReason.NOSHOW || ban.reason == PlayerBan.BanReason.RAGEQUIT)) {
 				return true;
 			}
 		}
@@ -329,6 +348,10 @@ public class Player {
 
 	public void setEnforceAC(boolean enforceAC) { this.enforceAC = enforceAC; }
 
+	public boolean getProctf() { return this.proctf; }
+
+	public void setProctf(boolean proctf) { this.proctf = proctf; }
+
 	public float getCaptainScore(Gametype gt){
 		WinDrawLoss wdl = stats.ts_wdl;
 		float kdr = stats.kdr;
@@ -382,5 +405,16 @@ public class Player {
 	public void setMapBans(int mapBans) {
 		this.mapBans = mapBans ;
 		db.updatePlayerBoost(this);
+	}
+
+	public void saveSpree(Gametype gametype, boolean won) {
+		if (this.spree.containsKey(gametype)) {
+			this.spree.put(gametype, won ? this.spree.get(gametype) + 1 : 0);
+			db.updateSpree(this, gametype, this.spree.get(gametype));
+		}
+		else {
+			this.spree.put(gametype, won ? 1 : 0);
+			db.createSpree(this, gametype, this.spree.get(gametype));
+		}
 	}
 }

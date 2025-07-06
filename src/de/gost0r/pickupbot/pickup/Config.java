@@ -8,6 +8,7 @@ public class Config {
 	public static final String CMD_1v1					= "!1v1";
 	public static final String CMD_2v2					= "!2v2";
 	public static final String CMD_DIV1					= "!div1";
+	public static final String CMD_PROCTF 				= "!proctf";
 	public static final String CMD_SKEET				= "!skeet";
 	public static final String CMD_AIM					= "!aim";
 	public static final String CMD_REMOVE				= "!remove";
@@ -60,9 +61,17 @@ public class Config {
 	public static final String CMD_TOP_KDR				= "!topkdr";
 	public static final String CMD_TOP					= "!top";
 	public static final String CMD_TOP_RICH				= "!toprich";
+	public static final String CMD_SPREE				= "!topspree";
 
 	public static final String CMD_MATCH				= "!match";
 	public static final String CMD_LAST					= "!last";
+
+	public static final String CMD_CREATE_PRIVATE 		= "!createprivate";
+	public static final String CMD_PRIVATE 				= "!private";
+	public static final String CMD_ADD_PLAYER_PRIVATE	= "!addprivate";
+	public static final String CMD_REMOVE_PLAYER_PRIVATE = "!removeprivate";
+	public static final String CMD_LEAVE_PRIVATE		= "!leaveprivate";
+	public static final String CMD_SHOW_PRIVATE			= "!showprivate";
 
 	//public static final String CMD_REPORT				= "!report";
 	//public static final String CMD_EXCUSE				= "!excuse";
@@ -82,6 +91,7 @@ public class Config {
 
 	public static final String CMD_UNREGISTER			= "!unregister";
 	public static final String CMD_ENFORCEAC			= "!enforceac";
+	public static final String CMD_SETPROCTF 			= "!setproctf";
 
 	public static final String CMD_ADDCHANNEL			= "!addchannel";
 	public static final String CMD_REMOVECHANNEL		= "!removechannel";
@@ -89,17 +99,25 @@ public class Config {
 	public static final String CMD_REMOVEROLE			= "!removerole";
 
 	public static final String CMD_RESETELO				= "!resetelo";
+	public static final String CMD_SHOWROLES 			= "!showroles";
+	public static final String CMD_SHOWKNOWNROLES 		= "!showknownroles";
+	public static final String CMD_SHOWKNOWNCHANNELS	= "!showknownchannels";
+	public static final String CMD_GODROLE				= "!godrole";
 
-	public static final String PUB_LIST = "" + CMD_ADD + " " + CMD_REMOVE + " " + CMD_MAPS + " " + CMD_MAP + " " + CMD_MATCH + " " 
-	+ CMD_LAST + " " + CMD_LIVE + " " + CMD_STATUS + " " + CMD_HELP + " " + CMD_REGISTER + " " + CMD_GETELO + " " + CMD_TOP_PLAYERS 
-	+ " " + CMD_TOP_COUNTRIES + " " + CMD_TOP_KDR + " " + CMD_TOP_WDL + " " + CMD_COUNTRY + " " + CMD_SURRENDER + " " + CMD_BANINFO 
-	+ " " + CMD_VOTES + " " + CMD_LAST + " " + CMD_TEAM + " " + CMD_LEAVETEAM + " " + CMD_SCRIM + " " + CMD_REMOVETEAM + " " + CMD_TEAMS;
+	public static final String PUB_LIST = CMD_REGISTER + " " + CMD_COUNTRY + " " + CMD_PING + " " + CMD_ADD + " " + CMD_REMOVE
+	+ " " + CMD_MAPS + " " + CMD_MAP + " " + CMD_MATCH + " " + CMD_LAST + " " + CMD_LIVE + " " + CMD_STATUS + " " + CMD_HELP 
+	+ " " + CMD_GETELO + " " + CMD_GETSTATS + " " + CMD_TOP_PLAYERS + " " + CMD_TOP_COUNTRIES + " " + CMD_TOP_KDR + " " + CMD_TOP_WDL 
+	+ " " + CMD_SURRENDER + " " + CMD_BANINFO + " " + CMD_VOTES + " " + CMD_LAST + " " + CMD_TEAM + " " + CMD_LEAVETEAM + " " + CMD_SCRIM 
+	+ " " + CMD_REMOVETEAM + " " + CMD_TEAMS + " " + CMD_WALLET + " " + CMD_DONATE + " " + CMD_BETHISTORY + " " + CMD_TOP_RICH 
+	+ " " + CMD_CREATE_PRIVATE + " " + CMD_PRIVATE + " " + CMD_ADD_PLAYER_PRIVATE + " " + CMD_REMOVE_PLAYER_PRIVATE + " " + CMD_LEAVE_PRIVATE 
+	+ " " + CMD_SHOW_PRIVATE;
 	
-	public static final String ADMIN_LIST = "" + CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " " + CMD_ENABLEMAP 
-	+ " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE + " " 
-	+ CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_ADDBAN + " " + CMD_REMOVEBAN 
-	+ " " + CMD_SHOWMATCHES + " " + CMD_UNREGISTER + " " + CMD_ADDROLE + " " + CMD_REMOVEROLE + " " + CMD_ADDCHANNEL + " " + CMD_REMOVECHANNEL 
-	+ " " + CMD_FORCEADD + " " + CMD_REBOOT;
+	public static final String ADMIN_LIST = CMD_LOCK + " " + CMD_UNLOCK + " " + CMD_RESET + " " + CMD_GETDATA + " " + CMD_ENABLEMAP
+	+ " " + CMD_DISABLEMAP + " " + CMD_RCON + " " + CMD_SHOWMATCHES + " " + CMD_SHOWSERVERS + " " + CMD_ENABLEGAMETYPE + " " + CMD_DISABLEGAMETYPE 
+	+ " " + CMD_ADDSERVER + " " + CMD_ENABLESERVER + " " + CMD_DISABLESERVER + " " + CMD_UPDATESERVER + " " + CMD_ADDBAN + " " + CMD_REMOVEBAN 
+	+ " " + CMD_SHOWMATCHES + " " + CMD_UNREGISTER + " " + CMD_SHOWKNOWNROLES + " " + CMD_SHOWKNOWNCHANNELS + " " + CMD_ADDROLE 
+	+ " " + CMD_REMOVEROLE + " " + CMD_ADDCHANNEL + " " + CMD_REMOVECHANNEL + " " + CMD_FORCEADD + " " + CMD_REBOOT + " " + CMD_SETPROCTF 
+	+ " " + CMD_ENFORCEAC + " " + CMD_RESETELO + " " + CMD_ENABLEDYNSERVER + " " + CMD_DISABLEDYNSERVER;
 
 //------------------------------------------------------------------------------------//
 
@@ -112,9 +130,10 @@ public class Config {
 	public static final String USE_CMD_1v1				= "!1v1 <map>";
 	public static final String USE_CMD_2v2				= "!2v2 <map>";
 	public static final String USE_CMD_DIV1				= "!div1 <map>";
-	public static final String USE_CMD_MAPS				= "!maps displays the map list for each gametype.";
+	public static final String USE_CMD_PROCTF 			= "!proctf <map>";
 	public static final String USE_CMD_MAP				= "!map <gametype> <mapname>";
-	public static final String USE_CMD_ADDVOTE			= "!addvote <gametype> <mapname>";
+	public static final String USE_CMD_MAPS				= "!maps <gametype>";
+	public static final String USE_CMD_ADDVOTE			= "!addvote <gametype>";
 	public static final String USE_CMD_BANMAP			= "!banmap <map>";
 	public static final String USE_CMD_STATUS			= "Type !status to get information on the queues.";
 	public static final String USE_CMD_HELP				= "!help <command>";
@@ -148,6 +167,7 @@ public class Config {
 	public static final String USE_CMD_TOP_COUNTRIES	= "!topcountries ordered by average ELO";
 	public static final String USE_CMD_TOP_WDL			= "!topwin <gametype>: players with the best win ratio for a specific gamemode";
 	public static final String USE_CMD_TOP_KDR			= "!topkdr <gametype>: players with the best KDR for a specific gamemode";
+	public static final String USE_CMD_TOP_SPREE		= "!topspree <gametype>: players with the best winning spree for a specific gamemode";
 
 	public static final String USE_CMD_MATCH			= "!match <id>";
 	public static final String USE_CMD_LAST				= "!last </@User|urtauth/>";
@@ -170,11 +190,11 @@ public class Config {
 
 	public static final String USE_CMD_UNREGISTER		= "!unregister <urtauth>";
 	public static final String USE_CMD_ENFORCEAC		= "!enforceac <urtauth>";
-
+	public static final String USE_CMD_SETPROCTF 		= "!setproctf <urtauth>";
 	public static final String USE_CMD_ADDCHANNEL		= "!addchannel <#name> <public/admin>";
 	public static final String USE_CMD_REMOVECHANNEL	= "!removechannel <#name> <public/admin>";
-	public static final String USE_CMD_ADDROLE			= "!addrole <@role> <admin/superadmin>";
-	public static final String USE_CMD_REMOVEROLE		= "!removerole <@role> <admin/superadmin>";
+	public static final String USE_CMD_ADDROLE			= "!addrole <@role> <admin/superadmin/streamer>";
+	public static final String USE_CMD_REMOVEROLE		= "!removerole <@role> <admin/superadmin/streamer>";
 
 	public static final String USE_CMD_SCRIM			= "!scrim <ts/ctf/2v2>";
 	public static final String USE_CMD_REMOVETEAM		= "!removeteam <gametype>";
@@ -183,6 +203,10 @@ public class Config {
 	public static final String USE_CMD_TEAMS			= "!teams lists the active teams";
 
 	public static final String USE_CMD_DONATE			= "!donate <player> <amount>";
+
+	public static final String USE_CMD_CREATE_PRIVATE	= "!createprivate <gamemode> <players (optional)>";
+	public static final String USE_CMD_ADD_PLAYER_PRIVATE = "!addprivate <players>";
+	public static final String USE_CMD_REMOVE_PLAYER_PRIVATE = "!removeprivate <players>";
 
 	//------------------------------------------------------------------------------------//
 	
@@ -207,6 +231,7 @@ public class Config {
 
 	public static final String APP_BET = "bet";
 	public static final String APP_BUY = "buy";
+	public static final String APP_PARDON = "pardon";
 	
 	//------------------------------------------------------------------------------------//
 
@@ -248,7 +273,7 @@ public class Config {
 	public static final String pkup_go_pub_map			= "Map: .map.";
 	public static final String pkup_go_pub_calm			= "**GTV**: connect gtv.b00bs-clan.com:709; password SevenAndJehar"; // temporarily hard coded
 	public static final String pkup_go_pub_calm_notavi	= "GTV: not available";
-	public static final String pkup_go_pub_sent			= "**.gametype.**: Server info has been sent. If you didn't get a DM try **!lostpass**.";
+	public static final String pkup_go_pub_sent			= "**.gametype.**: Server info has been sent.";
 	public static final String pkup_go_pub_threadtitle	= "Match .ID.";
 	public static final String pkup_go_pub_captains		= "The captains are .captain1. (**red**) and .captain2. (**blue**). Player stats:";
 	public static final String pkup_go_pub_pick			= ".captain. pick a player:";
@@ -275,6 +300,8 @@ public class Config {
 
 	public static final String is_banned				= ".user. (.urtauth.) is suspended .time. for .reason.";
 	public static final String is_unbanned				= ".user. (.urtauth.) is unbanned.";
+	public static final String is_pardonned				= ".user. (.urtauth.) is pardonned.";
+	public static final String is_pardonned_admin		= ".user. (.urtauth.) has been pardonned by .userAdmin.. Reason: ``.reason.``";
 	public static final String is_notbanned				= ".urtauth. is not banned (yet).";
 	public static final String not_banned				= "No active bans found for .urtauth.";
 	public static final String ban_history				= "**__Ban history:__** (Past 2 months)";
@@ -300,7 +327,7 @@ public class Config {
 	public static final String auth_taken_user			= "You have already registered an account.";
 	public static final String auth_invalid				= "Your **urtauth** seems to be invalid.";
 	public static final String auth_success				= "Your **urtauth** has been linked to your account.";
-	public static final String auth_success_admin		= "The user .user. registered using the auth ``.urtauth.``.";
+	public static final String auth_success_admin		= ":new: **The user .user. registered using the auth ``.urtauth.``.**";
 	public static final String auth_sent_key			= "You have to register your auth name and not your auth key!!!";
 
 	public static final String ac_enforced				= ":warning: **From now on the anticheat (AC) will be mandatory for you to play pickup games.**\n\n If the AC is new to you, check out the channel below for information on how to set it up: https://discord.com/channels/117622053061787657/1067227082372952084/1067227082372952084 If you run into any kind of issue, don't hesitate to ask for support in **#help** or by DM to ``@solitary#5004``\n\nYou will now need to press the green **Connect to server** button in the **#pickup** channel to join.";
@@ -312,13 +339,13 @@ public class Config {
 	public static final String player_not_in_match		= "You are not added to any queue.";
 	public static final String player_already_match		= "You are already in a match.";
 	public static final String player_not_admin			= "You must be an admin to use this command.";
-	public static final String player_notdiv1			= "Hi <:puma:849287183474884628>, you need to be in either the Top ``.minrank.``  **ELO** (#``.rank.``) *OR* Top ``.minkdrrank.``  **KDR** (#``.kdrrank.``) *OR* Top ``.minwinrank.``  **Win Rate** (#``.winrank.``) to add to the **div1** queue. Keep practicing on Sexy CTF.";
-
+	public static final String player_notdiv1			= "Hi, you need to have a minimum ``.minkdr.`` **KDR** (``.kdr.``) this season to add to the **div1** queue.";
+	public static final String player_not_proctf 		= "You can't join this queue, contact an admin if you think this is an error.";
 	public static final String player_not_captain		= "You can't pick a player. You are not captain or it is not your turn to pick.";
 
 	public static final String player_already_surrender	= "You already surrendered.";
 
-	public static final String afk_reminder				= "**[AFK]** .user. will be removed in 3 minutes. Write something in the channel to stay in queue.";
+	public static final String afk_reminder				= "**[AFK]** .user. will be removed in 3 minutes. Write something in the channel to stay in queue. :writing_hand:";
 	public static final String pick_reminder			= "**[CAPTAIN PICK]** .user. you have 1 min to pick a player in the game thread channel.";
 	public static final String pick_reset				= "**[CAPTAIN PICK]** The match **.matchid.** has been reset. .user. did not pick a player in time and was punished accordingly.";
 
@@ -352,17 +379,22 @@ public class Config {
 	public static final String wait_testing_server		= "Testing server list. This can take a while...";
 	public static final String admin_enforce_ac_on		= ":white_check_mark: The anticheat is now enforced for the player ``.urtauth.``";
 	public static final String admin_enforce_ac_off		= ":negative_squared_cross_mark: The anticheat is **no longer** enforced for the player ``.urtauth.``";
+
+	public static final String admin_proctf_on 			= ":white_check_mark: The player ``.urtauth.`` can now join the pro ctf queue.";
+	public static final String admin_proctf_off 		= ":negative_squared_cross_mark: The player ``.urtauth.`` can no longer join the pro ctf queue.";
+	public static final String proctf_dm 				= "You have been granted access to the ``pro ctf`` queue. You can now use ``!proctf <map>`` to play some more serious CTF games.";
 	
-	public static final String bot_online				= "The bot is back online!";
+	public static final String bot_online				= "**The bot is back online.**";
 
 	public static final String elo_reset				= "The elo has been reset! Don't forget to reboot the bot and remove all rank roles manually.";
 
 	public static final String ftw_playernotinmatch		= "Player not in match";
 	public static final String ftw_matchnotfound		= "Match not found";
+	public static final String ftw_servernotready		= "Server not ready, try again in a few seconds.";
 	public static final String ftw_success				= "Game launched";
 	public static final String ftw_notconnected			= "User not connected to the FTW launcher";
 	public static final String ftw_error				= "Unknown error";
-	public static final String ftw_error_noping			= "Check your dms and click on the link to register your ping in the different server locations.";
+	public static final String ftw_error_noping			= "Check your DMs and click on the link to calculate your ping with the different server locations.";
 	public static final String ftw_dm_noping			= "Please click here to register your ping in the different server locations: .url.";
 
 	public static final String team_involved_other		= "You are already involved in an active team. Leave it by sending ``!leaveteam``.";
@@ -416,4 +448,14 @@ public class Config {
 	public static final String donate_incorrect_amount	= "Incorrect amount of coin to donate.";
 	public static final String donate_processed			= ".player. donated <:.emojiname.:.emojiid.> ``.amount.`` to .otherplayer.";
 	public static final String donate_above_limit		= "You can't donate more than ``10,000`` coins.";
+	public static final String player_already_group		= "**.player.** is already in a private group.";
+	public static final String player_create_group 		= "You created a new private group! Do ``!addprivate <players>`` to add players to your group. Join the private queue with ``!private``.";
+	public static final String player_no_owned_group 	= "You don't own any private group. Do ``!createprivate`` to create one.";
+	public static final String player_no_group 			= "You are not part of any private group currently.";
+	public static final String player_added_group 		= "Successfully added players to group.";
+	public static final String player_removed_group 	= "Successfully removed players from group.";
+	public static final String private_dissolved		= "**.player.**'s private group was dissolved.";
+	public static final String private_left				= "You successfully left **.player.**'s private group.";
+	public static final String private_none				= "There are currently no private groups. Do ``!createprivate`` to create one.";
+	public static final String div1_stats_blocked		= "Div 1 stats are currently hidden";
 }

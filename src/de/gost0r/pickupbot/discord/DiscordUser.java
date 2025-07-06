@@ -172,6 +172,19 @@ public class DiscordUser {
 		}
 		return null;
 	}
+
+	public boolean hasStreamerRights() {
+		List<DiscordRole> roleList = this.getRoles(DiscordBot.getGuilds());
+		List<DiscordRole> streamerList = PickupBot.logic.getStreamerList();
+		for (DiscordRole s : roleList) {
+			for (DiscordRole r : streamerList) {
+				if (s.equals(r)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	
 	public boolean hasAdminRights() {
 		List<DiscordRole> roleList = this.getRoles(DiscordBot.getGuilds());

@@ -18,7 +18,12 @@ public class HeartbeatTask extends TimerTask {
 	
 	@Override
 	public void run() {
-		sendHeatbeat();
+		try {
+			sendHeatbeat();
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "HeartbeatTask failed: ", e);
+			Sentry.capture(e);
+		}
 	}
 
 	private void sendHeatbeat() {
@@ -29,6 +34,9 @@ public class HeartbeatTask extends TimerTask {
 			dg.sendMessage(msg.toString());
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Exception: ", e);
+			Sentry.capture(e);
+		} catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Unexpected exception in heartbeat: ", e);
 			Sentry.capture(e);
 		}
 	}
