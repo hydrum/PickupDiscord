@@ -46,7 +46,7 @@ public class PickupBotDiscordMain {
 
         } catch (IOException | JSONException | SecurityException | InterruptedException e) {
             LOGGER.log(Level.WARNING, "Exception: ", e);
-            Sentry.capture(e);
+            Sentry.captureException(e);
         }
     }
 
@@ -69,6 +69,6 @@ public class PickupBotDiscordMain {
         Sentry.init(dotenv.get("SENTRY_DSN") + "?environment=" + env);
 
         LOGGER.severe("Bot started.");
-        Sentry.capture("Bot started");
+        Sentry.captureMessage("Bot started");
     }
 }
