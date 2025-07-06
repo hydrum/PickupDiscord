@@ -20,9 +20,9 @@ public class DiscordSelectMenu extends DiscordComponent {
         selectMenuJSON.put("type", type);
         selectMenuJSON.put("custom_id", custom_id);
 
-        if (options != null){
+        if (options != null) {
             List<JSONObject> optionList = new ArrayList<JSONObject>();
-            for (DiscordSelectOption option : options){
+            for (DiscordSelectOption option : options) {
                 optionList.add(option.getJSON());
             }
             selectMenuJSON.put("options", optionList);

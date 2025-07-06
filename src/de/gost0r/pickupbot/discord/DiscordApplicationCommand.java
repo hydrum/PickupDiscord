@@ -13,26 +13,26 @@ public class DiscordApplicationCommand {
     public String default_member_permissions;
     public ArrayList<DiscordCommandOption> options;
 
-    public DiscordApplicationCommand(String name, String description){
+    public DiscordApplicationCommand(String name, String description) {
         this.type = 1;
         this.name = name;
         this.description = description;
         this.options = new ArrayList<DiscordCommandOption>();
     }
 
-    public JSONObject getJSON(){
+    public JSONObject getJSON() {
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("type", type);
         jsonObj.put("name", name);
         jsonObj.put("description", description);
 
-        if (default_member_permissions != null){
+        if (default_member_permissions != null) {
             jsonObj.put("default_member_permissions", default_member_permissions);
         }
 
-        if (options.size() > 0){
+        if (options.size() > 0) {
             List<JSONObject> optionList = new ArrayList<JSONObject>();
-            for (DiscordCommandOption option : options){
+            for (DiscordCommandOption option : options) {
                 optionList.add(option.getJSON());
             }
             jsonObj.put("options", optionList);
@@ -40,11 +40,11 @@ public class DiscordApplicationCommand {
         return jsonObj;
     }
 
-    public void addOption(DiscordCommandOption option){
+    public void addOption(DiscordCommandOption option) {
         options.add(option);
     }
 
-    public void create(){
+    public void create() {
         DiscordAPI.createApplicationCommand(this);
     }
 

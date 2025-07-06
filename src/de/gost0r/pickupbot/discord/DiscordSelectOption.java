@@ -9,7 +9,7 @@ public class DiscordSelectOption {
     public JSONObject emoji;
     public boolean isDefault;
 
-    public DiscordSelectOption(String label, String value){
+    public DiscordSelectOption(String label, String value) {
         this.label = label;
         this.value = value;
     }
@@ -20,7 +20,7 @@ public class DiscordSelectOption {
         selectOptionJSON.put("label", label);
         selectOptionJSON.put("value", value);
 
-        if (description != null){
+        if (description != null) {
             selectOptionJSON.put("description", description);
         }
         if (emoji != null) {

@@ -19,8 +19,7 @@ public class Team {
     private DiscordChannel threadChannel;
 
 
-
-    public Team(PickupLogic logic, Player captain){
+    public Team(PickupLogic logic, Player captain) {
         this.logic = logic;
 
         this.captain = captain;
@@ -33,32 +32,47 @@ public class Team {
         addPlayer(captain);
     }
 
-    public List<Player> getPlayers(){ return players; }
+    public List<Player> getPlayers() {
+        return players;
+    }
 
-    public List<Player> getInvitedPlayers(){ return invitedPlayers; }
+    public List<Player> getInvitedPlayers() {
+        return invitedPlayers;
+    }
 
-    public Player getCaptain(){ return captain; }
+    public Player getCaptain() {
+        return captain;
+    }
 
-    public DiscordChannel getThreadChannel() { return  threadChannel; }
+    public DiscordChannel getThreadChannel() {
+        return threadChannel;
+    }
 
-    public boolean isInTeam(Player player) { return players.contains(player); }
-    public boolean isInvitedToTeam(Player player) { return invitedPlayers.contains(player); }
+    public boolean isInTeam(Player player) {
+        return players.contains(player);
+    }
 
-    public void setCaptain(Player newCaptain){
-        if (!players.contains(newCaptain)){
+    public boolean isInvitedToTeam(Player player) {
+        return invitedPlayers.contains(player);
+    }
+
+    public void setCaptain(Player newCaptain) {
+        if (!players.contains(newCaptain)) {
             addPlayer(newCaptain);
         }
         captain = newCaptain;
     }
 
-    public void addPlayer(Player player){ players.add(player); }
+    public void addPlayer(Player player) {
+        players.add(player);
+    }
 
-    public void removePlayer(Player player){
+    public void removePlayer(Player player) {
         players.remove(player);
         logic.bot.sendMsg(threadChannel, Config.team_removed.replace(".player.", player.getDiscordUser().getMentionString()));
     }
 
-    public void invitePlayer(Player player){
+    public void invitePlayer(Player player) {
         invitedPlayers.add(player);
 
         List<DiscordComponent> buttons = new ArrayList<DiscordComponent>();
@@ -81,7 +95,7 @@ public class Team {
         logic.bot.sendMsgToEdit(threadChannel, invite_message, null, buttons);
     }
 
-    public void acceptInvitation(Player player){
+    public void acceptInvitation(Player player) {
         invitedPlayers.remove(player);
         addPlayer(player);
 
@@ -96,38 +110,38 @@ public class Team {
         logic.bot.sendMsgToEdit(threadChannel, accept_message, null, buttons);
     }
 
-    public void declineInvitation(Player player){
+    public void declineInvitation(Player player) {
         invitedPlayers.remove(player);
         logic.bot.sendMsg(threadChannel, Config.team_declined.replace(".player.", player.getDiscordUser().getMentionString()));
     }
 
-    public void cancelInvitation(Player player){
+    public void cancelInvitation(Player player) {
         invitedPlayers.remove(player);
         logic.bot.sendMsg(threadChannel, Config.team_canceled.replace(".player.", player.getDiscordUser().getMentionString()));
     }
 
-    public boolean isFull(){
+    public boolean isFull() {
         return players.size() == maxPlayers;
     }
 
-    public void archive(){
+    public void archive() {
         threadChannel.archive();
     }
 
-    public String getTeamString(){
+    public String getTeamString() {
         String str = captain.getDiscordUser().getMentionString() + " (captain)";
-        for (Player player : players){
-            if (!player.equals(captain)){
+        for (Player player : players) {
+            if (!player.equals(captain)) {
                 str = str + " " + player.getDiscordUser().getMentionString();
             }
         }
         return str;
     }
 
-    public String getTeamStringNoMention(){
+    public String getTeamStringNoMention() {
         String str = captain.getUrtauth() + " (captain)";
-        for (Player player : players){
-            if (!player.equals(captain)){
+        for (Player player : players) {
+            if (!player.equals(captain)) {
                 str = str + " " + player.getUrtauth();
             }
         }

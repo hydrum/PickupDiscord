@@ -5,7 +5,6 @@ import de.gost0r.pickupbot.discord.DiscordEmbed;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.List;
 
 public class PrivateGroup {
     public Player captain;
@@ -38,11 +37,11 @@ public class PrivateGroup {
 
     public DiscordEmbed getEmbed() {
         DiscordEmbed embed = new DiscordEmbed();
-        embed.title = "Private " + gt.getName().split(" ")[0] +  " Group";
+        embed.title = "Private " + gt.getName().split(" ")[0] + " Group";
         embed.color = 7056881;
 
         long epochSeconds = timestamp.plus(Duration.ofHours(1)).getEpochSecond();
-        embed.description = "**Captain**: " + captain.getDiscordUser().getMentionString() + "\nThis group will expire in <t:" + Long.toString(epochSeconds) +  ":R> if left inactive.";
+        embed.description = "**Captain**: " + captain.getDiscordUser().getMentionString() + "\nThis group will expire in <t:" + Long.toString(epochSeconds) + ":R> if left inactive.";
 
         int totalPlayers = playerList.size();
         int columns = (int) Math.ceil(totalPlayers / 10.0); // max 10 players per column

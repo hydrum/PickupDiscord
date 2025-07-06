@@ -6,12 +6,12 @@ public class DiscordCommandOptionChoice {
     public String name;
     public String value;
 
-    public DiscordCommandOptionChoice(String name, String value){
-        this.name= name;
+    public DiscordCommandOptionChoice(String name, String value) {
+        this.name = name;
         this.value = value;
     }
 
-    public JSONObject getJSON(){
+    public JSONObject getJSON() {
         JSONObject jsonObj = new JSONObject();
         jsonObj.put("name", name);
         jsonObj.put("value", value);

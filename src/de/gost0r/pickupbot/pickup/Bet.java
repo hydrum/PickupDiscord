@@ -23,7 +23,7 @@ public class Bet {
     public static JSONObject smaragdEmoji = new JSONObject().put("name", "pugcoin_smaragd").put("id", "1081605371367534672");
     public static JSONObject prismaEmoji = new JSONObject().put("name", "pugcoin_prisma").put("id", "1081605422764527768");
 
-    public Bet(int matchid, Player p, String color, long amount, float odds){
+    public Bet(int matchid, Player p, String color, long amount, float odds) {
         this.matchid = matchid;
         this.player = p;
         this.color = color;
@@ -32,7 +32,7 @@ public class Bet {
         this.open = true;
     }
 
-    public void place(Match match){
+    public void place(Match match) {
         boolean allIn = amount == player.getCoins();
         player.spendCoins(amount);
         JSONObject emoji = getCoinEmoji(amount);
@@ -42,18 +42,18 @@ public class Bet {
         msg = msg.replace(".emojiname.", emoji.getString("name"));
         msg = msg.replace(".emojiid.", emoji.getString("id"));
 
-        if (allIn){
-            msg +=" **ALL IN!!**";
+        if (allIn) {
+            msg += " **ALL IN!!**";
             logic.bot.sendMsg(logic.getChannelByType(PickupChannelType.PUBLIC), msg);
         }
         logic.bot.sendMsg(match.threadChannels, msg);
     }
 
-    public void enterResult(boolean result){
+    public void enterResult(boolean result) {
         won = result;
         open = false;
 
-        if (won){
+        if (won) {
             int wonAmount = Math.round(amount * odds);
             player.addCoins(wonAmount);
         }
@@ -61,7 +61,7 @@ public class Bet {
         logic.db.createBet(this);
     }
 
-    public void refund(Match match){
+    public void refund(Match match) {
         player.addCoins(amount);
         open = false;
         String msg = Config.bets_refund;
@@ -73,24 +73,24 @@ public class Bet {
         logic.bot.sendMsg(match.threadChannels, msg);
     }
 
-    public static JSONObject getCoinEmoji(long amount){
-        if (amount < 500){
+    public static JSONObject getCoinEmoji(long amount) {
+        if (amount < 500) {
             return bronzeEmoji;
-        } else if (amount < 1000){
+        } else if (amount < 1000) {
             return silverEmoji;
-        } else if (amount < 10000){
+        } else if (amount < 10000) {
             return goldEmoji;
-        } else if (amount < 25000){
+        } else if (amount < 25000) {
             return amberEmoji;
-        } else if (amount < 50000){
+        } else if (amount < 50000) {
             return rubyEmoji;
-        } else if (amount < 100000){
+        } else if (amount < 100000) {
             return pearlEmoji;
-        } else if (amount < 250000){
+        } else if (amount < 250000) {
             return amethystEmoji;
-        } else if (amount < 500000){
+        } else if (amount < 500000) {
             return diamondEmoji;
-        } else if (amount < 1000000){
+        } else if (amount < 1000000) {
             return smaragdEmoji;
         }
         return prismaEmoji;

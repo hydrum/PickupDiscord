@@ -1,18 +1,10 @@
 package de.gost0r.pickupbot;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import org.json.JSONObject;
-
-import de.gost0r.pickupbot.discord.DiscordBot;
-import de.gost0r.pickupbot.pickup.Database;
 import de.gost0r.pickupbot.pickup.PickupLogic;
-import de.gost0r.pickupbot.pickup.Player;
 
 public class PickupTest {
 
-	public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
 //		String config = new String(Files.readAllBytes(Paths.get("config.json")));
 //		JSONObject cfg = new JSONObject(config);
 //		DiscordBot.setToken(cfg.getString("token"));
@@ -29,11 +21,11 @@ public class PickupTest {
 ////		msg = msg.replace(".position.", String.valueOf(db.getRankForPlayer(p)));
 ////		msg = msg.replace(".rank.", p.getRank().getEmoji());
 //		System.out.println(p.isBanned());
-		
-		String duration = "10y";
-		long time = PickupLogic.parseDurationFromString(duration);
-		System.out.println(Long.MAX_VALUE + "\n" + time);
-		System.out.print(duration + " => " + PickupLogic.parseStringFromDuration(time));
-	}
+
+        String duration = "10y";
+        long time = PickupLogic.parseDurationFromString(duration);
+        System.out.println(Long.MAX_VALUE + "\n" + time);
+        System.out.print(duration + " => " + PickupLogic.parseStringFromDuration(time));
+    }
 
 }
