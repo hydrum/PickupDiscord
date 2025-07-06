@@ -1,6 +1,6 @@
 package de.gost0r.pickupbot.pickup;
 
-import de.gost0r.pickupbot.PickupBotDiscordMain;
+import de.gost0r.pickupbot.PickupBotApplication;
 import de.gost0r.pickupbot.discord.*;
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
 import de.gost0r.pickupbot.ftwgl.FtwglAPI;
@@ -1980,7 +1980,7 @@ public class PickupLogic {
 
     public void restartApplication() throws URISyntaxException, IOException {
         final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-        final File currentJar = new File(PickupBotDiscordMain.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        final File currentJar = new File(PickupBotApplication.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
         /* is it a jar file? */
         if (!currentJar.getName().endsWith(".jar"))
