@@ -6,16 +6,15 @@ import de.gost0r.pickupbot.pickup.MatchStats.Status;
 import de.gost0r.pickupbot.pickup.server.Server;
 import de.gost0r.pickupbot.pickup.server.ServerMonitor.ServerState;
 import io.sentry.Sentry;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Slf4j
 public class Match implements Runnable {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private Gametype gametype;
     private MatchState state;
@@ -250,7 +249,7 @@ public class Match implements Runnable {
                         server.getServerMonitor().surrender(i);
                     }
                 } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Exception: ", e);
+                    log.warn("Exception: ", e);
                     Sentry.captureException(e);
                 }
                 cleanUp();
@@ -694,7 +693,7 @@ public class Match implements Runnable {
         if (!logic.getDynamicServers() && gametype.getTeamSize() > 0) {
             int password = rand.nextInt((999999 - 100000) + 1) + 100000;
             server.password = String.valueOf(password);
-            LOGGER.info("Password: " + server.password);
+            log.info("Password: {}", server.password);
         }
 
         // Get most voted map
@@ -705,7 +704,7 @@ public class Match implements Runnable {
             return;
         }
         this.map = mapList.size() == 1 ? mapList.get(0) : mapList.get(rand.nextInt(mapList.size() - 1));
-        LOGGER.info("Map: " + this.map.name);
+        log.info("Map: {}", this.map.name);
 
         // avg elo
         elo = new int[]{0, 0};
@@ -716,8 +715,8 @@ public class Match implements Runnable {
             elo[1] /= gametype.getTeamSize();
         }
 
-        LOGGER.info("Team Red: " + elo[0] + " " + Arrays.toString(teamList.get("red").toArray()));
-        LOGGER.info("Team Blue: " + elo[1] + " " + Arrays.toString(teamList.get("blue").toArray()));
+        log.info("Team Red: {} {}", elo[0], Arrays.toString(teamList.get("red").toArray()));
+        log.info("Team Blue: {} {}", elo[1], Arrays.toString(teamList.get("blue").toArray()));
 
         id = logic.db.createMatch(this);
         server.matchid = id;
@@ -818,7 +817,7 @@ public class Match implements Runnable {
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
-                LOGGER.log(Level.WARNING, "Exception: ", e);
+                log.warn("Exception: ", e);
                 Sentry.captureException(e);
             }
         }
@@ -900,7 +899,7 @@ public class Match implements Runnable {
             } else {
                 msg.append(" - ");
             }
-            LOGGER.info(logic.getLastMapPlayed(gametype).name + " " + map.name);
+            log.info("{} {}", logic.getLastMapPlayed(gametype).name, map.name);
             if (logic.getLastMapPlayed(gametype).name.equals(map.name)) {
                 String mapString = "~~" + map.name + "~~";
                 msg.append(mapString);

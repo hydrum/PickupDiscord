@@ -3,16 +3,15 @@ package de.gost0r.pickupbot.discord.web;
 import de.gost0r.pickupbot.discord.DiscordBot;
 import de.gost0r.pickupbot.discord.web.WsClientEndPoint.MessageHandler;
 import io.sentry.Sentry;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Timer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Slf4j
 public class DiscordGateway implements MessageHandler {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private Timer heartbeatTimer = new Timer();
     private HeartbeatTask heartbeatTask;
@@ -32,10 +31,10 @@ public class DiscordGateway implements MessageHandler {
 
             msg = msg.replaceAll("\"__null__\"", "null");
 
-            LOGGER.finer("OUT DiscordPacket: " + msg);
+            log.trace("OUT DiscordPacket: {}", msg);
             clientEP.sendMessage(msg);
         } else {
-            LOGGER.info("Cancel heartbeatTimer");
+            log.trace("Cancel heartbeatTimer");
             heartbeatTimer.cancel();
         }
     }
@@ -62,12 +61,12 @@ public class DiscordGateway implements MessageHandler {
 
             // DON'T LOG THIS EVENT [spamming all user info of the server]
             if (t == null || !t.equals(DiscordGatewayEvent.GUILD_CREATE.name())) {
-                LOGGER.finer("INC DiscordPacket: " + incPak.toString());
+                log.trace("INC DiscordPacket: {}", incPak);
             }
             handlePacket(incPak);
 
         } catch (JSONException e) {
-            LOGGER.log(Level.WARNING, "Exception for '" + message + "': ", e);
+            log.warn("Exception for '{}': ", message, e);
             Sentry.captureException(e);
         }
     }
@@ -103,10 +102,10 @@ public class DiscordGateway implements MessageHandler {
 
             heartbeatTimer.scheduleAtFixedRate(heartbeatTask, interval / 2, interval);
         } catch (JSONException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Unexpected exception in handlePacketHello: ", e);
+            log.error("Unexpected exception in handlePacketHello: ", e);
             Sentry.captureException(e);
         }
 
@@ -140,10 +139,10 @@ public class DiscordGateway implements MessageHandler {
             sendMessage(outP.toSend());
 
         } catch (JSONException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Unexpected exception in identify: ", e);
+            log.error("Unexpected exception in identify: ", e);
             Sentry.captureException(e);
         }
 

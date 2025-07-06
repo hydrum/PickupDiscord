@@ -5,17 +5,15 @@ import de.gost0r.pickupbot.pickup.Match;
 import de.gost0r.pickupbot.pickup.Player;
 import de.gost0r.pickupbot.pickup.Region;
 import io.sentry.Sentry;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Slf4j
 public class Server {
-
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public int id;
 
@@ -57,7 +55,7 @@ public class Server {
             this.socket = new DatagramSocket();
             this.socket.setSoTimeout(1000);
         } catch (SocketException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
     }
@@ -66,7 +64,7 @@ public class Server {
     public synchronized String sendRcon(String rconString) {
         try {
             if (this.socket.isClosed()) {
-                LOGGER.severe("SOCKET IS CLOSED");
+                log.error("SOCKET IS CLOSED");
                 connect();
             }
             String rcon = "xxxxrcon " + rconpassword + " " + rconString;
@@ -79,7 +77,7 @@ public class Server {
             sendBuffer[2] = (byte) 0xff;
             sendBuffer[3] = (byte) 0xff;
 
-            LOGGER.fine(rcon);
+            log.trace(rcon);
 
             DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, getInetIP(), port);
             DatagramPacket recvPacket = new DatagramPacket(recvBuffer, recvBuffer.length);
@@ -107,7 +105,7 @@ public class Server {
             // Thread.sleep(100);
             return string;
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         return null;
@@ -117,7 +115,7 @@ public class Server {
     public synchronized String pushRcon(String rconString) {
         try {
             if (this.socket.isClosed()) {
-                LOGGER.severe("SOCKET IS CLOSED");
+                log.error("SOCKET IS CLOSED");
                 connect();
             }
             String rcon = "xxxxrcon " + rconpassword + " " + rconString;
@@ -129,13 +127,13 @@ public class Server {
             sendBuffer[2] = (byte) 0xff;
             sendBuffer[3] = (byte) 0xff;
 
-            LOGGER.fine(rcon);
+            log.trace(rcon);
 
             DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, getInetIP(), port);
             this.socket.send(sendPacket);
 
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         return null;
@@ -158,7 +156,7 @@ public class Server {
                 try {
                     monitorThread.join(5000);
                 } catch (InterruptedException e) {
-                    LOGGER.log(Level.WARNING, "Interrupted while waiting for monitor thread to stop", e);
+                    log.warn("Interrupted while waiting for monitor thread to stop", e);
                 }
             }
 
@@ -184,7 +182,7 @@ public class Server {
         try {
             return InetAddress.getByName(IP);
         } catch (UnknownHostException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         return null;

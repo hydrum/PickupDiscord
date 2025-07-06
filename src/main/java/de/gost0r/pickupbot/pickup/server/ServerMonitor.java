@@ -5,16 +5,15 @@ import de.gost0r.pickupbot.pickup.MatchStats.Status;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.ServerPlayer.ServerPlayerState;
 import io.sentry.Sentry;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Slf4j
 public class ServerMonitor implements Runnable {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public static enum ServerState {
         WELCOME,
@@ -73,23 +72,23 @@ public class ServerMonitor implements Runnable {
 
     @Override
     public void run() {
-        LOGGER.info("run() started on " + this.server.IP + ":" + this.server.port);
+        log.info("run() started on {}:{}", this.server.IP, this.server.port);
         try {
             while (!stopped) {
                 observe();
                 Thread.sleep(1000);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
             match.getLogic().bot.sendMsg(match.getLogic().getChannelByType(PickupChannelType.ADMIN), "ServerMonitor " + e.toString());
         }
-        LOGGER.info("run() ended");
+        log.info("run() ended");
     }
 
     public void stop() {
         stopped = true;
-        LOGGER.info("stop() called");
+        log.info("stop() called");
     }
 
     private void observe() throws Exception {
@@ -114,7 +113,7 @@ public class ServerMonitor implements Runnable {
             server.sendRcon("bigtext \"^1THIS IS A MASSACRE!!\"");
             server.sendRcon("say \"^1[MERCY RULE] ^3Game Over\"");
             noMercyIssued = true;
-            LOGGER.info("Mercy rule, game over");
+            log.info("Mercy rule, game over");
             sendDiscordMsg("**[MERCY RULE]** Let's stop the massacre. The match #" + String.valueOf(match.getID()) + " is over.");
         }
     }
@@ -138,7 +137,7 @@ public class ServerMonitor implements Runnable {
                 String time = getTimeString(timeleft);
                 String sendString = "(" + time + ") Waiting for: ^1" + playerlist;
                 sendServerMsg("say " + sendString);
-                LOGGER.fine(sendString);
+                log.trace(sendString);
                 String sendDiscordString = "(" + time + ") Please connect: " + getPlayerlistForDiscord(noshowPlayers);
                 sendDiscordMsg(sendDiscordString);
                 if (state == ServerState.WARMUP || state == ServerState.LIVE) {
@@ -178,7 +177,7 @@ public class ServerMonitor implements Runnable {
         setAllPlayersStatus(leaverPlayer, Status.RAGEQUIT);
 
         if (leaverPlayer.size() > 0) {
-            LOGGER.warning("Leavers: " + Arrays.toString(leaverPlayer.toArray()) + " earliest leaver: " + (earliestLeaver > 0 ? getTimeString(earliestLeaver) : "none"));
+            log.warn("Leavers: {} earliest leaver: {}", Arrays.toString(leaverPlayer.toArray()), earliestLeaver > 0 ? getTimeString(earliestLeaver) : "none");
         }
 
         if (earliestLeaver > -1L) {
@@ -192,7 +191,7 @@ public class ServerMonitor implements Runnable {
                 // server.sendRcon("startserverdemo all");
             } else if (state == ServerState.LIVE) {
                 if (getRemainingSeconds() < 90 && isLastHalf()) {
-                    LOGGER.warning(getRemainingSeconds() + "s remaining, don't report.");
+                    log.warn("{}s remaining, don't report.", getRemainingSeconds());
                     setAllPlayersStatus(leaverPlayer, Status.LEFT);
                     shouldPause = false;
                     if (hasPaused && isPauseDetected) {
@@ -225,7 +224,7 @@ public class ServerMonitor implements Runnable {
                 String time = getTimeString(timeleft);
                 String sendServerString = "(" + time + ") Time to reconnect for: ^1" + playerlist;
                 sendServerMsg("say " + sendServerString);
-                LOGGER.fine(sendServerString);
+                log.trace(sendServerString);
                 String sendDiscordString = "(" + time + ") Time to reconnect for: " + getPlayerlistForDiscord(leaverPlayer);
                 sendDiscordMsg(sendDiscordString);
             } else {
@@ -298,7 +297,7 @@ public class ServerMonitor implements Runnable {
                     match.getStats(player.player).score[half].protect_flag = player.ctfstats.protect_flag;
                 }
             } catch (NumberFormatException e) {
-                LOGGER.log(Level.WARNING, "Exception: ", e);
+                log.warn("Exception: ", e);
                 Sentry.captureException(e);
             }
         }
@@ -318,7 +317,7 @@ public class ServerMonitor implements Runnable {
                     // PLAYER IS AN ADMIN, DONT FORCE/KICK HIM
                     continue;
                 } else { // if player not authed, auth not registered or not playing in this match -> kick
-                    LOGGER.info("Didn't find " + sp.name + " (" + sp.auth + ") signed up for this match  -> kick");
+                    log.info("Didn't find {} ({}) signed up for this match  -> kick", sp.name, sp.auth);
                     server.sendRcon("kick " + sp.id); // You are not authed and/or not signed up for this match.");
                     sp.state = ServerPlayerState.Disconnected;
                     continue;
@@ -328,11 +327,11 @@ public class ServerMonitor implements Runnable {
                 if (team != null && state != ServerState.SCORE) {
                     String oppTeam = team.equalsIgnoreCase("red") ? "blue" : "red";
                     if (!sp.team.equalsIgnoreCase(team) && firstHalf) {
-                        LOGGER.info("Player " + sp.name + " (" + sp.auth + ") is in the wrong team. Supposed to be: " + team.toUpperCase() + " but currently " + sp.team);
+                        log.info("Player {} ({}) is in the wrong team. Supposed to be: {} but currently {}", sp.name, sp.auth, team.toUpperCase(), sp.team);
                         server.sendRcon("forceteam " + sp.id + " " + team.toUpperCase());
                     } else if (!sp.team.equalsIgnoreCase(oppTeam) && !firstHalf) // we should have switched teams -.-
                     {
-                        LOGGER.info("Player " + sp.name + " (" + sp.auth + ") is in the wrong team. Supposed to be: " + oppTeam.toUpperCase() + " but currently " + sp.team);
+                        log.info("Player {} ({}) is in the wrong team. Supposed to be: {} but currently {}", sp.name, sp.auth, oppTeam.toUpperCase(), sp.team);
                         server.sendRcon("forceteam " + sp.id + " " + oppTeam.toUpperCase());
                     }
                 }
@@ -352,16 +351,16 @@ public class ServerMonitor implements Runnable {
             if (match.getGametype().getTeamSize() == 0 && (rpp.matchready[0] || rpp.matchready[1]) && !rpp.warmupphase) {
                 server.sendRcon("forceready");
                 state = ServerState.WARMUP;
-                LOGGER.info("SWITCHED WELCOME -> WARMUP");
+                log.info("SWITCHED WELCOME -> WARMUP");
             } else if (rpp.matchready[0] && rpp.matchready[1] && rpp.warmupphase) {
                 state = ServerState.WARMUP;
-                LOGGER.info("SWITCHED WELCOME -> WARMUP");
+                log.info("SWITCHED WELCOME -> WARMUP");
             } else if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase) {
                 state = ServerState.LIVE;
                 if (match.getGametype().getTeamSize() > 2) {
                     match.getLogic().setLastMapPlayed(match.getGametype(), match.getMap());
                 }
-                LOGGER.info("SWITCHED WELCOME -> LIVE");
+                log.info("SWITCHED WELCOME -> LIVE");
             }
         } else if (state == ServerState.WARMUP) {
             if (rpp.matchready[0] && rpp.matchready[1] && !rpp.warmupphase) {
@@ -373,10 +372,10 @@ public class ServerMonitor implements Runnable {
 //				for (ServerPlayer p : players){
 //					backupStats.put(p.auth, new CTF_Stats());
 //				}
-                LOGGER.info("SWITCHED WARMUP -> LIVE");
+                log.info("SWITCHED WARMUP -> LIVE");
             } else if (!rpp.matchready[0] || !rpp.matchready[1]) {
                 state = ServerState.WELCOME;
-                LOGGER.info("SWITCHED WARMUP -> WELCOME");
+                log.info("SWITCHED WARMUP -> WELCOME");
             }
         } else if (state == ServerState.LIVE) {
             // TODO: Refactor this, hard-coded for 1v1 and 2v2
@@ -385,7 +384,7 @@ public class ServerMonitor implements Runnable {
                     || (match.getGametype().getTeamSize() <= 2 && (rpp.scores[0] >= 15 || rpp.scores[1] >= 15)
                     && rpp.gametime.equals("00:00:00"))) {
                 state = ServerState.SCORE;
-                LOGGER.info("SWITCHED LIVE -> SCORE");
+                log.info("SWITCHED LIVE -> SCORE");
             }
             checkNoMercy(rpp);
             // backUpScores(rpp);
@@ -395,16 +394,16 @@ public class ServerMonitor implements Runnable {
             if (rpp.warmupphase) {
                 if (rpp.matchready[0] && rpp.matchready[1]) {
                     state = ServerState.WARMUP;
-                    LOGGER.info("SWITCHED SCORE -> WARMUP");
+                    log.info("SWITCHED SCORE -> WARMUP");
                 } else {
                     state = ServerState.WELCOME;
-                    LOGGER.info("SWITCHED SCORE -> WELCOME");
+                    log.info("SWITCHED SCORE -> WELCOME");
                 }
                 handleScoreTransition();
             } else {
                 if (getPlayerCount("red") == 0 || getPlayerCount("blue") == 0 || !rpp.matchready[0] || !rpp.matchready[1]) {
                     state = ServerState.WELCOME;
-                    LOGGER.info("SWITCHED SCORE -> WELCOME");
+                    log.info("SWITCHED SCORE -> WELCOME");
                     handleScoreTransition();
                 }
             }
@@ -461,12 +460,12 @@ public class ServerMonitor implements Runnable {
             if (found != null) {
                 if (found.state == ServerPlayerState.Disconnected) {
                     found.state = ServerPlayerState.Reconnected;
-                    LOGGER.info("Player " + found.name + " (" + found.auth + ") reconnected.");
+                    log.info("Player {} ({}) reconnected.", found.name, found.auth);
                     found.timeDisconnect = -1L;
                 }
                 oldPlayers.remove(found);
             } else {
-                LOGGER.info("Player " + player.name + " (" + player.auth + ") connected.");
+                log.info("Player {} ({}) connected.", player.name, player.auth);
                 newPlayers.add(player);
             }
         }
@@ -480,7 +479,7 @@ public class ServerMonitor implements Runnable {
 //					backup_stats.add(player.ctfstats);
 //					backupStats.put(player.auth, backup_stats);
 //				}
-                LOGGER.info("Player " + player.name + " (" + player.auth + ") disconnected.");
+                log.info("Player {} ({}) disconnected.", player.name, player.auth);
             }
         }
 
@@ -493,7 +492,7 @@ public class ServerMonitor implements Runnable {
 
     private void requestAuth(ServerPlayer player) throws Exception {
         String replyAuth = server.sendRcon("auth-whois " + player.id);
-        LOGGER.fine(replyAuth);
+        log.trace(replyAuth);
         if (replyAuth != null && !replyAuth.isEmpty()) {
             if (replyAuth.startsWith("Client in slot")) return;
             String[] splitted = replyAuth.split(" ");
@@ -501,13 +500,13 @@ public class ServerMonitor implements Runnable {
             player.auth = player.auth.isEmpty() ? "---" : player.auth;
         } else {
             requestAuth(player);
-            LOGGER.severe("requesting auth again for " + player.name);
+            log.error("requesting auth again for {}", player.name);
         }
     }
 
     private boolean getSwapRoles() throws Exception {
         String swaproles = server.sendRcon("g_swaproles");
-        LOGGER.fine(swaproles);
+        log.trace(swaproles);
         String[] split = swaproles.split("\"");
         if (split.length > 4) {
             return split[3].equals("1^7");
@@ -520,18 +519,18 @@ public class ServerMonitor implements Runnable {
         RconPlayersParsed rpp = new RconPlayersParsed();
 
         String playersString = server.sendRcon("players");
-//		LOGGER.fine("rcon players: >>>" + playersString + "<<<");
+//		log.trace("rcon players: >>>" + playersString + "<<<");
         String[] stripped = playersString.split("\n");
 
         // hax to avoid empty
         if (stripped.length == 1) {
-            LOGGER.info("Corrupted RPP (too short), taking prevRPP instead");
+            log.info("Corrupted RPP (too short), taking prevRPP instead");
             return prevRPP;
         }
 
         boolean awaitsStats = false;
         for (String line : stripped) {
-            LOGGER.fine("line " + line);
+            log.trace("line " + line);
             if (line.isEmpty()) continue;
             if (line.equals("print")) continue;
             if (line.equals("==== ShutdownGame ====")) break;
@@ -560,7 +559,7 @@ public class ServerMonitor implements Runnable {
                 rpp.half = line.split(" ")[1];
             } else {
                 String[] splitted = line.split(" ");
-//				LOGGER.severe("splitted = " + Arrays.toString(splitted));
+//				log.error("splitted = " + Arrays.toString(splitted));
 
                 if (splitted[0].equals("[connecting]")) continue;
 
@@ -609,7 +608,7 @@ public class ServerMonitor implements Runnable {
         }
         // hax to avoid empty
         if (rpp.map == null || (rpp.playercount != rpp.players.size() && match.getGametype().getTeamSize() != 0)) {
-            LOGGER.info("Corrupted RPP, taking prevRPP instead");
+            log.info("Corrupted RPP, taking prevRPP instead");
             return prevRPP;
         }
         return rpp;
@@ -625,7 +624,7 @@ public class ServerMonitor implements Runnable {
         int redscore = score[0][0] + score[1][1]; //score_red_first + score_blue_second;
         int bluescore = score[0][1] + score[1][0]; //score_blue_first + score_red_second;
         int[] finalscore = {redscore, bluescore};
-        LOGGER.info("Score: " + Arrays.toString(finalscore));
+        log.info("Score: {}", Arrays.toString(finalscore));
         for (Player player : match.getPlayerList()) {
             if (player != null) {
                 calcElo(player, finalscore);
@@ -677,7 +676,7 @@ public class ServerMonitor implements Runnable {
         }
 
         int newelo = player.getElo() + elochange;
-        LOGGER.info("ELO player: " + player.getUrtauth() + " old ELO: " + player.getElo() + " new ELO: " + newelo + " (" + (!String.valueOf(elochange).startsWith("-") ? "+" : "") + elochange + ")");
+        log.info("ELO player: {} old ELO: {} new ELO: {} ({}{})", player.getUrtauth(), player.getElo(), newelo, !String.valueOf(elochange).startsWith("-") ? "+" : "", elochange);
         player.addElo(elochange);
     }
 
@@ -726,7 +725,7 @@ public class ServerMonitor implements Runnable {
         for (int i = 0; i < 3; i++) {
             server.sendRcon("say " + sendString);
         }
-        LOGGER.info(sendString);
+        log.info(sendString);
 
         stop();
         if (match.getLogic().getLastMapPlayed(match.getGametype()).equals(match.getMap())) {

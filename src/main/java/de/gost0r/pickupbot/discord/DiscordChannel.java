@@ -2,16 +2,15 @@ package de.gost0r.pickupbot.discord;
 
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
 import io.sentry.Sentry;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Slf4j
 public class DiscordChannel {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public String id;
     public DiscordChannelType type;
@@ -31,7 +30,7 @@ public class DiscordChannel {
             this.guild_id = channel.isNull("guild_id") ? null : channel.getString("guild_id");
             this.isThread = !channel.isNull("thread_metadata");
         } catch (JSONException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
     }
@@ -55,7 +54,7 @@ public class DiscordChannel {
                 return newChannel;
             }
         }
-        LOGGER.info("Unable to find channel for: " + channelID);
+        log.info("Unable to find channel for: {}", channelID);
         return null;
     }
 

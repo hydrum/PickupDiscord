@@ -5,6 +5,7 @@ import de.gost0r.pickupbot.discord.web.DiscordGateway;
 import de.gost0r.pickupbot.discord.web.DiscordGatewayEvent;
 import de.gost0r.pickupbot.discord.web.WsClientEndPoint;
 import io.sentry.Sentry;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,11 +13,9 @@ import org.json.JSONObject;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Slf4j
 public class DiscordBot {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static String token = "";
     private static String application_id = "";
@@ -52,12 +51,12 @@ public class DiscordBot {
             }
             endpoint.addMessageHandler(gateway);
         } catch (URISyntaxException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         } catch (Exception e) {
             // we can trigger a handshake exception for endpoint. if that's the case, simply try again.
             // TODO: need to check that this is really working
-            LOGGER.log(Level.SEVERE, "Exception: ", e);
+            log.error("Exception: ", e);
             init(env);
         }
     }
@@ -124,7 +123,7 @@ public class DiscordBot {
                     break;
             }
         } catch (JSONException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         tick();

@@ -7,6 +7,7 @@ import de.gost0r.pickupbot.ftwgl.FtwglAPI;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
 import de.gost0r.pickupbot.pickup.server.Server;
 import io.sentry.Sentry;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -15,11 +16,9 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Slf4j
 public class PickupLogic {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public PickupBot bot;
     public Database db;
@@ -1053,7 +1052,7 @@ public class PickupLogic {
                         }
                     }
                 } catch (NumberFormatException e) {
-                    LOGGER.log(Level.WARNING, "Exception: ", e);
+                    log.warn("Exception: ", e);
                     Sentry.captureException(e);
                 }
             }
@@ -1129,7 +1128,7 @@ public class PickupLogic {
             createMatch(gt);
             return true;
         } catch (NumberFormatException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
             return false;
         }
@@ -1208,7 +1207,7 @@ public class PickupLogic {
             checkServer();
             return true;
         } catch (IllegalArgumentException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
             return false;
         }
@@ -1226,7 +1225,7 @@ public class PickupLogic {
                 }
             }
         } catch (NumberFormatException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         return false;
@@ -1243,7 +1242,7 @@ public class PickupLogic {
                 }
             }
         } catch (NumberFormatException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         return false;
@@ -1259,7 +1258,7 @@ public class PickupLogic {
                 }
             }
         } catch (NumberFormatException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         return false;
@@ -1364,7 +1363,7 @@ public class PickupLogic {
             }
 
         } catch (NumberFormatException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
@@ -1383,7 +1382,7 @@ public class PickupLogic {
             }
 
         } catch (NumberFormatException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         bot.sendMsg(bot.getLatestMessageChannel(), "Match not found.");
@@ -1398,7 +1397,7 @@ public class PickupLogic {
             }
 
         } catch (NumberFormatException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         interaction.respond("Match not found.");
@@ -1583,11 +1582,11 @@ public class PickupLogic {
             long afkReminderTime = latestAFKmsg + 17 * 60 * 1000;
 
             if (afkKickTime < System.currentTimeMillis()) {
-                LOGGER.info("AFK: REMOVE - " + p.getUrtauth() + ": " + afkKickTime + " > " + System.currentTimeMillis());
+                log.info("AFK: REMOVE - {}: {} > {}", p.getUrtauth(), afkKickTime, System.currentTimeMillis());
                 cmdRemovePlayer(p, null);
             } else if (afkReminderTime < System.currentTimeMillis() && !p.getAfkReminderSent()) {
                 p.setAfkReminderSent(true);
-                LOGGER.info("AFK: REMINDER - " + p.getUrtauth() + ": " + afkKickTime + " > " + System.currentTimeMillis());
+                log.info("AFK: REMINDER - {}: {} > {}", p.getUrtauth(), afkKickTime, System.currentTimeMillis());
                 String msg = Config.afk_reminder;
                 msg = msg.replace(".user.", p.getDiscordUser().getMentionString());
                 bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);
@@ -1613,7 +1612,7 @@ public class PickupLogic {
                 ongoingMatches.remove(m);
             } else if (pickReminderTime < System.currentTimeMillis() && !m.getPickReminderSent()) {
                 m.setPickReminderSent(true);
-                LOGGER.info("PICK: REMINDER - " + m.getCaptainsTurn().getUrtauth() + ": " + pickKickTime + " > " + System.currentTimeMillis());
+                log.info("PICK: REMINDER - {}: {} > {}", m.getCaptainsTurn().getUrtauth(), pickKickTime, System.currentTimeMillis());
                 String msg = Config.pick_reminder;
                 msg = msg.replace(".user.", m.getCaptainsTurn().getDiscordUser().getMentionString());
                 bot.sendMsg(getChannelByType(PickupChannelType.PUBLIC), msg);

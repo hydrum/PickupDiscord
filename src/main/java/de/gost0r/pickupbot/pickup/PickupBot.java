@@ -2,18 +2,18 @@ package de.gost0r.pickupbot.pickup;
 
 import de.gost0r.pickupbot.discord.*;
 import de.gost0r.pickupbot.pickup.PlayerBan.BanReason;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class PickupBot extends DiscordBot {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private DiscordChannel latestMessageChannel;
 
@@ -42,7 +42,7 @@ public class PickupBot extends DiscordBot {
 
     @Override
     protected void recvMessage(DiscordMessage msg) {
-        LOGGER.info("RECV #" + ((msg.channel == null || msg.channel.name == null) ? "null" : msg.channel.name) + " " + msg.user.username + ": " + msg.content);
+        log.info("RECV #{} {}: {}", (msg.channel == null || msg.channel.name == null) ? "null" : msg.channel.name, msg.user.username, msg.content);
 
         this.latestMessageChannel = msg.channel;
 
@@ -1419,7 +1419,7 @@ public class PickupBot extends DiscordBot {
 
     @Override
     protected void recvInteraction(DiscordInteraction interaction) {
-        LOGGER.info("RECV #" + ((interaction.message.channel == null || interaction.message.channel.name == null) ? "null" : interaction.message.channel.name) + " " + interaction.user.username + ": " + interaction.custom_id);
+        log.info("RECV #{} {}: {}", (interaction.message.channel == null || interaction.message.channel.name == null) ? "null" : interaction.message.channel.name, interaction.user.username, interaction.custom_id);
 
         Player p = Player.get(interaction.user);
         if (p == null) {
@@ -1495,7 +1495,7 @@ public class PickupBot extends DiscordBot {
 
     @Override
     protected void recvApplicationCommand(DiscordInteraction interaction) {
-        LOGGER.info("RECV #" + interaction.name + " " + interaction.user.username);
+        log.info("RECV #{} {}", interaction.name, interaction.user.username);
 
         Player p = Player.get(interaction.user);
         if (p == null) {
