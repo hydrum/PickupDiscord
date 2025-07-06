@@ -9,14 +9,6 @@ repositories {
     mavenCentral()
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src']
-        }
-    }
-}
-
 dependencies {
     implementation 'io.sentry:sentry:8.16.0'
     implementation 'commons-io:commons-io:2.19.0'
