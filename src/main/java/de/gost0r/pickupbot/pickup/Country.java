@@ -1,5 +1,6 @@
 package de.gost0r.pickupbot.pickup;
 
+import io.sentry.Sentry;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 
@@ -13,18 +14,22 @@ public class Country {
 
     private static HashMap<String, String> CountryToContinentMap = new HashMap<String, String>();
 
-    public static void initCountryCodes() throws IOException {
-        String fileName = Paths.get("country-and-continent-codes-list.json").toString();
-        InputStream is = new FileInputStream(fileName);
-        String jsonTxt = IOUtils.toString(is, "UTF-8");
+    public static void initCountryCodes() {
+        try {
+            String fileName = Paths.get("country-and-continent-codes-list.json").toString();
+            InputStream is = new FileInputStream(fileName);
+            String jsonTxt = IOUtils.toString(is, "UTF-8");
 
-        JSONArray arr = new JSONArray(jsonTxt);
+            JSONArray arr = new JSONArray(jsonTxt);
 
-        for (int i = 0; i < arr.length(); i++) {
-            String continent = arr.getJSONObject(i).get("Continent_Code").toString();
-            String country = arr.getJSONObject(i).get("Two_Letter_Country_Code").toString();
+            for (int i = 0; i < arr.length(); i++) {
+                String continent = arr.getJSONObject(i).get("Continent_Code").toString();
+                String country = arr.getJSONObject(i).get("Two_Letter_Country_Code").toString();
 
-            CountryToContinentMap.put(country, continent);
+                CountryToContinentMap.put(country, continent);
+            }
+        } catch (IOException e) {
+            Sentry.captureException(e);
         }
     }
 

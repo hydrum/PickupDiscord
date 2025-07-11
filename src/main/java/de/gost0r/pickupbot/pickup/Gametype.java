@@ -1,16 +1,15 @@
 package de.gost0r.pickupbot.pickup;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Slf4j
 public class Gametype {
 
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     private final static File CONFIGS_DIRECTORY = new File("configs/");
 
     private String name;
@@ -129,13 +128,13 @@ public class Gametype {
                 }
             }
         } catch (FileNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Error while openning gametype config file : " + this.getName(), e);
+            log.error("Error while openning gametype config file : {}", this.getName(), e);
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Error while reading gametype config file : " + this.getName(), e);
+            log.error("Error while reading gametype config file : {}", this.getName(), e);
         }
 
         if (!config_found) {
-            LOGGER.log(Level.SEVERE, "Configuration file not found for gametype : " + this.getName());
+            log.error("Configuration file not found for gametype : {}", this.getName());
         }
 
     }

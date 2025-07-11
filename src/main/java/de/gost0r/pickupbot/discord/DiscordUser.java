@@ -3,6 +3,7 @@ package de.gost0r.pickupbot.discord;
 import de.gost0r.pickupbot.discord.api.DiscordAPI;
 import de.gost0r.pickupbot.pickup.PickupBot;
 import io.sentry.Sentry;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,11 +12,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Slf4j
 public class DiscordUser {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public String id;
     public String username;
@@ -43,7 +42,7 @@ public class DiscordUser {
             this.discriminator = user.getString("discriminator");
             this.avatar = user.isNull("avatar") ? null : user.getString("avatar");
         } catch (JSONException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
     }
@@ -66,7 +65,7 @@ public class DiscordUser {
             }
             roles.put(guild, roleList);
         } catch (JSONException e) {
-            LOGGER.log(Level.WARNING, "Exception for " + array.toString() + ": ", e);
+            log.warn("Exception for {}: ", array, e);
             Sentry.captureException(e);
         }
     }
@@ -89,7 +88,7 @@ public class DiscordUser {
                     DiscordRole role = DiscordRole.getRole(ar.getString(i));
                     list.add(role);
                 } catch (JSONException e) {
-                    LOGGER.log(Level.WARNING, "Exception: ", e);
+                    log.warn("Exception: ", e);
                     Sentry.captureException(e);
                 }
             }
@@ -110,7 +109,7 @@ public class DiscordUser {
                     return true;
                 }
             } catch (JSONException e) {
-                LOGGER.log(Level.WARNING, "Exception: ", e);
+                log.warn("Exception: ", e);
                 Sentry.captureException(e);
             }
         }
@@ -126,7 +125,7 @@ public class DiscordUser {
             }
             return channel;
         } catch (JSONException | NullPointerException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         return null;
@@ -144,7 +143,7 @@ public class DiscordUser {
             userList.put(userID, newUser);
             return newUser;
         } catch (JSONException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         return null;

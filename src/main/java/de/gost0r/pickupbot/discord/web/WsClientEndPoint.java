@@ -3,15 +3,14 @@ package de.gost0r.pickupbot.discord.web;
 import de.gost0r.pickupbot.discord.DiscordBot;
 import io.sentry.Sentry;
 import jakarta.websocket.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @ClientEndpoint
+@Slf4j
 public class WsClientEndPoint {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     Session userSession = null;
     private MessageHandler messageHandler;
@@ -31,7 +30,7 @@ public class WsClientEndPoint {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             container.connectToServer(this, endpointURI);
         } catch (DeploymentException | IOException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
     }
@@ -43,21 +42,21 @@ public class WsClientEndPoint {
             }
             connect();
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
     }
 
     @OnOpen
     public void onOpen(Session userSession) {
-        LOGGER.warning("WebSocket opened. ");
+        log.warn("WebSocket opened. ");
         Sentry.captureMessage("WebSocket opened. ");
         this.userSession = userSession;
     }
 
     @OnClose
     public void onClose(Session userSession, CloseReason reason) {
-        LOGGER.warning("WebSocket closed. " + reason.toString());
+        log.warn("WebSocket closed. " + reason.toString());
         Sentry.captureMessage("WebSocket closed. " + reason.toString());
         this.userSession = null;
         bot.reconnect();
@@ -78,7 +77,7 @@ public class WsClientEndPoint {
         if (this.userSession != null && this.userSession.isOpen()) {
             this.userSession.getAsyncRemote().sendText(message);
         } else {
-            LOGGER.warning("Unable to send msg, session is closed.");
+            log.warn("Unable to send msg, session is closed.");
             Sentry.captureMessage("Unable to send msg, session is closed.");
         }
     }

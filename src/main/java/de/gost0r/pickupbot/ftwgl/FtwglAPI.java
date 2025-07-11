@@ -7,6 +7,7 @@ import de.gost0r.pickupbot.pickup.Player;
 import de.gost0r.pickupbot.pickup.Region;
 import de.gost0r.pickupbot.pickup.server.Server;
 import io.sentry.Sentry;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -20,11 +21,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Slf4j
 public class FtwglAPI {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private static String api_url;
     private static String api_key;
@@ -80,7 +79,7 @@ public class FtwglAPI {
 
         if (!obj.has("server") || !obj.getJSONObject("server").has("config")) {
             // spawnDynamicServer(playerList);
-            LOGGER.warning("CAN'T SPAWN: " + response);
+            log.warn("CAN'T SPAWN: {}", response);
             return null;
         }
 
@@ -122,7 +121,7 @@ public class FtwglAPI {
                 Thread.sleep(1000);
                 return getSpawnedServerIp(server);
             } catch (InterruptedException e) {
-                LOGGER.log(Level.WARNING, "Exception: ", e);
+                log.warn("Exception: ", e);
                 Sentry.captureException(e);
             }
         }
@@ -132,7 +131,7 @@ public class FtwglAPI {
                 Thread.sleep(1000);
                 return getSpawnedServerIp(server);
             } catch (InterruptedException e) {
-                LOGGER.log(Level.WARNING, "Exception: ", e);
+                log.warn("Exception: ", e);
                 Sentry.captureException(e);
             }
         }
@@ -149,7 +148,7 @@ public class FtwglAPI {
         String response = sendPostRequest("/ratings", requestObj);
 
         if (response == null) {
-            LOGGER.warning("Failed to get rating for player: " + p.getDiscordUser().username);
+            log.warn("Failed to get rating for player: {}", p.getDiscordUser().username);
             return 0.0f;
         }
 
@@ -162,15 +161,15 @@ public class FtwglAPI {
                 if (ratingsObj.has(discordId)) {
                     return (float) ratingsObj.getDouble(discordId);
                 } else {
-                    LOGGER.warning("No rating found for player: " + p.getDiscordUser().username);
+                    log.warn("No rating found for player: {}", p.getDiscordUser().username);
                     return 0.0f;
                 }
             } else {
-                LOGGER.warning("No 'ratings' field found in response for player: " + p.getDiscordUser().username);
+                log.warn("No 'ratings' field found in response for player: {}", p.getDiscordUser().username);
                 return 0.0f;
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Exception parsing rating response: ", e);
+            log.warn("Exception parsing rating response: ", e);
             Sentry.captureException(e);
             return 0.0f;
         }
@@ -193,7 +192,7 @@ public class FtwglAPI {
         Map<Player, Float> playerRatings = new HashMap<>();
 
         if (response == null) {
-            LOGGER.warning("Failed to get ratings for player list");
+            log.warn("Failed to get ratings for player list");
             // Return map with all players having 0.0f rating
             for (Player player : players) {
                 playerRatings.put(player, 0.0f);
@@ -212,19 +211,19 @@ public class FtwglAPI {
                     if (ratingsObj.has(discordId)) {
                         playerRatings.put(player, (float) ratingsObj.getDouble(discordId));
                     } else {
-                        LOGGER.warning("No rating found for player: " + player.getDiscordUser().username);
+                        log.warn("No rating found for player: {}", player.getDiscordUser().username);
                         playerRatings.put(player, 0.0f);
                     }
                 }
             } else {
-                LOGGER.warning("No 'ratings' field found in response for player list");
+                log.warn("No 'ratings' field found in response for player list");
                 // Return map with all players having 0.0f rating
                 for (Player player : players) {
                     playerRatings.put(player, 0.0f);
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Exception parsing rating response: ", e);
+            log.warn("Exception parsing rating response: ", e);
             Sentry.captureException(e);
             // Return map with all players having 0.0f rating
             for (Player player : players) {
@@ -260,11 +259,11 @@ public class FtwglAPI {
                         Thread.sleep(1000);
                         return sendPostRequest(request, content);
                     } catch (InterruptedException e) {
-                        LOGGER.log(Level.WARNING, "Exception: ", e);
+                        log.warn("Exception: ", e);
                         Sentry.captureException(e);
                     }
                 } else {
-                    LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
+                    log.warn("API call failed: ({}) {} for {} - Loadout: {}", c.getResponseCode(), c.getResponseMessage(), url.toString(), content.toString());
                     Sentry.captureMessage("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString() + " - Loadout: " + content.toString());
                 }
                 return null;
@@ -277,17 +276,17 @@ public class FtwglAPI {
                 try {
                     fullmsg += output;
                 } catch (ClassCastException | NullPointerException e) {
-                    LOGGER.log(Level.WARNING, "Exception: ", e);
+                    log.warn("Exception: ", e);
                     Sentry.captureException(e);
                 }
             }
             c.disconnect();
 
-            LOGGER.fine("API call complete for " + request + ": " + fullmsg);
+            log.trace("API call complete for {}: {}", request, fullmsg);
             return fullmsg;
 
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         return null;
@@ -308,7 +307,7 @@ public class FtwglAPI {
                         Thread.sleep(1000);
                         return sendGetRequest(request, canBeNull);
                     } catch (InterruptedException e) {
-                        LOGGER.log(Level.WARNING, "Exception: ", e);
+                        log.warn("Exception: ", e);
                         Sentry.captureException(e);
                     }
                     return null;
@@ -316,7 +315,7 @@ public class FtwglAPI {
                 if (c.getResponseCode() == 404 && canBeNull) {
                     return null;
                 } else {
-                    LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
+                    log.warn("API call failed: ({}) {} for {}", c.getResponseCode(), c.getResponseMessage(), url.toString());
                     Sentry.captureMessage("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
                 }
             }
@@ -328,17 +327,17 @@ public class FtwglAPI {
                 try {
                     fullmsg += output;
                 } catch (ClassCastException | NullPointerException e) {
-                    LOGGER.log(Level.WARNING, "Exception: ", e);
+                    log.warn("Exception: ", e);
                     Sentry.captureException(e);
                 }
             }
             c.disconnect();
 
-            LOGGER.fine("API call complete for " + request + ": " + fullmsg);
+            log.trace("API call complete for {}: {}", request, fullmsg);
             return fullmsg;
 
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         return null;
@@ -358,7 +357,7 @@ public class FtwglAPI {
                         Thread.sleep(1000);
                         return sendHeadRequest(request);
                     } catch (InterruptedException e) {
-                        LOGGER.log(Level.WARNING, "Exception: ", e);
+                        log.warn("Exception: ", e);
                         Sentry.captureException(e);
                     }
                     return -1;
@@ -366,17 +365,17 @@ public class FtwglAPI {
                 if (c.getResponseCode() == 404) {
                     return c.getResponseCode();
                 } else {
-                    LOGGER.warning("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
+                    log.warn("API call failed: ({}) {} for {}", c.getResponseCode(), c.getResponseMessage(), url.toString());
                     Sentry.captureMessage("API call failed: (" + c.getResponseCode() + ") " + c.getResponseMessage() + " for " + url.toString());
                 }
             }
 
             c.disconnect();
-            LOGGER.fine("API call complete for " + request + ": " + String.valueOf(c.getResponseCode()));
+            log.trace("API call complete for {}: {}", request, String.valueOf(c.getResponseCode()));
             return c.getResponseCode();
 
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         return -1;

@@ -1,14 +1,12 @@
 package de.gost0r.pickupbot.discord.web;
 
 import io.sentry.Sentry;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+@Slf4j
 public class DiscordPacket {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     public DiscordGatewayOpcode op;    // opcode
     public JSONObject d;            // event data
@@ -37,7 +35,7 @@ public class DiscordPacket {
 //			msg.put("t", t);
             return msg.toString();
         } catch (JSONException e) {
-            LOGGER.log(Level.WARNING, "Exception: ", e);
+            log.warn("Exception: ", e);
             Sentry.captureException(e);
         }
         return null;
